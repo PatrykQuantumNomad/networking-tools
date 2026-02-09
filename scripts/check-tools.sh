@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# check-tools.sh — Verify which pentesting tools are installed
+source "$(dirname "$0")/common.sh"
+
+# Include common install paths not always in PATH
+for p in /opt/metasploit-framework/bin /usr/local/bin /opt/homebrew/bin; do
+    [[ -d "$p" ]] && [[ ":$PATH:" != *":$p:"* ]] && export PATH="$p:$PATH"
+done
+
+echo -e "${CYAN}=== Pentesting Tools Installation Check ===${NC}"
+echo ""
+
+declare -A TOOLS=(
+    [nmap]="brew install nmap"
+    [tshark]="brew install wireshark (includes tshark CLI)"
+    [msfconsole]="https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html"
+    [aircrack-ng]="brew install aircrack-ng"
+    [hashcat]="brew install hashcat"
+    [skipfish]="sudo port install skipfish"
+    [sqlmap]="brew install sqlmap"
+    [hping3]="brew install draftbrew/tap/hping"
+    [john]="brew install john"
+    [nikto]="brew install nikto"
+)
+
+# Ordered list for display
+TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto)
+
+installed=0
+total=${#TOOL_ORDER[@]}
+
+get_version() {
+    local tool="$1"
+    case "$tool" in
+        msfconsole)
+            # msfconsole --version starts the full console; read from manifest instead
+            if [[ -f /opt/metasploit-framework/version-manifest.txt ]]; then
+                grep '^metasploit-framework' /opt/metasploit-framework/version-manifest.txt | head -1
+            else
+                echo "installed"
+            fi
+            ;;
+        *)
+            timeout 5 "$tool" --version 2>/dev/null | head -1 || echo "installed"
+            ;;
+    esac
+}
+
+for tool in "${TOOL_ORDER[@]}"; do
+    if check_cmd "$tool"; then
+        version=$(get_version "$tool")
+        success "$tool — $version"
+        ((installed++)) || true
+    else
+        warn "$tool — NOT INSTALLED"
+        info "  Install: ${TOOLS[$tool]}"
+    fi
+done
+
+echo ""
+echo -e "${CYAN}$installed/$total tools installed${NC}"
+
+if [[ $installed -lt $total ]]; then
+    echo ""
+    info "Install all missing tools on macOS with:"
+    echo "  brew install nmap wireshark aircrack-ng hashcat skipfish sqlmap hping nikto john"
+    echo "  # Metasploit: see install link above"
+fi

@@ -1,0 +1,42 @@
+# docker-compose.yml — Vulnerable practice targets
+# Start: make lab-up   Stop: make lab-down
+#
+# IMPORTANT: These containers are intentionally vulnerable.
+# Only run them on isolated networks. Never expose to the internet.
+
+services:
+  # DVWA — Damn Vulnerable Web Application
+  # Login: admin / password
+  # URL: http://localhost:8080
+  dvwa:
+    image: vulnerables/web-dvwa
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  # Juice Shop — OWASP modern vulnerable app
+  # URL: http://localhost:3000
+  juice-shop:
+    image: bkimminich/juice-shop
+    ports:
+      - "3030:3000"
+    restart: unless-stopped
+
+  # WebGoat — OWASP teaching platform
+  # URL: http://localhost:8888/WebGoat
+  webgoat:
+    image: webgoat/webgoat
+    ports:
+      - "8888:8080"
+      - "9090:9090"
+    restart: unless-stopped
+
+  # Metasploitable-style vulnerable target
+  # SSH: localhost:2222
+  # HTTP: localhost:8180
+  vulnerable-target:
+    image: tleemcjr/metasploitable2
+    ports:
+      - "2222:22"
+      - "8180:80"
+    restart: unless-stopped

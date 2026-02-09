@@ -1,0 +1,34 @@
+# Output and captures
+*.pcap
+*.pcapng
+*.cap
+*.hccapx
+*.pot
+*.log
+*.csv
+*.xml
+*.html
+
+# Hashcat/John working files
+*.restore
+*.session
+
+# Skipfish output
+skipfish-output/
+
+# SQLMap output
+sqlmap-output/
+
+# Metasploit
+*.rc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Notes (personal)
+notes/*
+!notes/.gitkeep
+
+# Docker volumes
+labs/data/
