@@ -23,7 +23,7 @@ The script prints 10 example commands with explanations, then offers to run a pi
 ## Key Flags to Remember
 
 | Flag | What It Does |
-|------|-------------|
+| ------ | ------------- |
 | `-sn` | Ping scan only (no port scan) — just checks if host is up |
 | `-F` | Fast scan — top 100 ports |
 | `-sV` | Detect service versions on open ports |
@@ -56,6 +56,7 @@ nmap -F localhost
 If your scan shows many ports as "unknown", you're missing the `-sV` flag. A SYN scan (`-sS`) only checks open/closed — it doesn't probe what service is running.
 
 **Local machine (you own it):**
+
 ```bash
 # What process is listening on port 8080?
 lsof -i :8080 -P -n
@@ -68,6 +69,7 @@ bash scripts/nmap/identify-ports.sh
 ```
 
 **Remote target (network probing):**
+
 ```bash
 # Service version detection (the key missing flag)
 nmap -sV <target>

@@ -60,5 +60,10 @@ safety_banner() {
     echo ""
 }
 
+# Check if running in an interactive terminal
+is_interactive() {
+    [[ -t 0 ]]
+}
+
 # Project root directory
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

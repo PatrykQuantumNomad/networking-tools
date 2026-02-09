@@ -2,6 +2,23 @@
 # tshark/examples.sh — Wireshark CLI: packet capture and analysis
 source "$(dirname "$0")/../common.sh"
 
+show_help() {
+    cat <<EOF
+Usage: $(basename "$0")
+
+TShark (Wireshark CLI) - Packet capture and analysis examples
+
+Displays common tshark commands for capturing and analyzing network
+traffic on local interfaces. No target argument is required.
+
+Examples:
+    $(basename "$0")
+    $(basename "$0") --help
+EOF
+}
+
+[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+
 require_cmd tshark "brew install wireshark"
 safety_banner
 
@@ -59,6 +76,7 @@ echo "    tshark -r capture.pcap -Y 'ip.addr == 192.168.1.1'"
 echo ""
 
 # Demo: list interfaces
+[[ -t 0 ]] || exit 0
 read -rp "List available capture interfaces now? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     info "Running: tshark -D"

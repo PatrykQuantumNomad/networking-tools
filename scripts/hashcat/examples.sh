@@ -2,11 +2,28 @@
 # hashcat/examples.sh — GPU-accelerated password recovery
 source "$(dirname "$0")/../common.sh"
 
+show_help() {
+    cat <<EOF
+Usage: $(basename "$0")
+
+Hashcat - GPU-accelerated password recovery examples
+
+Displays common hashcat commands for dictionary attacks, brute force,
+rule-based attacks, and GPU benchmarking workflows.
+
+Examples:
+    $(basename "$0")
+    $(basename "$0") --help
+EOF
+}
+
+[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+
 require_cmd hashcat "brew install hashcat"
 safety_banner
 
 SAMPLE_DIR="$PROJECT_ROOT/scripts/hashcat/samples"
-mkdir -p "$SAMPLE_DIR"
+mkdir -p "$SAMPLE_DIR" || { error "Cannot create $SAMPLE_DIR"; exit 1; }
 
 info "=== Hashcat Examples ==="
 echo ""
@@ -72,6 +89,7 @@ echo "    hashcat -m 22000 -a 0 handshake.hc22000 wordlist.txt"
 echo ""
 
 # Demo
+[[ -t 0 ]] || exit 0
 read -rp "Run a quick benchmark? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     info "Running: hashcat -b -m 0 (MD5 benchmark)"

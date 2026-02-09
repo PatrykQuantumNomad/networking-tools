@@ -2,11 +2,28 @@
 # john/examples.sh — John the Ripper: password cracking
 source "$(dirname "$0")/../common.sh"
 
+show_help() {
+    cat <<EOF
+Usage: $(basename "$0")
+
+John the Ripper - Password cracking examples
+
+Displays common John the Ripper commands for dictionary attacks,
+brute force, hash extraction, and session management workflows.
+
+Examples:
+    $(basename "$0")
+    $(basename "$0") --help
+EOF
+}
+
+[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+
 require_cmd john "brew install john"
 safety_banner
 
 SAMPLE_DIR="$PROJECT_ROOT/scripts/john/samples"
-mkdir -p "$SAMPLE_DIR"
+mkdir -p "$SAMPLE_DIR" || { error "Cannot create $SAMPLE_DIR"; exit 1; }
 
 info "=== John the Ripper Examples ==="
 echo ""
@@ -77,6 +94,7 @@ echo "    john --restore=session_name"
 echo ""
 
 info "Supported formats: john --list=formats | wc -l"
+[[ -t 0 ]] || exit 0
 read -rp "Show all supported hash formats? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     john --list=formats 2>/dev/null | head -20

@@ -31,7 +31,7 @@ scripts/
   <tool>/examples.sh     # Each tool has its own directory with an examples.sh script
 labs/
   docker-compose.yml     # Intentionally vulnerable Docker targets for safe practice
-notes/                   # Personal notes (gitignored)
+notes/                   # Notes
 Makefile                 # Convenience targets for check, lab-up/down, and running tools
 ```
 

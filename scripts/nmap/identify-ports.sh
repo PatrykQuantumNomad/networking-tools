@@ -2,10 +2,26 @@
 # nmap/identify-ports.sh — Identify what's behind open ports
 source "$(dirname "$0")/../common.sh"
 
+show_help() {
+    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo ""
+    echo "Description:"
+    echo "  Identifies what's behind open ports on a target host. Shows common"
+    echo "  commands for local process lookup and nmap service detection."
+    echo "  Default target is localhost if none is provided."
+    echo ""
+    echo "Examples:"
+    echo "  $(basename "$0")              # Identify ports on localhost"
+    echo "  $(basename "$0") 192.168.1.1  # Identify ports on a remote host"
+    echo "  $(basename "$0") --help       # Show this help message"
+}
+
+[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+
 TARGET="${1:-localhost}"
 
 info "=== Port Identification ==="
-info "Target: $TARGET"
+info "Target: ${TARGET}"
 echo ""
 
 info "Why does nmap show 'unknown' for many ports?"
@@ -40,27 +56,27 @@ echo ""
 
 # 6. Nmap service version detection
 info "6) Nmap service probing (remote — works on any target)"
-echo "   nmap -sV $TARGET"
+echo "   nmap -sV ${TARGET}"
 echo ""
 
 # 7. Nmap version detection on specific ports
 info "7) Probe specific ports only"
-echo "   nmap -sV -p 8080,3030,8888 $TARGET"
+echo "   nmap -sV -p 8080,3030,8888 ${TARGET}"
 echo ""
 
 # 8. Aggressive nmap version detection
 info "8) Maximum version detection effort (slow)"
-echo "   nmap -sV --version-all $TARGET"
+echo "   nmap -sV --version-all ${TARGET}"
 echo ""
 
 # 9. Nmap with default scripts for more detail
 info "9) Service detection + default scripts"
-echo "   nmap -sV -sC $TARGET"
+echo "   nmap -sV -sC ${TARGET}"
 echo ""
 
 # 10. Combined: nmap scan then local lookup
 info "10) Full workflow: scan then identify"
-echo "    sudo nmap -sV -p- $TARGET -oG - | grep open"
+echo "    sudo nmap -sV -p- ${TARGET} -oG - | grep open"
 echo "    lsof -i -P -n | grep LISTEN"
 echo ""
 
@@ -77,9 +93,9 @@ if [[ "$TARGET" == "localhost" || "$TARGET" == "127.0.0.1" ]]; then
         lsof -iTCP -P -n 2>/dev/null | grep LISTEN | awk '{printf "%-20s %-8s %-10s %s\n", $1, $2, $3, $9}'
     fi
 else
-    read -rp "Run service detection on $TARGET now? [y/N] " answer
+    read -rp "Run service detection on ${TARGET} now? [y/N] " answer
     if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: nmap -sV --top-ports 100 $TARGET"
+        info "Running: nmap -sV --top-ports 100 ${TARGET}"
         nmap -sV --top-ports 100 "$TARGET"
     fi
 fi

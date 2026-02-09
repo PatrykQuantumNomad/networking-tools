@@ -2,6 +2,23 @@
 # metasploit/examples.sh — Metasploit Framework: exploitation & post-exploitation
 source "$(dirname "$0")/../common.sh"
 
+show_help() {
+    cat <<EOF
+Usage: $(basename "$0")
+
+Metasploit Framework - Exploitation and post-exploitation examples
+
+Displays common Metasploit commands for exploitation, scanning,
+payload generation, and post-exploitation workflows.
+
+Examples:
+    $(basename "$0")
+    $(basename "$0") --help
+EOF
+}
+
+[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+
 require_cmd msfconsole "https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html"
 safety_banner
 

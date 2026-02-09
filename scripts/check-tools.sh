@@ -2,6 +2,20 @@
 # check-tools.sh — Verify which pentesting tools are installed
 source "$(dirname "$0")/common.sh"
 
+show_help() {
+    echo "Usage: $(basename "$0") [-h|--help]"
+    echo ""
+    echo "Description:"
+    echo "  Checks which pentesting tools are installed on this system and"
+    echo "  reports their versions. Shows install instructions for any missing tools."
+    echo ""
+    echo "Examples:"
+    echo "  $(basename "$0")          # Check all tools"
+    echo "  $(basename "$0") --help   # Show this help message"
+}
+
+[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+
 # Include common install paths not always in PATH
 for p in /opt/metasploit-framework/bin /usr/local/bin /opt/homebrew/bin; do
     [[ -d "$p" ]] && [[ ":$PATH:" != *":$p:"* ]] && export PATH="$p:$PATH"

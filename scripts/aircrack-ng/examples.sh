@@ -2,6 +2,23 @@
 # aircrack-ng/examples.sh — WiFi security auditing suite
 source "$(dirname "$0")/../common.sh"
 
+show_help() {
+    cat <<EOF
+Usage: $(basename "$0")
+
+Aircrack-ng - WiFi security auditing suite examples
+
+Displays common aircrack-ng commands for WiFi network discovery,
+handshake capture, and WPA/WEP key cracking workflows.
+
+Examples:
+    $(basename "$0")
+    $(basename "$0") --help
+EOF
+}
+
+[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+
 require_cmd aircrack-ng "brew install aircrack-ng"
 safety_banner
 
