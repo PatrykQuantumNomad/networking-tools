@@ -26,9 +26,5 @@ sqlmap-output/
 .DS_Store
 Thumbs.db
 
-# Notes (personal)
-notes/*
-!notes/.gitkeep
-
 # Docker volumes
 labs/data/
