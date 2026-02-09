@@ -1,0 +1,182 @@
+# TShark -- Wireshark CLI
+
+## What It Does
+
+TShark is the command-line version of Wireshark. It captures and analyzes network traffic without a GUI. Essential for packet analysis, credential extraction, protocol debugging, and forensics. Uses the same display filters and dissectors as Wireshark, so anything you learn here transfers directly.
+
+## Running the Examples Script
+
+```bash
+# No target argument required — works with local interfaces
+bash scripts/tshark/examples.sh
+
+# Or via Makefile
+make tshark
+
+# Examples
+bash scripts/tshark/examples.sh
+```
+
+The script prints 10 example commands for capturing and analyzing traffic, then offers to list available network interfaces.
+
+## Key Flags to Remember
+
+| Flag | What It Does |
+| ------ | ------------- |
+| `-i <interface>` | Capture on specific interface (en0, lo0, etc.) |
+| `-Y '<filter>'` | Display filter (same syntax as Wireshark) |
+| `-T fields -e <field>` | Extract specific fields from packets |
+| `-r <file>` | Read from a capture file |
+| `-w <file>` | Write captured packets to file |
+| `-c <count>` | Stop after N packets |
+| `-f '<filter>'` | Capture filter (BPF syntax, applied at capture time) |
+| `-q -z <stat>` | Quiet mode with statistics (dns,tree / http,tree / io,phs) |
+| `--export-objects <proto>,<dir>` | Export files transferred over HTTP/SMB/DICOM |
+| `-V` | Verbose -- show full packet details |
+| `-D` | List available capture interfaces |
+
+## Capture Progression (recommended order)
+
+1. `tshark -D` -- what interfaces are available?
+2. `sudo tshark -i en0 -c 20` -- capture a quick sample
+3. `sudo tshark -i en0 -Y 'http' -c 20` -- filter to protocol of interest
+4. `sudo tshark -i en0 -w capture.pcap` -- save for offline analysis
+5. `tshark -r capture.pcap -q -z io,phs` -- get protocol statistics
+
+## Use-Case Scripts
+
+### capture-http-credentials.sh -- Extract credentials from unencrypted HTTP
+
+Captures and extracts credentials from unencrypted HTTP traffic. Demonstrates how POST form data, Basic Auth headers, and session cookies are visible in plaintext over HTTP. This is why HTTPS matters.
+
+**When to use:** Testing web apps served over HTTP, demonstrating the danger of unencrypted traffic, checking if the lab targets leak credentials.
+
+**Key commands:**
+
+```bash
+# Capture HTTP POST data (form submissions, login attempts)
+sudo tshark -i lo0 -Y 'http.request.method==POST' -T fields -e http.host -e http.request.uri -e http.file_data
+
+# Extract Basic Authentication headers
+sudo tshark -i lo0 -Y 'http.authbasic' -T fields -e ip.src -e http.authbasic
+
+# Filter for packets containing "password"
+sudo tshark -i lo0 -Y 'http contains "password"' -T fields -e ip.src -e http.host -e http.file_data
+
+# Extract session cookies
+sudo tshark -i lo0 -Y 'http.cookie' -T fields -e http.host -e http.cookie
+
+# Monitor FTP login attempts
+sudo tshark -i lo0 -Y 'ftp.request.command==USER || ftp.request.command==PASS' -T fields -e ftp.request.arg
+
+# Full credential extraction pipeline
+sudo tshark -i lo0 -Y 'http.request.method==POST and http contains "login"' -T fields -e frame.time -e ip.src -e http.host -e http.request.uri -e http.file_data
+```
+
+**Make target:** `make capture-creds`
+
+---
+
+### analyze-dns-queries.sh -- Monitor DNS for recon detection, tunneling, and C2
+
+Monitors and analyzes DNS query traffic. DNS is a goldmine for both attackers and defenders -- attackers use it for infrastructure mapping and data exfiltration (DNS tunneling), while defenders can detect these patterns.
+
+**When to use:** Detecting reconnaissance against your network, identifying DNS tunneling or command-and-control channels, monitoring which domains targets are querying.
+
+**Suspicious patterns to watch for:**
+- Unusually long domain names (tunneling encodes data in labels)
+- High volume of TXT record queries (potential C2)
+- NXDOMAIN floods (domain generation algorithms)
+- Zone transfer attempts (AXFR)
+
+**Key commands:**
+
+```bash
+# Show all DNS queries in real-time
+sudo tshark -i en0 -Y 'dns.flags.response==0' -T fields -e dns.qry.name
+
+# DNS queries with responses
+sudo tshark -i en0 -Y 'dns' -T fields -e dns.qry.name -e dns.a
+
+# Detect DNS zone transfer attempts
+sudo tshark -i en0 -Y 'dns.qry.type==252'
+
+# Find TXT record queries (potential C2)
+sudo tshark -i en0 -Y 'dns.qry.type==16' -T fields -e dns.qry.name -e dns.txt
+
+# Monitor for unusually long DNS names (tunneling indicator)
+sudo tshark -i en0 -Y 'dns.qry.name.len > 50' -T fields -e dns.qry.name
+
+# Count queries per domain from a capture file
+tshark -r capture.pcap -Y 'dns.flags.response==0' -T fields -e dns.qry.name | sort | uniq -c | sort -rn
+
+# DNS query statistics summary
+tshark -r capture.pcap -q -z dns,tree
+```
+
+**Make target:** `make analyze-dns`
+
+---
+
+### extract-files-from-capture.sh -- Export transferred files from packet captures
+
+Exports files transferred over HTTP, SMB, FTP, and other protocols from packet capture files. Reconstructs documents, images, executables, and other files from network traffic.
+
+**When to use:** Incident response (what files were exfiltrated?), malware analysis (what was downloaded?), forensics (reconstruct attacker activity).
+
+**Key commands:**
+
+```bash
+# Export all HTTP objects (files) from pcap
+tshark -r capture.pcap --export-objects http,exported_files/
+
+# Export SMB/CIFS file transfers
+tshark -r capture.pcap --export-objects smb,smb_files/
+
+# List HTTP file transfers without extracting
+tshark -r capture.pcap -Y 'http.content_type' -T fields -e http.host -e http.request.uri -e http.content_type
+
+# Filter for specific file types (e.g., PDFs)
+tshark -r capture.pcap -Y 'http.content_type contains "pdf"' -T fields -e http.request.uri
+
+# Show file sizes transferred
+tshark -r capture.pcap -Y 'http.content_length' -T fields -e http.host -e http.request.uri -e http.content_length
+
+# HTTP transfer statistics
+tshark -r capture.pcap -q -z http,tree
+
+# Complete workflow: capture then extract
+sudo tshark -i en0 -f 'port 80' -w traffic.pcap -c 500
+tshark -r traffic.pcap --export-objects http,extracted/
+```
+
+**Make target:** `make extract-files TARGET=<pcap>`
+
+## Practice Against Lab Targets
+
+```bash
+make lab-up
+
+# Capture HTTP traffic on loopback while browsing lab apps
+sudo tshark -i lo0 -Y 'http' -c 20
+
+# Capture login attempts to DVWA (port 8080)
+sudo tshark -i lo0 -f 'port 8080' -Y 'http.request.method==POST' -T fields -e http.file_data
+
+# Monitor DNS queries generated by lab activity
+sudo tshark -i en0 -Y 'dns.flags.response==0' -T fields -e dns.qry.name -c 30
+
+# Save a capture for offline analysis
+sudo tshark -i lo0 -f 'port 8080 or port 3000 or port 8888' -w lab-traffic.pcap -c 500
+```
+
+## Notes
+
+- Most capture commands require `sudo` because raw packet capture needs root privileges
+- Use `-f` (capture filter, BPF syntax) to limit what gets captured -- reduces file size and noise
+- Use `-Y` (display filter, Wireshark syntax) to filter what gets shown -- more flexible but applied after capture
+- The loopback interface (`lo0` on macOS, `lo` on Linux) is safest for lab practice -- only local traffic
+- Capture files (`.pcap`) can be opened in Wireshark GUI for visual analysis
+- TShark display filters are powerful: `http.request.method==POST`, `dns.qry.type==16`, `tcp.port==443`
+- When extracting fields with `-T fields`, chain multiple `-e` flags for the columns you need
+- Protocol statistics (`-q -z`) work best on saved capture files, not live captures

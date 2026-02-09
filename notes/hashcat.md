@@ -1,0 +1,199 @@
+# Hashcat -- GPU-Accelerated Password Cracking
+
+## What It Does
+
+Hashcat is the world's fastest password cracker, leveraging GPU acceleration to test billions of hashes per second. Supports 350+ hash types including MD5, SHA-1, NTLM, bcrypt, WPA/WPA2, and more. Essential for cracking hashes obtained during pentesting -- NTLM from Active Directory, web app hashes from database dumps, WiFi handshakes, and anything else that produces a hash.
+
+## Running the Examples Script
+
+```bash
+# No target argument required
+bash scripts/hashcat/examples.sh
+
+# No direct Makefile target for base examples
+# Use the use-case scripts below instead
+```
+
+The script creates sample hash files for practice, then prints 10 example commands covering dictionary attacks, brute force, rule-based attacks, mask attacks, and WPA cracking.
+
+## Key Flags to Remember
+
+| Flag | What It Does |
+| ------ | ------------- |
+| `-m <mode>` | Hash type (0=MD5, 100=SHA-1, 1000=NTLM, 1400=SHA-256, 3200=bcrypt) |
+| `-a <mode>` | Attack mode (0=dictionary, 1=combinator, 3=brute-force/mask, 6=hybrid) |
+| `-w <level>` | Workload profile (1=low, 2=default, 3=high, 4=nightmare) |
+| `-r <rules>` | Apply rule file (best64.rule, dive.rule) |
+| `-o <file>` | Output cracked hashes to file |
+| `--show` | Show already-cracked hashes from potfile |
+| `--restore` | Resume interrupted session |
+| `-b` | Run benchmark |
+| `-I` | Show available compute devices |
+| `--runtime=<sec>` | Stop after N seconds |
+| `--identify` | Identify hash type from a file |
+
+## Common Hash Modes Reference
+
+| Mode | Hash Type | Speed | Common Source |
+| ------ | ------------- | ------------- | ------------- |
+| 0 | MD5 | Very fast | Legacy web apps, DVWA |
+| 100 | SHA-1 | Fast | Older web apps |
+| 300 | MySQL 4.1+ | Very fast | MySQL databases |
+| 400 | phpass/WordPress | Slow | WordPress sites |
+| 1000 | NTLM | Very fast | Windows/Active Directory |
+| 1400 | SHA-256 | Medium | Modern web apps |
+| 1700 | SHA-512 | Medium | Modern web apps |
+| 3200 | bcrypt | Very slow | Secure web apps |
+| 10000 | Django PBKDF2 | Very slow | Django apps |
+| 22000 | WPA/WPA2 | Slow | WiFi handshakes |
+
+## Attack Mode Progression (recommended order)
+
+1. `hashcat -m <mode> -a 0 hash.txt rockyou.txt` -- dictionary (fast, catches weak passwords)
+2. `hashcat -m <mode> -a 0 hash.txt rockyou.txt -r best64.rule` -- dictionary + rules (catches mutations)
+3. `hashcat -m <mode> -a 0 hash.txt rockyou.txt -r dive.rule` -- dictionary + thorough rules
+4. `hashcat -m <mode> -a 6 hash.txt rockyou.txt '?d?d?d'` -- hybrid (word + digits)
+5. `hashcat -m <mode> -a 3 hash.txt '?u?l?l?l?l?d?d?d'` -- mask (known patterns)
+6. `hashcat -m <mode> -a 3 hash.txt '?a?a?a?a?a?a'` -- brute force (last resort)
+
+## Use-Case Scripts
+
+### crack-ntlm-hashes.sh -- Crack Windows NTLM hashes from AD dumps
+
+Cracks Windows NTLM password hashes using GPU-accelerated attacks. NTLM is the default Windows password hash and has no salt, making it extremely fast to crack -- a modern GPU tests billions per second.
+
+**When to use:** After extracting NTLM hashes from Active Directory (ntds.dit via secretsdump), SAM database, or Mimikatz memory dumps.
+
+**Key commands:**
+
+```bash
+# Dictionary attack with rockyou
+hashcat -m 1000 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+
+# Dictionary + best64 rules (smart word mutations)
+hashcat -m 1000 -a 0 hashes.txt wordlist.txt -r /usr/share/hashcat/rules/best64.rule
+
+# Dictionary + dive rules (more thorough, slower)
+hashcat -m 1000 -a 0 hashes.txt wordlist.txt -r /usr/share/hashcat/rules/dive.rule
+
+# Mask attack -- common pattern: Uppercase + lower + digits
+hashcat -m 1000 -a 3 hashes.txt '?u?l?l?l?l?d?d?d'
+
+# Brute force -- 8 char all lowercase
+hashcat -m 1000 -a 3 hashes.txt '?l?l?l?l?l?l?l?l'
+
+# Optimize for speed with high workload
+hashcat -m 1000 -a 0 -w 3 hashes.txt wordlist.txt
+
+# Show already-cracked results
+hashcat -m 1000 hashes.txt --show
+
+# Output cracked hashes to file
+hashcat -m 1000 -a 0 hashes.txt wordlist.txt -o cracked.txt --outfile-format=2
+```
+
+**Make target:** `make crack-ntlm TARGET=<hashfile>`
+
+---
+
+### benchmark-gpu.sh -- Benchmark GPU speed and estimate crack times
+
+Benchmarks GPU hash cracking performance. Shows hashes per second (H/s) for various hash types so you can estimate how long a cracking job will take. GPU cracking is orders of magnitude faster than CPU.
+
+**When to use:** Before starting a long cracking job, to estimate time. After setting up a new cracking rig. To compare GPU performance.
+
+**Speed context:**
+- CPU: ~100M MD5/s vs GPU: ~50B MD5/s
+- CPU: ~10M NTLM/s vs GPU: ~40B NTLM/s
+- CPU: ~10K bcrypt/s vs GPU: ~100K bcrypt/s
+- Time = Keyspace / Speed (e.g., 8-char lowercase = 26^8 = ~208B combos, at 40B NTLM/s = ~5 seconds)
+
+**Key commands:**
+
+```bash
+# Benchmark all supported hash types
+hashcat -b
+
+# Benchmark specific hash types
+hashcat -b -m 0       # MD5
+hashcat -b -m 1000    # NTLM
+hashcat -b -m 1400    # SHA-256
+hashcat -b -m 3200    # bcrypt
+
+# List available compute devices (GPUs, CPUs)
+hashcat -I
+
+# Benchmark with maximum workload
+hashcat -b -w 3
+
+# Time-limited cracking run (stop after 60 seconds)
+hashcat -m 1000 --runtime=60 hashes.txt wordlist.txt
+```
+
+**Make target:** `make benchmark-gpu`
+
+---
+
+### crack-web-hashes.sh -- Crack web app hashes (MD5, SHA, bcrypt, WordPress)
+
+Cracks common web application password hashes. Different web frameworks use different hash types with varying security levels -- MD5 is trivially fast, bcrypt is intentionally slow.
+
+**When to use:** After dumping a web app database (via SQL injection, backup file, etc.) and extracting password hashes. Identify the hash type first, then pick the right mode.
+
+**Key commands:**
+
+```bash
+# Crack MD5 hashes (mode 0) -- very fast
+hashcat -m 0 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+
+# Crack SHA-1 hashes (mode 100)
+hashcat -m 100 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+
+# Crack SHA-256 hashes (mode 1400)
+hashcat -m 1400 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+
+# Crack bcrypt hashes (mode 3200) -- expect slow speed
+hashcat -m 3200 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+
+# Crack WordPress/phpass hashes (mode 400)
+hashcat -m 400 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+
+# Crack Django PBKDF2-SHA256 hashes (mode 10000)
+hashcat -m 10000 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+
+# Crack MySQL 4.1+ hashes (mode 300)
+hashcat -m 300 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+
+# Identify unknown hash type
+hashcat --identify hash.txt
+```
+
+**Make target:** `make crack-web-hashes TARGET=<hashfile>`
+
+## Practice Against Lab Targets
+
+```bash
+make lab-up
+
+# DVWA stores passwords as MD5 -- if you extract them via SQL injection:
+hashcat -m 0 -a 0 dvwa-hashes.txt /usr/share/wordlists/rockyou.txt
+
+# Run a quick benchmark to see your GPU speed
+hashcat -b -m 0 -m 1000
+
+# Crack a known test hash (MD5 of "password123")
+echo "482c811da5d5b4bc6d497ffa98491e38" > /tmp/test-hash.txt
+hashcat -m 0 -a 3 /tmp/test-hash.txt '?l?l?l?l?l?l?l?l?d?d?d'
+```
+
+## Notes
+
+- Hashcat uses the GPU by default -- make sure drivers are installed (OpenCL, CUDA, or Metal)
+- The potfile (`~/.local/share/hashcat/hashcat.potfile`) caches cracked hashes -- `--show` reads from it
+- Rule files are the secret weapon: `best64.rule` covers common password patterns with minimal overhead
+- NTLM has no salt, so identical passwords always produce the same hash -- rainbow tables also work
+- bcrypt is intentionally slow by design; expect hours or days even with a good GPU
+- Use `--runtime=<seconds>` to limit a cracking run, then `--restore` to resume later
+- Wordlist quality matters more than GPU speed -- rockyou.txt is a good starting point
+- Mask charset codes: `?l` = lowercase, `?u` = uppercase, `?d` = digit, `?s` = special, `?a` = all
+- On macOS, hashcat uses Metal for GPU acceleration -- run `hashcat -I` to verify device detection

@@ -42,3 +42,85 @@ hping3: ## Run hping3 examples (usage: make hping3 TARGET=<ip>)
 
 identify-ports: ## Identify what's behind open ports (default: localhost)
 	@bash scripts/nmap/identify-ports.sh $(or $(TARGET),localhost)
+
+# Use-case scripts — specific tasks with correct parameters
+discover-hosts: ## Find live hosts on a subnet (usage: make discover-hosts TARGET=<subnet>)
+	@bash scripts/nmap/discover-live-hosts.sh $(or $(TARGET),localhost)
+
+scan-web-vulns: ## Scan web server for vulnerabilities (usage: make scan-web-vulns TARGET=<ip>)
+	@bash scripts/nmap/scan-web-vulnerabilities.sh $(or $(TARGET),localhost)
+
+capture-creds: ## Capture HTTP credentials from traffic
+	@bash scripts/tshark/capture-http-credentials.sh
+
+analyze-dns: ## Monitor DNS query traffic
+	@bash scripts/tshark/analyze-dns-queries.sh
+
+extract-files: ## Extract files from packet captures (usage: make extract-files TARGET=<pcap>)
+	@bash scripts/tshark/extract-files-from-capture.sh $(TARGET)
+
+gen-payload: ## Generate reverse shell payload (usage: make gen-payload TARGET=<lhost>)
+	@bash scripts/metasploit/generate-reverse-shell.sh $(TARGET)
+
+scan-services: ## Enumerate services with Metasploit scanners (usage: make scan-services TARGET=<ip>)
+	@bash scripts/metasploit/scan-network-services.sh $(or $(TARGET),localhost)
+
+setup-listener: ## Setup reverse shell listener
+	@bash scripts/metasploit/setup-listener.sh $(TARGET)
+
+crack-ntlm: ## Crack NTLM hashes (usage: make crack-ntlm TARGET=<hashfile>)
+	@bash scripts/hashcat/crack-ntlm-hashes.sh $(TARGET)
+
+benchmark-gpu: ## Benchmark GPU cracking speed
+	@bash scripts/hashcat/benchmark-gpu.sh
+
+crack-web-hashes: ## Crack web app hashes — MD5, SHA, bcrypt (usage: make crack-web-hashes TARGET=<hashfile>)
+	@bash scripts/hashcat/crack-web-hashes.sh $(TARGET)
+
+crack-linux-pw: ## Crack Linux /etc/shadow passwords
+	@bash scripts/john/crack-linux-passwords.sh
+
+crack-archive: ## Crack password-protected archives (usage: make crack-archive TARGET=<file>)
+	@bash scripts/john/crack-archive-passwords.sh $(TARGET)
+
+identify-hash: ## Identify unknown hash type (usage: make identify-hash TARGET=<hash>)
+	@bash scripts/john/identify-hash-type.sh $(TARGET)
+
+dump-db: ## Dump database via SQL injection (usage: make dump-db TARGET=<url>)
+	@bash scripts/sqlmap/dump-database.sh $(TARGET)
+
+test-params: ## Test all parameters for SQLi (usage: make test-params TARGET=<url>)
+	@bash scripts/sqlmap/test-all-parameters.sh $(TARGET)
+
+bypass-waf: ## Bypass WAF with tamper scripts (usage: make bypass-waf TARGET=<url>)
+	@bash scripts/sqlmap/bypass-waf.sh $(TARGET)
+
+scan-vulns: ## Scan for specific vulnerability types (usage: make scan-vulns TARGET=<url>)
+	@bash scripts/nikto/scan-specific-vulnerabilities.sh $(or $(TARGET),http://localhost:8080)
+
+scan-hosts: ## Scan multiple hosts with nikto (usage: make scan-hosts TARGET=<hostfile>)
+	@bash scripts/nikto/scan-multiple-hosts.sh $(TARGET)
+
+scan-auth: ## Authenticated nikto scan (usage: make scan-auth TARGET=<url>)
+	@bash scripts/nikto/scan-with-auth.sh $(or $(TARGET),http://localhost:8080)
+
+test-firewall: ## Test firewall rules with hping3 (usage: make test-firewall TARGET=<ip>)
+	@bash scripts/hping3/test-firewall-rules.sh $(or $(TARGET),localhost)
+
+detect-firewall: ## Detect firewall presence (usage: make detect-firewall TARGET=<ip>)
+	@bash scripts/hping3/detect-firewall.sh $(or $(TARGET),localhost)
+
+scan-auth-app: ## Authenticated skipfish scan (usage: make scan-auth-app TARGET=<url>)
+	@bash scripts/skipfish/scan-authenticated-app.sh $(or $(TARGET),http://localhost:8080)
+
+quick-scan: ## Quick web app scan (usage: make quick-scan TARGET=<url>)
+	@bash scripts/skipfish/quick-scan-web-app.sh $(or $(TARGET),http://localhost:3030)
+
+capture-handshake: ## Capture WPA handshake (usage: make capture-handshake TARGET=<interface>)
+	@bash scripts/aircrack-ng/capture-handshake.sh $(or $(TARGET),wlan0)
+
+crack-wpa: ## Crack WPA handshake (usage: make crack-wpa TARGET=<capfile>)
+	@bash scripts/aircrack-ng/crack-wpa-handshake.sh $(TARGET)
+
+analyze-wifi: ## Survey wireless networks (usage: make analyze-wifi TARGET=<interface>)
+	@bash scripts/aircrack-ng/analyze-wireless-networks.sh $(or $(TARGET),wlan0)
