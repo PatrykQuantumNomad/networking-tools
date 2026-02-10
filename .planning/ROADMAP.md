@@ -141,7 +141,7 @@ Plans:
 
 Plans:
 - [x] 06-01-PLAN.md — Rename tool pages to .mdx, add OS-specific install tabs, add cross-reference sections
-- [ ] 06-02-PLAN.md — Task index page, three learning path pages, lab walkthrough asides
+- [x] 06-02-PLAN.md — Task index page, three learning path pages, lab walkthrough asides
 - [ ] 06-03-PLAN.md — CI docs-completeness validation script and workflow integration
 
 ---
