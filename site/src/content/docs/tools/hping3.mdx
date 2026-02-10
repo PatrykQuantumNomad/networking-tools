@@ -196,3 +196,8 @@ sudo hping3 -S -p 8080 -T --ttl 1 localhost
 - Source port spoofing (`-s 53`) makes traffic look like DNS replies, which some firewalls allow
 - TCP traceroute (`-S -p 80 -T`) is more reliable through firewalls than ICMP traceroute
 - Combine hping3 with tcpdump or tshark to capture and analyze the full packet exchange
+
+## Related Tools
+
+- [Nmap](/networking-tools/tools/nmap/) -- port scanning complement to crafted packet probes
+- [Traceroute](/networking-tools/tools/traceroute/) -- path analysis pairs with firewall testing

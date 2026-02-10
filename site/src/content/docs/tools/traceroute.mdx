@@ -206,3 +206,8 @@ sudo mtr --report -c 10 -n google.com
 - mtr's `--report` mode is essential for scripting and diagnostics. Without it, mtr runs interactively (full-screen ncurses display).
 - The timing in `--report` mode depends on the cycle count (`-c`). More cycles = better statistical accuracy but longer runtime. 10 cycles is a good balance for quick checks; 100 cycles for thorough analysis.
 - Hops showing `* * *` (no response) are not necessarily down -- many routers are configured to not respond to traceroute probes as a security measure. This is called "stealth" or "filtered" and is completely normal for intermediate hops.
+
+## Related Tools
+
+- [dig](/networking-tools/tools/dig/) -- DNS resolution before route tracing
+- [hping3](/networking-tools/tools/hping3/) -- crafted packet probes for firewall and path analysis

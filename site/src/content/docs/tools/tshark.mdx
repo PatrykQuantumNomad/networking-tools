@@ -212,3 +212,9 @@ sudo tshark -i lo0 -f 'port 8080 or port 3000 or port 8888' -w lab-traffic.pcap 
 - TShark display filters are powerful: `http.request.method==POST`, `dns.qry.type==16`, `tcp.port==443`
 - When extracting fields with `-T fields`, chain multiple `-e` flags for the columns you need
 - Protocol statistics (`-q -z`) work best on saved capture files, not live captures
+
+## Related Tools
+
+- [Nmap](/networking-tools/tools/nmap/) -- generate network traffic to capture and analyze
+- [curl](/networking-tools/tools/curl/) -- capture HTTP request/response details in transit
+- [Netcat](/networking-tools/tools/netcat/) -- monitor raw TCP/UDP connections

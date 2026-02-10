@@ -176,3 +176,9 @@ curl -o /dev/null -s -w 'DNS: %{time_namelookup}s\nConnect: %{time_connect}s\nTo
 - The `-w` (write-out) format string is extremely powerful for performance debugging -- see `man curl` for all available variables
 - Use `-k` only for testing against self-signed certificates, never in production
 - curl's verbose output (`-v`) goes to stderr, so pipe with `2>&1` to capture it
+
+## Related Tools
+
+- [dig](/networking-tools/tools/dig/) -- resolve DNS before testing HTTP endpoints
+- [Nikto](/networking-tools/tools/nikto/) -- automated scanning complements manual HTTP testing
+- [tshark](/networking-tools/tools/tshark/) -- capture HTTP traffic for deeper analysis

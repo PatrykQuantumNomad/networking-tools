@@ -210,3 +210,10 @@ nmap -sV -p 8080,3030,8888 <target>
 - UDP scans (`-sU`) are very slow — use `--top-ports 20` to limit
 - NSE scripts live in `/usr/share/nmap/scripts/` — browse them for specific checks
 - XML output (`-oX`) can be imported into Metasploit with `db_import`
+
+## Related Tools
+
+- [tshark](/networking-tools/tools/tshark/) -- capture and analyze traffic from nmap scans
+- [Nikto](/networking-tools/tools/nikto/) -- scan web services discovered by nmap
+- [Metasploit](/networking-tools/tools/metasploit/) -- import nmap XML output for exploitation
+- [hping3](/networking-tools/tools/hping3/) -- crafted packet probes complement nmap port scanning

@@ -214,3 +214,10 @@ sqlmap -u 'http://localhost:8080/vulnerabilities/sqli/?id=1&Submit=Submit' \
 - Tamper scripts can be chained with commas: `--tamper=space2comment,between,randomcase`
 - Use `--dbms=mysql` if you know the database type to skip fingerprinting and speed up testing
 - Use `-v 3` for verbose output when debugging why detection is failing
+
+## Related Tools
+
+- [Nikto](/networking-tools/tools/nikto/) -- discover SQL injection points before targeted testing
+- [Nmap](/networking-tools/tools/nmap/) -- find web servers to test for injection
+- [Hashcat](/networking-tools/tools/hashcat/) -- crack password hashes extracted from databases
+- [John the Ripper](/networking-tools/tools/john/) -- crack extracted hashes with auto-detection

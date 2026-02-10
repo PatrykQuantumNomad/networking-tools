@@ -240,3 +240,8 @@ hashcat -m 0 -a 3 /tmp/test-hash.txt '?l?l?l?l?l?l?l?l?d?d?d'
 - Wordlist quality matters more than GPU speed -- rockyou.txt is a good starting point
 - Mask charset codes: `?l` = lowercase, `?u` = uppercase, `?d` = digit, `?s` = special, `?a` = all
 - On macOS, hashcat uses Metal for GPU acceleration -- run `hashcat -I` to verify device detection
+
+## Related Tools
+
+- [John the Ripper](/networking-tools/tools/john/) -- alternative cracker with different strengths (CPU-focused, auto-detect hash types)
+- [SQLMap](/networking-tools/tools/sqlmap/) -- extracts database hashes for cracking
