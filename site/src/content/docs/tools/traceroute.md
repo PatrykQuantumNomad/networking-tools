@@ -1,0 +1,188 @@
+---
+title: "traceroute / mtr -- Route Tracing"
+description: "Trace network paths, analyze per-hop latency, and compare routing protocols"
+sidebar:
+  order: 15
+  badge:
+    text: 'New'
+    variant: 'tip'
+---
+
+## What They Do
+
+**traceroute** maps the network path between your machine and a target by sending packets with incrementing TTL (Time To Live) values. Each router along the path decrements the TTL and, when it reaches zero, sends back an ICMP Time Exceeded message -- revealing that router's IP address. The result is a hop-by-hop map of every router between you and the destination.
+
+**mtr** (My Traceroute) combines traceroute and ping into a single tool. It continuously sends probes and tracks per-hop statistics including packet loss percentage, average latency, jitter, and worst-case times. Where traceroute gives you a one-shot snapshot, mtr gives you a statistical profile of every hop over time.
+
+The two tools are complementary:
+- **traceroute** for one-shot path discovery and quick verification
+- **mtr** for continuous monitoring, latency analysis, and identifying intermittent issues
+
+## Running the Examples Script
+
+```bash
+# Requires a target argument (IP or hostname)
+bash scripts/traceroute/examples.sh <target>
+
+# Or via Makefile
+make traceroute TARGET=<target>
+
+# Examples
+bash scripts/traceroute/examples.sh 8.8.8.8
+bash scripts/traceroute/examples.sh cloudflare.com
+```
+
+The script prints 10 example commands (5 traceroute + 5 mtr) with explanations, then offers to run a basic traceroute interactively.
+
+## Key Flags to Remember
+
+### traceroute
+
+| Flag | What It Does |
+| ---- | ------------ |
+| `-n` | Numeric output only (skip DNS resolution for faster results) |
+| `-I` | Use ICMP echo instead of UDP (requires sudo) |
+| `-m N` | Set maximum number of hops (default: 30) |
+| `-q N` | Number of probes per hop (default: 3) |
+| `-w N` | Wait timeout in seconds for each probe |
+| `-f N` | Start from TTL N instead of 1 (skip known hops) |
+| `-P tcp` | Use TCP probes (macOS -- useful for bypassing ICMP-filtering firewalls) |
+| `-T` | Use TCP SYN probes (Linux -- equivalent to macOS `-P tcp`) |
+
+### mtr
+
+| Flag | What It Does |
+| ---- | ------------ |
+| `--report` | Non-interactive mode -- run and print a final report |
+| `--report-wide` | Report mode with full hostnames (not truncated) |
+| `-c N` | Number of cycles/pings to send (default: 10) |
+| `-n` | No DNS resolution (numeric output only) |
+| `--tcp` | Use TCP SYN instead of ICMP (bypasses ICMP-filtering firewalls) |
+| `--udp` | Use UDP instead of ICMP |
+| `-s N` | Set packet size in bytes |
+| `-o FIELDS` | Custom output fields (e.g., `LSRABW` for Loss, Sent, Received, Avg, Best, Worst) |
+
+## Install
+
+| Platform | traceroute | mtr |
+| -------- | ---------- | --- |
+| macOS | Pre-installed | `brew install mtr` |
+| Debian / Ubuntu | `apt install traceroute` | `apt install mtr` |
+| RHEL / Fedora | `dnf install traceroute` | `dnf install mtr` |
+
+## Use-Case Scripts
+
+### trace-network-path.sh -- Basic path tracing
+
+Traces the network path to a target, showing every router hop along the way. Useful for understanding network topology and verifying routing.
+
+**When to use:** When you need to see the route packets take to reach a destination -- first step in diagnosing routing issues or understanding network layout.
+
+**Key commands:**
+
+```bash
+# Basic traceroute with numeric output (faster, no DNS)
+traceroute -n 8.8.8.8
+
+# ICMP mode (may get better responses from some routers)
+sudo traceroute -I example.com
+
+# Limit to 15 hops with 1 probe per hop (quick scan)
+traceroute -n -m 15 -q 1 example.com
+
+# TCP mode to bypass ICMP-filtering firewalls (macOS)
+traceroute -P tcp -p 443 example.com
+
+# TCP mode (Linux equivalent)
+sudo traceroute -T -p 443 example.com
+```
+
+**Make target:** `make trace-path TARGET=<host>`
+
+---
+
+### diagnose-latency.sh -- Per-hop latency analysis with mtr
+
+Runs mtr in report mode to collect per-hop latency statistics, then identifies hops with high packet loss or unusual latency. This is the go-to script for diagnosing slow connections.
+
+**When to use:** When a connection feels slow and you need to pinpoint which network segment is causing the delay. Also useful for documenting network quality for ISP support tickets.
+
+**Key commands:**
+
+```bash
+# Standard 10-cycle report (numeric, wide output)
+mtr --report --report-wide -c 10 -n example.com
+
+# Extended 100-cycle report for better statistics
+mtr --report --report-wide -c 100 -n example.com
+
+# TCP mode for hosts that block ICMP
+mtr --report --tcp -c 10 -n example.com
+
+# Custom packet size (test MTU issues)
+mtr --report -s 1400 -c 10 -n example.com
+```
+
+Note: mtr requires sudo on macOS because it needs raw socket access.
+
+**Make target:** `make diagnose-latency TARGET=<host>`
+
+---
+
+### compare-routes.sh -- Compare TCP vs ICMP vs UDP routes
+
+Runs traceroute using different protocols (ICMP, TCP, UDP) to compare the paths packets take. Different protocols may be routed differently or filtered at different points, revealing firewall rules and routing policies.
+
+**When to use:** When you suspect a firewall is filtering specific protocols, or when you want to understand how different traffic types are routed through a network.
+
+**Key commands:**
+
+```bash
+# UDP traceroute (default)
+traceroute -n example.com
+
+# ICMP traceroute
+sudo traceroute -I -n example.com
+
+# TCP traceroute to port 443 (macOS)
+traceroute -P tcp -p 443 -n example.com
+
+# TCP traceroute to port 80 (Linux)
+sudo traceroute -T -p 80 -n example.com
+```
+
+**Make target:** `make compare-routes TARGET=<host>`
+
+## macOS Notes
+
+- **traceroute** is pre-installed on macOS and works without sudo for UDP mode (the default). ICMP mode (`-I`) requires sudo.
+- **mtr** must be installed via Homebrew (`brew install mtr`) and **always requires sudo** on macOS because it needs raw socket access for packet crafting. Running mtr without sudo will fail with a permission error.
+- **TCP traceroute** uses different flags on macOS vs Linux: use `-P tcp` on macOS and `-T` on Linux. Both achieve the same result (TCP SYN probes).
+- The performance diagnostic script (`scripts/diagnostics/performance.sh`) detects the macOS/sudo situation automatically and warns instead of failing.
+
+## Practice Suggestions
+
+Good targets for practice (public infrastructure you can trace to):
+
+```bash
+# Google Public DNS
+traceroute -n 8.8.8.8
+
+# Cloudflare DNS
+traceroute -n 1.1.1.1
+
+# Cloudflare website (shows CDN routing)
+traceroute -n cloudflare.com
+
+# Compare paths to the same destination
+traceroute -n google.com
+sudo mtr --report -c 10 -n google.com
+```
+
+## Notes
+
+- traceroute uses **UDP** by default (not ICMP). Some routers respond differently to UDP vs ICMP, which is why you may see `* * *` for hops that would respond to ICMP.
+- Use `-n` to skip DNS resolution -- it makes traceroute significantly faster and avoids misleading reverse DNS names.
+- mtr's `--report` mode is essential for scripting and diagnostics. Without it, mtr runs interactively (full-screen ncurses display).
+- The timing in `--report` mode depends on the cycle count (`-c`). More cycles = better statistical accuracy but longer runtime. 10 cycles is a good balance for quick checks; 100 cycles for thorough analysis.
+- Hops showing `* * *` (no response) are not necessarily down -- many routers are configured to not respond to traceroute probes as a security measure. This is called "stealth" or "filtered" and is completely normal for intermediate hops.
