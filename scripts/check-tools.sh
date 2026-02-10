@@ -36,10 +36,11 @@ declare -A TOOLS=(
     [john]="brew install john"
     [nikto]="brew install nikto"
     [foremost]="brew install foremost"
+    [dig]="apt install dnsutils (Debian/Ubuntu) | brew install bind (macOS)"
 )
 
 # Ordered list for display
-TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto foremost)
+TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto foremost dig)
 
 installed=0
 total=${#TOOL_ORDER[@]}
@@ -54,6 +55,9 @@ get_version() {
             else
                 echo "installed"
             fi
+            ;;
+        dig)
+            dig -v 2>&1 | head -1
             ;;
         *)
             timeout 5 "$tool" --version 2>/dev/null | head -1 || echo "installed"

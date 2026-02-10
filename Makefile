@@ -1,6 +1,6 @@
 # Makefile — Common operations for networking-tools
 
-.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview
+.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -55,6 +55,9 @@ hping3: ## Run hping3 examples (usage: make hping3 TARGET=<ip>)
 
 foremost: ## Run foremost examples (usage: make foremost TARGET=<image>)
 	@bash scripts/foremost/examples.sh $(TARGET)
+
+dig: ## Run dig examples (usage: make dig TARGET=<domain>)
+	@bash scripts/dig/examples.sh $(TARGET)
 
 identify-ports: ## Identify what's behind open ports (default: localhost)
 	@bash scripts/nmap/identify-ports.sh $(or $(TARGET),localhost)
@@ -149,3 +152,12 @@ carve-filetypes: ## Carve specific file types from image (usage: make carve-file
 
 analyze-forensic: ## Analyze forensic disk image (usage: make analyze-forensic TARGET=<image>)
 	@bash scripts/foremost/analyze-forensic-image.sh $(TARGET)
+
+query-dns: ## Query DNS records (usage: make query-dns TARGET=<domain>)
+	@bash scripts/dig/query-dns-records.sh $(or $(TARGET),example.com)
+
+check-dns-prop: ## Check DNS propagation (usage: make check-dns-prop TARGET=<domain>)
+	@bash scripts/dig/check-dns-propagation.sh $(or $(TARGET),example.com)
+
+zone-transfer: ## Attempt DNS zone transfer (usage: make zone-transfer TARGET=<domain>)
+	@bash scripts/dig/attempt-zone-transfer.sh $(or $(TARGET),example.com)
