@@ -22,6 +22,9 @@ sqlmap-output/
 # Metasploit
 *.rc
 
+# Wordlists (too large for git)
+wordlists/*.txt
+
 # OS files
 .DS_Store
 Thumbs.db

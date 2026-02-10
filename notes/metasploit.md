@@ -164,11 +164,8 @@ msfconsole -q -x "use auxiliary/scanner/http/http_version; set RHOSTS localhost;
 # Directory scan against DVWA
 msfconsole -q -x "use auxiliary/scanner/http/dir_scanner; set RHOSTS localhost; set RPORT 8080; run; exit"
 
-# Scan the vulnerable target on port 8180
+# Scan VulnerableApp on port 8180
 msfconsole -q -x "use auxiliary/scanner/http/http_version; set RHOSTS localhost; set RPORT 8180; run; exit"
-
-# SSH version check on vulnerable target
-msfconsole -q -x "use auxiliary/scanner/ssh/ssh_version; set RHOSTS localhost; set RPORT 2222; run; exit"
 ```
 
 ## Notes

@@ -21,6 +21,7 @@ show_help() {
 require_cmd hashcat "brew install hashcat"
 
 HASHFILE="${1:-}"
+WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
 safety_banner
 
@@ -47,7 +48,7 @@ HFILE="${HASHFILE:-hashes.txt}"
 
 # 1. Dictionary attack on NTLM hashes
 info "1) Dictionary attack on NTLM hashes"
-echo "   hashcat -m 1000 -a 0 ${HFILE} /usr/share/wordlists/rockyou.txt"
+echo "   hashcat -m 1000 -a 0 ${HFILE} ${WORDLIST}"
 echo ""
 
 # 2. Dictionary + best64 rules

@@ -21,10 +21,12 @@ show_help() {
 require_cmd aircrack-ng "brew install aircrack-ng"
 
 CAPFILE="${1:-}"
+WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
 safety_banner
 
 info "=== WPA/WPA2 Handshake Cracking ==="
+info "This script works fully on macOS — cracking is offline CPU work."
 if [[ -n "$CAPFILE" ]]; then
     info "Capture file: ${CAPFILE}"
 else
@@ -47,7 +49,7 @@ echo ""
 
 # 1. Basic dictionary attack
 info "1) Basic dictionary attack"
-echo "   aircrack-ng -w /usr/share/wordlists/rockyou.txt capture.cap"
+echo "   aircrack-ng -w ${WORDLIST} capture.cap"
 echo ""
 
 # 2. Specify target BSSID

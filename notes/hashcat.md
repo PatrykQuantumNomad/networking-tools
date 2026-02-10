@@ -16,6 +16,17 @@ bash scripts/hashcat/examples.sh
 
 The script creates sample hash files for practice, then prints 10 example commands covering dictionary attacks, brute force, rule-based attacks, mask attacks, and WPA cracking.
 
+## Wordlist Setup
+
+Hashcat needs a wordlist for dictionary attacks. Download rockyou.txt (~14M passwords, ~140MB):
+
+```bash
+make wordlists
+# or: bash wordlists/download.sh
+```
+
+This places `rockyou.txt` in the project's `wordlists/` directory. The use-case scripts reference it automatically via `$WORDLIST`.
+
 ## Key Flags to Remember
 
 | Flag | What It Does |
@@ -68,7 +79,7 @@ Cracks Windows NTLM password hashes using GPU-accelerated attacks. NTLM is the d
 
 ```bash
 # Dictionary attack with rockyou
-hashcat -m 1000 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 1000 -a 0 hashes.txt wordlists/rockyou.txt
 
 # Dictionary + best64 rules (smart word mutations)
 hashcat -m 1000 -a 0 hashes.txt wordlist.txt -r /usr/share/hashcat/rules/best64.rule
@@ -144,25 +155,25 @@ Cracks common web application password hashes. Different web frameworks use diff
 
 ```bash
 # Crack MD5 hashes (mode 0) -- very fast
-hashcat -m 0 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 0 -a 0 hashes.txt wordlists/rockyou.txt
 
 # Crack SHA-1 hashes (mode 100)
-hashcat -m 100 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 100 -a 0 hashes.txt wordlists/rockyou.txt
 
 # Crack SHA-256 hashes (mode 1400)
-hashcat -m 1400 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 1400 -a 0 hashes.txt wordlists/rockyou.txt
 
 # Crack bcrypt hashes (mode 3200) -- expect slow speed
-hashcat -m 3200 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 3200 -a 0 hashes.txt wordlists/rockyou.txt
 
 # Crack WordPress/phpass hashes (mode 400)
-hashcat -m 400 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 400 -a 0 hashes.txt wordlists/rockyou.txt
 
 # Crack Django PBKDF2-SHA256 hashes (mode 10000)
-hashcat -m 10000 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 10000 -a 0 hashes.txt wordlists/rockyou.txt
 
 # Crack MySQL 4.1+ hashes (mode 300)
-hashcat -m 300 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 300 -a 0 hashes.txt wordlists/rockyou.txt
 
 # Identify unknown hash type
 hashcat --identify hash.txt
@@ -176,7 +187,7 @@ hashcat --identify hash.txt
 make lab-up
 
 # DVWA stores passwords as MD5 -- if you extract them via SQL injection:
-hashcat -m 0 -a 0 dvwa-hashes.txt /usr/share/wordlists/rockyou.txt
+hashcat -m 0 -a 0 dvwa-hashes.txt wordlists/rockyou.txt
 
 # Run a quick benchmark to see your GPU speed
 hashcat -b -m 0 -m 1000

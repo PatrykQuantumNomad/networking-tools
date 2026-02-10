@@ -99,7 +99,7 @@ if [[ -z "$HOSTFILE" ]]; then
     if [[ "$answer" =~ ^[Yy]$ ]]; then
         info "Running: nikto -h localhost -p 8080,3030,8888,8180 -Tuning 2 -maxtime 60s"
         echo ""
-        nikto -h localhost -p 8080,3030,8888,8180 -Tuning 2 -maxtime 60s
+        nikto -h localhost -p 8080,3030,8888,8180 -Tuning 2 -maxtime 60s || true
     fi
 else
     if [[ -f "$HOSTFILE" ]]; then
@@ -107,7 +107,7 @@ else
         if [[ "$answer" =~ ^[Yy]$ ]]; then
             info "Running: nikto -h ${HOSTFILE} -Tuning 2 -maxtime 120s"
             echo ""
-            nikto -h "$HOSTFILE" -Tuning 2 -maxtime 120s
+            nikto -h "$HOSTFILE" -Tuning 2 -maxtime 120s || true
         fi
     else
         error "File not found: ${HOSTFILE}"

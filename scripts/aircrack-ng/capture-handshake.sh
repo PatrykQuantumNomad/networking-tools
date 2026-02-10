@@ -10,6 +10,9 @@ show_help() {
     echo "  Shows the complete workflow from monitor mode to handshake capture."
     echo "  Requires a wireless interface. Default interface: wlan0"
     echo ""
+    echo "  LINUX ONLY: Requires airmon-ng/airodump-ng (not available on macOS)."
+    echo "  On macOS this script shows commands as reference only."
+    echo ""
     echo "Examples:"
     echo "  $(basename "$0")          # Use default interface wlan0"
     echo "  $(basename "$0") wlan1    # Use a specific interface"
@@ -18,7 +21,7 @@ show_help() {
 
 [[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
 
-require_cmd airmon-ng "brew install aircrack-ng"
+require_cmd aircrack-ng "brew install aircrack-ng"
 
 INTERFACE="${1:-wlan0}"
 
@@ -26,6 +29,13 @@ safety_banner
 
 info "=== WPA/WPA2 Handshake Capture ==="
 info "Interface: ${INTERFACE}"
+echo ""
+if ! check_cmd airmon-ng; then
+    warn "LINUX ONLY: Handshake capture requires airmon-ng/airodump-ng (not available on macOS)."
+    warn "On macOS, this script shows the commands as reference only."
+    info "To practice cracking on macOS, get a .cap file and run: make crack-wpa TARGET=file.cap"
+    echo ""
+fi
 warn "All commands require root/sudo. Only test networks you own."
 echo ""
 
@@ -96,15 +106,23 @@ echo ""
 # Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
-read -rp "List wireless interfaces with airmon-ng? (requires sudo) [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: sudo airmon-ng"
+if check_cmd airmon-ng; then
+    read -rp "List wireless interfaces with airmon-ng? (requires sudo) [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: sudo airmon-ng"
+        echo ""
+        sudo airmon-ng 2>&1 || true
+    fi
+else
+    warn "Handshake capture requires Linux with a monitor-mode WiFi adapter."
     echo ""
-    sudo airmon-ng 2>&1 || true
-    echo ""
-    info "Next steps:"
-    echo "   1. Pick your wireless interface from the list above"
-    echo "   2. Enable monitor mode: sudo airmon-ng start <interface>"
-    echo "   3. Scan for networks: sudo airodump-ng <interface>mon"
-    echo "   4. Target a network and capture the handshake"
+    read -rp "Run aircrack-ng benchmark to test cracking speed? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: aircrack-ng -S"
+        echo ""
+        aircrack-ng -S 2>&1 || true
+        echo ""
+        info "To practice cracking, get a sample .cap file and run:"
+        echo "   make crack-wpa TARGET=sample.cap"
+    fi
 fi

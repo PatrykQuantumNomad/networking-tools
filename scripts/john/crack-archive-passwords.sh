@@ -21,6 +21,7 @@ show_help() {
 require_cmd john "brew install john"
 
 ARCHIVE="${1:-}"
+WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
 safety_banner
 
@@ -55,7 +56,7 @@ echo ""
 
 # 2. Crack extracted ZIP hash
 info "2) Crack the extracted ZIP hash"
-echo "   john --wordlist=/usr/share/wordlists/rockyou.txt zip.hash"
+echo "   john --wordlist=${WORDLIST} zip.hash"
 echo ""
 
 # 3. Extract hash from RAR file

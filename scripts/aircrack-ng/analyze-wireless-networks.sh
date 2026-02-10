@@ -10,6 +10,9 @@ show_help() {
     echo "  signal strength, connected clients, and hidden SSIDs. Requires a"
     echo "  wireless interface in monitor mode. Default interface: wlan0"
     echo ""
+    echo "  LINUX ONLY: Requires airmon-ng/airodump-ng (not available on macOS)."
+    echo "  On macOS this script shows commands as reference only."
+    echo ""
     echo "Examples:"
     echo "  $(basename "$0")          # Use default interface wlan0"
     echo "  $(basename "$0") wlan1    # Use a specific interface"
@@ -18,7 +21,7 @@ show_help() {
 
 [[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
 
-require_cmd airmon-ng "brew install aircrack-ng"
+require_cmd aircrack-ng "brew install aircrack-ng"
 
 INTERFACE="${1:-wlan0}"
 
@@ -26,6 +29,13 @@ safety_banner
 
 info "=== Wireless Network Analysis ==="
 info "Interface: ${INTERFACE}"
+echo ""
+if ! check_cmd airmon-ng; then
+    warn "LINUX ONLY: All commands below require airmon-ng/airodump-ng (not available on macOS)."
+    warn "On macOS, this script shows the commands as reference only."
+    info "For live WiFi scanning, use a Linux VM (Kali) with a USB WiFi adapter."
+    echo ""
+fi
 warn "All commands require root/sudo. Monitor mode captures ALL nearby traffic."
 echo ""
 
@@ -96,20 +106,23 @@ echo ""
 # Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
-read -rp "List wireless interfaces with airmon-ng? (requires sudo) [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: sudo airmon-ng"
+if check_cmd airmon-ng; then
+    read -rp "List wireless interfaces with airmon-ng? (requires sudo) [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: sudo airmon-ng"
+        echo ""
+        sudo airmon-ng 2>&1 || true
+    fi
+else
+    warn "Monitor mode tools (airmon-ng, airodump-ng) require Linux."
     echo ""
-    sudo airmon-ng 2>&1 || true
-    echo ""
-    info "Interface capabilities:"
-    echo "   PHY  = Physical interface name"
-    echo "   Interface = Logical interface name"
-    echo "   Driver = Wireless driver in use"
-    echo "   Chipset = Hardware chipset (determines monitor mode support)"
-    echo ""
-    info "Next steps:"
-    echo "   1. Enable monitor mode: sudo airmon-ng start <interface>"
-    echo "   2. Start survey: sudo airodump-ng <interface>mon"
-    echo "   3. Press Ctrl+C to stop and review results"
+    read -rp "Show macOS WiFi interface info? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: system_profiler SPAirPortDataType"
+        echo ""
+        system_profiler SPAirPortDataType 2>&1 || true
+        echo ""
+        info "On macOS, the built-in WiFi card does not support monitor mode."
+        info "Use a Linux VM (Kali) with a USB WiFi adapter for full aircrack-ng features."
+    fi
 fi

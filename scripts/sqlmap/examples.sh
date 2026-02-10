@@ -80,6 +80,9 @@ info "10) Use tamper scripts to evade filters"
 echo "    sqlmap -u '${TARGET}?id=1' --tamper=space2comment,between"
 echo ""
 
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
+
 warn "Use --batch for non-interactive mode (accepts defaults)"
 warn "Use --output-dir=./sqlmap-output to save results"
 info "Practice target: make lab-up, then test http://localhost:8080"

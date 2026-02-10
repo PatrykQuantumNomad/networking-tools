@@ -106,7 +106,7 @@ skipfish -o webgoat_scan/ -L http://localhost:8888
 
 # Scan all lab targets quickly
 for t in 8080 3030 8888; do
-  skipfish -o "output_${t}/" -d 1 -c 100 "http://localhost:${t}"
+  skipfish -o "output_${t}/" -d 2 -c 100 "http://localhost:${t}"
 done
 
 # View results

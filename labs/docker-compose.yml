@@ -15,7 +15,7 @@ services:
     restart: unless-stopped
 
   # Juice Shop — OWASP modern vulnerable app
-  # URL: http://localhost:3000
+  # URL: http://localhost:3030
   juice-shop:
     image: bkimminich/juice-shop
     ports:
@@ -31,12 +31,11 @@ services:
       - "9090:9090"
     restart: unless-stopped
 
-  # Metasploitable-style vulnerable target
-  # SSH: localhost:2222
-  # HTTP: localhost:8180
-  vulnerable-target:
-    image: tleemcjr/metasploitable2
+  # OWASP VulnerableApp — deliberately vulnerable Java web app
+  # Covers: command injection, SQLi, XSS, XXE, SSRF, path traversal, JWT flaws
+  # URL: http://localhost:8180/VulnerableApp
+  vulnerable-app:
+    image: sasanlabs/owasp-vulnerableapp:latest
     ports:
-      - "2222:22"
-      - "8180:80"
+      - "8180:9090"
     restart: unless-stopped

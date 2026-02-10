@@ -86,18 +86,18 @@ echo ""
 
 # 10. Scan multiple targets quickly
 info "10) Scan multiple lab targets quickly"
-echo "    for t in 8080 3030 8888; do skipfish -o \"output_\${t}/\" -d 1 -c 100 \"http://localhost:\${t}\"; done"
+echo "    for t in 8080 3030 8888; do skipfish -o \"output_\${t}/\" -d 2 -c 100 \"http://localhost:\${t}\"; done"
 echo ""
 
 # Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
-read -rp "Run a very quick scan (-d 1 -c 100) against ${TARGET}? [y/N] " answer
+read -rp "Run a very quick scan (-d 2 -c 100) against ${TARGET}? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     OUTDIR="/tmp/skipfish_quick_$(date +%s)"
-    info "Running: skipfish -o ${OUTDIR} -d 1 -c 100 ${TARGET}"
+    info "Running: skipfish -o ${OUTDIR} -d 2 -c 100 ${TARGET}"
     echo ""
-    skipfish -o "$OUTDIR" -d 1 -c 100 "$TARGET"
+    skipfish -o "$OUTDIR" -d 2 -c 100 "$TARGET"
     echo ""
     info "Results saved to: ${OUTDIR}"
 fi

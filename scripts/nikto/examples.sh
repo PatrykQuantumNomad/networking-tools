@@ -86,5 +86,5 @@ echo ""
 read -rp "Run a basic scan against ${TARGET} now? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     info "Running: nikto -h ${TARGET}"
-    nikto -h "$TARGET"
+    nikto -h "$TARGET" || true
 fi

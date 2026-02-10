@@ -1,10 +1,13 @@
 # Makefile — Common operations for networking-tools
 
-.PHONY: check lab-up lab-down lab-status help
+.PHONY: check lab-up lab-down lab-status help wordlists
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+wordlists: ## Download wordlists (rockyou.txt) for password cracking
+	@bash wordlists/download.sh
 
 check: ## Check which pentesting tools are installed
 	@bash scripts/check-tools.sh
@@ -14,9 +17,9 @@ lab-up: ## Start vulnerable lab targets (Docker)
 	@echo ""
 	@echo "Lab targets:"
 	@echo "  DVWA:          http://localhost:8080  (admin/password)"
-	@echo "  Juice Shop:    http://localhost:3000"
+	@echo "  Juice Shop:    http://localhost:3030"
 	@echo "  WebGoat:       http://localhost:8888/WebGoat"
-	@echo "  Vuln Target:   http://localhost:8180  (SSH: localhost:2222)"
+	@echo "  VulnerableApp: http://localhost:8180/VulnerableApp"
 
 lab-down: ## Stop all lab targets
 	docker compose -f labs/docker-compose.yml down
@@ -39,6 +42,9 @@ nikto: ## Run nikto examples (usage: make nikto TARGET=<url>)
 
 hping3: ## Run hping3 examples (usage: make hping3 TARGET=<ip>)
 	@bash scripts/hping3/examples.sh $(TARGET)
+
+foremost: ## Run foremost examples (usage: make foremost TARGET=<image>)
+	@bash scripts/foremost/examples.sh $(TARGET)
 
 identify-ports: ## Identify what's behind open ports (default: localhost)
 	@bash scripts/nmap/identify-ports.sh $(or $(TARGET),localhost)
@@ -124,3 +130,12 @@ crack-wpa: ## Crack WPA handshake (usage: make crack-wpa TARGET=<capfile>)
 
 analyze-wifi: ## Survey wireless networks (usage: make analyze-wifi TARGET=<interface>)
 	@bash scripts/aircrack-ng/analyze-wireless-networks.sh $(or $(TARGET),wlan0)
+
+recover-files: ## Recover deleted files from disk image (usage: make recover-files TARGET=<image>)
+	@bash scripts/foremost/recover-deleted-files.sh $(TARGET)
+
+carve-filetypes: ## Carve specific file types from image (usage: make carve-filetypes TARGET=<image>)
+	@bash scripts/foremost/carve-specific-filetypes.sh $(TARGET)
+
+analyze-forensic: ## Analyze forensic disk image (usage: make analyze-forensic TARGET=<image>)
+	@bash scripts/foremost/analyze-forensic-image.sh $(TARGET)

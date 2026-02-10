@@ -21,6 +21,7 @@ show_help() {
 require_cmd hashcat "brew install hashcat"
 
 HASHFILE="${1:-}"
+WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
 safety_banner
 
@@ -52,47 +53,47 @@ HFILE="${HASHFILE:-hashes.txt}"
 
 # 1. Crack MD5 hashes
 info "1) Crack MD5 hashes (mode 0)"
-echo "   hashcat -m 0 -a 0 ${HFILE} /usr/share/wordlists/rockyou.txt"
+echo "   hashcat -m 0 -a 0 ${HFILE} ${WORDLIST}"
 echo ""
 
 # 2. Crack SHA-1 hashes
 info "2) Crack SHA-1 hashes (mode 100)"
-echo "   hashcat -m 100 -a 0 ${HFILE} /usr/share/wordlists/rockyou.txt"
+echo "   hashcat -m 100 -a 0 ${HFILE} ${WORDLIST}"
 echo ""
 
 # 3. Crack SHA-256 hashes
 info "3) Crack SHA-256 hashes (mode 1400)"
-echo "   hashcat -m 1400 -a 0 ${HFILE} /usr/share/wordlists/rockyou.txt"
+echo "   hashcat -m 1400 -a 0 ${HFILE} ${WORDLIST}"
 echo ""
 
 # 4. Crack SHA-512 hashes
 info "4) Crack SHA-512 hashes (mode 1700)"
-echo "   hashcat -m 1700 -a 0 ${HFILE} /usr/share/wordlists/rockyou.txt"
+echo "   hashcat -m 1700 -a 0 ${HFILE} ${WORDLIST}"
 echo ""
 
 # 5. Crack bcrypt hashes (slow!)
 info "5) Crack bcrypt hashes (mode 3200) — expect slow speed"
-echo "   hashcat -m 3200 -a 0 ${HFILE} /usr/share/wordlists/rockyou.txt"
+echo "   hashcat -m 3200 -a 0 ${HFILE} ${WORDLIST}"
 echo ""
 
 # 6. Crack WordPress hashes (phpass)
 info "6) Crack WordPress/phpass hashes (mode 400)"
-echo "   hashcat -m 400 -a 0 ${HFILE} /usr/share/wordlists/rockyou.txt"
+echo "   hashcat -m 400 -a 0 ${HFILE} ${WORDLIST}"
 echo ""
 
 # 7. Crack Django SHA-256 hashes
 info "7) Crack Django PBKDF2-SHA256 hashes (mode 10000)"
-echo "   hashcat -m 10000 -a 0 ${HFILE} /usr/share/wordlists/rockyou.txt"
+echo "   hashcat -m 10000 -a 0 ${HFILE} ${WORDLIST}"
 echo ""
 
 # 8. Crack MySQL 4.1+ hashes
 info "8) Crack MySQL 4.1+ hashes (mode 300)"
-echo "   hashcat -m 300 -a 0 ${HFILE} /usr/share/wordlists/rockyou.txt"
+echo "   hashcat -m 300 -a 0 ${HFILE} ${WORDLIST}"
 echo ""
 
 # 9. Crack MD5 with salt (md5($salt.$pass))
 info "9) Crack salted MD5 — md5(salt.pass) format (mode 20)"
-echo "   hashcat -m 20 -a 0 ${HFILE} /usr/share/wordlists/rockyou.txt"
+echo "   hashcat -m 20 -a 0 ${HFILE} ${WORDLIST}"
 echo ""
 
 # 10. Identify hash type by trying common modes

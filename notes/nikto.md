@@ -15,7 +15,7 @@ make nikto TARGET=<target>
 
 # Examples with lab targets
 bash scripts/nikto/examples.sh http://localhost:8080
-bash scripts/nikto/examples.sh http://localhost:3000
+bash scripts/nikto/examples.sh http://localhost:3030
 ```
 
 The script prints 10 example commands with explanations, then offers to run a basic scan interactively.
@@ -170,7 +170,7 @@ nikto -h http://localhost:8080 -id admin:password
 nikto -h localhost -p 8080,3000,8888,8180 -Tuning 2 -maxtime 60s
 
 # Scan Juice Shop
-nikto -h http://localhost:3000
+nikto -h http://localhost:3030
 ```
 
 ## Notes

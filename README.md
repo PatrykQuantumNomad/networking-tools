@@ -1,6 +1,6 @@
 # Networking Tools — Pentesting Learning Lab
 
-A hands-on learning project for penetration testing and ethical hacking fundamentals using 10 open-source tools.
+A hands-on learning project for penetration testing and ethical hacking fundamentals using 11 open-source tools.
 
 ## Tools Covered
 
@@ -9,13 +9,14 @@ A hands-on learning project for penetration testing and ethical hacking fundamen
 | **Nmap** | Network scanning & host discovery | `scripts/nmap/examples.sh` |
 | **TShark** | Packet capture & analysis (Wireshark CLI) | `scripts/tshark/examples.sh` |
 | **Metasploit** | Exploitation framework | `scripts/metasploit/examples.sh` |
-| **Aircrack-ng** | WiFi security auditing | `scripts/aircrack-ng/examples.sh` |
+| **Aircrack-ng** | WiFi security auditing (cracking only on macOS — see below) | `scripts/aircrack-ng/examples.sh` |
 | **Hashcat** | GPU password cracking | `scripts/hashcat/examples.sh` |
 | **Skipfish** | Web app security scanner | `scripts/skipfish/examples.sh` |
 | **SQLMap** | SQL injection automation | `scripts/sqlmap/examples.sh` |
 | **hping3** | Packet crafting & network probing | `scripts/hping3/examples.sh` |
 | **John the Ripper** | Password cracking | `scripts/john/examples.sh` |
 | **Nikto** | Web server vulnerability scanning | `scripts/nikto/examples.sh` |
+| **Foremost** | File carving & recovery | `scripts/foremost/examples.sh` |
 
 ## Quick Start
 
@@ -24,7 +25,10 @@ A hands-on learning project for penetration testing and ethical hacking fundamen
 make check
 
 # 2. Install missing tools (macOS)
-brew install nmap wireshark aircrack-ng hashcat sqlmap draftbrew/tap/hping nikto john
+brew install nmap wireshark aircrack-ng hashcat sqlmap draftbrew/tap/hping nikto john foremost
+
+# Skipfish is not in Homebrew — install via MacPorts (https://www.macports.org)
+sudo port install skipfish
 
 # 3. Start vulnerable lab targets for practice
 make lab-up
@@ -43,13 +47,31 @@ The `labs/` directory contains a Docker Compose setup with intentionally vulnera
 | DVWA | http://localhost:8080 | Classic vulnerable web app (login: admin/password) |
 | Juice Shop | http://localhost:3030 | Modern OWASP vulnerable app |
 | WebGoat | http://localhost:8888/WebGoat | OWASP teaching platform |
-| Vulnerable Target | http://localhost:8180 | Metasploitable-style target |
+| VulnerableApp | http://localhost:8180/VulnerableApp | OWASP vulnerable Java web app |
 
 ```bash
 make lab-up       # Start all targets
 make lab-down     # Stop all targets
 make lab-status   # Check what's running
 ```
+
+## macOS Limitations
+
+**Aircrack-ng**: The Homebrew package only includes the cracking tools. Monitor mode tools (`airmon-ng`, `airodump-ng`, `aireplay-ng`) are **Linux-only** and not available on macOS.
+
+| What | macOS | Linux |
+|------|-------|-------|
+| Crack .cap files (`aircrack-ng -w`) | Yes | Yes |
+| Benchmark (`aircrack-ng -S`) | Yes | Yes |
+| Convert captures (`aircrack-ng -J`) | Yes | Yes |
+| Survey networks (`airodump-ng`) | No | Yes |
+| Capture handshakes (`airodump-ng`) | No | Yes |
+| Deauth clients (`aireplay-ng`) | No | Yes |
+| Monitor mode (`airmon-ng`) | No | Yes |
+
+For full WiFi testing, use a Linux VM (Kali) with a USB WiFi adapter.
+
+**Skipfish**: Not available in Homebrew. Install via [MacPorts](https://www.macports.org): `sudo port install skipfish`
 
 ## Legal Disclaimer
 

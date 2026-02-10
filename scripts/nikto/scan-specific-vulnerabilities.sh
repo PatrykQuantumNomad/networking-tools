@@ -105,13 +105,13 @@ if [[ "$TARGET" == *"localhost"* || "$TARGET" == *"127.0.0.1"* ]]; then
     if [[ "$answer" =~ ^[Yy]$ ]]; then
         info "Running: nikto -h ${TARGET} -Tuning 2"
         echo ""
-        nikto -h "$TARGET" -Tuning 2
+        nikto -h "$TARGET" -Tuning 2 || true
     fi
 else
     read -rp "Run a quick Tuning 2 scan (interesting files) against ${TARGET}? [y/N] " answer
     if [[ "$answer" =~ ^[Yy]$ ]]; then
         info "Running: nikto -h ${TARGET} -Tuning 2"
         echo ""
-        nikto -h "$TARGET" -Tuning 2
+        nikto -h "$TARGET" -Tuning 2 || true
     fi
 fi

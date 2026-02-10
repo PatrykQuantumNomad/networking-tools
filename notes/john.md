@@ -16,6 +16,17 @@ bash scripts/john/examples.sh
 
 The script creates sample hash files for practice, then prints 10 example commands covering dictionary attacks, hash extraction, format specification, and session management.
 
+## Wordlist Setup
+
+John needs a wordlist for dictionary attacks. Download rockyou.txt (~14M passwords, ~140MB):
+
+```bash
+make wordlists
+# or: bash wordlists/download.sh
+```
+
+This places `rockyou.txt` in the project's `wordlists/` directory. The use-case scripts reference it automatically via `$WORDLIST`.
+
 ## Key Flags to Remember
 
 | Flag | What It Does |
@@ -82,7 +93,7 @@ sudo unshadow /etc/passwd /etc/shadow > unshadowed.txt
 john unshadowed.txt
 
 # Crack with a wordlist
-john --wordlist=/usr/share/wordlists/rockyou.txt unshadowed.txt
+john --wordlist=wordlists/rockyou.txt unshadowed.txt
 
 # Crack with wordlist + rules for word mutations
 john --wordlist=wordlist.txt --rules=best64 unshadowed.txt
@@ -115,7 +126,7 @@ Cracks password-protected ZIP, RAR, 7z, PDF, SSH keys, KeePass databases, and Of
 ```bash
 # ZIP: extract hash then crack
 zip2john protected.zip > zip.hash
-john --wordlist=/usr/share/wordlists/rockyou.txt zip.hash
+john --wordlist=wordlists/rockyou.txt zip.hash
 
 # RAR: extract hash then crack
 rar2john protected.rar > rar.hash
@@ -201,7 +212,7 @@ make lab-up
 echo "admin:5f4dcc3b5aa765d61d8327deb882cf99" > dvwa-hashes.txt
 
 # 2. Crack with John
-john --format=raw-md5 --wordlist=/usr/share/wordlists/rockyou.txt dvwa-hashes.txt
+john --format=raw-md5 --wordlist=wordlists/rockyou.txt dvwa-hashes.txt
 
 # 3. Show results
 john --show --format=raw-md5 dvwa-hashes.txt

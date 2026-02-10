@@ -96,13 +96,13 @@ if [[ "$TARGET" == *"localhost:8080"* || "$TARGET" == *"127.0.0.1:8080"* ]]; the
     if [[ "$answer" =~ ^[Yy]$ ]]; then
         info "Running: nikto -h ${TARGET} -id admin:password -Tuning 2 -maxtime 60s"
         echo ""
-        nikto -h "$TARGET" -id admin:password -Tuning 2 -maxtime 60s
+        nikto -h "$TARGET" -id admin:password -Tuning 2 -maxtime 60s || true
     fi
 else
     read -rp "Run a quick authenticated scan against ${TARGET}? [y/N] " answer
     if [[ "$answer" =~ ^[Yy]$ ]]; then
         info "Running: nikto -h ${TARGET} -id admin:password -Tuning 2 -maxtime 60s"
         echo ""
-        nikto -h "$TARGET" -id admin:password -Tuning 2 -maxtime 60s
+        nikto -h "$TARGET" -id admin:password -Tuning 2 -maxtime 60s || true
     fi
 fi

@@ -18,6 +18,7 @@ show_help() {
 [[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
 
 require_cmd john "brew install john"
+WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
 safety_banner
 
@@ -51,7 +52,7 @@ echo ""
 
 # 3. Crack with a wordlist
 info "3) Crack with a wordlist"
-echo "   john --wordlist=/usr/share/wordlists/rockyou.txt unshadowed.txt"
+echo "   john --wordlist=${WORDLIST} unshadowed.txt"
 echo ""
 
 # 4. Crack with wordlist + rules

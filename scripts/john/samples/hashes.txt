@@ -1,0 +1,2 @@
+user1:$1$abc$5MkftMgJsJpJx3g1tSAtD1
+user2:$1$xyz$RhST5gdTixBcEXjcYbXW71

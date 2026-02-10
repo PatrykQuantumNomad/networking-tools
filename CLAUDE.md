@@ -10,7 +10,7 @@ A pentesting learning lab with bash scripts demonstrating 10 open-source securit
 
 ```bash
 make check          # Verify which of the 10 tools are installed
-make lab-up         # Start Docker vulnerable targets (DVWA, Juice Shop, WebGoat, Metasploitable)
+make lab-up         # Start Docker vulnerable targets (DVWA, Juice Shop, WebGoat, VulnerableApp)
 make lab-down       # Stop lab targets
 make lab-status     # Show running lab containers
 make help           # List all Makefile targets
@@ -62,7 +62,7 @@ Every `examples.sh` follows the same structure:
 | DVWA | 8080 | admin / password |
 | Juice Shop | 3000 | (register) |
 | WebGoat | 8888 | (register) |
-| Vulnerable Target | 8180 (HTTP), 2222 (SSH) | — |
+| VulnerableApp | 8180 | — |
 
 ## Adding a New Tool
 

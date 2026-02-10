@@ -59,6 +59,14 @@ Find the right script by what you're trying to do. All commands support `--help`
 | Test firewall rules with crafted packets | `make test-firewall TARGET=<ip>` | hping3 |
 | Detect firewall presence | `make detect-firewall TARGET=<ip>` | hping3 |
 
+## File Carving & Forensics
+
+| I want to... | Command | Tool |
+| -------------- | --------- | ------ |
+| Recover deleted files from a disk image | `make recover-files TARGET=<image>` | foremost |
+| Extract specific file types (jpg, pdf, exe) | `make carve-filetypes TARGET=<image>` | foremost |
+| Analyze a forensic disk image | `make analyze-forensic TARGET=<image>` | foremost |
+
 ## Exploitation
 
 | I want to... | Command | Tool |

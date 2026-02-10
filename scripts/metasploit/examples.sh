@@ -92,5 +92,8 @@ info "10) Run a resource script for automation"
 echo "    msfconsole -r my_script.rc"
 echo ""
 
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
+
 warn "Metasploit is interactive — run 'msfconsole' to start."
 warn "Practice against the lab targets (make lab-up) — NEVER against unauthorized systems."

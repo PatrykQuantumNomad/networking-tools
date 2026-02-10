@@ -35,10 +35,11 @@ declare -A TOOLS=(
     [hping3]="brew install draftbrew/tap/hping"
     [john]="brew install john"
     [nikto]="brew install nikto"
+    [foremost]="brew install foremost"
 )
 
 # Ordered list for display
-TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto)
+TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto foremost)
 
 installed=0
 total=${#TOOL_ORDER[@]}
@@ -77,6 +78,6 @@ echo -e "${CYAN}$installed/$total tools installed${NC}"
 if [[ $installed -lt $total ]]; then
     echo ""
     info "Install all missing tools on macOS with:"
-    echo "  brew install nmap wireshark aircrack-ng hashcat skipfish sqlmap hping nikto john"
+    echo "  brew install nmap wireshark aircrack-ng hashcat skipfish sqlmap hping nikto john foremost"
     echo "  # Metasploit: see install link above"
 fi
