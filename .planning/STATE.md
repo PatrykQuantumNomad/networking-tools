@@ -12,16 +12,16 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 Phase: 4 of 7 (Content Migration and Tool Pages) -- COMPLETE
 Plan: 3 of 3 in current phase
 Status: Phase complete -- all 3 plans executed
-Last activity: 2026-02-10 -- Completed 04-02 new tool pages and diagnostic docs
+Last activity: 2026-02-10 -- Completed 04-01 content migration (11 tool pages + lab walkthrough)
 
 Progress: [############........] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 3min
-- Total execution time: 0.48 hours
+- Total plans completed: 11
+- Average duration: 4min
+- Total execution time: 0.57 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [############........] 60%
 | 01-foundations | 3 | 7min | 2min |
 | 02-core-networking-tools | 3 | 11min | 4min |
 | 03-diagnostic-scripts | 2 | 7min | 4min |
-| 04-content-migration-and-tool-pages | 2 | 6min | 3min |
+| 04-content-migration-and-tool-pages | 3 | 17min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (4min), 03-01 (3min), 03-02 (4min), 04-03 (2min), 04-02 (4min)
+- Last 5 plans: 03-01 (3min), 03-02 (4min), 04-03 (2min), 04-02 (4min), 04-01 (11min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -73,6 +73,8 @@ Recent decisions affecting current work:
 - [04-03]: Listed 14 tools (matching check-tools.sh TOOL_ORDER) instead of 10
 - [04-02]: Tool pages assembled directly from scripts (dig, curl, netcat have no notes/*.md files)
 - [04-02]: Diagnostic pages use table-based severity explanation format (check/severity/meaning columns)
+- [04-01]: Sidebar ordering groups tools by function: network(1-3), web(7-9), exploit(10), cracking(11-12), wireless(13), forensics(14)
+- [04-01]: Metasploit console commands use text language tag instead of bash to avoid false syntax highlighting
 
 ### Pending Todos
 
@@ -85,5 +87,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 04-02-PLAN.md -- Phase 4 complete, ready for Phase 5
+Stopped at: Completed 04-01-PLAN.md -- All Phase 4 plans complete, ready for Phase 5
 Resume file: None
