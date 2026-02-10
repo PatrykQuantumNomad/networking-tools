@@ -37,10 +37,11 @@ declare -A TOOLS=(
     [nikto]="brew install nikto"
     [foremost]="brew install foremost"
     [dig]="apt install dnsutils (Debian/Ubuntu) | brew install bind (macOS)"
+    [curl]="apt install curl (Debian/Ubuntu) | brew install curl (macOS)"
 )
 
 # Ordered list for display
-TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto foremost dig)
+TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto foremost dig curl)
 
 installed=0
 total=${#TOOL_ORDER[@]}

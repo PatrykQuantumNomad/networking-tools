@@ -1,6 +1,6 @@
 # Makefile — Common operations for networking-tools
 
-.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer
+.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -58,6 +58,9 @@ foremost: ## Run foremost examples (usage: make foremost TARGET=<image>)
 
 dig: ## Run dig examples (usage: make dig TARGET=<domain>)
 	@bash scripts/dig/examples.sh $(TARGET)
+
+curl: ## Run curl examples (usage: make curl TARGET=<url>)
+	@bash scripts/curl/examples.sh $(TARGET)
 
 identify-ports: ## Identify what's behind open ports (default: localhost)
 	@bash scripts/nmap/identify-ports.sh $(or $(TARGET),localhost)
@@ -161,3 +164,12 @@ check-dns-prop: ## Check DNS propagation (usage: make check-dns-prop TARGET=<dom
 
 zone-transfer: ## Attempt DNS zone transfer (usage: make zone-transfer TARGET=<domain>)
 	@bash scripts/dig/attempt-zone-transfer.sh $(or $(TARGET),example.com)
+
+test-http: ## Test HTTP endpoints (usage: make test-http TARGET=<url>)
+	@bash scripts/curl/test-http-endpoints.sh $(or $(TARGET),https://example.com)
+
+check-ssl: ## Check SSL certificate (usage: make check-ssl TARGET=<domain>)
+	@bash scripts/curl/check-ssl-certificate.sh $(or $(TARGET),example.com)
+
+debug-http: ## Debug HTTP response timing (usage: make debug-http TARGET=<url>)
+	@bash scripts/curl/debug-http-response.sh $(or $(TARGET),https://example.com)
