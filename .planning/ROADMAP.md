@@ -34,12 +34,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Pushing to main triggers the GitHub Actions workflow and the site deploys to `https://<user>.github.io/networking-tools/` with working CSS, navigation, and search
   4. The `report_pass`, `report_fail`, `report_warn`, `report_skip`, `report_section`, and `run_check` functions exist in common.sh and produce colored output when called from a test script
   5. The Makefile uses a consistent namespacing convention for new targets (site-dev, site-build, site-preview) and `make help` groups targets by category
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: common.sh diagnostic extensions (report_pass/fail/warn/skip, report_section, run_check)
-- [ ] 01-02: Astro Starlight site scaffold with correct base path, landing page, sidebar, and Makefile targets
-- [ ] 01-03: GitHub Actions workflow deploying to GitHub Pages via withastro/action
+- [ ] 01-01-PLAN.md — common.sh diagnostic extensions (report_pass/fail/warn/skip, report_section, run_check)
+- [ ] 01-02-PLAN.md — Astro Starlight site scaffold with correct base path, landing page, sidebar, and Makefile targets
+- [ ] 01-03-PLAN.md — GitHub Actions workflow deploying to GitHub Pages via withastro/action
 
 ---
 
