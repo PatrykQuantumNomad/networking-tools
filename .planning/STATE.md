@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 3 of 7 (Diagnostic Scripts)
-Plan: 0 of 3 in current phase
-Status: Ready for planning
-Last activity: 2026-02-10 -- Phase 2 verified and complete
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-10 -- Completed 03-01 DNS diagnostic script
 
-Progress: [######..............] 30%
+Progress: [#######.............] 35%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 3min
-- Total execution time: 0.3 hours
+- Total execution time: 0.35 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [######..............] 30%
 |-------|-------|-------|----------|
 | 01-foundations | 3 | 7min | 2min |
 | 02-core-networking-tools | 3 | 11min | 4min |
+| 03-diagnostic-scripts | 1 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (1min), 02-01 (4min), 02-02 (3min), 02-03 (4min)
+- Last 5 plans: 02-01 (4min), 02-02 (3min), 02-03 (4min), 03-01 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -61,6 +62,9 @@ Recent decisions affecting current work:
 - [02-03]: detect_nc_variant() uses exclusion-based detection -- Apple fork does not self-identify, defaults to openbsd
 - [02-03]: nc -h exits non-zero on macOS/OpenBSD; added || true guard in get_version()
 - [02-03]: Used nc-listener/nc-transfer Makefile target names to avoid collision with metasploit setup-listener
+- [03-01]: Counter wrapper functions (count_pass/fail/warn) for clean pass/fail/warn tallying in diagnostic scripts
+- [03-01]: WARN for missing AAAA/MX/TXT/PTR records, FAIL for missing A/NS/SOA -- severity-appropriate thresholds
+- [03-01]: Pattern B established: preamble, require_cmd, default target, info header, report_section sections, count wrappers, summary
 
 ### Pending Todos
 
@@ -73,5 +77,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Phase 2 verified complete -- ready for Phase 3 planning
+Stopped at: Completed 03-01-PLAN.md -- ready for 03-02 connectivity diagnostic
 Resume file: None
