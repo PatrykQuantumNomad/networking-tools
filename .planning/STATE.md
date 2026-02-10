@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 3 - Diagnostic Scripts
+**Current focus:** Phase 4 - Content Migration and Tool Pages
 
 ## Current Position
 
-Phase: 3 of 7 (Diagnostic Scripts) -- COMPLETE
-Plan: 2 of 2 in current phase
-Status: Phase complete -- ready for Phase 4
-Last activity: 2026-02-10 -- Completed 03-02 connectivity diagnostic script
+Phase: 4 of 7 (Content Migration and Tool Pages)
+Plan: 3 of 3 in current phase
+Status: Completed 04-03 getting-started guide
+Last activity: 2026-02-10 -- Completed 04-03 getting-started guide
 
-Progress: [########............] 40%
+Progress: [###########.........] 55%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 3min
-- Total execution time: 0.38 hours
+- Total execution time: 0.41 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [########............] 40%
 | 01-foundations | 3 | 7min | 2min |
 | 02-core-networking-tools | 3 | 11min | 4min |
 | 03-diagnostic-scripts | 2 | 7min | 4min |
+| 04-content-migration-and-tool-pages | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (4min), 02-02 (3min), 02-03 (4min), 03-01 (3min), 03-02 (4min)
+- Last 5 plans: 02-02 (3min), 02-03 (4min), 03-01 (3min), 03-02 (4min), 04-03 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -68,6 +69,8 @@ Recent decisions affecting current work:
 - [03-02]: macOS-first for get_local_ip (ifconfig on Darwin, ip on Linux) -- iproute2mac ip behaves differently
 - [03-02]: WARN not FAIL for blocked ICMP -- many hosts block ping; indicates filtering, not broken connectivity
 - [03-02]: Cross-platform helpers pattern: OS_TYPE=$(uname -s) with Darwin/Linux branching + || true guards for pipefail safety
+- [04-03]: Used port 3030 for Juice Shop (matching docker-compose.yml) instead of plan's 3000
+- [04-03]: Listed 14 tools (matching check-tools.sh TOOL_ORDER) instead of 10
 
 ### Pending Todos
 
@@ -80,5 +83,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 03-02-PLAN.md -- Phase 3 complete, ready for Phase 4
+Stopped at: Completed 04-03-PLAN.md -- getting-started guide
 Resume file: None
