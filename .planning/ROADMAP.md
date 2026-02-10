@@ -117,11 +117,11 @@ Plans:
   3. On macOS, mtr-dependent scripts detect the sudo requirement and either prompt for elevation or warn clearly rather than failing silently
   4. Running `make diagnose-performance TARGET=example.com` produces a structured latency report with per-hop statistics
   5. The traceroute/mtr tool page exists on the Astro site
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: traceroute/mtr examples.sh + 3 use-case scripts with sudo detection
-- [ ] 05-02: Performance diagnostic script (scripts/diagnostics/performance.sh) + site page
+- [ ] 05-01-PLAN.md — traceroute/mtr examples.sh + 3 use-case scripts + check-tools.sh/Makefile/USECASES.md integration
+- [ ] 05-02-PLAN.md — Performance diagnostic script (scripts/diagnostics/performance.sh) + site pages (traceroute.md, performance.md)
 
 ---
 
