@@ -1,0 +1,684 @@
+# Phase 4: Content Migration and Tool Pages - Research
+
+**Researched:** 2026-02-10
+**Domain:** Astro Starlight content migration, Markdown frontmatter, documentation page structure
+**Confidence:** HIGH
+
+## Summary
+
+Phase 4 is a pure content phase -- no new infrastructure, no new code, no configuration changes. The Astro Starlight site was scaffolded in Phase 1 with the correct base path, sidebar autogeneration, and build pipeline. Phase 2 created dig/curl/netcat scripts. Phase 3 created DNS and connectivity diagnostic scripts. Phase 4 populates the site with documentation pages by: (1) migrating 11 existing tool notes from `notes/*.md` to `site/src/content/docs/tools/` with Starlight frontmatter, (2) creating 3 new tool pages for dig, curl, and netcat (which have no `notes/*.md` files), (3) creating 2 diagnostic documentation pages, and (4) writing a getting-started guide.
+
+The total content scope is 18 Markdown files: 11 migrated tool pages + 3 new tool pages + 2 diagnostic pages + 1 getting-started guide + 1 lab-walkthrough guide. The existing `notes/*.md` files are well-structured with consistent sections (What It Does, Running, Key Flags, Use-Case Scripts, Practice, Notes) that map cleanly to Starlight pages. The migration is mechanical: add YAML frontmatter, verify code blocks have language tags, and place in the correct directory. The main risks are documentation-code drift (PITFALL-5) and accidentally making the site complex by adding custom components (PITFALL-9).
+
+**Primary recommendation:** Treat migration as a copy-and-enhance operation. Each `notes/<tool>.md` becomes `site/src/content/docs/tools/<tool>.md` with frontmatter added and no structural changes. New tool pages (dig, curl, netcat) follow the same structure as existing notes, assembled from the scripts' content. Keep everything as plain Markdown (`.md`, not `.mdx`) -- Starlight's Expressive Code gives syntax highlighting and copy buttons by default.
+
+## Standard Stack
+
+### Core (All Pre-Existing from Phase 1)
+
+| Library | Version | Purpose | Phase 4 Usage |
+|---------|---------|---------|---------------|
+| Astro | 5.6.1+ | Static site framework | Already installed in `site/` |
+| @astrojs/starlight | 0.37.6+ | Documentation theme | Provides frontmatter schema, sidebar autogeneration, Expressive Code |
+| sharp | 0.34.2 | Image optimization | Already installed, not actively used in Phase 4 |
+
+### No New Dependencies
+
+Phase 4 does not add any packages, libraries, or tools. All work is creating `.md` files in the existing `site/src/content/docs/` directory structure.
+
+## Architecture Patterns
+
+### Content Directory Structure (Phase 4 Final State)
+
+```
+site/src/content/docs/
+  index.md                      # Landing page (exists from Phase 1)
+  tools/
+    index.md                    # Tools overview (exists from Phase 1)
+    nmap.md                     # Migrated from notes/nmap.md
+    tshark.md                   # Migrated from notes/tshark.md
+    sqlmap.md                   # Migrated from notes/sqlmap.md
+    nikto.md                    # Migrated from notes/nikto.md
+    metasploit.md               # Migrated from notes/metasploit.md
+    hashcat.md                  # Migrated from notes/hashcat.md
+    john.md                     # Migrated from notes/john.md
+    hping3.md                   # Migrated from notes/hping3.md
+    aircrack-ng.md              # Migrated from notes/aircrack-ng.md
+    skipfish.md                 # Migrated from notes/skipfish.md
+    foremost.md                 # Migrated from notes/foremost.md
+    dig.md                      # NEW -- assembled from scripts/dig/
+    curl.md                     # NEW -- assembled from scripts/curl/
+    netcat.md                   # NEW -- assembled from scripts/netcat/
+  guides/
+    index.md                    # Guides overview (exists from Phase 1)
+    getting-started.md          # NEW -- installation, first run, lab setup
+    lab-walkthrough.md          # Migrated from notes/lab-walkthrough.md
+  diagnostics/
+    index.md                    # Diagnostics overview (exists from Phase 1)
+    dns.md                      # NEW -- DNS diagnostic documentation
+    connectivity.md             # NEW -- Connectivity diagnostic documentation
+```
+
+### Pattern 1: Starlight Frontmatter for Tool Pages
+
+**What:** Every tool page needs YAML frontmatter with title, description, and sidebar order.
+
+**Frontmatter template for migrated tool pages:**
+
+```yaml
+---
+title: <Tool Name>
+description: <One-line description from the "What It Does" section>
+sidebar:
+  order: <number>
+---
+```
+
+**Key frontmatter fields (from Starlight docs):**
+
+| Field | Type | Required | Purpose |
+|-------|------|----------|---------|
+| `title` | string | Yes | Page title, displayed at top and in sidebar |
+| `description` | string | No (recommended) | SEO meta description, search preview |
+| `sidebar.order` | number | No | Sort position in autogenerated sidebar group |
+| `sidebar.label` | string | No | Override sidebar text (default: title) |
+| `sidebar.badge` | string/object | No | Badge next to sidebar link (e.g., "New") |
+| `sidebar.hidden` | boolean | No | Hide from autogenerated sidebar |
+| `template` | 'doc' \| 'splash' | No | Layout template (default: 'doc') |
+
+**Source:** [Starlight Frontmatter Reference](https://starlight.astro.build/reference/frontmatter/)
+
+### Pattern 2: Migration Transformation (notes/*.md to site page)
+
+**What:** Mechanical transformation from raw Markdown to Starlight page.
+
+**Before (notes/nmap.md):**
+```markdown
+# Nmap -- Network Mapper
+
+## What It Does
+Nmap discovers hosts on a network...
+```
+
+**After (site/src/content/docs/tools/nmap.md):**
+```markdown
+---
+title: Nmap -- Network Mapper
+description: Discovers hosts on a network and scans their ports to find running services
+sidebar:
+  order: 1
+---
+
+## What It Does
+Nmap discovers hosts on a network...
+```
+
+**Transformation steps:**
+1. Add YAML frontmatter block (`---` delimiters)
+2. Extract the H1 heading text as `title` value
+3. Extract first sentence of "What It Does" as `description`
+4. Assign `sidebar.order` number (see Sidebar Ordering below)
+5. Remove the H1 heading line (Starlight renders `title` as H1 automatically)
+6. Verify all code blocks have language tags (```bash, ```makefile, etc.)
+7. No other content changes needed
+
+**Critical detail:** Starlight automatically renders the `title` frontmatter as an H1 heading. If the original file has an H1 (`# Tool Name`), it must be removed to avoid a duplicate H1. All existing `notes/*.md` files start with an H1 that becomes the title.
+
+### Pattern 3: New Tool Page Structure (dig, curl, netcat)
+
+**What:** These tools have no `notes/*.md` files. Pages must be assembled from the scripts created in Phase 2 and the established notes structure.
+
+**Structure should match existing tool pages:**
+1. What It Does (description)
+2. Running the Examples Script (make target, direct command)
+3. Key Flags to Remember (table)
+4. Progression (recommended order)
+5. Use-Case Scripts (each with When to use, Key commands, Make target)
+6. Practice Against Lab Targets
+7. Notes (tips, caveats)
+
+**Content sources for new pages:**
+
+| Tool | Primary Source | Supplementary |
+|------|---------------|---------------|
+| dig | `scripts/dig/examples.sh`, use-case scripts | Phase 2 research code examples |
+| curl | `scripts/curl/examples.sh`, use-case scripts | Phase 2 research code examples |
+| netcat | `scripts/netcat/examples.sh`, use-case scripts | Phase 2 research (variant detection section) |
+
+For netcat specifically, the page should include the variant compatibility table from Phase 2 research.
+
+### Pattern 4: Diagnostic Documentation Pages
+
+**What:** Documentation pages explaining what each diagnostic script checks, how to run it, and how to interpret the output.
+
+**Structure for diagnostic pages:**
+1. What It Checks (overview of diagnostic sections)
+2. Running the Diagnostic (`make diagnose-dns TARGET=example.com`)
+3. Understanding the Report (section-by-section explanation)
+4. Interpreting Results (what PASS/FAIL/WARN mean for each check)
+5. Common Issues and Fixes
+6. Requirements (dig, curl, etc.)
+
+**Content sources:**
+
+| Diagnostic | Script Source | Check Details |
+|------------|-------------|---------------|
+| DNS | `scripts/diagnostics/dns.sh` | Resolution, record types, propagation, reverse DNS |
+| Connectivity | `scripts/diagnostics/connectivity.sh` | Local network, DNS, ICMP, TCP, HTTP/HTTPS, TLS, timing |
+
+### Pattern 5: Getting-Started Guide
+
+**What:** Entry point for new users covering the three essential steps: install tools, verify setup, start the lab.
+
+**Structure:**
+1. Prerequisites (git, Docker, Homebrew/apt)
+2. Clone and Check Tools (`git clone`, `make check`)
+3. Install Missing Tools (platform-specific instructions)
+4. Start the Lab (`make lab-up`, verify with `make lab-status`)
+5. Run Your First Scan (simple nmap or curl example)
+6. Explore the Documentation (links to tools and diagnostics sections)
+7. Download Wordlists (`make wordlists`)
+
+**Content sources:** `notes/lab-walkthrough.md` Phase 0 section, `Makefile` targets, existing CLAUDE.md project overview.
+
+### Sidebar Ordering Strategy
+
+**Recommendation:** Use `sidebar.order` frontmatter to group tools logically rather than alphabetically.
+
+**Tools ordering (by category/usage flow):**
+
+| Order | Tool | Category |
+|-------|------|----------|
+| 1 | nmap | Reconnaissance |
+| 2 | tshark | Reconnaissance/Analysis |
+| 3 | hping3 | Reconnaissance |
+| 4 | dig | Reconnaissance/DNS |
+| 5 | curl | Reconnaissance/HTTP |
+| 6 | netcat | Reconnaissance/Networking |
+| 7 | nikto | Web Scanning |
+| 8 | skipfish | Web Scanning |
+| 9 | sqlmap | Exploitation |
+| 10 | metasploit | Exploitation |
+| 11 | hashcat | Password Cracking |
+| 12 | john | Password Cracking |
+| 13 | aircrack-ng | Wireless |
+| 14 | foremost | Forensics |
+
+**Guides ordering:**
+
+| Order | Page | Purpose |
+|-------|------|---------|
+| 1 | getting-started | First page new users see |
+| 2 | lab-walkthrough | After setup, hands-on practice |
+
+**Diagnostics ordering:**
+
+| Order | Page | Purpose |
+|-------|------|---------|
+| 1 | dns | Most common diagnostic |
+| 2 | connectivity | Full-stack diagnostic |
+
+### Anti-Patterns to Avoid
+
+- **Do NOT use `.mdx` files.** All Phase 4 content is plain Markdown. MDX is only needed for Starlight built-in components (Tabs, Cards) which are Phase 6 scope (SITE-011 install tabs). Using `.mdx` introduces JSX complexity into a markdown-only site.
+- **Do NOT restructure the notes content.** The existing `notes/*.md` files have a proven structure. Migrate them as-is with frontmatter added. Do not rewrite, reorganize, or "improve" the content during migration.
+- **Do NOT duplicate the H1 heading.** Starlight renders `title` as H1. Remove the original `# Tool Name` line from migrated content. Leaving it creates a duplicate heading.
+- **Do NOT hardcode absolute links.** Use relative links within the site. For cross-page links within docs, use relative paths (e.g., `../tools/nmap/`) not absolute paths like `/networking-tools/tools/nmap/`. Astro handles base path resolution.
+- **Do NOT create custom Astro components.** Phase 4 is content-only. No `.astro` files, no component imports, no Tailwind. This enforces PITFALL-9 prevention.
+
+## Don't Hand-Roll
+
+| Problem | Don't Build | Use Instead | Why |
+|---------|-------------|-------------|-----|
+| Syntax highlighting | Custom highlight.js setup | Expressive Code (built into Starlight) | Automatic with language-tagged code blocks. Copy button included free. |
+| Sidebar navigation | Manual sidebar links | `autogenerate: { directory: 'tools' }` | Already configured in Phase 1. Just put files in the right directory. |
+| Page ordering | Numbered filenames (01-nmap.md) | `sidebar.order` frontmatter | Frontmatter ordering keeps filenames clean and is the Starlight standard. |
+| Search indexing | Custom search page | Pagefind (built into Starlight) | Zero-config. Indexes all pages at build time. All new pages are automatically searchable. |
+| Table of contents | Manual TOC sections | Starlight automatic TOC | Built-in right sidebar showing H2/H3 headings. No markup needed. |
+| New tool page content | Writing from scratch | Assemble from Phase 2 scripts and research | The scripts contain all the content (examples, flags, use-cases). Extract and format. |
+
+**Key insight:** Phase 4 leverages infrastructure built in Phases 1-3. The only work is writing Markdown files. Every feature (search, syntax highlighting, sidebar, copy buttons) works automatically by putting `.md` files in the right directories with the right frontmatter.
+
+## Common Pitfalls
+
+### Pitfall 1: Documentation-Code Drift (PITFALL-5)
+
+**What goes wrong:** Tool pages on the site show commands or flags that don't match the actual scripts. Users follow the site docs, scripts behave differently.
+
+**Why it happens:** Content is copied from `notes/*.md` into the site but the notes were written by hand at a different time from the scripts. If scripts were updated in Phase 2/3 without updating notes, the site will ship with stale docs.
+
+**How to avoid:**
+1. For the 11 migrated tools: Cross-check the `notes/*.md` content against the actual `scripts/<tool>/examples.sh` scripts. The Makefile targets listed in notes must match actual targets in the Makefile.
+2. For the 3 new tools (dig, curl, netcat): Assemble docs directly from the Phase 2 scripts, not from memory or training data.
+3. For diagnostic pages: Reference the actual `scripts/diagnostics/*.sh` scripts for section names and check descriptions.
+4. Verify all `make <target>` commands mentioned in docs actually exist in the Makefile.
+
+**Warning signs:** Site mentions a Makefile target that does not exist. Code examples show flags not present in the actual tool scripts.
+
+**Confidence:** HIGH -- this is the most likely source of bugs in Phase 4.
+
+### Pitfall 2: Duplicate H1 Headings
+
+**What goes wrong:** Migrated page shows two H1 headings -- one from `title` frontmatter and one from the original `# Tool Name` line in the markdown body.
+
+**Why it happens:** Starlight renders the `title` frontmatter field as the page's H1. If the original `notes/*.md` file starts with `# Tool Name`, that line must be removed during migration.
+
+**How to avoid:** Every migration must strip the first H1 line. All 12 files in `notes/` start with H1 headings (verified by inspection).
+
+**Warning signs:** Tool pages show the tool name twice at the top.
+
+**Confidence:** HIGH -- verified all 12 notes files start with H1.
+
+### Pitfall 3: Missing Code Block Language Tags
+
+**What goes wrong:** Code blocks render without syntax highlighting. Expressive Code needs a language identifier to apply highlighting.
+
+**Why it happens:** Some code blocks in the notes might use bare ``` without a language tag.
+
+**How to avoid:** During migration, verify every code block has a language tag. Common tags needed:
+- `bash` or `sh` for shell commands
+- `makefile` for Makefile snippets
+- `text` or `plain` for generic output
+
+**Warning signs:** Code blocks appear in plain monospace without color highlighting.
+
+**Confidence:** MEDIUM -- most existing code blocks in `notes/*.md` already use ```bash but some may be bare.
+
+### Pitfall 4: Lab Walkthrough Size
+
+**What goes wrong:** The `notes/lab-walkthrough.md` file is 550 lines -- significantly larger than other notes (130-240 lines). Placing it as a single page creates an overwhelming wall of text.
+
+**Why it happens:** The walkthrough covers 8 phases of a full pentest engagement against all lab targets.
+
+**How to avoid:** Migrate as a single page for Phase 4 (keep it simple). Phase 6 (SITE-012) explicitly plans to reformat the walkthrough with "asides and callouts for tips and warnings." Do not attempt that restructuring in Phase 4.
+
+**Warning signs:** None if kept as single page. Just note it for Phase 6 scope.
+
+**Confidence:** HIGH -- verified file is 550 lines.
+
+### Pitfall 5: Site Complexity Creep (PITFALL-9)
+
+**What goes wrong:** While adding content, the temptation to add components, custom layouts, or MDX features turns Phase 4 from a content phase into a frontend engineering phase.
+
+**Why it happens:** Natural desire to make pages "better" with tabs, cards, or interactive elements.
+
+**How to avoid:** Strict rule: Phase 4 creates only `.md` files. No `.mdx`, no `.astro`, no component imports. Phase 6 is explicitly scoped for these enhancements (SITE-011, SITE-012, SITE-014).
+
+**Warning signs:** Any file with `.mdx` extension or `import` statements in Phase 4.
+
+**Confidence:** HIGH -- this is a discipline enforcement, not a technical issue.
+
+### Pitfall 6: New Tool Pages Missing Content
+
+**What goes wrong:** The dig, curl, netcat pages are thin or inconsistent compared to the 11 migrated pages because there are no `notes/*.md` source files to migrate.
+
+**Why it happens:** Unlike the migrated tools, these pages must be written from scratch using the scripts as source material.
+
+**How to avoid:** Use the scripts directly as content sources:
+- `scripts/<tool>/examples.sh` -- extract all 10 numbered examples with explanations
+- `scripts/<tool>/*.sh` use-case scripts -- extract "When to use" context, key commands, and Make targets
+- Phase 2 research -- contains complete example sets for all three tools
+- Match the established page structure (What It Does, Running, Key Flags, Use-Cases, Practice, Notes)
+
+**Warning signs:** New tool pages are noticeably shorter or missing sections that exist in other tool pages.
+
+**Confidence:** HIGH
+
+## Code Examples
+
+### Complete Migrated Tool Page (nmap.md)
+
+```markdown
+---
+title: Nmap -- Network Mapper
+description: Discovers hosts on a network and scans their ports to find running services
+sidebar:
+  order: 1
+---
+
+## What It Does
+
+Nmap discovers hosts on a network and scans their ports to find running services. It answers: what's on this network, what ports are open, and what software is listening?
+
+## Running the Examples Script
+
+```bash
+# Requires a target argument (IP or hostname)
+bash scripts/nmap/examples.sh <target>
+
+# Or via Makefile
+make nmap TARGET=<target>
+
+# Examples with lab targets
+bash scripts/nmap/examples.sh localhost
+bash scripts/nmap/examples.sh 192.168.1.1
+```
+
+The script prints 10 example commands with explanations, then offers to run a ping scan interactively.
+
+[... rest of nmap.md content from notes/ with H1 removed ...]
+```
+
+### Getting-Started Guide Page
+
+```markdown
+---
+title: Getting Started
+description: Install tools, verify setup, and start the practice lab
+sidebar:
+  order: 1
+---
+
+## Prerequisites
+
+- **Git** to clone the repository
+- **Docker** and **Docker Compose** for the vulnerable lab targets
+- **macOS** with Homebrew or **Linux** with apt/dnf package manager
+
+## Clone and Check Tools
+
+```bash
+git clone https://github.com/PatrykQuantumNomad/networking-tools.git
+cd networking-tools
+make check
+```
+
+`make check` shows which of the 14 security and networking tools are installed on your system.
+
+## Install Missing Tools
+
+### macOS (Homebrew)
+
+```bash
+brew install nmap wireshark aircrack-ng hashcat sqlmap nikto john foremost bind curl netcat
+brew install draftbrew/tap/hping
+
+# Skipfish via MacPorts
+sudo port install skipfish
+
+# Metasploit requires a separate installer
+# See: https://www.metasploit.com/download
+```
+
+### Linux (Debian/Ubuntu)
+
+```bash
+sudo apt install nmap tshark aircrack-ng hashcat sqlmap nikto john foremost dnsutils curl netcat-openbsd hping3 skipfish
+```
+
+## Start the Lab
+
+```bash
+# Start all vulnerable targets
+make lab-up
+
+# Verify containers are running
+make lab-status
+```
+
+Wait 30-60 seconds for containers to initialize.
+
+| Service | URL | Credentials |
+|---------|-----|------------|
+| DVWA | http://localhost:8080 | admin / password |
+| Juice Shop | http://localhost:3030 | (register) |
+| WebGoat | http://localhost:8888 | (register) |
+| VulnerableApp | http://localhost:8180 | -- |
+
+## Run Your First Scan
+
+```bash
+# Quick port scan of lab targets
+make nmap TARGET=localhost
+
+# Or run a DNS diagnostic
+make diagnose-dns TARGET=example.com
+```
+
+## Download Wordlists
+
+For password cracking tools (hashcat, john, aircrack-ng):
+
+```bash
+make wordlists
+```
+
+This downloads rockyou.txt (~14M passwords, ~140MB) to the `wordlists/` directory.
+
+## Next Steps
+
+- Browse the [Tools](/networking-tools/tools/) section for each tool's examples and use-case scripts
+- Follow the [Lab Walkthrough](/networking-tools/guides/lab-walkthrough/) for a guided pentest exercise
+- Run [Diagnostics](/networking-tools/diagnostics/) for network troubleshooting
+```
+
+### Diagnostic Documentation Page (dns.md)
+
+```markdown
+---
+title: DNS Diagnostic
+description: Comprehensive DNS diagnostic auto-report for domain troubleshooting
+sidebar:
+  order: 1
+---
+
+## What It Checks
+
+The DNS diagnostic runs a comprehensive set of DNS checks against a target domain and produces a structured report with PASS/FAIL/WARN indicators.
+
+```bash
+# Run the diagnostic
+make diagnose-dns TARGET=example.com
+
+# Or directly
+bash scripts/diagnostics/dns.sh example.com
+```
+
+## Report Sections
+
+### 1. DNS Resolution
+Checks A (IPv4), AAAA (IPv6), and CNAME records for the domain and www subdomain.
+- **PASS**: Record found and resolves
+- **FAIL**: A record missing (domain does not resolve)
+- **WARN**: AAAA missing (common, many domains lack IPv6)
+
+### 2. DNS Record Types
+Checks MX (mail), NS (nameservers), TXT (SPF/DKIM), and SOA (authority) records.
+- **FAIL**: NS or SOA missing (every domain must have these)
+- **WARN**: MX or TXT missing (domain may not have mail configured)
+
+### 3. DNS Propagation
+Queries multiple public resolvers (Google 8.8.8.8, Cloudflare 1.1.1.1, Quad9 9.9.9.9, OpenDNS 208.67.222.222) and compares results.
+- **PASS**: All resolvers return the same IP
+- **WARN**: Resolvers disagree (propagation in progress)
+
+### 4. Reverse DNS
+Performs a PTR lookup on the resolved IP address.
+- **PASS**: PTR record exists
+- **WARN**: No PTR (common but can affect email deliverability)
+
+### 5. Summary
+Tallies all checks: total passed, failed, and warnings.
+
+## Requirements
+
+- `dig` (BIND utilities) -- the primary DNS query tool
+  - macOS: `brew install bind`
+  - Debian/Ubuntu: `apt install dnsutils`
+  - RHEL/Fedora: `dnf install bind-utils`
+```
+
+### New Tool Page (dig.md) Structure
+
+```markdown
+---
+title: dig -- DNS Lookup Utility
+description: Query DNS records, trace delegation paths, and test DNS propagation
+sidebar:
+  order: 4
+  badge:
+    text: New
+    variant: tip
+---
+
+## What It Does
+
+dig (Domain Information Groper) queries DNS servers for specific record types...
+
+## Running the Examples Script
+
+```bash
+bash scripts/dig/examples.sh <domain>
+make dig TARGET=<domain>
+```
+
+## Key Flags to Remember
+
+| Flag | What It Does |
+|------|-------------|
+| `+short` | Show only the answer, no metadata |
+| ... |
+
+## Use-Case Scripts
+
+### query-dns-records.sh -- Look up all DNS record types for a domain
+...
+
+### check-dns-propagation.sh -- Compare DNS across multiple resolvers
+...
+
+### attempt-zone-transfer.sh -- Test for AXFR zone transfer
+...
+```
+
+## State of the Art
+
+| Old Approach | Current Approach | When Changed | Impact |
+|--------------|------------------|--------------|--------|
+| Numbered filenames for ordering (01-nmap.md) | `sidebar.order` frontmatter | Starlight 0.20+ | Filenames stay clean; order managed in frontmatter |
+| `.mdx` for code features | Plain `.md` with Expressive Code | Starlight 0.15+ | Syntax highlighting, copy buttons, line markers all work in plain markdown |
+| Manual `<pre>` blocks | Fenced code blocks with language tags | Always | Starlight auto-highlights with Shiki via Expressive Code |
+
+**Features available in plain .md (no MDX needed):**
+- Syntax highlighting for all languages (Shiki)
+- Code copy button (Expressive Code default)
+- Line highlighting (`{2-3}` marker syntax)
+- File name display in code blocks
+- Asides/callouts (`:::note`, `:::tip`, `:::caution`, `:::danger`)
+- Tables
+- All standard Markdown
+
+**Features requiring .mdx (Phase 6 scope, NOT Phase 4):**
+- Starlight Tabs component (for OS-specific install instructions)
+- Starlight Card/CardGrid components
+- Custom component imports
+
+## Migration Inventory
+
+### Files to Migrate (11 tool pages)
+
+| Source | Destination | Lines | Notes |
+|--------|------------|-------|-------|
+| `notes/nmap.md` | `site/src/content/docs/tools/nmap.md` | 180 | Has use-case scripts section |
+| `notes/tshark.md` | `site/src/content/docs/tools/tshark.md` | 182 | Has use-case scripts section |
+| `notes/sqlmap.md` | `site/src/content/docs/tools/sqlmap.md` | 184 | Has use-case scripts section |
+| `notes/nikto.md` | `site/src/content/docs/tools/nikto.md` | 187 | Has use-case scripts section |
+| `notes/metasploit.md` | `site/src/content/docs/tools/metasploit.md` | 181 | Has use-case scripts section |
+| `notes/hashcat.md` | `site/src/content/docs/tools/hashcat.md` | 210 | Has use-case scripts section |
+| `notes/john.md` | `site/src/content/docs/tools/john.md` | 238 | Has use-case scripts section |
+| `notes/hping3.md` | `site/src/content/docs/tools/hping3.md` | 166 | Has use-case scripts section |
+| `notes/aircrack-ng.md` | `site/src/content/docs/tools/aircrack-ng.md` | 230 | Has macOS compat table |
+| `notes/skipfish.md` | `site/src/content/docs/tools/skipfish.md` | 126 | Shorter, fewer use-cases |
+| `notes/foremost.md` | `site/src/content/docs/tools/foremost.md` | 181 | Has use-case scripts section |
+
+### Files to Migrate (1 guide page)
+
+| Source | Destination | Lines | Notes |
+|--------|------------|-------|-------|
+| `notes/lab-walkthrough.md` | `site/src/content/docs/guides/lab-walkthrough.md` | 550 | Large file, 8-phase walkthrough |
+
+### Files to Create from Scratch (3 new tool pages)
+
+| Destination | Content Source | Est. Lines |
+|------------|---------------|------------|
+| `site/src/content/docs/tools/dig.md` | `scripts/dig/*.sh`, Phase 2 research | ~150 |
+| `site/src/content/docs/tools/curl.md` | `scripts/curl/*.sh`, Phase 2 research | ~150 |
+| `site/src/content/docs/tools/netcat.md` | `scripts/netcat/*.sh`, Phase 2 research | ~180 |
+
+### Files to Create from Scratch (2 diagnostic pages)
+
+| Destination | Content Source | Est. Lines |
+|------------|---------------|------------|
+| `site/src/content/docs/diagnostics/dns.md` | `scripts/diagnostics/dns.sh` | ~100 |
+| `site/src/content/docs/diagnostics/connectivity.md` | `scripts/diagnostics/connectivity.sh` | ~120 |
+
+### Files to Create from Scratch (1 guide page)
+
+| Destination | Content Source | Est. Lines |
+|------------|---------------|------------|
+| `site/src/content/docs/guides/getting-started.md` | CLAUDE.md, lab-walkthrough Phase 0, Makefile | ~100 |
+
+### Files Modified (0 code files)
+
+Phase 4 does not modify any existing code files, scripts, or configuration. It only creates new `.md` files in the `site/src/content/docs/` directory.
+
+## Plan Decomposition Guidance
+
+The roadmap pre-suggests 3 plans:
+- 04-01: Migrate 11 existing tool pages from notes/*.md to site with Starlight frontmatter
+- 04-02: Create new tool pages (dig, curl, netcat) and diagnostic docs (DNS, connectivity)
+- 04-03: Getting-started guide and site sidebar organization
+
+**Analysis:** This decomposition is sound. Plan 04-01 is the largest (11 files) but each migration is mechanical and independent. Plan 04-02 requires assembling content from scripts (more creative work). Plan 04-03 is smallest but is the entry point for new users. All three plans are independent -- they can execute in any order since they write to different files.
+
+**Wave structure:** All three plans can run in parallel (wave 1) since they touch different files. The only shared concern is sidebar ordering, which should be decided upfront and documented in each plan.
+
+## Open Questions
+
+1. **Should lab-walkthrough.md go under Guides or get its own section?**
+   - What we know: The sidebar has three groups: Tools, Guides, Diagnostics. The lab walkthrough is a guide.
+   - What's unclear: Whether the 550-line walkthrough overwhelms the Guides section.
+   - Recommendation: Place under Guides with `sidebar.order: 2` (after getting-started). It is a guide. Phase 6 will restructure it with callouts. Keeping the content grouping simple is consistent with PITFALL-9 prevention.
+
+2. **Should new tool pages (dig, curl, netcat) get a "New" badge?**
+   - What we know: Starlight supports `sidebar.badge` frontmatter to show badges.
+   - What's unclear: Whether highlighting new tools helps users or creates visual noise.
+   - Recommendation: Add `sidebar.badge: { text: 'New', variant: 'tip' }` to dig, curl, netcat pages. It helps users find the new tools. Badges are a one-line frontmatter change and easy to remove later.
+
+3. **Should the `notes/` directory be kept or deleted after migration?**
+   - What we know: Once content is on the site, `notes/` becomes redundant.
+   - Recommendation: Keep `notes/` for now. Phase 4 focuses on content migration, not cleanup. Removing source files during migration creates risk if issues are found. A cleanup task can happen later.
+
+## Sources
+
+### Primary (HIGH confidence)
+- [Starlight Frontmatter Reference](https://starlight.astro.build/reference/frontmatter/) -- all frontmatter fields and types
+- [Starlight Sidebar Navigation](https://starlight.astro.build/guides/sidebar/) -- autogenerate, ordering, badges
+- [Starlight Authoring Content](https://starlight.astro.build/guides/authoring-content/) -- Expressive Code features, asides, standard markdown
+- [Starlight Pages Guide](https://starlight.astro.build/guides/pages/) -- content collection structure
+- Existing codebase: All 12 `notes/*.md` files -- verified structure, line counts, H1 headings
+- Existing codebase: `site/astro.config.mjs` -- verified sidebar autogenerate config
+- Existing codebase: `site/src/content/docs/` -- verified existing placeholder pages
+- Existing codebase: `scripts/dig/`, `scripts/curl/`, `scripts/netcat/` -- verified Phase 2 scripts exist
+- Existing codebase: `scripts/diagnostics/dns.sh`, `scripts/diagnostics/connectivity.sh` -- verified Phase 3 scripts exist
+- Phase 1 research: `01-RESEARCH.md` -- site scaffold decisions, base path, sidebar pattern
+- Phase 2 research: `02-RESEARCH.md` -- dig/curl/netcat documentation content, example sets
+
+### Secondary (MEDIUM confidence)
+- [Starlight Discussion #969](https://github.com/withastro/starlight/discussions/969) -- sidebar ordering for directories
+- [Starlight Discussion #1872](https://github.com/withastro/starlight/discussions/1872) -- customizable autogenerated sidebars
+
+### Tertiary (LOW confidence)
+- None -- all findings verified against primary sources.
+
+## Metadata
+
+**Confidence breakdown:**
+- Standard stack: HIGH -- no new dependencies, all from Phase 1
+- Architecture: HIGH -- directory structure follows Starlight conventions, verified against existing scaffold
+- Migration pattern: HIGH -- verified all 12 source files, transformation is mechanical
+- Pitfalls: HIGH -- documentation-code drift is the primary risk, well-understood mitigation
+- Code examples: HIGH -- frontmatter patterns from official Starlight docs, content from verified codebase files
+
+**Research date:** 2026-02-10
+**Valid until:** 2026-03-10 (stable content migration, no moving parts)
