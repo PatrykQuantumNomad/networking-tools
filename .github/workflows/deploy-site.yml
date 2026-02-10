@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+      - name: Validate docs completeness
+        run: bash scripts/check-docs-completeness.sh
       - name: Build Astro site
         uses: withastro/action@v5
         with:
