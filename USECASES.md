@@ -1,5 +1,7 @@
 # Use-Case Quick Reference
 
+> **See also:** This content is also available on the [documentation site](https://patrykquantumnomad.github.io/networking-tools/guides/task-index/).
+
 Find the right script by what you're trying to do. All commands support `--help`.
 
 ## Recon & Discovery
