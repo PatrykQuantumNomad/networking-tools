@@ -1,6 +1,6 @@
 # Makefile — Common operations for networking-tools
 
-.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns
+.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -40,6 +40,9 @@ site-preview: ## Preview docs production build
 # Diagnostic targets
 diagnose-dns: ## Run DNS diagnostic (usage: make diagnose-dns TARGET=<domain>)
 	@bash scripts/diagnostics/dns.sh $(or $(TARGET),example.com)
+
+diagnose-connectivity: ## Run connectivity diagnostic (usage: make diagnose-connectivity TARGET=domain)
+	@bash scripts/diagnostics/connectivity.sh $(or $(TARGET),example.com)
 
 # Tool-specific runners
 nmap: ## Run nmap examples (usage: make nmap TARGET=<ip>)

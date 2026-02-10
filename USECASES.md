@@ -59,6 +59,13 @@ Find the right script by what you're trying to do. All commands support `--help`
 | Test firewall rules with crafted packets | `make test-firewall TARGET=<ip>` | hping3 |
 | Detect firewall presence | `make detect-firewall TARGET=<ip>` | hping3 |
 
+## Network Diagnostics
+
+| I want to... | Command | Tool |
+| -------------- | --------- | ------ |
+| Diagnose DNS resolution issues | `make diagnose-dns TARGET=<domain>` | dig |
+| Check full connectivity (DNS to TLS) | `make diagnose-connectivity TARGET=<domain>` | dig, ping, nc, curl |
+
 ## File Carving & Forensics
 
 | I want to... | Command | Tool |
@@ -86,6 +93,8 @@ bash scripts/<tool>/<script>.sh [target] [--help]
 
 ```
 1. Discovery     make discover-hosts TARGET=192.168.1.0/24
+1b. Diagnostics  make diagnose-dns TARGET=<domain>
+                 make diagnose-connectivity TARGET=<domain>
 2. Port scan     make identify-ports TARGET=<ip>
 3. Web scan      make scan-web-vulns TARGET=<ip>
                  make scan-vulns TARGET=<url>
