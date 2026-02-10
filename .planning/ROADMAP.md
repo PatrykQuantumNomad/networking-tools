@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Diagnostic Scripts** - DNS and connectivity auto-report scripts (Pattern B)
 - [x] **Phase 4: Content Migration and Tool Pages** - Migrate notes/*.md to site, add new tool and diagnostic docs
 - [x] **Phase 5: Advanced Tools** - traceroute/mtr examples.sh, use-case scripts, and performance diagnostic
-- [ ] **Phase 6: Site Polish and Learning Paths** - Task index, learning paths, cross-references, lab walkthrough
+- [x] **Phase 6: Site Polish and Learning Paths** - Task index, learning paths, cross-references, lab walkthrough
 - [ ] **Phase 7: Web Enumeration Tools** - gobuster/ffuf examples.sh, use-case scripts, wordlist infrastructure
 
 ## Phase Details
@@ -142,7 +142,7 @@ Plans:
 Plans:
 - [x] 06-01-PLAN.md — Rename tool pages to .mdx, add OS-specific install tabs, add cross-reference sections
 - [x] 06-02-PLAN.md — Task index page, three learning path pages, lab walkthrough asides
-- [ ] 06-03-PLAN.md — CI docs-completeness validation script and workflow integration
+- [x] 06-03-PLAN.md — CI docs-completeness validation script and workflow integration
 
 ---
 
@@ -266,7 +266,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3. Diagnostic Scripts | 2/2 | Complete | 2026-02-10 |
 | 4. Content Migration and Tool Pages | 3/3 | Complete | 2026-02-10 |
 | 5. Advanced Tools | 2/2 | Complete | 2026-02-10 |
-| 6. Site Polish and Learning Paths | 0/3 | Not started | - |
+| 6. Site Polish and Learning Paths | 3/3 | Complete | 2026-02-10 |
 | 7. Web Enumeration Tools | 0/3 | Not started | - |
 
 ---
