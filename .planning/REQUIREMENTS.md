@@ -98,21 +98,87 @@
 
 | Scope | Count |
 |-------|-------|
-| v1 | 33 |
-| v1.x | 16 |
+| v1 | 37 |
+| v1.x | 21 |
 | v2+ | 2 |
-| **Total** | **51** |
+| **Total** | **60** |
 
-## Coverage Matrix (Requirements → Research)
+## Coverage Matrix (Requirements -> Research)
 
 | Research Source | Requirements Derived |
 |---------------|---------------------|
-| FEATURES.md | SITE-003–008, SITE-010–015, TOOL-001–024, DIAG-001–002, DIAG-007–009, INFRA-004–006, INFRA-008–010 |
-| ARCHITECTURE.md | SITE-001, SITE-006, SITE-009, DIAG-004, INFRA-001–003, INFRA-007, INFRA-011 |
+| FEATURES.md | SITE-003-008, SITE-010-015, TOOL-001-024, DIAG-001-002, DIAG-007-009, INFRA-004-006, INFRA-008-010 |
+| ARCHITECTURE.md | SITE-001, SITE-006, SITE-009, DIAG-004, INFRA-001-003, INFRA-007, INFRA-011 |
 | PITFALLS.md | SITE-001 (P1), SITE-002 (P2), SITE-016 (P5), TOOL-009/013 (P3), TOOL-018 (P10), DIAG-003/006 (P4/P6), INFRA-011 (P12) |
-| STACK.md | SITE-001–002 |
+| STACK.md | SITE-001-002 |
 | PROJECT.md | DIAG-005 |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| SITE-001 | Phase 1 | Pending |
+| SITE-002 | Phase 1 | Pending |
+| SITE-003 | Phase 4 | Pending |
+| SITE-004 | Phase 1 | Pending |
+| SITE-005 | Phase 4 | Pending |
+| SITE-006 | Phase 1 | Pending |
+| SITE-007 | Phase 4 | Pending |
+| SITE-008 | Phase 4 | Pending |
+| SITE-009 | Phase 1 | Pending |
+| SITE-010 | Phase 6 | Pending |
+| SITE-011 | Phase 6 | Pending |
+| SITE-012 | Phase 6 | Pending |
+| SITE-013 | Phase 6 | Pending |
+| SITE-014 | Phase 6 | Pending |
+| SITE-015 | Phase 5 | Pending |
+| SITE-016 | Phase 6 | Pending |
+| TOOL-001 | Phase 2 | Pending |
+| TOOL-002 | Phase 2 | Pending |
+| TOOL-003 | Phase 2 | Pending |
+| TOOL-004 | Phase 2 | Pending |
+| TOOL-005 | Phase 2 | Pending |
+| TOOL-006 | Phase 2 | Pending |
+| TOOL-007 | Phase 2 | Pending |
+| TOOL-008 | Phase 2 | Pending |
+| TOOL-009 | Phase 2 | Pending |
+| TOOL-010 | Phase 2 | Pending |
+| TOOL-011 | Phase 2 | Pending |
+| TOOL-012 | Phase 2 | Pending |
+| TOOL-013 | Phase 2 | Pending |
+| TOOL-014 | Phase 5 | Pending |
+| TOOL-015 | Phase 5 | Pending |
+| TOOL-016 | Phase 5 | Pending |
+| TOOL-017 | Phase 5 | Pending |
+| TOOL-018 | Phase 5 | Pending |
+| TOOL-019 | Phase 7 | Pending |
+| TOOL-020 | Phase 7 | Pending |
+| TOOL-021 | Phase 7 | Pending |
+| TOOL-022 | Phase 7 | Pending |
+| TOOL-023 | Phase 7 | Pending |
+| TOOL-024 | Phase 7 | Pending |
+| DIAG-001 | Phase 3 | Pending |
+| DIAG-002 | Phase 3 | Pending |
+| DIAG-003 | Phase 3 | Pending |
+| DIAG-004 | Phase 3 | Pending |
+| DIAG-005 | Phase 3 | Pending |
+| DIAG-006 | Phase 3 | Pending |
+| DIAG-007 | Phase 5 | Pending |
+| DIAG-008 | Deferred (v2+) | -- |
+| DIAG-009 | Deferred (v2+) | -- |
+| INFRA-001 | Phase 1 | Pending |
+| INFRA-002 | Phase 1 | Pending |
+| INFRA-003 | Phase 1 | Pending |
+| INFRA-004 | Phase 2 | Pending |
+| INFRA-005 | Phase 2 | Pending |
+| INFRA-006 | Phase 3 | Pending |
+| INFRA-007 | Phase 1 | Pending |
+| INFRA-008 | Phase 7 | Pending |
+| INFRA-009 | Phase 5 / Phase 7 | Pending |
+| INFRA-010 | Phase 3 | Pending |
+| INFRA-011 | Phase 1 | Pending |
 
 ---
 *Requirements generated: 2026-02-10*
+*Traceability added: 2026-02-10*
 *Ready for roadmap: yes*
