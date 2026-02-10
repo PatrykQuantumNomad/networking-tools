@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundations and Site Scaffold** - common.sh extensions + Astro site scaffold + GitHub Actions deploy
 - [x] **Phase 2: Core Networking Tools** - dig, curl, netcat examples.sh and use-case scripts
 - [x] **Phase 3: Diagnostic Scripts** - DNS and connectivity auto-report scripts (Pattern B)
-- [ ] **Phase 4: Content Migration and Tool Pages** - Migrate notes/*.md to site, add new tool and diagnostic docs
+- [x] **Phase 4: Content Migration and Tool Pages** - Migrate notes/*.md to site, add new tool and diagnostic docs
 - [ ] **Phase 5: Advanced Tools** - traceroute/mtr examples.sh, use-case scripts, and performance diagnostic
 - [ ] **Phase 6: Site Polish and Learning Paths** - Task index, learning paths, cross-references, lab walkthrough
 - [ ] **Phase 7: Web Enumeration Tools** - gobuster/ffuf examples.sh, use-case scripts, wordlist infrastructure
@@ -99,9 +99,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Migrate 11 existing tool pages and lab walkthrough from notes/*.md to site with Starlight frontmatter
-- [ ] 04-02-PLAN.md — Create new tool pages (dig, curl, netcat) and diagnostic docs (DNS, connectivity)
-- [ ] 04-03-PLAN.md — Getting-started guide
+- [x] 04-01-PLAN.md — Migrate 11 existing tool pages and lab walkthrough from notes/*.md to site with Starlight frontmatter
+- [x] 04-02-PLAN.md — Create new tool pages (dig, curl, netcat) and diagnostic docs (DNS, connectivity)
+- [x] 04-03-PLAN.md — Getting-started guide
 
 ---
 
@@ -264,7 +264,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 1. Foundations and Site Scaffold | 3/3 | Complete | 2026-02-10 |
 | 2. Core Networking Tools | 3/3 | Complete | 2026-02-10 |
 | 3. Diagnostic Scripts | 2/2 | Complete | 2026-02-10 |
-| 4. Content Migration and Tool Pages | 0/3 | Not started | - |
+| 4. Content Migration and Tool Pages | 3/3 | Complete | 2026-02-10 |
 | 5. Advanced Tools | 0/2 | Not started | - |
 | 6. Site Polish and Learning Paths | 0/3 | Not started | - |
 | 7. Web Enumeration Tools | 0/3 | Not started | - |
