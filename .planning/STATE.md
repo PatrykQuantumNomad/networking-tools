@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 5 - Advanced Tools -- COMPLETE
+**Current focus:** Phase 6 - Site Polish and Learning Paths
 
 ## Current Position
 
-Phase: 5 of 7 (Advanced Tools) -- COMPLETE
-Plan: 2 of 2 in current phase
-Status: Phase complete -- all 2 plans executed
-Last activity: 2026-02-10 -- Completed 05-02 performance diagnostic and documentation
+Phase: 6 of 7 (Site Polish and Learning Paths)
+Plan: 2 of 3 in current phase
+Status: Plan 02 complete -- task index, learning paths, and walkthrough asides
+Last activity: 2026-02-10 -- Completed 06-02 task index, learning paths, and walkthrough asides
 
-Progress: [##############......] 70%
+Progress: [################....] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 15
 - Average duration: 4min
-- Total execution time: 0.76 hours
+- Total execution time: 0.98 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [##############......] 70%
 | 03-diagnostic-scripts | 2 | 7min | 4min |
 | 04-content-migration-and-tool-pages | 3 | 17min | 6min |
 | 05-advanced-tools | 2 | 11min | 6min |
+| 06-site-polish-and-learning-paths | 2 | 13min | 7min |
 
 **Recent Trend:**
-- Last 5 plans: 04-03 (2min), 04-02 (4min), 04-01 (11min), 05-01 (4min), 05-02 (7min)
+- Last 5 plans: 04-01 (11min), 05-01 (4min), 05-02 (7min), 06-01 (7min), 06-02 (6min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -84,6 +85,11 @@ Recent decisions affecting current work:
 - [05-02]: _run_with_timeout wrapper (30s traceroute, 60s mtr) to prevent hangs on unreachable targets
 - [05-02]: 50ms threshold for latency spike detection between consecutive hops
 - [05-02]: pipefail-safe grep in while loops: || true on grep pipes that may return no matches
+- [06-01]: Metasploit uses 2-tab layout (nightly installer + Kali pre-installed) instead of standard 3-OS-tab pattern
+- [06-01]: Skipfish uses 2-tab layout (MacPorts + Debian only) -- not in Homebrew or RHEL repos
+- [06-01]: Pre-installed tools (curl, netcat, traceroute) show informational text in macOS tab instead of install commands
+- [06-02]: Sidebar ordering: task-index(3), learning paths(10-12) to keep getting-started and lab-walkthrough first
+- [06-02]: Learning path steps include specific make commands for immediate practice
 
 ### Pending Todos
 
@@ -96,5 +102,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 05-02-PLAN.md -- All Phase 5 plans complete, ready for Phase 6
+Stopped at: Completed 06-01-PLAN.md -- Tool page MDX conversion and cross-references done, ready for 06-02
 Resume file: None
