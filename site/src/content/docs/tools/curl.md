@@ -1,0 +1,164 @@
+---
+title: "curl — HTTP Client"
+description: "Transfer data with URLs, test HTTP endpoints, inspect SSL certificates, and debug response timing"
+sidebar:
+  order: 5
+  badge:
+    text: 'New'
+    variant: 'tip'
+---
+
+## What It Does
+
+curl transfers data to or from a server using URLs. It answers: what does the server respond with, what are the response headers, how long does each phase of the connection take, and is the SSL certificate valid?
+
+## Running the Examples Script
+
+```bash
+# Requires a target argument (URL)
+bash scripts/curl/examples.sh <target>
+
+# Or via Makefile
+make curl TARGET=<target>
+
+# Examples with lab targets
+bash scripts/curl/examples.sh https://example.com
+bash scripts/curl/examples.sh http://localhost:8080
+```
+
+The script prints 10 example commands with explanations, then offers to fetch response headers interactively.
+
+## Key Flags to Remember
+
+| Flag | What It Does |
+| ---- | ------------ |
+| `-I` | Fetch response headers only (HEAD request) |
+| `-i` | Include response headers with the body |
+| `-v` | Verbose output -- full request and response details |
+| `-L` | Follow redirects automatically |
+| `-X POST` | Send a POST request (or PUT, DELETE, PATCH, etc.) |
+| `-d 'data'` | Send data in the request body |
+| `-H 'Header: value'` | Send a custom header |
+| `-o output.html` | Download response to a file |
+| `-s` | Silent mode -- no progress bar or error messages |
+| `-k` | Ignore SSL certificate errors (testing only) |
+| `-w 'format'` | Write out connection timing and metadata after transfer |
+
+## Install
+
+| Platform | Command |
+| -------- | ------- |
+| macOS | Pre-installed |
+| Debian / Ubuntu | `apt install curl` |
+| RHEL / Fedora | `dnf install curl` |
+
+## Use-Case Scripts
+
+### test-http-endpoints.sh -- Test HTTP endpoints with different methods
+
+Demonstrates HTTP method testing with curl. Shows how to send GET, POST, PUT, DELETE, PATCH, HEAD, and OPTIONS requests to inspect API behavior and status codes.
+
+**When to use:** When testing web application endpoints for allowed methods, CORS configuration, or API behavior.
+
+**Key commands:**
+
+```bash
+# GET request -- check status code
+curl -s -o /dev/null -w 'HTTP %{http_code}\n' https://example.com
+
+# POST with JSON body
+curl -X POST -H 'Content-Type: application/json' -d '{"key":"value"}' https://example.com
+
+# OPTIONS request -- discover allowed methods and CORS
+curl -X OPTIONS -i -s https://example.com
+
+# HEAD request -- headers only, no body
+curl -I -s https://example.com
+
+# Follow redirects and show the redirect chain
+curl -L -v -s -o /dev/null https://example.com 2>&1 | grep -E '< HTTP/|< location:'
+```
+
+**Make target:** `make test-http TARGET=<url>`
+
+---
+
+### check-ssl-certificate.sh -- Check SSL/TLS certificate details
+
+Inspects SSL/TLS certificates using curl. Shows how to check certificate validity, expiry dates, TLS version support, certificate chain of trust, and HSTS headers.
+
+**When to use:** When verifying SSL certificate configuration, checking for expiring certificates, or testing TLS version support.
+
+**Key commands:**
+
+```bash
+# View SSL certificate details
+curl -vI https://example.com 2>&1 | grep -E 'subject:|issuer:|expire|SSL'
+
+# Test TLS 1.2 support
+curl --tlsv1.2 --tls-max 1.2 -sI https://example.com -o /dev/null -w 'TLS 1.2: HTTP %{http_code}\n'
+
+# Test TLS 1.3 support
+curl --tlsv1.3 -sI https://example.com -o /dev/null -w 'TLS 1.3: HTTP %{http_code}\n'
+
+# Check HSTS header
+curl -sI https://example.com | grep -i strict-transport-security
+
+# Compare with vs without certificate verification
+curl -sI https://example.com -o /dev/null -w 'With verify: HTTP %{http_code}\n'
+curl -sI -k https://example.com -o /dev/null -w 'Skip verify: HTTP %{http_code}\n'
+```
+
+**Make target:** `make check-ssl TARGET=<domain>`
+
+---
+
+### debug-http-response.sh -- Debug HTTP response timing and details
+
+Diagnoses HTTP response behavior using curl's timing and debug features. Measures DNS lookup, TCP connect, TLS handshake, and time-to-first-byte to pinpoint latency sources.
+
+**When to use:** When diagnosing slow web requests or identifying which phase of the connection is causing delays.
+
+**Key commands:**
+
+```bash
+# Full HTTP timing breakdown
+curl -o /dev/null -s -w 'DNS Lookup:   %{time_namelookup}s\nTCP Connect:  %{time_connect}s\nTLS Handshake: %{time_appconnect}s\nFirst Byte:    %{time_starttransfer}s\nTotal:         %{time_total}s\n' https://example.com
+
+# Measure time-to-first-byte (TTFB)
+curl -o /dev/null -s -w 'TTFB: %{time_starttransfer}s\n' https://example.com
+
+# Show response size in bytes
+curl -o /dev/null -s -w 'Download size: %{size_download} bytes\nHeader size: %{size_header} bytes\n' https://example.com
+
+# Compare HTTP/1.1 vs HTTP/2 response
+curl --http1.1 -o /dev/null -s -w 'HTTP/1.1 total: %{time_total}s\n' https://example.com
+curl --http2 -o /dev/null -s -w 'HTTP/2   total: %{time_total}s\n' https://example.com
+
+# Save full debug trace to file for analysis
+curl --trace curl-trace.log --trace-time https://example.com -o /dev/null
+```
+
+**Make target:** `make debug-http TARGET=<url>`
+
+## Practice Against Lab Targets
+
+```bash
+make lab-up
+
+# Test lab endpoints
+curl -I http://localhost:8080          # DVWA
+curl -I http://localhost:3030          # Juice Shop
+curl -I http://localhost:8888/WebGoat  # WebGoat
+
+# Timing breakdown against local target
+curl -o /dev/null -s -w 'DNS: %{time_namelookup}s\nConnect: %{time_connect}s\nTotal: %{time_total}s\n' http://localhost:8080
+```
+
+## Notes
+
+- macOS ships with curl pre-installed -- no additional installation needed
+- Use `-s` (silent) when scripting to suppress the progress bar
+- The `-w` (write-out) format string is extremely powerful for performance debugging -- see `man curl` for all available variables
+- Use `-k` only for testing against self-signed certificates, never in production
+- curl's verbose output (`-v`) goes to stderr, so pipe with `2>&1` to capture it

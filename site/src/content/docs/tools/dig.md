@@ -1,0 +1,164 @@
+---
+title: "dig — DNS Lookup Utility"
+description: "Query DNS records, trace delegation paths, and test DNS propagation"
+sidebar:
+  order: 4
+  badge:
+    text: 'New'
+    variant: 'tip'
+---
+
+## What It Does
+
+dig queries DNS servers for records associated with a domain. It answers: what IP addresses does this domain resolve to, who are its nameservers, what mail servers handle its email, and has a DNS change propagated globally?
+
+## Running the Examples Script
+
+```bash
+# Requires a target argument (domain name)
+bash scripts/dig/examples.sh <target>
+
+# Or via Makefile
+make dig TARGET=<target>
+
+# Examples
+bash scripts/dig/examples.sh example.com
+bash scripts/dig/examples.sh google.com
+```
+
+The script prints 10 example commands with explanations, then offers to run a quick A record lookup interactively.
+
+## Key Flags to Remember
+
+| Flag | What It Does |
+| ---- | ------------ |
+| `+short` | Show only the answer (no headers, authority, or additional sections) |
+| `MX` | Query mail exchange records |
+| `AAAA` | Query IPv6 address records |
+| `TXT` | Query TXT records (SPF, DKIM, domain verification) |
+| `SOA` | Query Start of Authority record (zone serial number) |
+| `NS` | Query authoritative nameservers |
+| `@8.8.8.8` | Query a specific DNS server instead of the default resolver |
+| `+trace` | Trace the delegation path from root servers to the answer |
+| `-x <ip>` | Reverse DNS lookup (PTR record) for an IP address |
+| `+noall +answer` | Show only the answer section (clean output) |
+
+## Install
+
+| Platform | Command |
+| -------- | ------- |
+| macOS | `brew install bind` |
+| Debian / Ubuntu | `apt install dnsutils` |
+| RHEL / Fedora | `dnf install bind-utils` |
+
+## Use-Case Scripts
+
+### query-dns-records.sh -- Query all common DNS record types
+
+Queries common DNS record types (A, AAAA, MX, NS, TXT, SOA, CNAME) for a domain. Useful for reconnaissance and understanding a domain's infrastructure.
+
+**When to use:** When you need to map out all DNS records for a target domain -- first step in DNS-based reconnaissance.
+
+**Key commands:**
+
+```bash
+# A record -- IPv4 address
+dig example.com A +noall +answer
+
+# MX records -- mail exchange servers
+dig example.com MX +noall +answer
+
+# NS records -- authoritative nameservers
+dig example.com NS +noall +answer
+
+# TXT records -- SPF, DKIM, domain verification
+dig example.com TXT +noall +answer
+
+# ALL records -- query everything available
+dig example.com ANY +noall +answer
+
+# Query via specific DNS server (Cloudflare)
+dig @1.1.1.1 example.com A +noall +answer
+```
+
+**Make target:** `make query-dns TARGET=<domain>`
+
+---
+
+### check-dns-propagation.sh -- Compare DNS responses across public resolvers
+
+Compares DNS responses across multiple public resolvers (Google, Cloudflare, Quad9, OpenDNS) to check whether a DNS change has propagated globally. Useful after updating A records, MX records, or nameservers.
+
+**When to use:** After making DNS changes, to verify the update has reached all major resolvers.
+
+**Key commands:**
+
+```bash
+# Check A record across multiple resolvers
+for dns in 8.8.8.8 1.1.1.1 9.9.9.9 208.67.222.222; do
+    echo "$dns: $(dig @$dns example.com A +short)"
+done
+
+# Compare TTL values across resolvers
+for dns in 8.8.8.8 1.1.1.1 9.9.9.9; do
+    echo "$dns:"; dig @$dns example.com A +noall +answer
+done
+
+# Compare SOA serial numbers across resolvers
+for dns in 8.8.8.8 1.1.1.1 9.9.9.9; do
+    echo "$dns:"; dig @$dns example.com SOA +short
+done
+```
+
+**Make target:** `make check-dns-prop TARGET=<domain>`
+
+---
+
+### attempt-zone-transfer.sh -- Attempt DNS zone transfers (AXFR)
+
+Demonstrates DNS zone transfer (AXFR) techniques for discovering all records in a DNS zone. Misconfigured servers may allow unauthorized zone transfers, revealing the full DNS inventory including internal subdomains.
+
+**When to use:** During reconnaissance to check if a target's nameservers are misconfigured to allow zone transfers.
+
+**Key commands:**
+
+```bash
+# Find authoritative nameservers first
+dig example.com NS +short
+
+# Attempt AXFR against a nameserver
+dig axfr example.com @$(dig example.com NS +short | head -1)
+
+# Loop AXFR attempt against all nameservers
+for ns in $(dig example.com NS +short); do
+    echo "Trying $ns..."; dig axfr example.com @$ns
+done
+
+# Brute-check common subdomains
+for sub in www mail ftp ns1 ns2 admin dev staging vpn; do
+    result=$(dig ${sub}.example.com A +short)
+    [[ -n "$result" ]] && echo "${sub}.example.com: $result"
+done
+```
+
+**Make target:** `make zone-transfer TARGET=<domain>`
+
+## Practice Against Lab Targets
+
+dig operates against DNS servers, not web application targets directly. You can use it to resolve the lab target hostnames:
+
+```bash
+make lab-up
+dig localhost A +short
+dig +short localhost AAAA
+```
+
+For realistic DNS practice, query public domains like `example.com` or `google.com`.
+
+## Notes
+
+- `dig -v` outputs version information to stderr, not stdout -- use `dig -v 2>&1` if you need to capture it
+- Unlike most tools, dig does not need `sudo` for any operation
+- The `+short` flag is your best friend for scripting -- it strips all headers and returns only the answer
+- Use `+trace` to debug resolution failures -- it shows where the delegation chain breaks
+- dig is part of the BIND utilities package, which is why the install package names vary by platform
