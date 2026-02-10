@@ -137,12 +137,12 @@ Plans:
   3. Tool pages include OS-specific install tabs (macOS Homebrew vs Linux apt) using Starlight Tabs component
   4. The lab walkthrough is formatted as Starlight pages with asides and callouts for tips and warnings
   5. CI validates that every `scripts/*/examples.sh` has a corresponding documentation page on the site
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: Task index page and learning path pages
-- [ ] 06-02: OS-specific install tabs, cross-references, and lab walkthrough formatting
-- [ ] 06-03: CI docs-completeness validation
+- [ ] 06-01-PLAN.md — Rename tool pages to .mdx, add OS-specific install tabs, add cross-reference sections
+- [ ] 06-02-PLAN.md — Task index page, three learning path pages, lab walkthrough asides
+- [ ] 06-03-PLAN.md — CI docs-completeness validation script and workflow integration
 
 ---
 
