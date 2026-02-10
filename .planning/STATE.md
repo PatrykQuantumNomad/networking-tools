@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 4 - Content Migration and Tool Pages
+**Current focus:** Phase 5 - Advanced Tools
 
 ## Current Position
 
-Phase: 4 of 7 (Content Migration and Tool Pages) -- COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase complete -- all 3 plans executed
-Last activity: 2026-02-10 -- Completed 04-01 content migration (11 tool pages + lab walkthrough)
+Phase: 5 of 7 (Advanced Tools)
+Plan: 1 of 2 in current phase
+Status: Plan 05-01 complete, Plan 05-02 pending
+Last activity: 2026-02-10 -- Completed 05-01 traceroute/mtr scripts (4 scripts + project integration)
 
-Progress: [############........] 60%
+Progress: [#############.......] 65%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 12
 - Average duration: 4min
-- Total execution time: 0.57 hours
+- Total execution time: 0.64 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [############........] 60%
 | 02-core-networking-tools | 3 | 11min | 4min |
 | 03-diagnostic-scripts | 2 | 7min | 4min |
 | 04-content-migration-and-tool-pages | 3 | 17min | 6min |
+| 05-advanced-tools | 1 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (3min), 03-02 (4min), 04-03 (2min), 04-02 (4min), 04-01 (11min)
+- Last 5 plans: 03-02 (4min), 04-03 (2min), 04-02 (4min), 04-01 (11min), 05-01 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -75,6 +76,11 @@ Recent decisions affecting current work:
 - [04-02]: Diagnostic pages use table-based severity explanation format (check/severity/meaning columns)
 - [04-01]: Sidebar ordering groups tools by function: network(1-3), web(7-9), exploit(10), cracking(11-12), wireless(13), forensics(14)
 - [04-01]: Metasploit console commands use text language tag instead of bash to avoid false syntax highlighting
+- [05-01]: traceroute version detection returns 'installed' (macOS BSD has no --version flag)
+- [05-01]: diagnose-latency.sh warns and exits on macOS without sudo (never auto-elevates)
+- [05-01]: examples.sh requires traceroute only; mtr examples print regardless with install note if missing
+- [05-01]: diagnose-performance Makefile target points to scripts/diagnostics/performance.sh (created by Plan 02)
+- [05-01]: macOS uses -a for AS lookups in traceroute (not -A like Linux)
 
 ### Pending Todos
 
@@ -87,5 +93,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 04-01-PLAN.md -- All Phase 4 plans complete, ready for Phase 5
+Stopped at: Completed 05-01-PLAN.md -- traceroute/mtr scripts created, ready for 05-02
 Resume file: None
