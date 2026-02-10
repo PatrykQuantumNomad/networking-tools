@@ -7,6 +7,10 @@ sidebar:
 
 A guided walkthrough that takes you through every use case in this project, organized as a realistic pentest engagement against the Docker lab targets.
 
+:::tip[Prefer a guided approach?]
+Check out the [Learning Paths](/networking-tools/guides/learning-recon/) for structured sequences focused on specific skills like reconnaissance, web app testing, or network debugging.
+:::
+
 ## Lab Targets
 
 | Target | URL | Credentials | Best For |
@@ -37,6 +41,10 @@ sudo port install skipfish
 
 Metasploit requires a separate installer — see the link in `make check` output.
 
+:::tip[Start Here]
+You don't need every tool installed to begin. Start with nmap and work through the phases in order -- install additional tools as you need them.
+:::
+
 ### Download wordlists
 
 ```bash
@@ -44,6 +52,10 @@ make wordlists
 ```
 
 This downloads rockyou.txt (~14M passwords, ~140MB) to `wordlists/`. Required for hashcat, john, and aircrack-ng dictionary attacks.
+
+:::note
+The rockyou.txt download is ~140MB. If you're on a slow connection, you can skip this and come back when you reach the Password Cracking phase.
+:::
 
 ### Start the lab
 
@@ -73,6 +85,10 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:8180/VulnerableApp   # V
 3. Go to http://localhost:8080/setup.php
 4. Click **Create / Reset Database**
 5. Log in again — DVWA is now ready
+
+:::caution
+DVWA resets its database when the container restarts. You'll need to repeat this step each time you run `make lab-up`.
+:::
 
 ---
 
@@ -121,6 +137,10 @@ make analyze-dns
 ```
 
 Leave this running while you work through other phases. It captures DNS queries, which can reveal interesting domains being resolved.
+
+:::tip
+Leave tshark running in a background terminal throughout the entire walkthrough. Reviewing the captured DNS queries afterward reveals which domains each tool resolves during scanning.
+:::
 
 **Recon summary**: At this point you know what hosts are up, what ports are open, what services are running, and their versions. This drives your next steps.
 
@@ -200,6 +220,10 @@ make scan-hosts TARGET=/tmp/targets.txt
 **Goal**: Confirm and exploit SQL injection on DVWA.
 
 **Tools used**: sqlmap
+
+:::caution
+SQL injection testing requires an active session cookie. If your DVWA session expires mid-test, sqlmap will silently get redirected to the login page and find no injection points.
+:::
 
 ### 3.1 Get your DVWA session cookie
 
@@ -341,6 +365,10 @@ This works with any password-protected archive file you have on hand.
 
 **Tools used**: tshark, hping3
 
+:::note
+Traffic capture with tshark requires root/sudo privileges. On macOS, you may need to grant Terminal full disk access in System Settings > Privacy & Security.
+:::
+
 ### 5.1 Capture HTTP credentials
 
 Start tshark capturing on the loopback interface:
@@ -402,6 +430,10 @@ make detect-firewall TARGET=localhost
 **Goal**: Understand the exploit workflow with Metasploit.
 
 **Tools used**: metasploit
+
+:::danger
+Never run Metasploit exploits against systems you don't own or have written authorization to test. The lab containers are safe targets -- external systems are not.
+:::
 
 ### 6.1 Generate a reverse shell payload
 
@@ -484,6 +516,10 @@ make analyze-forensic TARGET=/path/to/disk-image.dd
 
 **macOS note**: Monitor mode tools (`airmon-ng`, `airodump-ng`, `aireplay-ng`) are Linux-only and not included in the Homebrew package. The scripts detect this and fall back to `aircrack-ng -S` (benchmark). For full WiFi testing, use a Linux VM (Kali) with a USB WiFi adapter.
 
+:::note
+On macOS, only offline operations work (cracking captured handshakes, benchmarking). Monitor mode tools require Linux with a compatible USB WiFi adapter.
+:::
+
 What works on macOS:
 - Cracking captured handshakes (`aircrack-ng -w wordlist capture.cap`)
 - Benchmarking (`aircrack-ng -S`)
@@ -524,6 +560,10 @@ Stop all lab containers when you're done:
 ```bash
 make lab-down
 ```
+
+:::tip
+Run `docker system prune` periodically to reclaim disk space from stopped containers and unused images.
+:::
 
 Verify everything is stopped:
 
