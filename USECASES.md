@@ -66,6 +66,15 @@ Find the right script by what you're trying to do. All commands support `--help`
 | Diagnose DNS resolution issues | `make diagnose-dns TARGET=<domain>` | dig |
 | Check full connectivity (DNS to TLS) | `make diagnose-connectivity TARGET=<domain>` | dig, ping, nc, curl |
 
+## Route Tracing & Performance
+
+| I want to... | Command | Tool |
+| -------------- | --------- | ------ |
+| Trace the network path to a host | `make trace-path TARGET=<host>` | traceroute |
+| Analyze per-hop latency | `make diagnose-latency TARGET=<host>` | mtr |
+| Compare TCP/ICMP/UDP routes | `make compare-routes TARGET=<host>` | traceroute |
+| Run a full performance diagnostic | `make diagnose-performance TARGET=<host>` | traceroute, mtr |
+
 ## File Carving & Forensics
 
 | I want to... | Command | Tool |
@@ -95,6 +104,9 @@ bash scripts/<tool>/<script>.sh [target] [--help]
 1. Discovery     make discover-hosts TARGET=192.168.1.0/24
 1b. Diagnostics  make diagnose-dns TARGET=<domain>
                  make diagnose-connectivity TARGET=<domain>
+1c. Route trace  make trace-path TARGET=<host>
+                 make diagnose-latency TARGET=<host>
+                 make diagnose-performance TARGET=<host>
 2. Port scan     make identify-ports TARGET=<ip>
 3. Web scan      make scan-web-vulns TARGET=<ip>
                  make scan-vulns TARGET=<url>

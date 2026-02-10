@@ -1,6 +1,6 @@
 # Makefile — Common operations for networking-tools
 
-.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity
+.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity traceroute trace-path diagnose-latency compare-routes diagnose-performance
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -192,3 +192,18 @@ nc-listener: ## Setup netcat listener
 
 nc-transfer: ## Transfer files with netcat
 	@bash scripts/netcat/transfer-files.sh
+
+traceroute: ## Run traceroute/mtr examples (usage: make traceroute TARGET=<host>)
+	@bash scripts/traceroute/examples.sh $(TARGET)
+
+trace-path: ## Trace network path (usage: make trace-path TARGET=<host>)
+	@bash scripts/traceroute/trace-network-path.sh $(or $(TARGET),example.com)
+
+diagnose-latency: ## Diagnose per-hop latency with mtr (usage: make diagnose-latency TARGET=<host>)
+	@bash scripts/traceroute/diagnose-latency.sh $(or $(TARGET),example.com)
+
+compare-routes: ## Compare TCP/ICMP/UDP routes (usage: make compare-routes TARGET=<host>)
+	@bash scripts/traceroute/compare-routes.sh $(or $(TARGET),example.com)
+
+diagnose-performance: ## Run performance diagnostic (usage: make diagnose-performance TARGET=<host>)
+	@bash scripts/diagnostics/performance.sh $(or $(TARGET),example.com)

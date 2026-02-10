@@ -39,10 +39,12 @@ declare -A TOOLS=(
     [dig]="apt install dnsutils (Debian/Ubuntu) | brew install bind (macOS)"
     [curl]="apt install curl (Debian/Ubuntu) | brew install curl (macOS)"
     [nc]="apt install netcat-openbsd (Debian/Ubuntu) | brew install netcat (macOS)"
+    [traceroute]="apt install traceroute (Debian/Ubuntu) | dnf install traceroute (RHEL/Fedora) | pre-installed on macOS"
+    [mtr]="apt install mtr (Debian/Ubuntu) | dnf install mtr (RHEL/Fedora) | brew install mtr (macOS)"
 )
 
 # Ordered list for display
-TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto foremost dig curl nc)
+TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto foremost dig curl nc traceroute mtr)
 
 installed=0
 total=${#TOOL_ORDER[@]}
@@ -64,6 +66,10 @@ get_version() {
         nc)
             # nc -h exits non-zero on some variants (e.g., macOS/OpenBSD)
             nc -h 2>&1 | head -1 || true
+            ;;
+        traceroute)
+            # macOS BSD traceroute has no --version flag
+            echo "installed"
             ;;
         *)
             timeout 5 "$tool" --version 2>/dev/null | head -1 || echo "installed"
