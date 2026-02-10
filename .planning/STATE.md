@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 5 - Advanced Tools
+**Current focus:** Phase 5 - Advanced Tools -- COMPLETE
 
 ## Current Position
 
-Phase: 5 of 7 (Advanced Tools)
-Plan: 1 of 2 in current phase
-Status: Plan 05-01 complete, Plan 05-02 pending
-Last activity: 2026-02-10 -- Completed 05-01 traceroute/mtr scripts (4 scripts + project integration)
+Phase: 5 of 7 (Advanced Tools) -- COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase complete -- all 2 plans executed
+Last activity: 2026-02-10 -- Completed 05-02 performance diagnostic and documentation
 
-Progress: [#############.......] 65%
+Progress: [##############......] 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: 4min
-- Total execution time: 0.64 hours
+- Total execution time: 0.76 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [#############.......] 65%
 | 02-core-networking-tools | 3 | 11min | 4min |
 | 03-diagnostic-scripts | 2 | 7min | 4min |
 | 04-content-migration-and-tool-pages | 3 | 17min | 6min |
-| 05-advanced-tools | 1 | 4min | 4min |
+| 05-advanced-tools | 2 | 11min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (4min), 04-03 (2min), 04-02 (4min), 04-01 (11min), 05-01 (4min)
+- Last 5 plans: 04-03 (2min), 04-02 (4min), 04-01 (11min), 05-01 (4min), 05-02 (7min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -81,6 +81,9 @@ Recent decisions affecting current work:
 - [05-01]: examples.sh requires traceroute only; mtr examples print regardless with install note if missing
 - [05-01]: diagnose-performance Makefile target points to scripts/diagnostics/performance.sh (created by Plan 02)
 - [05-01]: macOS uses -a for AS lookups in traceroute (not -A like Linux)
+- [05-02]: _run_with_timeout wrapper (30s traceroute, 60s mtr) to prevent hangs on unreachable targets
+- [05-02]: 50ms threshold for latency spike detection between consecutive hops
+- [05-02]: pipefail-safe grep in while loops: || true on grep pipes that may return no matches
 
 ### Pending Todos
 
@@ -93,5 +96,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 05-01-PLAN.md -- traceroute/mtr scripts created, ready for 05-02
+Stopped at: Completed 05-02-PLAN.md -- All Phase 5 plans complete, ready for Phase 6
 Resume file: None
