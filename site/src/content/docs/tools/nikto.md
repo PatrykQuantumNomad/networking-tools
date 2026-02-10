@@ -1,0 +1,192 @@
+---
+title: "Nikto — Web Server Vulnerability Scanner"
+description: Nikto scans web servers for known vulnerabilities, dangerous files, outdated software, and misconfigurations
+sidebar:
+  order: 7
+---
+
+## What It Does
+
+Nikto scans web servers for known vulnerabilities, dangerous files, outdated software, and misconfigurations. It checks against a database of 7000+ potentially dangerous files and identifies version-specific issues on 1250+ servers. It answers: what security problems does this web server have?
+
+## Running the Examples Script
+
+```bash
+# Requires a target argument (URL or IP)
+bash scripts/nikto/examples.sh <target>
+
+# Or via Makefile
+make nikto TARGET=<target>
+
+# Examples with lab targets
+bash scripts/nikto/examples.sh http://localhost:8080
+bash scripts/nikto/examples.sh http://localhost:3030
+```
+
+The script prints 10 example commands with explanations, then offers to run a basic scan interactively.
+
+## Key Flags to Remember
+
+| Flag | What It Does |
+| ------ | ------------- |
+| `-h <target>` | Host to scan (URL, IP, or hostname) |
+| `-p <ports>` | Port(s) to scan -- comma-separated for multiple |
+| `-ssl` | Force SSL/TLS mode |
+| `-Tuning <digits>` | Scan only specific vulnerability categories |
+| `-o <file>` | Save output to file |
+| `-Format <fmt>` | Output format: html, csv, xml, txt |
+| `-id <user:pass>` | HTTP Basic Authentication credentials |
+| `-C <cookies>` | Cookie-based authentication |
+| `-H <header>` | Add custom HTTP header |
+| `-evasion <n>` | IDS evasion techniques (1=Random URI, 2=Self-ref, 3=Premature end, 4=Long URL) |
+| `-useproxy <url>` | Route scan through a proxy |
+| `-maxtime <time>` | Maximum scan time (e.g., 120s, 5m) |
+| `-followredirects` | Follow HTTP redirects |
+| `-update` | Update Nikto's vulnerability database |
+
+## Scan Progression (recommended order)
+
+1. `nikto -h <target>` -- full scan, get the big picture
+2. `nikto -h <target> -Tuning 2` -- interesting files and misconfigurations
+3. `nikto -h <target> -Tuning 498` -- SQLi + XSS + command execution
+4. `nikto -h <target> -id admin:password` -- authenticated scan for deeper coverage
+5. `nikto -h <target> -output report.html -Format htm` -- save the report
+
+## Use-Case Scripts
+
+### scan-specific-vulnerabilities.sh -- Target specific vulnerability types using Tuning options
+
+Uses Nikto's Tuning flags to scan for specific vulnerability categories instead of running a full scan. Each tuning number targets a different vulnerability type, making scans faster and less noisy. Covers all tuning codes from file upload (0) to remote source inclusion (c), plus reverse tuning (x) to exclude categories.
+
+**When to use:** When you know what you are looking for (e.g., only SQLi or XSS), when you need a faster scan, or when you want to reduce traffic to avoid detection.
+
+**Key commands:**
+
+```bash
+# Scan for SQL injection only
+nikto -h http://localhost:8080 -Tuning 9
+
+# Scan for XSS only
+nikto -h http://localhost:8080 -Tuning 4
+
+# Scan for command execution vulnerabilities
+nikto -h http://localhost:8080 -Tuning 8
+
+# Combine: SQLi + XSS + command execution
+nikto -h http://localhost:8080 -Tuning 498
+
+# Scan for interesting files and directories
+nikto -h http://localhost:8080 -Tuning 2
+
+# Scan for server misconfigurations and software identification
+nikto -h http://localhost:8080 -Tuning b
+
+# Full scan excluding denial-of-service tests
+nikto -h http://localhost:8080 -Tuning x6
+```
+
+**Make target:** `make scan-vulns TARGET=<url>`
+
+---
+
+### scan-multiple-hosts.sh -- Scan multiple web servers from nmap output or host list
+
+Scans multiple web servers discovered by nmap or listed in a file. More efficient than running nikto one host at a time. Accepts host files (one per line), nmap greppable output via pipe, and nmap XML output directly. The standard workflow is: nmap finds targets, nikto probes them.
+
+**When to use:** After network discovery (nmap) when you have multiple web servers to scan. Also useful for scanning all lab targets at once across different ports.
+
+**Key commands:**
+
+```bash
+# Scan multiple ports on one host
+nikto -h localhost -p 80,8080,3030,8888
+
+# Scan from a host list file (one target per line)
+nikto -h hosts.txt
+
+# Pipe nmap greppable output directly to nikto
+nmap -p80,443,8080 -oG - 192.168.1.0/24 | nikto -h -
+
+# Scan hosts from nmap XML output
+nikto -h nmap_output.xml
+
+# Quick scan mode for many hosts (limit time and scope)
+nikto -h hosts.txt -Tuning 2 -maxtime 120s
+
+# Create host list from nmap discovery, then scan
+nmap -sn 192.168.1.0/24 -oG - | awk '/Up/{print $2}' > hosts.txt && nikto -h hosts.txt -p 80
+
+# Generate CSV report for all hosts
+nikto -h hosts.txt -Format csv -output scan_results.csv
+```
+
+**Make target:** `make scan-hosts TARGET=<hostfile>`
+
+---
+
+### scan-with-auth.sh -- Authenticated scan using credentials or session cookies
+
+Performs authenticated Nikto scans using HTTP Basic Auth, cookies, or custom headers. Unauthenticated scans only see the login page and public content. Authenticated scans access admin panels, user dashboards, file upload forms, and management interfaces -- typically doubling or tripling the attack surface found.
+
+**When to use:** After obtaining valid credentials or session tokens. Run authenticated scans to discover vulnerabilities in restricted areas that unauthenticated scanning cannot reach.
+
+**Key commands:**
+
+```bash
+# HTTP Basic Authentication
+nikto -h http://localhost:8080 -id admin:password
+
+# Cookie-based authentication
+nikto -h http://localhost:8080 -C "PHPSESSID=abc123; security=low"
+
+# Custom header authentication (Bearer token)
+nikto -h http://localhost:8080 -H "Authorization: Bearer token123"
+
+# Authenticated scan with specific tuning (SQLi + XSS + Injection)
+nikto -h http://localhost:8080 -id admin:password -Tuning 249
+
+# Authenticated scan saving HTML report
+nikto -h http://localhost:8080 -id admin:password -output auth_scan.html -Format htm
+
+# Use a proxy to capture authenticated traffic (e.g., Burp Suite)
+nikto -h http://localhost:8080 -id admin:password -useproxy http://127.0.0.1:8080
+
+# Digest authentication
+nikto -h http://localhost:8080 -id admin:password -authtype digest
+```
+
+**Make target:** `make scan-auth TARGET=<url>`
+
+## Practice Against Lab Targets
+
+```bash
+make lab-up
+
+# Basic scan against DVWA
+nikto -h http://localhost:8080
+
+# Scan all lab targets at once
+nikto -h localhost -p 8080,3000,8888,8180
+
+# Authenticated scan against DVWA (admin/password)
+nikto -h http://localhost:8080 -id admin:password
+
+# Quick scan for interesting files across all lab ports
+nikto -h localhost -p 8080,3000,8888,8180 -Tuning 2 -maxtime 60s
+
+# Scan Juice Shop
+nikto -h http://localhost:3030
+```
+
+## Notes
+
+- Nikto is loud by design -- it makes thousands of requests and is easily detected by WAFs and IDS
+- Use `-Tuning` to limit scan scope and reduce noise when stealth matters
+- Combine with nmap for workflow: nmap finds web servers, nikto scans them
+- The `-evasion` flag offers basic IDS evasion but is not a substitute for real stealth
+- Update the vulnerability database regularly with `nikto -update`
+- Output formats (`-Format html/csv/xml`) are useful for reporting and importing into other tools
+- Cookie values expire -- if an authenticated scan stops finding pages, refresh the session cookie
+- Nikto can read nmap XML output directly with `-h nmap_output.xml`, making the nmap-to-nikto workflow seamless
+- Nikto does not spider the site -- it tests known file paths and server behaviors
+- For deep application-level scanning, pair nikto with skipfish or a full DAST tool

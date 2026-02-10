@@ -1,0 +1,133 @@
+---
+title: "Skipfish — Web Application Security Scanner"
+description: Skipfish is a web application security scanner that performs active reconnaissance by crawling the target site and testing for security issues
+sidebar:
+  order: 8
+---
+
+## What It Does
+
+Skipfish is a web application security scanner that performs active reconnaissance by crawling the target site and testing for security issues. It generates an interactive HTML report. Developed by Google, it's known for speed (written in C) and low false positive rates. Unlike nikto (which checks known file paths), skipfish crawls and tests application logic.
+
+## Running the Examples Script
+
+```bash
+# Requires a target argument (URL)
+bash scripts/skipfish/examples.sh <target>
+
+# Examples with lab targets
+bash scripts/skipfish/examples.sh http://localhost:8080
+bash scripts/skipfish/examples.sh http://localhost:3030
+```
+
+The script prints 10 example commands with explanations, then offers to run a basic scan interactively. Results are saved as an interactive HTML report.
+
+## Key Flags to Remember
+
+| Flag | What It Does |
+| ------ | ------------- |
+| `-o <dir>` | Output directory for HTML report (required) |
+| `-C "<cookie>"` | Send cookie (for authentication) |
+| `-H "<header>"` | Add custom HTTP header |
+| `-d <depth>` | Maximum crawl depth |
+| `-c <count>` | Maximum number of requests |
+| `-m <connections>` | Maximum simultaneous connections |
+| `-l <req/sec>` | Maximum requests per second |
+| `-W <wordlist>` | Custom wordlist for discovery |
+| `-S <wordlist>` | Supplemental wordlist (e.g., skipfish's own dictionaries) |
+| `-L` | Learning mode only (no active tests) |
+| `-I <path>` | Include only matching paths |
+| `-X <path>` | Exclude matching paths |
+| `-t <seconds>` | Request timeout |
+
+## Quick Scan Strategies
+
+Full skipfish scans can run for hours or days. For CTFs, initial recon, or demos:
+
+| Strategy | Flags | Why |
+| ------ | ------------- | ------------- |
+| Limit depth | `-d 2` | Fewer levels to crawl |
+| Limit requests | `-c 500` | Hard cap on total probes |
+| Limit connections | `-m 10` | Less aggressive |
+| Rate limit | `-l 5` | Fewer requests per second |
+| No brute-force | `-W /dev/null` | Skip dictionary attacks |
+| Learning only | `-L` | Passive crawl, no active tests |
+
+## Use-Case Scripts
+
+### scan-authenticated-app.sh -- Authenticated Web App Scanning
+
+Scans with session cookies, HTTP Basic Auth, or custom headers. Unauthenticated scans miss most of the attack surface -- admin panels, dashboards, and file upload forms. Shows how to get cookies from browser DevTools and exclude logout pages to stay authenticated.
+
+**When to use:** After obtaining valid credentials or session cookies, to scan restricted areas of a web application.
+
+**Key commands:**
+
+```bash
+skipfish -o output/ -C "PHPSESSID=abc123" <target>                            # Cookie auth
+skipfish -o output/ -C "PHPSESSID=abc123" -C "security=low" <target>          # Multiple cookies
+skipfish -o output/ --auth-form <target>/login --auth-user admin --auth-pass password <target>  # Form auth
+skipfish -o output/ -H "Authorization: Bearer token123" <target>               # Bearer token
+skipfish -o output/ -C "PHPSESSID=abc123" -X /logout -X /signout <target>     # Exclude logout
+```
+
+**Make target:** `make scan-auth-app TARGET=<url>`
+
+### quick-scan-web-app.sh -- Fast Initial Reconnaissance
+
+Runs fast, time-limited scans for CTFs and initial recon. Limits depth, requests, and connections for quick results instead of the default exhaustive crawl.
+
+**When to use:** When you need a quick security overview without waiting hours for a full scan.
+
+**Key commands:**
+
+```bash
+skipfish -o output/ -d 2 <target>                 # Depth-limited
+skipfish -o output/ -c 500 <target>               # Request-limited
+skipfish -o output/ -L <target>                   # Learning-only (passive)
+skipfish -o output/ -d 2 -c 200 <target>          # Combined quick scan
+skipfish -o output/ -W /dev/null <target>          # No dictionary brute-force
+```
+
+**Make target:** `make quick-scan TARGET=<url>`
+
+## Practice Against Lab Targets
+
+```bash
+make lab-up
+
+# Quick scan against DVWA (depth-limited, request-limited)
+skipfish -o dvwa_scan/ -d 2 -c 200 http://localhost:8080
+
+# Authenticated scan against DVWA
+# 1. Log in to DVWA at http://localhost:8080 (admin/password)
+# 2. Open DevTools (F12) -> Application -> Cookies
+# 3. Copy the PHPSESSID value, then:
+skipfish -o dvwa_auth/ -C "PHPSESSID=<your-session>; security=low" -d 2 http://localhost:8080
+
+# Quick scan Juice Shop
+skipfish -o juice_scan/ -d 2 -c 300 http://localhost:3030
+
+# Learning-only mode (passive crawl, safe)
+skipfish -o webgoat_scan/ -L http://localhost:8888
+
+# Scan all lab targets quickly
+for t in 8080 3030 8888; do
+  skipfish -o "output_${t}/" -d 2 -c 100 "http://localhost:${t}"
+done
+
+# View results
+open dvwa_scan/index.html
+```
+
+## Notes
+
+- The `-o` output directory is required and must not already exist (or skipfish will error)
+- Results are an interactive HTML report -- open `index.html` in a browser
+- Skipfish is aggressive by default -- use `-l` and `-m` to limit impact on targets
+- Unlike nikto, skipfish actually crawls the site and follows links
+- Learning-only mode (`-L`) is useful for mapping an app without triggering any alerts
+- Exclude logout pages (`-X /logout`) when scanning authenticated to avoid losing your session
+- Skipfish is no longer actively maintained but remains a solid quick-scan tool
+- For more thorough DAST scanning, consider pairing with nikto or a commercial tool
+- The `--auth-form` flag enables form-based login without manually grabbing cookies
