@@ -55,12 +55,12 @@ Plans:
   3. Running `bash scripts/netcat/examples.sh 127.0.0.1` prints 10 numbered educational examples that identify the local netcat variant (OpenBSD/GNU/ncat) and label variant-specific flags
   4. Each tool has 3 working use-case scripts: dig (query-dns-records, check-dns-propagation, attempt-zone-transfer), curl (test-http-endpoints, check-ssl-certificate, debug-http-response), netcat (scan-ports, setup-listener, transfer-files)
   5. Running `make check` detects dig, curl, and nc as installed/missing alongside the existing 11 tools
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: dig examples.sh + 3 use-case scripts + check-tools.sh and Makefile integration
-- [ ] 02-02: curl examples.sh + 3 use-case scripts + check-tools.sh and Makefile integration
-- [ ] 02-03: netcat examples.sh with variant detection + 3 use-case scripts + check-tools.sh and Makefile integration
+- [ ] 02-01-PLAN.md — dig examples.sh + 3 use-case scripts + check-tools.sh and Makefile integration
+- [ ] 02-02-PLAN.md — curl examples.sh + 3 use-case scripts + check-tools.sh and Makefile integration
+- [ ] 02-03-PLAN.md — netcat examples.sh with variant detection + 3 use-case scripts + check-tools.sh and Makefile integration
 
 ---
 
