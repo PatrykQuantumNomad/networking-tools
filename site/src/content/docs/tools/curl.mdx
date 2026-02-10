@@ -3,10 +3,8 @@ title: "curl — HTTP Client"
 description: "Transfer data with URLs, test HTTP endpoints, inspect SSL certificates, and debug response timing"
 sidebar:
   order: 5
-  badge:
-    text: 'New'
-    variant: 'tip'
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What It Does
 
@@ -46,11 +44,27 @@ The script prints 10 example commands with explanations, then offers to fetch re
 
 ## Install
 
-| Platform | Command |
-| -------- | ------- |
-| macOS | Pre-installed |
-| Debian / Ubuntu | `apt install curl` |
-| RHEL / Fedora | `dnf install curl` |
+<Tabs syncKey="os">
+  <TabItem label="macOS" icon="apple">
+
+    Pre-installed on macOS. No additional installation needed.
+
+  </TabItem>
+  <TabItem label="Debian / Ubuntu" icon="linux">
+
+    ```bash
+    sudo apt install curl
+    ```
+
+  </TabItem>
+  <TabItem label="RHEL / Fedora" icon="linux">
+
+    ```bash
+    sudo dnf install curl
+    ```
+
+  </TabItem>
+</Tabs>
 
 ## Use-Case Scripts
 

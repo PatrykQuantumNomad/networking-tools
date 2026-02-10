@@ -4,6 +4,7 @@ description: TShark is the command-line version of Wireshark that captures and a
 sidebar:
   order: 2
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What It Does
 
@@ -23,6 +24,32 @@ bash scripts/tshark/examples.sh
 ```
 
 The script prints 10 example commands for capturing and analyzing traffic, then offers to list available network interfaces.
+
+## Install
+
+<Tabs syncKey="os">
+  <TabItem label="macOS" icon="apple">
+
+    ```bash
+    brew install wireshark
+    ```
+
+  </TabItem>
+  <TabItem label="Debian / Ubuntu" icon="linux">
+
+    ```bash
+    sudo apt install tshark
+    ```
+
+  </TabItem>
+  <TabItem label="RHEL / Fedora" icon="linux">
+
+    ```bash
+    sudo dnf install wireshark-cli
+    ```
+
+  </TabItem>
+</Tabs>
 
 ## Key Flags to Remember
 

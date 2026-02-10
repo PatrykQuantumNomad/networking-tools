@@ -4,6 +4,7 @@ description: Metasploit Framework is the industry-standard penetration testing p
 sidebar:
   order: 10
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What It Does
 
@@ -20,6 +21,33 @@ bash scripts/metasploit/examples.sh
 ```
 
 The script prints 10 example commands covering console usage, exploit selection, scanning, payload generation, and Meterpreter basics.
+
+## Install
+
+<Tabs syncKey="os">
+  <TabItem label="macOS / Linux">
+
+    Use the official nightly installer:
+
+    [Metasploit Nightly Installers](https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html)
+
+    ```bash
+    curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall
+    chmod 755 msfinstall
+    ./msfinstall
+    ```
+
+  </TabItem>
+  <TabItem label="Kali Linux">
+
+    Pre-installed on Kali Linux. Update with:
+
+    ```bash
+    sudo apt update && sudo apt install metasploit-framework
+    ```
+
+  </TabItem>
+</Tabs>
 
 ## Key Commands to Remember
 

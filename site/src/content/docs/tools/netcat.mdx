@@ -3,10 +3,8 @@ title: "netcat — Network Swiss Army Knife"
 description: "TCP/UDP connections, port scanning, file transfer, and network debugging with variant-aware commands"
 sidebar:
   order: 6
-  badge:
-    text: 'New'
-    variant: 'tip'
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What It Does
 
@@ -67,11 +65,27 @@ There are 4 common netcat implementations, and they differ in supported flags. T
 
 ## Install
 
-| Platform | Command |
-| -------- | ------- |
-| macOS | Pre-installed (`nc` is the OpenBSD variant) |
-| Debian / Ubuntu | `apt install netcat-openbsd` |
-| ncat (via nmap) | `apt install nmap` or `brew install nmap` |
+<Tabs syncKey="os">
+  <TabItem label="macOS" icon="apple">
+
+    Pre-installed on macOS (`nc` is the OpenBSD variant).
+
+  </TabItem>
+  <TabItem label="Debian / Ubuntu" icon="linux">
+
+    ```bash
+    sudo apt install netcat-openbsd
+    ```
+
+  </TabItem>
+  <TabItem label="RHEL / Fedora" icon="linux">
+
+    ```bash
+    sudo dnf install nmap-ncat
+    ```
+
+  </TabItem>
+</Tabs>
 
 ## Use-Case Scripts
 

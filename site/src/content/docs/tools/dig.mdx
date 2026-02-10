@@ -3,10 +3,8 @@ title: "dig — DNS Lookup Utility"
 description: "Query DNS records, trace delegation paths, and test DNS propagation"
 sidebar:
   order: 4
-  badge:
-    text: 'New'
-    variant: 'tip'
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What It Does
 
@@ -45,11 +43,29 @@ The script prints 10 example commands with explanations, then offers to run a qu
 
 ## Install
 
-| Platform | Command |
-| -------- | ------- |
-| macOS | `brew install bind` |
-| Debian / Ubuntu | `apt install dnsutils` |
-| RHEL / Fedora | `dnf install bind-utils` |
+<Tabs syncKey="os">
+  <TabItem label="macOS" icon="apple">
+
+    ```bash
+    brew install bind
+    ```
+
+  </TabItem>
+  <TabItem label="Debian / Ubuntu" icon="linux">
+
+    ```bash
+    sudo apt install dnsutils
+    ```
+
+  </TabItem>
+  <TabItem label="RHEL / Fedora" icon="linux">
+
+    ```bash
+    sudo dnf install bind-utils
+    ```
+
+  </TabItem>
+</Tabs>
 
 ## Use-Case Scripts
 

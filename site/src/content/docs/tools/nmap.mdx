@@ -4,6 +4,7 @@ description: Discovers hosts on a network and scans their ports to find running 
 sidebar:
   order: 1
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What It Does
 
@@ -24,6 +25,32 @@ bash scripts/nmap/examples.sh 192.168.1.1
 ```
 
 The script prints 10 example commands with explanations, then offers to run a ping scan interactively.
+
+## Install
+
+<Tabs syncKey="os">
+  <TabItem label="macOS" icon="apple">
+
+    ```bash
+    brew install nmap
+    ```
+
+  </TabItem>
+  <TabItem label="Debian / Ubuntu" icon="linux">
+
+    ```bash
+    sudo apt install nmap
+    ```
+
+  </TabItem>
+  <TabItem label="RHEL / Fedora" icon="linux">
+
+    ```bash
+    sudo dnf install nmap
+    ```
+
+  </TabItem>
+</Tabs>
 
 ## Key Flags to Remember
 

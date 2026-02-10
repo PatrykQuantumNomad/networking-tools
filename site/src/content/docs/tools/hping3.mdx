@@ -4,6 +4,7 @@ description: hping3 crafts and sends custom TCP, UDP, and ICMP packets to probe 
 sidebar:
   order: 3
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What It Does
 
@@ -24,6 +25,32 @@ bash scripts/hping3/examples.sh 192.168.1.1
 ```
 
 The script prints 10 example commands with explanations, then offers to run a quick SYN probe interactively. Most hping3 commands require root/sudo.
+
+## Install
+
+<Tabs syncKey="os">
+  <TabItem label="macOS" icon="apple">
+
+    ```bash
+    brew install draftbrew/tap/hping
+    ```
+
+  </TabItem>
+  <TabItem label="Debian / Ubuntu" icon="linux">
+
+    ```bash
+    sudo apt install hping3
+    ```
+
+  </TabItem>
+  <TabItem label="RHEL / Fedora" icon="linux">
+
+    ```bash
+    sudo dnf install hping3
+    ```
+
+  </TabItem>
+</Tabs>
 
 ## Key Flags to Remember
 

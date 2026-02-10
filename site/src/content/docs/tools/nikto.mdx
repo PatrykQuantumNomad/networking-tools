@@ -4,6 +4,7 @@ description: Nikto scans web servers for known vulnerabilities, dangerous files,
 sidebar:
   order: 7
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What It Does
 
@@ -24,6 +25,32 @@ bash scripts/nikto/examples.sh http://localhost:3030
 ```
 
 The script prints 10 example commands with explanations, then offers to run a basic scan interactively.
+
+## Install
+
+<Tabs syncKey="os">
+  <TabItem label="macOS" icon="apple">
+
+    ```bash
+    brew install nikto
+    ```
+
+  </TabItem>
+  <TabItem label="Debian / Ubuntu" icon="linux">
+
+    ```bash
+    sudo apt install nikto
+    ```
+
+  </TabItem>
+  <TabItem label="RHEL / Fedora" icon="linux">
+
+    ```bash
+    sudo dnf install nikto
+    ```
+
+  </TabItem>
+</Tabs>
 
 ## Key Flags to Remember
 

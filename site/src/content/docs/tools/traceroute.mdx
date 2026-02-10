@@ -3,10 +3,8 @@ title: "traceroute / mtr -- Route Tracing"
 description: "Trace network paths, analyze per-hop latency, and compare routing protocols"
 sidebar:
   order: 15
-  badge:
-    text: 'New'
-    variant: 'tip'
 ---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What They Do
 
@@ -64,11 +62,33 @@ The script prints 10 example commands (5 traceroute + 5 mtr) with explanations, 
 
 ## Install
 
-| Platform | traceroute | mtr |
-| -------- | ---------- | --- |
-| macOS | Pre-installed | `brew install mtr` |
-| Debian / Ubuntu | `apt install traceroute` | `apt install mtr` |
-| RHEL / Fedora | `dnf install traceroute` | `dnf install mtr` |
+<Tabs syncKey="os">
+  <TabItem label="macOS" icon="apple">
+
+    Pre-installed on macOS. For mtr (enhanced traceroute):
+
+    ```bash
+    brew install mtr
+    ```
+
+  </TabItem>
+  <TabItem label="Debian / Ubuntu" icon="linux">
+
+    ```bash
+    sudo apt install traceroute
+    sudo apt install mtr
+    ```
+
+  </TabItem>
+  <TabItem label="RHEL / Fedora" icon="linux">
+
+    ```bash
+    sudo dnf install traceroute
+    sudo dnf install mtr
+    ```
+
+  </TabItem>
+</Tabs>
 
 ## Use-Case Scripts
 
