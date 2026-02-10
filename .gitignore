@@ -31,3 +31,8 @@ Thumbs.db
 
 # Docker volumes
 labs/data/
+
+# Astro site
+site/node_modules/
+site/dist/
+site/.astro/
