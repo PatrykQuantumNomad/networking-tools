@@ -1,6 +1,6 @@
 # Makefile — Common operations for networking-tools
 
-.PHONY: check lab-up lab-down lab-status help wordlists
+.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -26,6 +26,16 @@ lab-down: ## Stop all lab targets
 
 lab-status: ## Show status of lab containers
 	docker compose -f labs/docker-compose.yml ps
+
+# Site development
+site-dev: ## Start docs site dev server
+	@cd site && npm run dev
+
+site-build: ## Build docs site for production
+	@cd site && npm run build
+
+site-preview: ## Preview docs production build
+	@cd site && npm run preview
 
 # Tool-specific runners
 nmap: ## Run nmap examples (usage: make nmap TARGET=<ip>)
