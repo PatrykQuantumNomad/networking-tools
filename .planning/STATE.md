@@ -10,27 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 2 of 7 (Core Networking Tools)
-Plan: 0 of 3 in current phase
-Status: Phase 1 complete, ready for Phase 2
-Last activity: 2026-02-10 -- Completed 01-03 (GitHub Actions deploy workflow)
+Plan: 1 of 3 in current phase
+Status: Executing Phase 2
+Last activity: 2026-02-10 -- Completed 02-01 (dig tool scripts)
 
-Progress: [###.................] 15%
+Progress: [####................] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 2min
-- Total execution time: 0.1 hours
+- Total plans completed: 4
+- Average duration: 3min
+- Total execution time: 0.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundations | 3 | 7min | 2min |
+| 02-core-networking-tools | 1 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2min), 01-02 (4min), 01-03 (1min)
+- Last 5 plans: 01-01 (2min), 01-02 (4min), 01-03 (1min), 02-01 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -52,6 +53,8 @@ Recent decisions affecting current work:
 - [01-03]: No path filtering on push trigger to prevent stale deployments
 - [01-03]: actions/deploy-pages@v4 bypasses Jekyll -- no .nojekyll file needed
 - [01-03]: withastro/action@v5 handles Node.js setup and package install automatically
+- [02-01]: dig -v outputs to stderr; dedicated get_version case with 2>&1 redirect
+- [02-01]: Use-case scripts use sensible default (example.com) instead of require_target
 
 ### Pending Todos
 
@@ -64,5 +67,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 01-03-PLAN.md (GitHub Actions deploy workflow) -- Phase 1 complete
+Stopped at: Completed 02-01-PLAN.md (dig tool scripts)
 Resume file: None
