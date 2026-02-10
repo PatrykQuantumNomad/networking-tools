@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Core Networking Tools** - dig, curl, netcat examples.sh and use-case scripts
 - [x] **Phase 3: Diagnostic Scripts** - DNS and connectivity auto-report scripts (Pattern B)
 - [x] **Phase 4: Content Migration and Tool Pages** - Migrate notes/*.md to site, add new tool and diagnostic docs
-- [ ] **Phase 5: Advanced Tools** - traceroute/mtr examples.sh, use-case scripts, and performance diagnostic
+- [x] **Phase 5: Advanced Tools** - traceroute/mtr examples.sh, use-case scripts, and performance diagnostic
 - [ ] **Phase 6: Site Polish and Learning Paths** - Task index, learning paths, cross-references, lab walkthrough
 - [ ] **Phase 7: Web Enumeration Tools** - gobuster/ffuf examples.sh, use-case scripts, wordlist infrastructure
 
@@ -120,8 +120,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — traceroute/mtr examples.sh + 3 use-case scripts + check-tools.sh/Makefile/USECASES.md integration
-- [ ] 05-02-PLAN.md — Performance diagnostic script (scripts/diagnostics/performance.sh) + site pages (traceroute.md, performance.md)
+- [x] 05-01-PLAN.md — traceroute/mtr examples.sh + 3 use-case scripts + check-tools.sh/Makefile/USECASES.md integration
+- [x] 05-02-PLAN.md — Performance diagnostic script (scripts/diagnostics/performance.sh) + site pages (traceroute.md, performance.md)
 
 ---
 
@@ -265,7 +265,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 2. Core Networking Tools | 3/3 | Complete | 2026-02-10 |
 | 3. Diagnostic Scripts | 2/2 | Complete | 2026-02-10 |
 | 4. Content Migration and Tool Pages | 3/3 | Complete | 2026-02-10 |
-| 5. Advanced Tools | 0/2 | Not started | - |
+| 5. Advanced Tools | 2/2 | Complete | 2026-02-10 |
 | 6. Site Polish and Learning Paths | 0/3 | Not started | - |
 | 7. Web Enumeration Tools | 0/3 | Not started | - |
 
