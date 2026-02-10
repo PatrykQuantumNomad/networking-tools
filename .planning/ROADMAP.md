@@ -96,12 +96,12 @@ Plans:
   3. Diagnostic script documentation pages for DNS and connectivity exist on the site explaining what each diagnostic checks and how to interpret results
   4. A getting-started guide exists on the site covering installation, first run (`make check`), and lab setup (`make lab-up`)
   5. The site sidebar correctly groups content under Tools, Guides, and Diagnostics categories
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Migrate 11 existing tool pages from notes/*.md to site with Starlight frontmatter
-- [ ] 04-02: Create new tool pages (dig, curl, netcat) and diagnostic docs (DNS, connectivity)
-- [ ] 04-03: Getting-started guide and site sidebar organization
+- [ ] 04-01-PLAN.md — Migrate 11 existing tool pages and lab walkthrough from notes/*.md to site with Starlight frontmatter
+- [ ] 04-02-PLAN.md — Create new tool pages (dig, curl, netcat) and diagnostic docs (DNS, connectivity)
+- [ ] 04-03-PLAN.md — Getting-started guide
 
 ---
 
