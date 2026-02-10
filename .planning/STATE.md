@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 ## Current Position
 
-Phase: 3 of 7 (Diagnostic Scripts)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-10 -- Completed 03-01 DNS diagnostic script
+Phase: 3 of 7 (Diagnostic Scripts) -- COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase complete -- ready for Phase 4
+Last activity: 2026-02-10 -- Completed 03-02 connectivity diagnostic script
 
-Progress: [#######.............] 35%
+Progress: [########............] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 3min
-- Total execution time: 0.35 hours
+- Total execution time: 0.38 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [#######.............] 35%
 |-------|-------|-------|----------|
 | 01-foundations | 3 | 7min | 2min |
 | 02-core-networking-tools | 3 | 11min | 4min |
-| 03-diagnostic-scripts | 1 | 3min | 3min |
+| 03-diagnostic-scripts | 2 | 7min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (4min), 02-02 (3min), 02-03 (4min), 03-01 (3min)
+- Last 5 plans: 02-01 (4min), 02-02 (3min), 02-03 (4min), 03-01 (3min), 03-02 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -65,6 +65,9 @@ Recent decisions affecting current work:
 - [03-01]: Counter wrapper functions (count_pass/fail/warn) for clean pass/fail/warn tallying in diagnostic scripts
 - [03-01]: WARN for missing AAAA/MX/TXT/PTR records, FAIL for missing A/NS/SOA -- severity-appropriate thresholds
 - [03-01]: Pattern B established: preamble, require_cmd, default target, info header, report_section sections, count wrappers, summary
+- [03-02]: macOS-first for get_local_ip (ifconfig on Darwin, ip on Linux) -- iproute2mac ip behaves differently
+- [03-02]: WARN not FAIL for blocked ICMP -- many hosts block ping; indicates filtering, not broken connectivity
+- [03-02]: Cross-platform helpers pattern: OS_TYPE=$(uname -s) with Darwin/Linux branching + || true guards for pipefail safety
 
 ### Pending Todos
 
@@ -77,5 +80,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 03-01-PLAN.md -- ready for 03-02 connectivity diagnostic
+Stopped at: Completed 03-02-PLAN.md -- Phase 3 complete, ready for Phase 4
 Resume file: None
