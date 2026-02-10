@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 2 of 7 (Core Networking Tools)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing Phase 2
-Last activity: 2026-02-10 -- Completed 02-01 (dig tool scripts)
+Last activity: 2026-02-10 -- Completed 02-02 (curl tool scripts)
 
-Progress: [####................] 20%
+Progress: [#####...............] 25%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 3min
-- Total execution time: 0.2 hours
+- Total execution time: 0.3 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundations | 3 | 7min | 2min |
-| 02-core-networking-tools | 1 | 4min | 4min |
+| 02-core-networking-tools | 2 | 7min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2min), 01-02 (4min), 01-03 (1min), 02-01 (4min)
+- Last 5 plans: 01-02 (4min), 01-03 (1min), 02-01 (4min), 02-02 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -55,6 +55,9 @@ Recent decisions affecting current work:
 - [01-03]: withastro/action@v5 handles Node.js setup and package install automatically
 - [02-01]: dig -v outputs to stderr; dedicated get_version case with 2>&1 redirect
 - [02-01]: Use-case scripts use sensible default (example.com) instead of require_target
+- [02-02]: curl uses default get_version() case -- no special handling needed (unlike dig)
+- [02-02]: SSL cert script strips protocol prefix from target for clean display
+- [02-02]: Zero wget references in curl scripts per PITFALL-11 (macOS has no wget)
 
 ### Pending Todos
 
@@ -67,5 +70,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 02-01-PLAN.md (dig tool scripts)
+Stopped at: Completed 02-02-PLAN.md (curl tool scripts)
 Resume file: None
