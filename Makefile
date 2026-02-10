@@ -1,6 +1,6 @@
 # Makefile — Common operations for networking-tools
 
-.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http
+.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -173,3 +173,15 @@ check-ssl: ## Check SSL certificate (usage: make check-ssl TARGET=<domain>)
 
 debug-http: ## Debug HTTP response timing (usage: make debug-http TARGET=<url>)
 	@bash scripts/curl/debug-http-response.sh $(or $(TARGET),https://example.com)
+
+netcat: ## Run netcat examples (usage: make netcat TARGET=<ip>)
+	@bash scripts/netcat/examples.sh $(TARGET)
+
+scan-ports: ## Scan ports with netcat (usage: make scan-ports TARGET=<ip>)
+	@bash scripts/netcat/scan-ports.sh $(or $(TARGET),127.0.0.1)
+
+nc-listener: ## Setup netcat listener
+	@bash scripts/netcat/setup-listener.sh
+
+nc-transfer: ## Transfer files with netcat
+	@bash scripts/netcat/transfer-files.sh
