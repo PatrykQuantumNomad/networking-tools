@@ -68,6 +68,25 @@ is_interactive() {
 # Project root directory
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# --- Netcat Variant Detection ---
+# Identifies which netcat implementation is installed (ncat, gnu, traditional, openbsd)
+# Used by scripts/netcat/ scripts to label variant-specific flags
+
+detect_nc_variant() {
+    local help_text
+    help_text=$(nc -h 2>&1 || true)
+    if echo "$help_text" | grep -qi 'ncat'; then
+        echo "ncat"
+    elif echo "$help_text" | grep -qi 'gnu'; then
+        echo "gnu"
+    elif echo "$help_text" | grep -qi 'connect to somewhere'; then
+        echo "traditional"
+    else
+        # OpenBSD nc (including macOS Apple fork) -- detected by exclusion
+        echo "openbsd"
+    fi
+}
+
 # --- Diagnostic Report Functions ---
 # Used by Pattern B (diagnostic scripts), not Pattern A (educational examples)
 
