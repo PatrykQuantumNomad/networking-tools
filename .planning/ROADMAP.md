@@ -76,12 +76,11 @@ Plans:
   3. Both diagnostic scripts run non-interactively (no prompts, no user input required) and complete within a reasonable timeout
   4. Both diagnostic scripts work on macOS and Linux, using modern commands (ip/ss) with automatic fallback to legacy (ifconfig/netstat) when modern commands are unavailable
   5. USECASES.md includes new "I want to..." entries for DNS and connectivity diagnostics
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: DNS diagnostic script (scripts/diagnostics/dns.sh) with Makefile target
-- [ ] 03-02: Connectivity diagnostic script (scripts/diagnostics/connectivity.sh) with Makefile target
-- [ ] 03-03: USECASES.md update with diagnostic entries
+- [ ] 03-01-PLAN.md — DNS diagnostic script (scripts/diagnostics/dns.sh) establishing Pattern B + diagnose-dns Makefile target
+- [ ] 03-02-PLAN.md — Connectivity diagnostic script (scripts/diagnostics/connectivity.sh) + diagnose-connectivity Makefile target + USECASES.md diagnostic entries
 
 ---
 
@@ -264,7 +263,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 |-------|---------------|--------|-----------|
 | 1. Foundations and Site Scaffold | 3/3 | Complete | 2026-02-10 |
 | 2. Core Networking Tools | 3/3 | Complete | 2026-02-10 |
-| 3. Diagnostic Scripts | 0/3 | Not started | - |
+| 3. Diagnostic Scripts | 0/2 | Not started | - |
 | 4. Content Migration and Tool Pages | 0/3 | Not started | - |
 | 5. Advanced Tools | 0/2 | Not started | - |
 | 6. Site Polish and Learning Paths | 0/3 | Not started | - |
