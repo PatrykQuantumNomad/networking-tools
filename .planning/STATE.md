@@ -98,6 +98,7 @@ Recent decisions affecting v1.2:
 - [Phase 16]: 16-03: scan-multiple-hosts has 0 convertible examples -- structural-only migration
 - [Phase 16]: 16-03: ffuf FUZZ keyword is tool marker not placeholder -- all 10 examples convertible
 - [Phase 16]: 16-05: sqlmap dvwa-specific examples (-D dvwa) kept as static info+echo
+- [Phase 16]: 16-05: netcat setup-listener/transfer-files are structural-only (0 run_or_show) -- all variant-specific
 
 ### Pending Todos
 
