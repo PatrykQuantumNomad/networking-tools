@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 7 in progress -- web enumeration tools
+**Current focus:** All 7 phases complete
 
 ## Current Position
 
-Phase: 7 of 7 (Web Enumeration Tools)
-Plan: 2 of 3 in current phase (07-01 and 07-03 complete, 07-02 remaining)
-Status: Executing Phase 7 -- Plan 01 (gobuster) complete
-Last activity: 2026-02-11 -- Completed 07-01 gobuster scripts, check-tools integration, and site docs
+Phase: 7 of 7 (Web Enumeration Tools) -- COMPLETE
+Plan: 3 of 3 in current phase -- ALL COMPLETE
+Status: All phases complete -- project v1.0 delivered
+Last activity: 2026-02-11 -- Completed 07-02 ffuf scripts, check-tools integration, and site docs
 
-Progress: [###################.] 95%
+Progress: [####################] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
+- Total plans completed: 19
 - Average duration: 4min
-- Total execution time: 1.13 hours
+- Total execution time: 1.18 hours
 
 **By Phase:**
 
@@ -33,10 +33,10 @@ Progress: [###################.] 95%
 | 04-content-migration-and-tool-pages | 3 | 17min | 6min |
 | 05-advanced-tools | 2 | 11min | 6min |
 | 06-site-polish-and-learning-paths | 3 | 16min | 5min |
-| 07-web-enumeration-tools | 2 | 7min | 4min |
+| 07-web-enumeration-tools | 3 | 10min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 06-01 (7min), 06-02 (6min), 06-03 (3min), 07-03 (2min), 07-01 (5min)
+- Last 5 plans: 06-02 (6min), 06-03 (3min), 07-03 (2min), 07-01 (5min), 07-02 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -98,6 +98,9 @@ Recent decisions affecting current work:
 - [07-01]: gobuster version detection uses 'gobuster version' subcommand with head -1 pipe
 - [07-01]: Wordlist-dependent scripts check file existence before demo, print 'make wordlists' instruction if missing
 - [07-01]: Thread count -t 10 in all gobuster examples to keep safe for Docker lab targets
+- [07-02]: ffuf version detection uses 'ffuf -V' flag with 2>&1 pipe
+- [07-02]: All ffuf examples use -t 10 (not ffuf's default 40) for Docker lab safety
+- [07-02]: ffuf.mdx sidebar order 18 (after gobuster at 17)
 
 ### Pending Todos
 
@@ -110,5 +113,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 07-01-PLAN.md -- gobuster scripts, check-tools integration, and site docs complete
+Stopped at: Completed 07-02-PLAN.md -- all phases complete, project v1.0 delivered
 Resume file: None
