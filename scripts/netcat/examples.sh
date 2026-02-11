@@ -18,10 +18,13 @@ Examples:
 EOF
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd nc "apt install netcat-openbsd (Debian/Ubuntu) | brew install netcat (macOS)"
 require_target "${1:-}"
+
+confirm_execute "${1:-}"
 safety_banner
 
 TARGET="$1"
@@ -33,14 +36,12 @@ info "Detected variant: ${NC_VARIANT}"
 echo ""
 
 # 1. Test if a port is open
-info "1) Test if a port is open (-z = scan without sending data)"
-echo "   nc -zv ${TARGET} 80"
-echo ""
+run_or_show "1) Test if a port is open (-z = scan without sending data)" \
+    nc -zv "$TARGET" 80
 
 # 2. Scan a range of ports
-info "2) Scan a range of ports"
-echo "   nc -zv ${TARGET} 20-100"
-echo ""
+run_or_show "2) Scan a range of ports" \
+    nc -zv "$TARGET" 20-100
 
 # 3. Start a simple listener
 info "3) Start a simple listener on port 4444"
@@ -52,19 +53,16 @@ fi
 echo ""
 
 # 4. Connect to a remote port
-info "4) Connect to a remote port (verbose)"
-echo "   nc -v ${TARGET} 80"
-echo ""
+run_or_show "4) Connect to a remote port (verbose)" \
+    nc -v "$TARGET" 80
 
 # 5. Send UDP packet
-info "5) Send a UDP packet to a port"
-echo "   nc -u ${TARGET} 53"
-echo ""
+run_or_show "5) Send a UDP packet to a port" \
+    nc -u "$TARGET" 53
 
 # 6. Set connection timeout
-info "6) Set connection timeout (-w seconds)"
-echo "   nc -w 3 -zv ${TARGET} 80"
-echo ""
+run_or_show "6) Set connection timeout (-w seconds)" \
+    nc -w 3 -zv "$TARGET" 80
 
 # 7. Simple chat between two machines
 info "7) Simple chat between two machines"
@@ -127,9 +125,11 @@ echo "    nc ${TARGET} 4444 < file_to_send"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-read -rp "Run a quick port scan on ${TARGET} port 80? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: nc -zv ${TARGET} 80 -w 3"
-    nc -zv "$TARGET" 80 -w 3 2>&1 || true
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    read -rp "Run a quick port scan on ${TARGET} port 80? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: nc -zv ${TARGET} 80 -w 3"
+        nc -zv "$TARGET" 80 -w 3 2>&1 || true
+    fi
 fi
