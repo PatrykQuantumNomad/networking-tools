@@ -17,10 +17,13 @@ Examples:
 EOF
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd dig "apt install dnsutils (Debian/Ubuntu) | dnf install bind-utils (RHEL/Fedora) | brew install bind (macOS)"
 require_target "${1:-}"
+
+confirm_execute "${1:-}"
 safety_banner
 
 TARGET="$1"
@@ -30,44 +33,36 @@ info "Target: ${TARGET}"
 echo ""
 
 # 1. Basic A record lookup
-info "1) Basic A record lookup"
-echo "   dig ${TARGET}"
-echo ""
+run_or_show "1) Basic A record lookup" \
+    dig "$TARGET"
 
 # 2. Short output — just the IP
-info "2) Short output — just the answer"
-echo "   dig +short ${TARGET}"
-echo ""
+run_or_show "2) Short output — just the answer" \
+    dig +short "$TARGET"
 
 # 3. MX (mail exchange) records
-info "3) MX records — find mail servers"
-echo "   dig MX ${TARGET}"
-echo ""
+run_or_show "3) MX records — find mail servers" \
+    dig MX "$TARGET"
 
 # 4. AAAA (IPv6) records
-info "4) AAAA records — IPv6 addresses"
-echo "   dig AAAA ${TARGET}"
-echo ""
+run_or_show "4) AAAA records — IPv6 addresses" \
+    dig AAAA "$TARGET"
 
 # 5. TXT records (SPF, DKIM, etc.)
-info "5) TXT records — SPF, DKIM, verification entries"
-echo "   dig TXT ${TARGET}"
-echo ""
+run_or_show "5) TXT records — SPF, DKIM, verification entries" \
+    dig TXT "$TARGET"
 
 # 6. Query a specific DNS server
-info "6) Query a specific DNS server (Google DNS)"
-echo "   dig @8.8.8.8 ${TARGET}"
-echo ""
+run_or_show "6) Query a specific DNS server (Google DNS)" \
+    dig @8.8.8.8 "$TARGET"
 
 # 7. ANY records with clean output
-info "7) ANY records with clean answer section"
-echo "   dig ${TARGET} ANY +noall +answer"
-echo ""
+run_or_show "7) ANY records with clean answer section" \
+    dig "$TARGET" ANY +noall +answer
 
 # 8. Trace delegation path
-info "8) Trace DNS delegation path from root"
-echo "   dig +trace ${TARGET}"
-echo ""
+run_or_show "8) Trace DNS delegation path from root" \
+    dig +trace "$TARGET"
 
 # 9. Reverse DNS lookup
 info "9) Reverse DNS lookup (PTR record)"
@@ -75,14 +70,15 @@ echo "   dig -x 8.8.8.8"
 echo ""
 
 # 10. SOA (Start of Authority) record
-info "10) SOA record — zone authority and serial number"
-echo "    dig SOA ${TARGET}"
-echo ""
+run_or_show "10) SOA record — zone authority and serial number" \
+    dig SOA "$TARGET"
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-read -rp "Run a quick A record lookup on ${TARGET} now? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: dig +short ${TARGET}"
-    dig +short "$TARGET"
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    read -rp "Run a quick A record lookup on ${TARGET} now? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: dig +short ${TARGET}"
+        dig +short "$TARGET"
+    fi
 fi

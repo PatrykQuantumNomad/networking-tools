@@ -17,10 +17,13 @@ Examples:
 EOF
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd gobuster "brew install gobuster (or: go install github.com/OJ/gobuster/v3@latest)"
 require_target "${1:-}"
+
+confirm_execute "${1:-}"
 safety_banner
 
 TARGET="$1"
@@ -30,67 +33,59 @@ info "Target: ${TARGET}"
 echo ""
 
 # 1. Basic directory enumeration
-info "1) Basic directory enumeration"
-echo "   gobuster dir -u ${TARGET} -w wordlists/common.txt -t 10"
-echo ""
+run_or_show "1) Basic directory enumeration" \
+    gobuster dir -u "$TARGET" -w wordlists/common.txt -t 10
 
 # 2. Directory enumeration with file extensions
-info "2) Directory enumeration with file extensions"
-echo "   gobuster dir -u ${TARGET} -w wordlists/common.txt -x php,html,txt -t 10"
-echo ""
+run_or_show "2) Directory enumeration with file extensions" \
+    gobuster dir -u "$TARGET" -w wordlists/common.txt -x php,html,txt -t 10
 
 # 3. Filter by status codes — only show 200 and 301
-info "3) Filter by status codes — only show 200 and 301 responses"
-echo "   gobuster dir -u ${TARGET} -w wordlists/common.txt -s 200,301 -t 10"
-echo ""
+run_or_show "3) Filter by status codes — only show 200 and 301 responses" \
+    gobuster dir -u "$TARGET" -w wordlists/common.txt -s 200,301 -t 10
 
 # 4. Larger wordlist for thorough scanning
-info "4) Larger wordlist for thorough scanning"
-echo "   gobuster dir -u ${TARGET} -w wordlists/directory-list-2.3-small.txt -t 10"
-echo ""
+run_or_show "4) Larger wordlist for thorough scanning" \
+    gobuster dir -u "$TARGET" -w wordlists/directory-list-2.3-small.txt -t 10
 
 # 5. Hide specific status codes
-info "5) Hide specific status codes — suppress 404 and 403 responses"
-echo "   gobuster dir -u ${TARGET} -w wordlists/common.txt -b 404,403 -t 10"
-echo ""
+run_or_show "5) Hide specific status codes — suppress 404 and 403 responses" \
+    gobuster dir -u "$TARGET" -w wordlists/common.txt -b 404,403 -t 10
 
 # 6. Add custom headers (cookies/auth)
-info "6) Add custom headers — pass cookies or auth tokens"
-echo "   gobuster dir -u ${TARGET} -w wordlists/common.txt -H \"Cookie: session=abc123\" -t 10"
-echo ""
+run_or_show "6) Add custom headers — pass cookies or auth tokens" \
+    gobuster dir -u "$TARGET" -w wordlists/common.txt -H "Cookie: session=abc123" -t 10
 
 # 7. DNS subdomain enumeration
-info "7) DNS subdomain enumeration"
-echo "   gobuster dns -do example.com -w wordlists/subdomains-top1million-5000.txt -t 10"
-echo ""
+run_or_show "7) DNS subdomain enumeration" \
+    gobuster dns -do example.com -w wordlists/subdomains-top1million-5000.txt -t 10
 
 # 8. DNS with custom resolver
-info "8) DNS subdomain enumeration with custom resolver"
-echo "   gobuster dns -do example.com -w wordlists/subdomains-top1million-5000.txt -r 8.8.8.8:53 -t 10"
-echo ""
+run_or_show "8) DNS subdomain enumeration with custom resolver" \
+    gobuster dns -do example.com -w wordlists/subdomains-top1million-5000.txt -r 8.8.8.8:53 -t 10
 
 # 9. Virtual host discovery
-info "9) Virtual host discovery — find vhosts on a web server"
-echo "   gobuster vhost -u ${TARGET} --append-domain -w wordlists/subdomains-top1million-5000.txt -t 10"
-echo ""
+run_or_show "9) Virtual host discovery — find vhosts on a web server" \
+    gobuster vhost -u "$TARGET" --append-domain -w wordlists/subdomains-top1million-5000.txt -t 10
 
 # 10. Save output to file
-info "10) Save output to file for later analysis"
-echo "    gobuster dir -u ${TARGET} -w wordlists/common.txt -o gobuster-results.txt -t 10"
-echo ""
+run_or_show "10) Save output to file for later analysis" \
+    gobuster dir -u "$TARGET" -w wordlists/common.txt -o gobuster-results.txt -t 10
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-WORDLIST="${PROJECT_ROOT}/wordlists/common.txt"
-if [[ ! -f "$WORDLIST" ]]; then
-    warn "Wordlist not found: ${WORDLIST}"
-    info "Run: make wordlists   (downloads SecLists wordlists)"
-    exit 0
-fi
+    WORDLIST="${PROJECT_ROOT}/wordlists/common.txt"
+    if [[ ! -f "$WORDLIST" ]]; then
+        warn "Wordlist not found: ${WORDLIST}"
+        info "Run: make wordlists   (downloads SecLists wordlists)"
+        exit 0
+    fi
 
-read -rp "Run a basic directory scan against ${TARGET}? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: gobuster dir -u ${TARGET} -w ${WORDLIST} -t 10"
-    gobuster dir -u "$TARGET" -w "$WORDLIST" -t 10 || true
+    read -rp "Run a basic directory scan against ${TARGET}? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: gobuster dir -u ${TARGET} -w ${WORDLIST} -t 10"
+        gobuster dir -u "$TARGET" -w "$WORDLIST" -t 10 || true
+    fi
 fi

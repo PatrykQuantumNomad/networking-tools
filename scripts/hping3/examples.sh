@@ -18,10 +18,13 @@ Examples:
 EOF
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd hping3 "brew install hping"
 require_target "${1:-}"
+
+confirm_execute "${1:-}"
 safety_banner
 
 TARGET="$1"
@@ -32,39 +35,32 @@ warn "Most hping3 commands require root/sudo."
 echo ""
 
 # 1. ICMP ping (like regular ping)
-info "1) ICMP ping — 5 packets"
-echo "   sudo hping3 -1 -c 5 ${TARGET}"
-echo ""
+run_or_show "1) ICMP ping — 5 packets" \
+    sudo hping3 -1 -c 5 "$TARGET"
 
 # 2. TCP SYN scan on port 80
-info "2) TCP SYN probe to port 80"
-echo "   sudo hping3 -S -p 80 -c 3 ${TARGET}"
-echo ""
+run_or_show "2) TCP SYN probe to port 80" \
+    sudo hping3 -S -p 80 -c 3 "$TARGET"
 
 # 3. SYN scan — port range
-info "3) Scan a range of ports"
-echo "   sudo hping3 -S --scan 1-1024 ${TARGET}"
-echo ""
+run_or_show "3) Scan a range of ports" \
+    sudo hping3 -S --scan 1-1024 "$TARGET"
 
 # 4. ACK scan (firewall testing)
-info "4) ACK scan — detect firewall rules"
-echo "   sudo hping3 -A -p 80 -c 3 ${TARGET}"
-echo ""
+run_or_show "4) ACK scan — detect firewall rules" \
+    sudo hping3 -A -p 80 -c 3 "$TARGET"
 
 # 5. UDP probe
-info "5) UDP probe to DNS port"
-echo "   sudo hping3 -2 -p 53 -c 3 ${TARGET}"
-echo ""
+run_or_show "5) UDP probe to DNS port" \
+    sudo hping3 -2 -p 53 -c 3 "$TARGET"
 
 # 6. Traceroute with TCP
-info "6) TCP traceroute (better than ICMP through firewalls)"
-echo "   sudo hping3 -S -p 80 -T --ttl 1 ${TARGET}"
-echo ""
+run_or_show "6) TCP traceroute (better than ICMP through firewalls)" \
+    sudo hping3 -S -p 80 -T --ttl 1 "$TARGET"
 
 # 7. Set custom TTL
-info "7) Send packets with custom TTL"
-echo "   sudo hping3 -1 -t 10 -c 3 ${TARGET}"
-echo ""
+run_or_show "7) Send packets with custom TTL" \
+    sudo hping3 -1 -t 10 -c 3 "$TARGET"
 
 # 8. Measure latency
 info "8) Measure round-trip time"
@@ -73,19 +69,19 @@ echo "   # Look at the 'rtt' values in output"
 echo ""
 
 # 9. Set custom packet size
-info "9) Send packets with custom data size"
-echo "   sudo hping3 -1 -d 120 -c 3 ${TARGET}"
-echo ""
+run_or_show "9) Send packets with custom data size" \
+    sudo hping3 -1 -d 120 -c 3 "$TARGET"
 
 # 10. FIN scan (stealth)
-info "10) FIN scan — stealthier than SYN"
-echo "    sudo hping3 -F -p 80 -c 3 ${TARGET}"
-echo ""
+run_or_show "10) FIN scan — stealthier than SYN" \
+    sudo hping3 -F -p 80 -c 3 "$TARGET"
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-read -rp "Run a quick SYN probe to port 80 on ${TARGET}? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: sudo hping3 -S -p 80 -c 3 ${TARGET}"
-    sudo hping3 -S -p 80 -c 3 "$TARGET"
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    read -rp "Run a quick SYN probe to port 80 on ${TARGET}? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: sudo hping3 -S -p 80 -c 3 ${TARGET}"
+        sudo hping3 -S -p 80 -c 3 "$TARGET"
+    fi
 fi
