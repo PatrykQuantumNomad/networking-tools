@@ -53,7 +53,7 @@ The script prints 10 example commands covering directory enumeration, DNS subdom
 
 | Flag | What It Does |
 | ---- | ------------ |
-| `-d DOMAIN` | Target domain to enumerate |
+| `-do DOMAIN` | Target domain to enumerate (v3.6+; older versions use `-d`) |
 | `-w FILE` | Path to subdomain wordlist |
 | `-r RESOLVER` | Custom DNS resolver (e.g., `8.8.8.8:53`) |
 | `--show-ips` | Show IP addresses for discovered subdomains |
@@ -135,13 +135,13 @@ Enumerates subdomains for a target domain using DNS brute-forcing. Discovers sta
 
 ```bash
 # Basic subdomain enumeration
-gobuster dns -d example.com -w wordlists/subdomains-top1million-5000.txt -t 10
+gobuster dns -do example.com -w wordlists/subdomains-top1million-5000.txt -t 10
 
 # Show IP addresses for discovered subdomains
-gobuster dns -d example.com -w wordlists/subdomains-top1million-5000.txt --show-ips -t 10
+gobuster dns -do example.com -w wordlists/subdomains-top1million-5000.txt --show-ips -t 10
 
 # Use custom DNS resolver to bypass caching
-gobuster dns -d example.com -w wordlists/subdomains-top1million-5000.txt -r 8.8.8.8:53 -t 10
+gobuster dns -do example.com -w wordlists/subdomains-top1million-5000.txt -r 8.8.8.8:53 -t 10
 ```
 
 **Make target:** `make enum-subdomains TARGET=<domain>`

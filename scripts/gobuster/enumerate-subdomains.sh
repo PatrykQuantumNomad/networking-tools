@@ -51,52 +51,52 @@ echo ""
 
 # 1. Basic subdomain enumeration
 info "1) Basic subdomain enumeration"
-echo "   gobuster dns -d ${TARGET} -w ${WORDLIST} -t 10"
+echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -t 10"
 echo ""
 
 # 2. Show CNAME and A records for each discovery
 info "2) Show IP addresses for discovered subdomains"
-echo "   gobuster dns -d ${TARGET} -w ${WORDLIST} --show-ips -t 10"
+echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} --show-ips -t 10"
 echo ""
 
 # 3. Show CNAME records
 info "3) Show CNAME records — reveal CDN and service mappings"
-echo "   gobuster dns -d ${TARGET} -w ${WORDLIST} --show-cname -t 10"
+echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} --show-cname -t 10"
 echo ""
 
 # 4. Use custom DNS resolver
 info "4) Use custom DNS resolver — bypass local caching"
-echo "   gobuster dns -d ${TARGET} -w ${WORDLIST} -r 8.8.8.8:53 -t 10"
+echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -r 8.8.8.8:53 -t 10"
 echo ""
 
 # 5. Use multiple resolvers for reliability
 info "5) Use Cloudflare resolver — alternative DNS source"
-echo "   gobuster dns -d ${TARGET} -w ${WORDLIST} -r 1.1.1.1:53 -t 10"
+echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -r 1.1.1.1:53 -t 10"
 echo ""
 
 # 6. Wildcard detection with verbose output
 info "6) Verbose output — see all attempts including failures"
-echo "   gobuster dns -d ${TARGET} -w ${WORDLIST} -v -t 10"
+echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -v -t 10"
 echo ""
 
 # 7. Enumerate with larger wordlist
 info "7) Thorough enumeration with larger wordlist"
-echo "   gobuster dns -d ${TARGET} -w \${PROJECT_ROOT}/wordlists/subdomains-top1million-5000.txt -t 10"
+echo "   gobuster dns -do ${TARGET} -w \${PROJECT_ROOT}/wordlists/subdomains-top1million-5000.txt -t 10"
 echo ""
 
 # 8. Save results to file
 info "8) Save results to file for later analysis"
-echo "   gobuster dns -d ${TARGET} -w ${WORDLIST} -o subdomain-results.txt -t 10"
+echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -o subdomain-results.txt -t 10"
 echo ""
 
 # 9. Quiet mode — only show discoveries
 info "9) Quiet mode — only show discovered subdomains"
-echo "   gobuster dns -d ${TARGET} -w ${WORDLIST} -q -t 10"
+echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -q -t 10"
 echo ""
 
 # 10. Combined — resolver, IPs, and output file
 info "10) Full enumeration — custom resolver, show IPs, save results"
-echo "    gobuster dns -d ${TARGET} -w ${WORDLIST} -r 8.8.8.8:53 --show-ips -o subdomains.txt -t 10"
+echo "    gobuster dns -do ${TARGET} -w ${WORDLIST} -r 8.8.8.8:53 --show-ips -o subdomains.txt -t 10"
 echo ""
 
 # Interactive demo
@@ -104,6 +104,6 @@ echo ""
 
 read -rp "Run a subdomain scan against ${TARGET}? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: gobuster dns -d ${TARGET} -w ${WORDLIST} -t 10"
-    gobuster dns -d "$TARGET" -w "$WORDLIST" -t 10 || true
+    info "Running: gobuster dns -do ${TARGET} -w ${WORDLIST} -t 10"
+    gobuster dns -do "$TARGET" -w "$WORDLIST" -t 10 || true
 fi

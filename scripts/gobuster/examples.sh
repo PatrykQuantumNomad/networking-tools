@@ -61,12 +61,12 @@ echo ""
 
 # 7. DNS subdomain enumeration
 info "7) DNS subdomain enumeration"
-echo "   gobuster dns -d example.com -w wordlists/subdomains-top1million-5000.txt -t 10"
+echo "   gobuster dns -do example.com -w wordlists/subdomains-top1million-5000.txt -t 10"
 echo ""
 
 # 8. DNS with custom resolver
 info "8) DNS subdomain enumeration with custom resolver"
-echo "   gobuster dns -d example.com -w wordlists/subdomains-top1million-5000.txt -r 8.8.8.8:53 -t 10"
+echo "   gobuster dns -do example.com -w wordlists/subdomains-top1million-5000.txt -r 8.8.8.8:53 -t 10"
 echo ""
 
 # 9. Virtual host discovery
