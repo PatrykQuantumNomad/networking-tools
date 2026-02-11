@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 65+ scripts, 3 diagnostic auto-reports, an Astro/Starlight documentation site with learning paths, and Docker-based vulnerable targets for safe practice.
+A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 65+ scripts, 3 diagnostic auto-reports, a branded Astro/Starlight documentation site with dark orange/amber theme, custom homepage, learning paths, and Docker-based vulnerable targets for safe practice.
 
 ## Core Value
 
@@ -27,19 +27,14 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 - ✓ Wordlist infrastructure for SecLists web enumeration files — v1.0
 - ✓ CI docs-completeness validation ensuring every tool has documentation — v1.0
 - ✓ Cross-platform support with netcat variant detection, mtr sudo gating, BSD/GNU compatibility — v1.0
+- ✓ Dark + orange/amber accent color palette across all UI elements with WCAG AA light mode contrast — v1.1
+- ✓ Custom terminal-prompt SVG logo with dual dark/light variants and adaptive favicon — v1.1
+- ✓ Sidebar navigation cleanup removing redundant section index entries — v1.1
+- ✓ Homepage redesign with branded hero, tool card grids by category, feature highlights, and guide links — v1.1
 
 ### Active
 
-#### Current Milestone: v1.1 Site Visual Refresh
-
-**Goal:** Transform the documentation site from default Starlight into a polished, branded pentesting toolkit with a dark + orange/amber theme, custom logo, redesigned homepage, and cleaned-up navigation.
-
-**Target features:**
-- Project logo with technical/hacker aesthetic
-- Homepage redesign with hero intro + tool grid + guide links
-- Full visual refresh: dark theme with orange/amber accent palette (Kali docs reference)
-- Sidebar navigation cleanup (remove redundant index items)
-- Custom Starlight theme/components for consistent branding
+(No active milestone — next milestone via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -49,15 +44,17 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 - Cloud infrastructure tools (AWS CLI, terraform) — different domain
 - Real-time monitoring/alerting — scripts are run-once diagnostic, not daemons
 - Offline mode — scripts require network access by nature
+- Custom React/Svelte interactive components — Starlight built-in components cover needs
+- Tailwind CSS integration — Starlight CSS custom properties handle theming
+- Animated backgrounds or particle effects — accessibility issues, performance cost
 
 ## Context
 
-Shipped v1.0 with 13,585 LOC (8,180 bash + 5,405 site docs) across 124 files.
+Shipped v1.1 with branded documentation site. Total codebase: ~14,000 LOC across 130+ files.
 Tech stack: Bash scripts + Astro 5.x/Starlight 0.37.x + GitHub Actions + Docker Compose.
 17 tools integrated into check-tools.sh with Makefile targets for each.
 3 diagnostic scripts following Pattern B (structured auto-reports with pass/fail/warn).
-Documentation site deployed to GitHub Pages with CI validation.
-v1.1 focus: Site visual refresh — current site uses default Starlight theme with minimal branding, generic homepage, and redundant sidebar items. Kali Linux docs as design reference, dark + orange/amber palette.
+Documentation site deployed to GitHub Pages with CI validation, dark orange/amber theme, terminal-prompt logo, and redesigned homepage.
 
 ## Constraints
 
@@ -67,6 +64,7 @@ v1.1 focus: Site visual refresh — current site uses default Starlight theme wi
 - **Script Pattern**: New tools must follow established pattern (examples.sh + use-case scripts) — architectural consistency
 - **Diagnostic Scripts**: Must be diagnostic (auto-report), not interactive step-by-step — user preference
 - **Dependencies**: Prefer tools available via Homebrew or pre-installed on macOS/Linux
+- **Site Theming**: Use CSS custom property overrides only (no element/class selectors) — safe Starlight cascade override
 
 ## Key Decisions
 
@@ -79,7 +77,12 @@ v1.1 focus: Site visual refresh — current site uses default Starlight theme wi
 | detect_nc_variant() exclusion-based detection | Apple nc fork does not self-identify; eliminates false GNU detection | ✓ Good — works on macOS, Linux, and ncat |
 | Counter wrapper functions for diagnostic tallying | Clean pass/fail/warn counts without polluting global state | ✓ Good — reused in all 3 diagnostics |
 | -t 10 thread limit for gobuster/ffuf | Docker lab targets can't handle default 40 threads | ✓ Good — safe default for lab environment |
-| || true guards on pipefail-sensitive patterns | set -e exits on grep no-match, arithmetic zero, nc -h | ✓ Good — prevents silent script failures |
+| \|\| true guards on pipefail-sensitive patterns | set -e exits on grep no-match, arithmetic zero, nc -h | ✓ Good — prevents silent script failures |
+| :root-only CSS variable overrides for Starlight theming | Unlayered CSS beats @layer without !important; no selector conflicts | ✓ Good — clean theme override, no side effects |
+| Terminal prompt >_ motif as brand icon | Simple geometric shape readable at 16px; evokes CLI/terminal tools | ✓ Good — recognizable at all sizes |
+| sidebar.hidden frontmatter over config excludes | Keeps configuration local to each page; no config-level changes | ✓ Good — clean, maintainable |
+| MDX homepage with Starlight Card/CardGrid/LinkCard | Built-in components; zero custom JS; consistent with site patterns | ✓ Good — 17 tools + guides + diagnostics on one page |
+| [data-has-hero] CSS scoping for splash pages | Splash-page-only styles don't leak to content pages | ✓ Good — homepage spacing isolated |
 
 ---
-*Last updated: 2026-02-11 after v1.1 milestone started*
+*Last updated: 2026-02-11 after v1.1 milestone*

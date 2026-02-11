@@ -1,5 +1,29 @@
 # Project Milestones: Networking Tools
 
+## v1.1 Site Visual Refresh (Shipped: 2026-02-11)
+
+**Delivered:** Transformed the documentation site from default Starlight into a polished, branded pentesting toolkit with a dark + orange/amber theme, custom terminal-prompt logo, redesigned homepage with tool card grids, and cleaned-up navigation.
+
+**Phases completed:** 8-11 (4 plans total)
+
+**Key accomplishments:**
+- Applied dark + orange/amber accent palette with WCAG AA-compliant light mode contrast across all UI elements
+- Created terminal-prompt (>_) SVG logo with dual dark/light variants and adaptive favicon
+- Removed redundant sidebar index entries using Starlight's sidebar.hidden frontmatter
+- Built full MDX homepage with branded hero, 17 tool cards organized by category, diagnostic links, and guide links
+
+**Stats:**
+- 36 files created/modified
+- +4,670 / -1,388 lines changed (CSS, MDX, SVG, config)
+- 4 phases, 4 plans, 7 tasks
+- Same day ship (2026-02-11, ~4.5 hours)
+
+**Git range:** `feat(08-01)` → `docs(phase-11)`
+
+**What's next:** TBD — next milestone via `/gsd:new-milestone`
+
+---
+
 ## v1.0 Networking Tools Expansion (Shipped: 2026-02-11)
 
 **Delivered:** Transformed a bash-first pentesting learning lab into a comprehensive 17-tool networking toolkit with an Astro/Starlight documentation site, diagnostic auto-report scripts, and six new networking tools.
