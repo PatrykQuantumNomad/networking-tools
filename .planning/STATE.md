@@ -94,7 +94,7 @@ Recent decisions affecting current work:
 - [06-03]: || true guard on ((errors++)) to prevent set -e exit when post-increment evaluates to 0 (falsy)
 - [07-03]: No exit 1 on SecLists download failure (non-critical, unlike rockyou.txt) -- script continues if supplementary wordlist fails
 - [07-03]: Updated Makefile wordlists help text to reflect expanded scope (password cracking + web enumeration)
-- [07-01]: Used -d flag for gobuster DNS mode (standard documented flag) instead of plan's -do which was based on uncertain research
+- [07-01]: Fixed gobuster DNS mode to use -do flag (v3.6+) per research Pitfall 6; executor initially used -d, corrected during verification
 - [07-01]: gobuster version detection uses 'gobuster version' subcommand with head -1 pipe
 - [07-01]: Wordlist-dependent scripts check file existence before demo, print 'make wordlists' instruction if missing
 - [07-01]: Thread count -t 10 in all gobuster examples to keep safe for Docker lab targets

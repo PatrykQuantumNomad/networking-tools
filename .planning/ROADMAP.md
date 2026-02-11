@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Content Migration and Tool Pages** - Migrate notes/*.md to site, add new tool and diagnostic docs
 - [x] **Phase 5: Advanced Tools** - traceroute/mtr examples.sh, use-case scripts, and performance diagnostic
 - [x] **Phase 6: Site Polish and Learning Paths** - Task index, learning paths, cross-references, lab walkthrough
-- [ ] **Phase 7: Web Enumeration Tools** - gobuster/ffuf examples.sh, use-case scripts, wordlist infrastructure
+- [x] **Phase 7: Web Enumeration Tools** - gobuster/ffuf examples.sh, use-case scripts, wordlist infrastructure
 
 ## Phase Details
 
@@ -161,9 +161,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — gobuster examples.sh + 2 use-case scripts + check-tools.sh/Makefile integration + gobuster.mdx site page
-- [ ] 07-02-PLAN.md — ffuf examples.sh + 1 use-case script + check-tools.sh/Makefile integration + ffuf.mdx site page
-- [ ] 07-03-PLAN.md — Wordlist download extension for SecLists directories/subdomains + USECASES.md web enumeration entries
+- [x] 07-01-PLAN.md — gobuster examples.sh + 2 use-case scripts + check-tools.sh/Makefile integration + gobuster.mdx site page
+- [x] 07-02-PLAN.md — ffuf examples.sh + 1 use-case script + check-tools.sh/Makefile integration + ffuf.mdx site page
+- [x] 07-03-PLAN.md — Wordlist download extension for SecLists directories/subdomains + USECASES.md web enumeration entries
 
 ---
 
@@ -267,7 +267,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. Content Migration and Tool Pages | 3/3 | Complete | 2026-02-10 |
 | 5. Advanced Tools | 2/2 | Complete | 2026-02-10 |
 | 6. Site Polish and Learning Paths | 3/3 | Complete | 2026-02-10 |
-| 7. Web Enumeration Tools | 0/3 | Not started | - |
+| 7. Web Enumeration Tools | 3/3 | Complete | 2026-02-11 |
 
 ---
 *Roadmap created: 2026-02-10*
