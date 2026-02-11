@@ -3,7 +3,7 @@
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [domain] [wordlist] [-h|--help]"
+    echo "Usage: $(basename "$0") [domain] [wordlist] [-h|--help] [-x|--execute]"
     echo ""
     echo "Description:"
     echo "  Enumerates subdomains for a target domain using DNS brute-forcing"
@@ -11,14 +11,22 @@ show_help() {
     echo "  and forgotten infrastructure."
     echo "  Default target is example.com if none is provided."
     echo ""
+    echo "Options:"
+    echo "  -h, --help       Show this help message"
+    echo "  -x, --execute    Run commands instead of displaying them"
+    echo "  -v, --verbose    Increase verbosity"
+    echo "  -q, --quiet      Suppress informational output"
+    echo ""
     echo "Examples:"
     echo "  $(basename "$0")                                   # Enumerate example.com"
     echo "  $(basename "$0") target.com                        # Enumerate target.com"
     echo "  $(basename "$0") target.com /path/to/subdomains    # Use custom wordlist"
+    echo "  $(basename "$0") -x target.com                     # Execute enumeration"
     echo "  $(basename "$0") --help                            # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd gobuster "brew install gobuster (or: go install github.com/OJ/gobuster/v3@latest)"
 
@@ -32,6 +40,7 @@ if [[ ! -f "$WORDLIST" ]]; then
     exit 1
 fi
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Enumerate Subdomains ==="
@@ -50,34 +59,28 @@ echo "   less-hardened services or sensitive data."
 echo ""
 
 # 1. Basic subdomain enumeration
-info "1) Basic subdomain enumeration"
-echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -t 10"
-echo ""
+run_or_show "1) Basic subdomain enumeration" \
+    gobuster dns -do "$TARGET" -w "$WORDLIST" -t 10
 
 # 2. Show CNAME and A records for each discovery
-info "2) Show IP addresses for discovered subdomains"
-echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} --show-ips -t 10"
-echo ""
+run_or_show "2) Show IP addresses for discovered subdomains" \
+    gobuster dns -do "$TARGET" -w "$WORDLIST" --show-ips -t 10
 
 # 3. Show CNAME records
-info "3) Show CNAME records — reveal CDN and service mappings"
-echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} --show-cname -t 10"
-echo ""
+run_or_show "3) Show CNAME records — reveal CDN and service mappings" \
+    gobuster dns -do "$TARGET" -w "$WORDLIST" --show-cname -t 10
 
 # 4. Use custom DNS resolver
-info "4) Use custom DNS resolver — bypass local caching"
-echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -r 8.8.8.8:53 -t 10"
-echo ""
+run_or_show "4) Use custom DNS resolver — bypass local caching" \
+    gobuster dns -do "$TARGET" -w "$WORDLIST" -r 8.8.8.8:53 -t 10
 
 # 5. Use multiple resolvers for reliability
-info "5) Use Cloudflare resolver — alternative DNS source"
-echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -r 1.1.1.1:53 -t 10"
-echo ""
+run_or_show "5) Use Cloudflare resolver — alternative DNS source" \
+    gobuster dns -do "$TARGET" -w "$WORDLIST" -r 1.1.1.1:53 -t 10
 
 # 6. Wildcard detection with verbose output
-info "6) Verbose output — see all attempts including failures"
-echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -v -t 10"
-echo ""
+run_or_show "6) Verbose output — see all attempts including failures" \
+    gobuster dns -do "$TARGET" -w "$WORDLIST" -v -t 10
 
 # 7. Enumerate with larger wordlist
 info "7) Thorough enumeration with larger wordlist"
@@ -90,9 +93,8 @@ echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -o subdomain-results.txt -t 1
 echo ""
 
 # 9. Quiet mode — only show discoveries
-info "9) Quiet mode — only show discovered subdomains"
-echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -q -t 10"
-echo ""
+run_or_show "9) Quiet mode — only show discovered subdomains" \
+    gobuster dns -do "$TARGET" -w "$WORDLIST" -q -t 10
 
 # 10. Combined — resolver, IPs, and output file
 info "10) Full enumeration — custom resolver, show IPs, save results"
@@ -100,10 +102,12 @@ echo "    gobuster dns -do ${TARGET} -w ${WORDLIST} -r 8.8.8.8:53 --show-ips -o 
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Run a subdomain scan against ${TARGET}? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: gobuster dns -do ${TARGET} -w ${WORDLIST} -t 10"
-    gobuster dns -do "$TARGET" -w "$WORDLIST" -t 10 || true
+    read -rp "Run a subdomain scan against ${TARGET}? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: gobuster dns -do ${TARGET} -w ${WORDLIST} -t 10"
+        gobuster dns -do "$TARGET" -w "$WORDLIST" -t 10 || true
+    fi
 fi
