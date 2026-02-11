@@ -70,7 +70,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 13-01-PLAN.md — Create 8 library modules in scripts/lib/ and rewrite common.sh as entry point
+- [x] 13-01-PLAN.md — Create 8 library modules in scripts/lib/ and rewrite common.sh as entry point (completed 2026-02-11)
 - [ ] 13-02-PLAN.md — Smoke test and backward compatibility verification of all 5 success criteria
 
 ### Phase 14: Argument Parsing and Dual-Mode Pattern
@@ -142,7 +142,7 @@ Plans:
 | 10. Navigation Cleanup | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 11. Homepage Redesign | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 12. Pre-Refactor Cleanup | v1.2 | 1/1 | Complete | 2026-02-11 |
-| 13. Library Infrastructure | v1.2 | 0/TBD | Not started | - |
+| 13. Library Infrastructure | v1.2 | 1/2 | In progress | - |
 | 14. Argument Parsing + Dual-Mode | v1.2 | 0/TBD | Not started | - |
 | 15. Examples Script Migration | v1.2 | 0/TBD | Not started | - |
 | 16. Use-Case Script Migration | v1.2 | 0/TBD | Not started | - |

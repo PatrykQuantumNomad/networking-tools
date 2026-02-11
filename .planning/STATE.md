@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** v1.2 Script Hardening -- Phase 12 Pre-Refactor Cleanup
+**Current focus:** v1.2 Script Hardening -- Phase 13 Library Infrastructure
 
 ## Current Position
 
-Phase: 12 of 17 (Pre-Refactor Cleanup)
-Plan: 1 of 1 in current phase (COMPLETE)
-Status: Phase 12 complete -- ready for Phase 13 planning
-Last activity: 2026-02-11 -- Completed 12-01 normalize guards plan
+Phase: 13 of 17 (Library Infrastructure)
+Plan: 1 of 2 in current phase (COMPLETE)
+Status: Plan 13-01 complete -- ready for 13-02 consumer migration verification
+Last activity: 2026-02-11 -- Completed 13-01 library modules plan
 
-Progress: [█░░░░░░░░░] 17%
+Progress: [██░░░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24
+- Total plans completed: 25
 - Average duration: 4min
-- Total execution time: 1.40 hours
+- Total execution time: 1.48 hours
 
 **By Phase:**
 
@@ -39,6 +39,7 @@ Progress: [█░░░░░░░░░] 17%
 | 10-navigation-cleanup | 1 | 2min | 2min |
 | 11-homepage-redesign | 1 | 2min | 2min |
 | 12-pre-refactor-cleanup | 1 | 6min | 6min |
+| 13-library-infrastructure | 1 | 5min | 5min |
 
 *Updated after each plan completion*
 
@@ -59,6 +60,10 @@ Recent decisions affecting v1.2:
 - 12-01: Standard comment "# Interactive demo (skip if non-interactive)" for all guards
 - 12-01: Version guard before set -euo pipefail using only Bash 2.x+ syntax
 - 12-01: Three source-path entries in .shellcheckrc (SCRIPTDIR, SCRIPTDIR/.., SCRIPTDIR/../lib)
+- 13-01: ERR trap uses plain echo (not library functions) to avoid recursion
+- 13-01: EXIT trap only (not INT/TERM) per Greg's Wiki -- avoids double execution
+- 13-01: Colors disabled via empty strings (not unset) preserving variable references
+- 13-01: VERBOSE >= 1 overrides LOG_LEVEL to debug for single-knob verbosity
 
 ### Pending Todos
 
@@ -78,5 +83,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 12-01-PLAN.md (normalize guards) -- Phase 12 complete
+Stopped at: Completed 13-01-PLAN.md (library modules) -- ready for 13-02
 Resume file: None
