@@ -30,7 +30,16 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 
 ### Active
 
-(None — next milestone requirements TBD via `/gsd:new-milestone`)
+#### Current Milestone: v1.1 Site Visual Refresh
+
+**Goal:** Transform the documentation site from default Starlight into a polished, branded pentesting toolkit with a dark + orange/amber theme, custom logo, redesigned homepage, and cleaned-up navigation.
+
+**Target features:**
+- Project logo with technical/hacker aesthetic
+- Homepage redesign with hero intro + tool grid + guide links
+- Full visual refresh: dark theme with orange/amber accent palette (Kali docs reference)
+- Sidebar navigation cleanup (remove redundant index items)
+- Custom Starlight theme/components for consistent branding
 
 ### Out of Scope
 
@@ -44,10 +53,11 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 ## Context
 
 Shipped v1.0 with 13,585 LOC (8,180 bash + 5,405 site docs) across 124 files.
-Tech stack: Bash scripts + Astro 5.x/Starlight + GitHub Actions + Docker Compose.
+Tech stack: Bash scripts + Astro 5.x/Starlight 0.37.x + GitHub Actions + Docker Compose.
 17 tools integrated into check-tools.sh with Makefile targets for each.
 3 diagnostic scripts following Pattern B (structured auto-reports with pass/fail/warn).
 Documentation site deployed to GitHub Pages with CI validation.
+v1.1 focus: Site visual refresh — current site uses default Starlight theme with minimal branding, generic homepage, and redundant sidebar items. Kali Linux docs as design reference, dark + orange/amber palette.
 
 ## Constraints
 
@@ -72,4 +82,4 @@ Documentation site deployed to GitHub Pages with CI validation.
 | || true guards on pipefail-sensitive patterns | set -e exits on grep no-match, arithmetic zero, nc -h | ✓ Good — prevents silent script failures |
 
 ---
-*Last updated: 2026-02-11 after v1.0 milestone*
+*Last updated: 2026-02-11 after v1.1 milestone started*

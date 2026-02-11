@@ -5,16 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Planning next milestone
+**Current focus:** v1.1 Site Visual Refresh
 
 ## Current Position
 
-Phase: 7 of 7 complete -- v1.0 shipped
-Plan: All plans complete
-Status: Milestone v1.0 archived -- ready for next milestone
-Last activity: 2026-02-11 -- v1.0 milestone complete
-
-Progress: [####################] 100% (v1.0)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-11 — Milestone v1.1 started
 
 ## Performance Metrics
 
