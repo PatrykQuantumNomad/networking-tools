@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 
 ## Current Position
 
-Phase: 13 of 17 (Library Infrastructure)
-Plan: 2 of 2 in current phase (COMPLETE)
-Status: Phase 13 complete -- ready for Phase 14 planning
-Last activity: 2026-02-11 -- Completed 13-02 smoke test and verification plan
+Phase: 14 of 17 (Argument Parsing and Dual-Mode Pattern)
+Plan: 1 of 2 in current phase
+Status: Executing Phase 14 -- plan 01 complete
+Last activity: 2026-02-11 -- Completed 14-01 args module and pilot migration
 
-Progress: [███░░░░░░░] 50%
+Progress: [█████░░░░░] 53%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 26
+- Total plans completed: 27
 - Average duration: 4min
-- Total execution time: 1.56 hours
+- Total execution time: 1.61 hours
 
 **By Phase:**
 
@@ -40,6 +40,7 @@ Progress: [███░░░░░░░] 50%
 | 11-homepage-redesign | 1 | 2min | 2min |
 | 12-pre-refactor-cleanup | 1 | 6min | 6min |
 | 13-library-infrastructure | 2 | 10min | 5min |
+| 14-argument-parsing-and-dual-mode-pattern | 1 | 3min | 3min |
 
 *Updated after each plan completion*
 
@@ -65,6 +66,10 @@ Recent decisions affecting v1.2:
 - 13-01: Colors disabled via empty strings (not unset) preserving variable references
 - 13-01: VERBOSE >= 1 overrides LOG_LEVEL to debug for single-knob verbosity
 - 13-02: Base temp directory instead of array tracking for make_temp -- avoids subshell array loss
+- 14-01: EXECUTE_MODE defaults to "show" -- all scripts backward compatible without code changes
+- 14-01: Unknown flags pass through to REMAINING_ARGS (permissive) for per-script extensibility
+- 14-01: confirm_execute refuses non-interactive stdin in execute mode -- prevents silent automated pentesting
+- 14-01: Example 9 (hardcoded subnet) kept as static info+echo -- run_or_show only for $TARGET commands
 
 ### Pending Todos
 
@@ -84,5 +89,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 13-02-PLAN.md (smoke test and verification) -- Phase 13 complete, ready for Phase 14
+Stopped at: Completed 14-01-PLAN.md (args module and pilot migration) -- ready for 14-02
 Resume file: None

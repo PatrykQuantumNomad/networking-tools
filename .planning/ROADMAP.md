@@ -86,7 +86,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 14-01-PLAN.md — Create args.sh module, add run_or_show/confirm_execute to output.sh, pilot-migrate nmap/examples.sh
+- [x] 14-01-PLAN.md — Create args.sh module, add run_or_show/confirm_execute to output.sh, pilot-migrate nmap/examples.sh (completed 2026-02-11)
 - [ ] 14-02-PLAN.md — Automated verification of all 5 success criteria with test script
 
 ### Phase 15: Examples Script Migration
@@ -143,7 +143,7 @@ Plans:
 | 11. Homepage Redesign | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 12. Pre-Refactor Cleanup | v1.2 | 1/1 | Complete | 2026-02-11 |
 | 13. Library Infrastructure | v1.2 | 2/2 | Complete | 2026-02-11 |
-| 14. Argument Parsing + Dual-Mode | v1.2 | 0/2 | Planned | - |
+| 14. Argument Parsing + Dual-Mode | v1.2 | 1/2 | In Progress | - |
 | 15. Examples Script Migration | v1.2 | 0/TBD | Not started | - |
 | 16. Use-Case Script Migration | v1.2 | 0/TBD | Not started | - |
 | 17. ShellCheck Compliance + CI | v1.2 | 0/TBD | Not started | - |
