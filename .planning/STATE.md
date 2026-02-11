@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 
 ## Current Position
 
-Phase: 16 of 17 (Use-Case Script Migration) -- NOT STARTED
-Plan: 0 of TBD in current phase
-Status: Phase 15 complete, ready for Phase 16
-Last activity: 2026-02-11 -- Completed 15-04 (test suite extension, all 17 scripts verified)
+Phase: 16 of 17 (Use-Case Script Migration) -- IN PROGRESS
+Plan: 1 of 8 in current phase
+Status: Executing Phase 16 plans
+Last activity: 2026-02-11 -- Completed 16-01 (nmap + hping3 use-case script migration, 5 scripts)
 
 Progress: [██████░░░░] 65%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 32
+- Total plans completed: 33
 - Average duration: 4min
-- Total execution time: 1.93 hours
+- Total execution time: 2.01 hours
 
 **By Phase:**
 
@@ -42,6 +42,7 @@ Progress: [██████░░░░] 65%
 | 13-library-infrastructure | 2 | 10min | 5min |
 | 14-argument-parsing-and-dual-mode-pattern | 2 | 5min | 3min |
 | 15-examples-script-migration | 4 | 17min | 4min |
+| 16-use-case-script-migration | 1 | 5min | 5min |
 
 *Updated after each plan completion*
 
@@ -85,6 +86,8 @@ Recent decisions affecting v1.2:
 - 15-02: Platform conditionals (traceroute) wrap run_or_show calls, not the other way around
 - 15-04: Skip make targets for tools not installed rather than failing (graceful degradation)
 - 15-04: Clear ERR trap after sourcing common.sh in test harness to prevent stack trace noise
+- 16-01: identify-ports.sh keeps no safety_banner (local introspection, not active scanning)
+- 16-01: Multi-command examples (&&, ;, |) kept as info+echo -- run_or_show for single commands only
 
 ### Pending Todos
 
@@ -104,5 +107,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 15-04-PLAN.md (test suite extension) -- Phase 15 complete, Phase 16 next
+Stopped at: Completed 16-01-PLAN.md (nmap + hping3 use-case migration) -- 5 of 46 scripts migrated
 Resume file: None
