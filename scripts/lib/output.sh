@@ -23,3 +23,44 @@ is_interactive() {
 
 # Project root directory (lib/ is two levels below project root)
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+# Run a command or display it, depending on EXECUTE_MODE
+# In "show" mode (default): prints description + indented command
+# In "execute" mode (-x): prints description + runs the command
+#
+# Usage: run_or_show "N) Description" command [args...]
+run_or_show() {
+    local description="$1"
+    shift
+
+    if [[ "${EXECUTE_MODE:-show}" == "execute" ]]; then
+        info "$description"
+        debug "Executing: $*"
+        "$@"
+        echo ""
+    else
+        info "$description"
+        echo "   $*"
+        echo ""
+    fi
+}
+
+# Prompt for confirmation before executing commands in -x mode
+# No-op in show mode (default). Exits if user declines.
+# Refuses to execute if stdin is not a terminal (piped/automated).
+#
+# Usage: confirm_execute [target]
+confirm_execute() {
+    local target="${1:-}"
+    [[ "${EXECUTE_MODE:-show}" != "execute" ]] && return 0
+
+    if [[ ! -t 0 ]]; then
+        warn "Execute mode requires an interactive terminal for confirmation"
+        exit 1
+    fi
+
+    echo ""
+    warn "Execute mode: commands will run against ${target:-the target}"
+    read -rp "Continue? [y/N] " answer
+    [[ "$answer" =~ ^[Yy]$ ]] || exit 0
+}
