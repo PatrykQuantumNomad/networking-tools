@@ -4,7 +4,7 @@
 
 - SHIPPED **v1.0 Networking Tools Expansion** — Phases 1-7 (shipped 2026-02-11)
 - SHIPPED **v1.1 Site Visual Refresh** — Phases 8-11 (shipped 2026-02-11)
-- ACTIVE **v1.2 Script Hardening** — Phases 12-17
+- SHIPPED **v1.2 Script Hardening** — Phases 12-17 (shipped 2026-02-11)
 
 ## Phases
 
@@ -138,7 +138,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 17-01-PLAN.md — Fix 11 ShellCheck warnings, add make lint target, create GitHub Actions CI workflow
+- [x] 17-01-PLAN.md — Fix 11 ShellCheck warnings, add make lint target, create GitHub Actions CI workflow (completed 2026-02-11)
 
 ## Progress
 
@@ -154,4 +154,4 @@ Plans:
 | 14. Argument Parsing + Dual-Mode | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 15. Examples Script Migration | v1.2 | 4/4 | Complete | 2026-02-11 |
 | 16. Use-Case Script Migration | v1.2 | 8/8 | Complete | 2026-02-11 |
-| 17. ShellCheck Compliance + CI | v1.2 | 0/1 | Not started | - |
+| 17. ShellCheck Compliance + CI | v1.2 | 1/1 | Complete | 2026-02-11 |

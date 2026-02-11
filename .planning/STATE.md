@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** v1.2 Script Hardening -- Phase 16 Use-Case Script Migration
+**Current focus:** v1.2 Script Hardening -- Phase 17 ShellCheck Compliance and CI
 
 ## Current Position
 
-Phase: 16 of 17 (Use-Case Script Migration) -- COMPLETE
-Plan: 8 of 8 in current phase (all complete)
-Status: Phase 16 complete, ready for Phase 17
-Last activity: 2026-02-11 -- Completed 16-08 (test suite extension, 268 tests covering 63 scripts)
+Phase: 17 of 17 (ShellCheck Compliance and CI) -- COMPLETE
+Plan: 1 of 1 in current phase (all complete)
+Status: Phase 17 complete -- v1.2 Script Hardening milestone COMPLETE
+Last activity: 2026-02-11 -- Completed 17-01 (ShellCheck compliance + CI gate)
 
 Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 39
+- Total plans completed: 40
 - Average duration: 4min
-- Total execution time: 2.56 hours
+- Total execution time: 2.59 hours
 
 **By Phase:**
 
@@ -43,11 +43,10 @@ Progress: [██████████] 100%
 | 14-argument-parsing-and-dual-mode-pattern | 2 | 5min | 3min |
 | 15-examples-script-migration | 4 | 17min | 4min |
 | 16-use-case-script-migration | 8 | 38min | 5min |
+| 17-shellcheck-compliance-and-ci | 1 | 3min | 3min |
 
 *Updated after each plan completion*
-| Phase 16 P08 | 3min | 1 task | 2 files |
-| Phase 16 P05 | 6min | 2 tasks | 6 files |
-| Phase 16 P04 | 8min | 2 tasks | 5 files |
+| Phase 17 P01 | 3min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -106,6 +105,9 @@ Recent decisions affecting v1.2:
 - [Phase 16]: 16-07: benchmark-gpu.sh 9 run_or_show conversions (examples 1-9), example 10 kept as info+echo (hardcoded file paths)
 - [Phase 16]: 16-07: identify-hash-type.sh safety_banner extra arg removed (was passing install hint as unused parameter)
 - [Phase 16]: 16-07: Multi-positional (LHOST/LPORT) metasploit scripts use confirm_execute without argument
+- 17-01: Inline SC2034 directives per-assignment (not file-level or .shellcheckrc global disable)
+- 17-01: Removed unused RESOLVERS array rather than suppressing warning
+- 17-01: Pre-installed ShellCheck on ubuntu-latest (no third-party actions)
 
 ### Pending Todos
 
@@ -113,8 +115,7 @@ None.
 
 ### Blockers/Concerns
 
-- Exact ShellCheck warning count unknown until Phase 17 planning (run shellcheck first to scope)
-- Pattern B diagnostic scripts (3 scripts) may not need dual-mode -- clarify during Phase 16
+None.
 
 ### Quick Tasks Completed
 
@@ -125,5 +126,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 16-08-PLAN.md (test suite extension, 268 tests -- Phase 16 COMPLETE)
+Stopped at: Completed 17-01-PLAN.md (ShellCheck compliance + CI gate -- Phase 17 COMPLETE)
 Resume file: None
