@@ -1,0 +1,12 @@
+# .shellcheckrc -- ShellCheck project-level configuration
+# ShellCheck walks up from each script's directory to find this file
+
+# Resolve source statements relative to each script's directory
+source-path=SCRIPTDIR
+source-path=SCRIPTDIR/..
+
+# Future-proofing for Phase 13 library split (common.sh will source lib/*.sh)
+source-path=SCRIPTDIR/../lib
+
+# Allow following dynamically-constructed source paths
+external-sources=true
