@@ -39,7 +39,7 @@ Archived to `.planning/milestones/v1.1-ROADMAP.md`
 - [x] **Phase 13: Library Infrastructure** - Split common.sh into modules with strict mode, logging, traps, and helpers (completed 2026-02-11)
 - [x] **Phase 14: Argument Parsing and Dual-Mode Pattern** - Build the arg parser and run_or_show mechanism, prove with pilot (completed 2026-02-11)
 - [x] **Phase 15: Examples Script Migration** - Upgrade all 17 examples.sh to dual-mode (completed 2026-02-11)
-- [ ] **Phase 16: Use-Case Script Migration** - Upgrade all 46 use-case scripts to dual-mode
+- [x] **Phase 16: Use-Case Script Migration** - Upgrade all 46 use-case scripts to dual-mode (completed 2026-02-11)
 - [ ] **Phase 17: ShellCheck Compliance and CI** - Zero warnings across all scripts with CI gating
 
 ## Phase Details
@@ -117,14 +117,14 @@ Plans:
 **Plans**: 8 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Migrate 5 nmap + hping3 use-case scripts (discover-live-hosts, scan-web-vulnerabilities, identify-ports, test-firewall-rules, detect-firewall)
-- [ ] 16-02-PLAN.md — Migrate 6 dig + curl use-case scripts (query-dns-records, attempt-zone-transfer, check-dns-propagation, check-ssl-certificate, debug-http-response, test-http-endpoints)
-- [ ] 16-03-PLAN.md — Migrate 6 nikto + skipfish + ffuf use-case scripts (scan-specific-vulnerabilities, scan-multiple-hosts, scan-with-auth, scan-authenticated-app, quick-scan-web-app, fuzz-parameters)
-- [ ] 16-04-PLAN.md — Migrate 5 gobuster + traceroute use-case scripts (discover-directories, enumerate-subdomains, trace-network-path, diagnose-latency, compare-routes)
-- [ ] 16-05-PLAN.md — Migrate 6 sqlmap + netcat use-case scripts (dump-database, test-all-parameters, bypass-waf, scan-ports, setup-listener, transfer-files)
-- [ ] 16-06-PLAN.md — Migrate 6 foremost + tshark use-case scripts (analyze-forensic-image, carve-specific-filetypes, recover-deleted-files, capture-http-credentials, analyze-dns-queries, extract-files-from-capture)
-- [ ] 16-07-PLAN.md — Migrate 12 metasploit + hashcat + john + aircrack-ng use-case scripts (all static/no-target)
-- [ ] 16-08-PLAN.md — Extend test suite to verify all 46 use-case scripts
+- [x] 16-01-PLAN.md — Migrate 5 nmap + hping3 use-case scripts (completed 2026-02-11)
+- [x] 16-02-PLAN.md — Migrate 6 dig + curl use-case scripts (completed 2026-02-11)
+- [x] 16-03-PLAN.md — Migrate 6 nikto + skipfish + ffuf use-case scripts (completed 2026-02-11)
+- [x] 16-04-PLAN.md — Migrate 5 gobuster + traceroute use-case scripts (completed 2026-02-11)
+- [x] 16-05-PLAN.md — Migrate 6 sqlmap + netcat use-case scripts (completed 2026-02-11)
+- [x] 16-06-PLAN.md — Migrate 6 foremost + tshark use-case scripts (completed 2026-02-11)
+- [x] 16-07-PLAN.md — Migrate 12 metasploit + hashcat + john + aircrack-ng use-case scripts (completed 2026-02-11)
+- [x] 16-08-PLAN.md — Extend test suite to verify all 46 use-case scripts (completed 2026-02-11)
 
 ### Phase 17: ShellCheck Compliance and CI
 **Goal**: Every script passes ShellCheck at warning severity with CI enforcement preventing regressions
@@ -153,5 +153,5 @@ Plans:
 | 13. Library Infrastructure | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 14. Argument Parsing + Dual-Mode | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 15. Examples Script Migration | v1.2 | 4/4 | Complete | 2026-02-11 |
-| 16. Use-Case Script Migration | v1.2 | 0/8 | Not started | - |
+| 16. Use-Case Script Migration | v1.2 | 8/8 | Complete | 2026-02-11 |
 | 17. ShellCheck Compliance + CI | v1.2 | 0/TBD | Not started | - |
