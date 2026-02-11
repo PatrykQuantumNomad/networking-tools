@@ -1,0 +1,84 @@
+---
+title: Networking Tools
+description: Pentesting and network diagnostic learning lab
+template: splash
+hero:
+  tagline: Pentesting scripts and diagnostics. Ready to run.
+  image:
+    dark: ../../assets/logo-dark.svg
+    light: ../../assets/logo-light.svg
+    alt: "Networking Tools terminal prompt logo"
+  actions:
+    - text: Get Started
+      link: /networking-tools/guides/getting-started/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/PatrykQuantumNomad/networking-tools
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## At a Glance
+
+<CardGrid>
+  <Card icon="setting" title="17 Tools">
+    From nmap to aircrack-ng -- scanning, packet analysis, password cracking, web fuzzing, and more.
+  </Card>
+  <Card icon="document" title="28 Use-Case Scripts">
+    Task-focused scripts for common pentest scenarios. Run one command, get what you need.
+  </Card>
+  <Card icon="laptop" title="Docker Lab">
+    DVWA, Juice Shop, WebGoat, and VulnerableApp for safe, legal practice.
+  </Card>
+  <Card icon="information" title="Diagnostics">
+    Auto-report scripts for DNS, connectivity, and performance troubleshooting.
+  </Card>
+</CardGrid>
+
+## Security Tools
+
+<CardGrid>
+  <LinkCard title="Nmap" description="Network scanning and host discovery" href="/networking-tools/tools/nmap/" />
+  <LinkCard title="TShark" description="CLI packet capture and analysis" href="/networking-tools/tools/tshark/" />
+  <LinkCard title="Metasploit" description="Penetration testing framework" href="/networking-tools/tools/metasploit/" />
+  <LinkCard title="Hashcat" description="GPU-accelerated password cracking" href="/networking-tools/tools/hashcat/" />
+  <LinkCard title="John the Ripper" description="Versatile password cracker" href="/networking-tools/tools/john/" />
+  <LinkCard title="SQLMap" description="Automatic SQL injection testing" href="/networking-tools/tools/sqlmap/" />
+  <LinkCard title="Nikto" description="Web server vulnerability scanner" href="/networking-tools/tools/nikto/" />
+  <LinkCard title="hping3" description="Packet crafting and network probing" href="/networking-tools/tools/hping3/" />
+  <LinkCard title="Aircrack-ng" description="WiFi security auditing suite" href="/networking-tools/tools/aircrack-ng/" />
+  <LinkCard title="Skipfish" description="Web application security scanner" href="/networking-tools/tools/skipfish/" />
+  <LinkCard title="Foremost" description="File carving and data recovery" href="/networking-tools/tools/foremost/" />
+  <LinkCard title="ffuf" description="Fast web fuzzer" href="/networking-tools/tools/ffuf/" />
+  <LinkCard title="Gobuster" description="Web content and DNS discovery" href="/networking-tools/tools/gobuster/" />
+</CardGrid>
+
+## Networking Tools
+
+<CardGrid>
+  <LinkCard title="curl" description="HTTP requests and endpoint testing" href="/networking-tools/tools/curl/" />
+  <LinkCard title="dig" description="DNS record lookups and tracing" href="/networking-tools/tools/dig/" />
+  <LinkCard title="Netcat" description="Network Swiss Army knife" href="/networking-tools/tools/netcat/" />
+  <LinkCard title="Traceroute" description="Route tracing and latency analysis" href="/networking-tools/tools/traceroute/" />
+</CardGrid>
+
+## Diagnostics
+
+<CardGrid>
+  <LinkCard title="DNS Diagnostic" description="Comprehensive DNS troubleshooting report" href="/networking-tools/diagnostics/dns/" />
+  <LinkCard title="Connectivity Diagnostic" description="Layer-by-layer connectivity check from DNS to TLS" href="/networking-tools/diagnostics/connectivity/" />
+  <LinkCard title="Performance Diagnostic" description="Hop-by-hop latency analysis with traceroute and mtr" href="/networking-tools/diagnostics/performance/" />
+</CardGrid>
+
+## Guides & Learning Paths
+
+<CardGrid>
+  <LinkCard title="Getting Started" description="Install tools, verify setup, and start the lab" href="/networking-tools/guides/getting-started/" />
+  <LinkCard title="Lab Walkthrough" description="Guided pentest engagement against Docker targets" href="/networking-tools/guides/lab-walkthrough/" />
+  <LinkCard title="I Want To..." description="Find the right tool by task" href="/networking-tools/guides/task-index/" />
+  <LinkCard title="Reconnaissance" description="Learning path: dig, nmap, tshark, metasploit" href="/networking-tools/guides/learning-recon/" />
+  <LinkCard title="Web App Testing" description="Learning path: nmap, nikto, skipfish, sqlmap" href="/networking-tools/guides/learning-webapp/" />
+  <LinkCard title="Network Debugging" description="Learning path: dig, traceroute, hping3, curl, tshark" href="/networking-tools/guides/learning-network-debug/" />
+</CardGrid>
