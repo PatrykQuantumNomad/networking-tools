@@ -1,297 +1,390 @@
-# Technology Stack
+# Technology Stack: Visual Refresh
 
-**Project:** networking-tools documentation site + diagnostic scripts expansion
-**Researched:** 2026-02-10
+**Project:** networking-tools documentation site -- visual refresh milestone
+**Researched:** 2026-02-11
+**Scope:** Custom theming (dark+orange/amber), SVG logo, card-based homepage, sidebar cleanup
 
-## Recommended Stack
+## Existing Stack (No Changes Required)
 
-### Documentation Site — Astro + Starlight
+These are already installed and validated. Listed for context only.
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Astro | 5.17.x | Static site framework | Stable release. Astro 6 is in beta (6.0-beta-6) with breaking changes (Node 22+, Zod 4, removed APIs). Not ready for production. Astro 5 is battle-tested, well-documented, and Starlight's current target. | HIGH |
-| @astrojs/starlight | 0.37.x | Documentation theme | Purpose-built for docs sites. Used by Cloudflare, Google, Microsoft, OpenAI. Includes Pagefind search, sidebar auto-generation, i18n, dark mode, Expressive Code — all built-in. No assembly required. | HIGH |
-| Node.js | 22.x LTS | Runtime | Astro 5 default. The withastro/action GitHub Action defaults to Node 22. Aligns with current LTS schedule. | HIGH |
-| npm | (bundled) | Package manager | Project has no existing JS toolchain. npm is simplest — zero config, lockfile works with GitHub Actions out of the box. No reason to add pnpm/yarn complexity for a docs site. | HIGH |
+| Technology | Version | Status |
+|------------|---------|--------|
+| Astro | 5.17.1 | Installed, stable |
+| @astrojs/starlight | 0.37.6 | Installed, stable |
+| sharp | 0.34.2 | Installed (image optimization) |
+| Node.js | 22.x LTS | Runtime |
+| GitHub Pages | - | Deployment target |
 
-### Documentation Site — Built-in (No Additional Packages Needed)
+## New Additions Required
 
-These capabilities ship with Starlight. Do NOT install separate packages for them.
+### Zero New npm Dependencies
 
-| Capability | Provided By | Notes |
-|------------|-------------|-------|
-| Full-text search | Pagefind (built-in) | Client-side search, zero config. Indexed at build time. No external service needed. |
-| Syntax highlighting | Expressive Code (built-in) | Shiki-powered, 100+ languages. Supports line highlighting, file names, diff markers, copy button. Bash/shell highlighting works out of the box. |
-| Dark/light mode | Starlight (built-in) | Automatic theme detection. No config needed. |
-| Sidebar navigation | Starlight (built-in) | Auto-generated from filesystem structure. Customizable via frontmatter `sidebar.order` or `astro.config.mjs`. |
-| Responsive layout | Starlight (built-in) | Mobile-first. Collapsible sidebar on small screens. |
-| Markdown + MDX | Astro (built-in) | Write docs in `.md` or `.mdx`. MDX enables interactive components inside docs. |
-| Content collections | Astro (built-in) | Type-safe frontmatter via Zod schemas. `docsSchema()` helper validates all doc frontmatter. |
-| Tabs component | Starlight (built-in) | `<Tabs>` / `<TabItem>` for showing OS-specific commands (macOS vs Linux). Supports `syncKey` for synced tabs across page. |
-| Code component | Starlight (built-in) | `<Code>` component for dynamic code blocks. Can import files with `?raw` suffix. |
+The visual refresh requires **no new npm packages**. Everything needed ships with Astro 5.17.1 and Starlight 0.37.6.
 
-### Deployment — GitHub Pages + GitHub Actions
+| Capability | How | Why No Package Needed |
+|------------|-----|----------------------|
+| Custom color theme | CSS custom properties in `src/styles/custom.css` | Starlight exposes `--sl-color-accent-*` and `--sl-color-gray-*` variables. Override in a custom CSS file registered via `customCss` config. |
+| SVG logo | Astro SVG component import (stable since 5.7) | `import Logo from './assets/logo.svg'` works natively. No `astro-icon` or other package needed. For Starlight nav, use `logo.src` config pointing to an `.svg` file in `src/assets/`. |
+| Card-based homepage | Built-in `<Card>`, `<CardGrid>`, `<LinkCard>` components | Ship with `@astrojs/starlight`. Import from `@astrojs/starlight/components`. |
+| Sidebar cleanup | Starlight sidebar config in `astro.config.mjs` | Supports `collapsed`, `badge`, manual items mixed with `autogenerate`, custom `label`, and frontmatter `sidebar.order`. |
+| Hero customization | Override via `components.Hero` config or frontmatter `hero.image.html` | Component overrides are a first-class Starlight feature. |
+| Dark mode | Already built-in | Starlight ships dark/light/auto theme switching. Custom CSS targets `:root` (dark) and `:root[data-theme='light']` separately. |
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| GitHub Pages | - | Hosting | Free, already where the repo lives. Static-only which is what Astro produces. No server costs. | HIGH |
-| withastro/action | v5 (5.0.2) | Build action | Official Astro GitHub Action. Auto-detects package manager from lockfile, builds, and uploads artifact. One-liner in workflow. | HIGH |
-| actions/deploy-pages | v4 | Deploy action | Official GitHub Pages deployment action. Pairs with withastro/action. | HIGH |
-| actions/checkout | v6 | Repo checkout | Standard checkout step. | HIGH |
+### Confidence: HIGH
 
-### Bash Scripting — Quality Tools
+All capabilities verified against installed versions:
+- CSS custom properties: Verified in `node_modules/@astrojs/starlight/style/props.css` (read directly)
+- SVG component imports: Stable since Astro 5.7.0, installed version is 5.17.1 (official docs confirmed)
+- Card/CardGrid/LinkCard: Documented at starlight.astro.build/components/card-grids/
+- Component overrides: Documented at starlight.astro.build/guides/overriding-components/
+- Sidebar options: Documented at starlight.astro.build/guides/sidebar/
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| ShellCheck | latest | Static analysis / linter | Industry standard for bash. Catches syntax errors, quoting bugs, portability issues, antipatterns. The project already uses `set -euo pipefail` in common.sh which is good — ShellCheck enforces this pattern consistently. | HIGH |
-| shfmt | latest | Code formatter | Consistent formatting across all scripts. Use with `-i 4` (4-space indent) to match existing project style. Can auto-fix. | HIGH |
-| bats-core | 1.13.x | Bash test framework | TAP-compliant test runner. Tests verify script behavior without actually running scans. Supports setup/teardown, assertions, parallel execution. Works with Bash 3.2+ (macOS default). | MEDIUM |
+## New Files to Create
 
-### Bash Scripting — Diagnostic Script Dependencies
+No packages to install, but these new files are needed:
 
-These are the tools the new diagnostic scripts will wrap. They are NOT project dependencies to install — they are system tools the scripts document and require.
+| File | Purpose |
+|------|---------|
+| `site/src/styles/custom.css` | Color theme overrides (accent colors, gray scale, shadows) |
+| `site/src/assets/logo.svg` | SVG logo file for nav bar |
+| `site/src/components/Hero.astro` | Custom Hero component override for card-based homepage |
 
-| Tool | Category | macOS Install | Linux Install | Notes |
-|------|----------|---------------|---------------|-------|
-| dig | DNS diagnostics | Built-in (macOS) | `apt install dnsutils` | Part of BIND utils. Preferred over nslookup. |
-| whois | Domain intelligence | Built-in (macOS) | `apt install whois` | Domain registration lookups. |
-| curl | HTTP diagnostics | Built-in (macOS) | `apt install curl` | HTTP timing, header inspection, API testing. |
-| netcat (nc) | Connectivity testing | Built-in (macOS) | `apt install netcat-openbsd` | Port scanning, banner grabbing, file transfer. |
-| traceroute | Path analysis | Built-in (macOS) | `apt install traceroute` | Network path tracing. |
-| mtr | Path analysis (live) | `brew install mtr` | `apt install mtr` | Combines traceroute + ping. Live updating. |
-| gobuster | Directory brute-force | `brew install gobuster` | `apt install gobuster` | Go-based, fast. For web directory/DNS enumeration. |
-| ffuf | Web fuzzing | `brew install ffuf` | `go install github.com/ffuf/ffuf/v2@latest` | Faster than gobuster for fuzzing. Supports multiple wordlist positions. |
+## Theme Implementation: CSS Custom Properties
 
-## Documentation Site Directory Structure
+### Color System Architecture
 
-Place the Astro site in a `docs/` subdirectory of the repo. This keeps the docs separate from the bash scripts while living in the same repository.
+Starlight uses a layered CSS custom property system defined in `props.css`. The cascade layer order is:
 
 ```
-networking-tools/
-  docs/                          # Astro Starlight site
-    astro.config.mjs
-    package.json
-    package-lock.json
-    public/
-      CNAME                      # If using custom domain (optional)
-    src/
-      content/
-        docs/
-          index.mdx              # Landing page
-          getting-started/
-            installation.mdx
-            lab-setup.mdx
-          tools/
-            nmap/
-              overview.mdx
-              examples.mdx       # Generated or hand-written from scripts
-              use-cases.mdx
-            dig/
-              overview.mdx
-              ...
-          guides/
-            dns-diagnostics.mdx
-            web-recon.mdx
-            ...
-          reference/
-            common-sh.mdx
-            makefile-targets.mdx
-      content.config.ts
-    .github/                     # NOT here — at repo root
-  scripts/                       # Existing bash scripts (unchanged)
-  labs/                          # Existing Docker lab (unchanged)
-  .github/
-    workflows/
-      deploy-docs.yml            # GitHub Actions workflow
-  Makefile                       # Add docs targets
+starlight.base → starlight.reset → starlight.core → starlight.content → starlight.components → starlight.utils
 ```
 
-## GitHub Actions Workflow
+Custom CSS added via `customCss` is **unlayered**, meaning it automatically takes precedence over all Starlight layers. No `!important` or `@layer` manipulation needed.
 
-```yaml
-# .github/workflows/deploy-docs.yml
-name: Deploy docs to GitHub Pages
+### Dark Mode Accent Colors (Orange/Amber)
 
-on:
-  push:
-    branches: [main]
-    paths: ['docs/**']           # Only rebuild when docs change
-  workflow_dispatch:
+Override these three variables for the primary accent (links, nav highlights, buttons):
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - name: Build Astro site
-        uses: withastro/action@v5
-        with:
-          path: ./docs           # Subdirectory containing the Astro project
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+```css
+/* src/styles/custom.css */
+:root {
+  /* Dark mode: orange/amber accent */
+  --sl-color-accent-low: hsl(30, 50%, 18%);
+  --sl-color-accent: hsl(35, 95%, 55%);
+  --sl-color-accent-high: hsl(38, 95%, 80%);
+}
 ```
 
-## Astro Configuration
+### Light Mode Accent Colors
+
+```css
+:root[data-theme='light'] {
+  --sl-color-accent-high: hsl(30, 80%, 28%);
+  --sl-color-accent: hsl(35, 90%, 50%);
+  --sl-color-accent-low: hsl(38, 90%, 90%);
+}
+```
+
+### Gray Scale (Darker Background)
+
+For a Kali-inspired darker feel, shift the gray scale:
+
+```css
+:root {
+  --sl-color-black: hsl(225, 15%, 8%);   /* Deeper black */
+  --sl-color-gray-6: hsl(225, 14%, 13%); /* Darker nav/sidebar */
+  --sl-color-gray-5: hsl(225, 12%, 19%); /* Darker inline code bg */
+}
+```
+
+### Full Variable Reference
+
+| Variable | Controls | Dark Default | Override For |
+|----------|----------|-------------|-------------|
+| `--sl-color-accent-low` | Badge backgrounds, subtle highlights | `hsl(224, 54%, 20%)` | Dark amber glow |
+| `--sl-color-accent` | Links, primary buttons, active states | `hsl(224, 100%, 60%)` | Amber/orange primary |
+| `--sl-color-accent-high` | Link text, accent text | `hsl(224, 100%, 85%)` | Light amber for readability |
+| `--sl-color-black` | Page background | `hsl(224, 10%, 10%)` | Deeper dark base |
+| `--sl-color-gray-6` | Nav/sidebar background | `hsl(224, 14%, 16%)` | Match darker base |
+| `--sl-color-gray-5` | Inline code background | `hsl(224, 10%, 23%)` | Subtle contrast |
+| `--sl-color-gray-4` | Borders, separators | `hsl(224, 7%, 36%)` | Keep or darken slightly |
+| `--sl-color-gray-2` | Body text | `hsl(224, 6%, 77%)` | Keep for readability |
+| `--sl-color-white` | Headings, bold text | `hsl(0, 0%, 100%)` | Keep white |
+| `--sl-color-text-accent` | Accent-colored text | `var(--sl-color-accent-high)` | Auto-inherits from accent-high |
+| `--sl-color-bg` | Main background | `var(--sl-color-black)` | Auto-inherits from black |
+| `--sl-color-bg-nav` | Nav background | `var(--sl-color-gray-6)` | Auto-inherits from gray-6 |
+| `--sl-color-bg-sidebar` | Sidebar background | `var(--sl-color-gray-6)` | Auto-inherits from gray-6 |
+
+## Logo Implementation
+
+### Approach: SVG File in `src/assets/`
+
+Starlight's logo config accepts a file path. The SVG will be rendered as an `<img>` tag in the nav bar, sized to fit the nav height (`3.5rem` mobile, `4rem` desktop).
 
 ```javascript
-// docs/astro.config.mjs
-import { defineConfig } from 'astro/config';
-import starlight from '@astrojs/starlight';
+// astro.config.mjs
+starlight({
+  logo: {
+    src: './src/assets/logo.svg',
+    alt: 'Networking Tools',
+    replacesTitle: false,  // Keep text title alongside logo
+  },
+})
+```
 
+### SVG Design Constraints
+
+- **Height:** Rendered at `calc(var(--sl-nav-height) - 2 * var(--sl-nav-pad-y))` = ~2rem (32px) on mobile, ~2.5rem (40px) on desktop
+- **Width:** `auto` with `max-width: 100%` and `object-fit: contain`
+- **Format:** SVG preferred for crispness at any size and small file size
+- **Colors:** Use explicit colors in the SVG (not `currentColor`) since Starlight renders logos as `<img>` tags, not inline SVG. The logo will NOT inherit CSS custom properties.
+- **Theme variants:** If the logo needs different colors for light/dark mode, use the `light`/`dark` config instead of `src`:
+
+```javascript
+logo: {
+  dark: './src/assets/logo-dark.svg',
+  light: './src/assets/logo-light.svg',
+  alt: 'Networking Tools',
+}
+```
+
+### Why NOT Inline SVG
+
+Starlight does not currently support inline SVG logos (confirmed via GitHub Discussion #955). The logo is always rendered as an `<img>` tag. This means:
+- No access to CSS custom properties from within the SVG
+- No `fill: currentColor` trick
+- Must bake colors into the SVG file
+- For theme-aware logos, provide separate light/dark variants
+
+## Homepage Card Components
+
+### Available Built-in Components
+
+| Component | Import | Purpose |
+|-----------|--------|---------|
+| `Card` | `@astrojs/starlight/components` | Content card with title, optional icon, body text |
+| `CardGrid` | `@astrojs/starlight/components` | Responsive 2-column grid wrapper |
+| `LinkCard` | `@astrojs/starlight/components` | Clickable card that links to another page |
+
+### Card Props
+
+```typescript
+// Card
+title: string;    // Required: heading text
+icon?: string;    // Optional: built-in icon name
+
+// LinkCard
+title: string;    // Required: heading text
+href: string;     // Required: link URL
+description?: string; // Optional: subtitle text
+
+// CardGrid
+stagger?: boolean; // Optional: offset alternating cards vertically (5rem shift)
+```
+
+### Available Icons for Cards
+
+Relevant built-in icons for a pentesting docs site:
+
+| Icon Name | Visual | Good For |
+|-----------|--------|----------|
+| `rocket` | Launch | Getting started |
+| `laptop` | Computer | Tools section |
+| `setting` | Gear | Configuration |
+| `puzzle` | Puzzle piece | Integrations |
+| `open-book` | Book | Guides/learning |
+| `list-format` | List | Reference/index |
+| `magnifier` | Search | Discovery |
+| `warning` | Alert | Security warnings |
+| `terminal` | Terminal | CLI tools |
+| `information` | Info | About/details |
+| `approve-check-circle` | Checkmark | Status/validation |
+
+### Homepage Pattern: MDX with Cards
+
+The homepage can use MDX to import Card components directly. Convert `index.md` to `index.mdx`:
+
+```mdx
+---
+title: Networking Tools
+template: splash
+hero:
+  tagline: ...
+  actions: [...]
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="17 Security Tools" icon="laptop">
+    Nmap, tshark, sqlmap, nikto, and more with ready-to-run scripts.
+  </Card>
+  <Card title="65+ Scripts" icon="terminal">
+    Task-focused scripts for real pentest scenarios.
+  </Card>
+</CardGrid>
+```
+
+## Sidebar Configuration
+
+### Current Config
+
+```javascript
+sidebar: [
+  { label: 'Tools', autogenerate: { directory: 'tools' } },
+  { label: 'Guides', autogenerate: { directory: 'guides' } },
+  { label: 'Diagnostics', autogenerate: { directory: 'diagnostics' } },
+]
+```
+
+### Available Enhancements (No Packages Needed)
+
+| Feature | Config | Purpose |
+|---------|--------|---------|
+| Collapsed groups | `collapsed: true` | Start groups collapsed, reduce visual noise |
+| Badges | `badge: { text: 'New', variant: 'tip' }` | Highlight new or updated tools |
+| Custom ordering | Frontmatter `sidebar: { order: N }` | Control tool ordering (alphabetical by default) |
+| Manual items | `items: [{ label: '...', slug: '...' }]` | Mix manual items with autogenerated |
+| Subgroups | Nested `items` arrays | Group tools by category within sidebar |
+
+### Sidebar Ordering via Frontmatter
+
+Each page can set its sidebar order:
+
+```yaml
+---
+title: Nmap
+sidebar:
+  order: 1
+  badge:
+    text: Core
+    variant: tip
+---
+```
+
+Lower numbers appear first. Pages without `order` sort alphabetically after ordered pages.
+
+## Expressive Code Theme
+
+The current config uses default Starlight themes. For the orange/amber visual refresh, consider a custom code block theme that complements the palette. However, the default `starlight-dark` / `starlight-light` themes will automatically pick up the accent color changes and look fine.
+
+If a custom code theme is desired later:
+
+```javascript
+// astro.config.mjs (optional, only if defaults don't match)
+starlight({
+  expressiveCode: {
+    themes: ['one-dark-pro', 'github-light'],
+    useStarlightDarkModeSwitch: true,
+    useStarlightUiThemeColors: true,
+  },
+})
+```
+
+Recommendation: **Start with defaults.** The `useStarlightUiThemeColors: true` flag (default) means code blocks will inherit the custom accent colors. Only switch themes if the visual result is unsatisfactory.
+
+## Configuration Changes Summary
+
+### astro.config.mjs Additions
+
+```javascript
+// Complete updated config
 export default defineConfig({
-  site: 'https://<username>.github.io',
-  base: '/networking-tools',     // Must match repo name for GitHub Pages
+  site: 'https://patrykquantumnomad.github.io',
+  base: '/networking-tools',
   integrations: [
     starlight({
       title: 'Networking Tools',
       description: 'Pentesting and network diagnostic learning lab',
+      logo: {
+        src: './src/assets/logo.svg',
+        alt: 'Networking Tools',
+        replacesTitle: false,
+      },
+      customCss: ['./src/styles/custom.css'],
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/<user>/networking-tools' },
+        {
+          icon: 'github',
+          label: 'GitHub',
+          href: 'https://github.com/PatrykQuantumNomad/networking-tools',
+        },
       ],
       sidebar: [
-        { label: 'Getting Started', autogenerate: { directory: 'getting-started' } },
+        // Refined sidebar config (details in ARCHITECTURE.md)
         { label: 'Tools', autogenerate: { directory: 'tools' } },
         { label: 'Guides', autogenerate: { directory: 'guides' } },
-        { label: 'Reference', autogenerate: { directory: 'reference' } },
+        { label: 'Diagnostics', autogenerate: { directory: 'diagnostics' } },
       ],
-      expressiveCode: {
-        themes: ['github-dark', 'github-light'],
-      },
     }),
   ],
 });
 ```
 
-## Installation
+### Key Config Properties Added
 
-```bash
-# Initialize docs site (run once from repo root)
-cd docs
-npm create astro@latest -- --template starlight --yes
-
-# After scaffolding, the package.json will include:
-#   astro: ^5.17.0
-#   @astrojs/starlight: ^0.37.6
-
-# Development
-cd docs && npm run dev          # http://localhost:4321
-
-# Build (produces static HTML in docs/dist/)
-cd docs && npm run build
-
-# Preview production build locally
-cd docs && npm run preview
-```
-
-```bash
-# Bash quality tools (install once on dev machine)
-brew install shellcheck shfmt   # macOS
-# apt install shellcheck shfmt  # Debian/Ubuntu
-
-# Optional: bash test framework
-brew install bats-core          # macOS
-# apt install bats              # Debian/Ubuntu
-```
+| Property | Value | What It Does |
+|----------|-------|-------------|
+| `logo.src` | `'./src/assets/logo.svg'` | Displays logo in nav bar |
+| `logo.alt` | `'Networking Tools'` | Accessibility text |
+| `logo.replacesTitle` | `false` | Keep text title visible |
+| `customCss` | `['./src/styles/custom.css']` | Load custom theme overrides |
 
 ## Alternatives Considered
 
 | Category | Recommended | Alternative | Why Not |
 |----------|-------------|-------------|---------|
-| Docs framework | Astro + Starlight | Docusaurus (React) | Heavier runtime, React dependency unnecessary for static docs. Astro ships zero JS by default. Starlight has equivalent features with better performance. |
-| Docs framework | Astro + Starlight | MkDocs (Python) | Would add a Python dependency to a bash/Node project. Theming is less flexible. No built-in MDX component support. |
-| Docs framework | Astro + Starlight | VitePress (Vue) | Good option, but Starlight has richer built-in components (tabs, code, cards, asides) and better plugin ecosystem for docs specifically. |
-| Docs framework | Astro + Starlight | Jekyll (Ruby) | GitHub Pages' old default. Slow builds, Ruby dependency, limited component model. Outdated choice in 2026. |
-| Search | Pagefind (built-in) | Algolia DocSearch | Requires external service, approval process, account. Pagefind is client-side, zero-config, and already bundled with Starlight. Perfect for a project this size. |
-| Astro version | 5.17.x (stable) | 6.0 beta | Beta has breaking changes (Node 22+ required, removed Astro.glob(), Zod 4 migration). Starlight 0.37.x targets Astro 5. Wait for Astro 6 stable + Starlight compatibility update. |
-| Hosting | GitHub Pages | Netlify / Vercel | Extra account, extra service. GitHub Pages is free, integrated with the repo, and sufficient for a static docs site. No server-side features needed. |
-| Package manager | npm | pnpm / yarn | No existing JS toolchain in the project. npm is the simplest choice — comes with Node, no extra install. The docs site is a simple static build, not a complex monorepo. |
-| Bash linter | ShellCheck | bashate | bashate only checks style, not logic bugs. ShellCheck catches actual bugs (unquoted variables, incorrect test syntax, useless cat, etc.). |
-| Bash formatter | shfmt | manual | Consistent formatting across 40+ scripts requires automation. shfmt integrates with editors and CI. |
-| Bash testing | bats-core | shunit2 | bats has cleaner syntax, better community activity, TAP output for CI integration. shunit2 is xUnit-style which feels foreign in bash. |
+| Theming | CSS custom properties override | `starlight-theme-black` plugin | Adds a dependency for what amounts to ~30 lines of CSS. The plugin is Shadcn-inspired, not security/pentesting-inspired. Custom CSS gives precise control over the Kali-like palette. |
+| Theming | CSS custom properties override | Tailwind CSS integration | Starlight docs explicitly advise against Tailwind because it fights Starlight's cascade. CSS custom properties are the designed extension point. |
+| Logo | SVG file in `src/assets/` | Inline SVG via component override | Starlight renders logos as `<img>` tags. Inline SVG would require overriding the `SiteTitle` component, which is fragile across Starlight upgrades. File-based is the supported path. |
+| Logo | SVG file | PNG/WebP raster image | SVG stays crisp at all sizes, smaller file size, easier to edit. Perfect for a simple logo. |
+| Homepage cards | Built-in Card/CardGrid | Custom Astro components | No need to rebuild what Starlight provides. Built-in cards are styled, responsive, and maintained upstream. |
+| Homepage cards | Built-in Card/CardGrid + Hero override | Starlight `hero.image.html` | The `hero.image.html` frontmatter accepts raw HTML string. Cards below the hero fold are better done with MDX components for maintainability. |
+| Homepage layout | Override Hero component | Keep default Hero + add cards below | Overriding Hero gives full control. But if the default hero layout (title + tagline + actions + optional image) is sufficient, just add cards below in MDX. Start with the simpler approach. |
+| Sidebar | Config-based customization | Override Sidebar component | Component overrides are last-resort. The config-based approach (collapsed, badges, manual items) covers all the cleanup needs. |
 
-## What NOT to Use
+## What NOT to Add
 
 | Technology | Why Not |
 |------------|---------|
-| Astro 6 beta | Breaking changes, Starlight not yet compatible. Revisit after stable release (likely Q2 2026). |
-| React/Vue/Svelte integrations | Docs site has no interactive UI needs. Astro's zero-JS default is the right call. Adding a framework adds bundle size for zero benefit. |
-| Tailwind CSS | Starlight's built-in styles are purpose-built for docs. Adding Tailwind means fighting Starlight's cascade. Customize via CSS custom properties instead. |
-| MDX for every page | Use `.md` by default. Only upgrade to `.mdx` when a page needs interactive components (tabs, dynamic code). MDX adds compilation overhead. |
-| Database / CMS | Content lives in git as Markdown files alongside the scripts. No Contentful, Sanity, or other CMS needed. This keeps docs versioned with the code. |
-| Docker for docs | The docs site is static HTML. No Docker needed for development or deployment. `npm run dev` is sufficient. |
-| Pagefind manual config | Starlight bundles and configures Pagefind automatically. Do not install `pagefind` separately or configure it manually. |
+| `astro-icon` | Astro 5.17.1 has native SVG imports. The `astro-icon` package is redundant. |
+| Tailwind CSS | Explicitly advised against by Starlight docs. CSS custom properties are the designed theming mechanism. |
+| `@fontsource/*` | No custom font planned for this milestone. System font stack is fine for a pentesting docs site. If needed later, add via `customCss` config. |
+| Any CSS-in-JS solution | Starlight uses scoped CSS in Astro components. No runtime CSS needed. |
+| `starlight-theme-black` | Shadcn-inspired, not aligned with the Kali/pentesting aesthetic. 30 lines of custom CSS achieves a better fit. |
+| `starlight-utils` (multi-sidebar) | Current sidebar structure (3 groups) is simple enough. Multi-sidebar adds complexity for no benefit. |
+| Image optimization libraries | `sharp` is already installed. Astro's `<Image>` component handles optimization. No additional packages needed. |
 
-## Upgrade Path
+## Installation
 
-When Astro 6 reaches stable (expected mid-2026):
-
-1. Wait for Starlight to release a version targeting Astro 6
-2. Run `npx @astrojs/upgrade` to update both packages
-3. Key migration items: Node 22+ (already using it), Zod 4 (affects content schemas), removed `Astro.glob()` (unlikely to be used in Starlight)
-4. The `withastro/action@v5` already defaults to Node 22, so no CI changes needed
-
-## Makefile Integration
-
-Add these targets to the existing Makefile:
-
-```makefile
-# Documentation
-docs-dev: ## Start docs dev server
-	cd docs && npm run dev
-
-docs-build: ## Build documentation site
-	cd docs && npm run build
-
-docs-preview: ## Preview docs production build
-	cd docs && npm run preview
-
-# Quality
-lint-scripts: ## Lint all bash scripts with ShellCheck
-	shellcheck scripts/**/*.sh
-
-fmt-scripts: ## Format all bash scripts with shfmt
-	shfmt -w -i 4 scripts/**/*.sh
-
-test-scripts: ## Run bash script tests
-	bats tests/
+```bash
+# No new packages to install.
+# The visual refresh is purely configuration + CSS + SVG asset.
+#
+# Create new files:
+mkdir -p site/src/styles
+touch site/src/styles/custom.css
+touch site/src/assets/logo.svg
+# Optionally: touch site/src/components/Hero.astro (only if overriding)
 ```
 
 ## Sources
 
-### HIGH Confidence (Official documentation, verified npm registry)
-- Astro deployment to GitHub Pages: https://docs.astro.build/en/guides/deploy/github/
-- Starlight getting started: https://starlight.astro.build/getting-started/
-- Starlight sidebar configuration: https://starlight.astro.build/guides/sidebar/
-- Starlight frontmatter reference: https://starlight.astro.build/reference/frontmatter/
-- Starlight plugins and integrations: https://starlight.astro.build/resources/plugins/
-- Expressive Code syntax highlighting: https://expressive-code.com/key-features/syntax-highlighting/
-- withastro/action GitHub Action: https://github.com/withastro/action
-- ShellCheck: https://github.com/koalaman/shellcheck
-- bats-core: https://github.com/bats-core/bats-core
-- npm registry: astro@5.17.1, @astrojs/starlight@0.37.6 (verified 2026-02-10)
+### HIGH Confidence (Official docs, verified against installed packages)
+- Starlight CSS & Styling: https://starlight.astro.build/guides/css-and-tailwind/
+- Starlight Configuration Reference: https://starlight.astro.build/reference/configuration/
+- Starlight Sidebar Guide: https://starlight.astro.build/guides/sidebar/
+- Starlight Component Overrides: https://starlight.astro.build/guides/overriding-components/
+- Starlight Card Grids: https://starlight.astro.build/components/card-grids/
+- Starlight Link Cards: https://starlight.astro.build/components/link-cards/
+- Starlight Icons Reference: https://starlight.astro.build/reference/icons/
+- Starlight Overrides Reference: https://starlight.astro.build/reference/overrides/
+- Starlight Frontmatter Reference: https://starlight.astro.build/reference/frontmatter/
+- Astro SVG Components (stable since 5.7): https://docs.astro.build/en/reference/experimental-flags/svg/
+- Starlight `props.css` (read directly from `node_modules/@astrojs/starlight/style/props.css`)
+- Starlight `Hero.astro` (read directly from `node_modules/@astrojs/starlight/components/Hero.astro`)
+- Starlight `SiteTitle.astro` (read directly from `node_modules/@astrojs/starlight/components/SiteTitle.astro`)
 
-### MEDIUM Confidence (Official blog posts, release announcements)
-- Astro 6 Beta announcement: https://astro.build/blog/astro-6-beta/
-- Astro January 2026 updates: https://astro.build/blog/whats-new-january-2026/
-- Astro 2025 year in review (Starlight adoption): https://astro.build/blog/year-in-review-2025/
-
-### LOW Confidence (Community sources, general best practices)
-- shfmt: https://github.com/mvdan/sh (formatter — well-established but version not verified via official source)
+### MEDIUM Confidence (Official GitHub discussions)
+- Inline SVG logos not supported: https://github.com/withastro/starlight/discussions/955
+- Expressive Code themes: https://expressive-code.com/guides/themes/

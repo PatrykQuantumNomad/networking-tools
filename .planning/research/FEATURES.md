@@ -1,327 +1,225 @@
-# Feature Research
+# Feature Landscape: Site Visual Refresh
 
-**Domain:** Pentesting/networking learning lab with documentation site, diagnostic scripts, and tool onboarding
-**Researched:** 2026-02-10
-**Confidence:** MEDIUM-HIGH
+**Domain:** Documentation site visual refresh for pentesting toolkit (Astro/Starlight on GitHub Pages)
+**Researched:** 2026-02-11
+**Confidence:** HIGH (Starlight features verified via official docs, competitor analysis via direct site inspection)
 
-Research covers three expansion areas: (1) Astro/Starlight documentation site, (2) diagnostic network scripts, and (3) new tool onboarding (dig, curl, netcat, traceroute/mtr, gobuster/ffuf). Findings synthesized from competitor analysis of HackTricks, ired.team Red Team Notes, highon.coffee, pentestmonkey, existing bash diagnostic script collections, and Astro Starlight official docs.
+This research covers what a polished security documentation site looks like and what features the visual refresh milestone should include. Scoped exclusively to visual/UX improvements -- all 30 content pages, CI deployment, and existing functionality are already built and working.
 
----
-
-## Area 1: Documentation Site (Astro/Starlight GitHub Pages)
-
-### Table Stakes (Users Expect These)
-
-Features users assume exist. Missing these = product feels incomplete.
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Full-text search | Every reference site (HackTricks, ired.team) has search. Pentesters use Ctrl+F constantly. Starlight provides Pagefind search out of the box. | LOW | Starlight built-in, zero config. |
-| Copy-to-clipboard on code blocks | Pentesters copy commands verbatim. HackTricks, ired.team, and every modern docs site have this. Starlight includes it via Expressive Code. | LOW | Starlight built-in via Expressive Code integration. |
-| Tool-per-page reference | Each tool needs its own page with flags, examples, and "when to use." Matches how HackTricks and highon.coffee organize content. The existing `notes/*.md` files are the starting point. | MEDIUM | 11 existing tools + 5 new tools = 16 pages. Content exists in notes/ already. |
-| Command examples with syntax highlighting | Code blocks with bash highlighting. Starlight does this automatically for fenced code blocks. | LOW | Starlight built-in. |
-| Mobile-responsive layout | People reference docs from phones during CTFs and engagements. Starlight is responsive by default. | LOW | Starlight built-in. |
-| Dark mode | Security folks overwhelmingly prefer dark mode. Starlight ships dark/light/auto toggle. | LOW | Starlight built-in, zero config. |
-| Sidebar navigation organized by category | Pentest tools vs. networking tools vs. diagnostics need clear separation. Starlight auto-generates sidebar from folder structure. | LOW | Folder structure = sidebar structure. Plan: `pentest-tools/`, `network-tools/`, `diagnostics/`, `guides/`. |
-| "When to use this tool" context per page | HackTricks excels because it explains WHEN, not just HOW. The existing notes/*.md files already include "What It Does" and "Scan Progression." | MEDIUM | Content writing effort, but high value. |
-| GitHub Pages deployment with CI | Expected for any open-source docs site. Standard GitHub Actions workflow for Astro. | LOW | Standard `astro build` + deploy action. |
-
-### Differentiators (Competitive Advantage)
-
-Features that set the product apart. Not required, but valuable.
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Runnable command snippets with TARGET placeholders | Unlike static cheatsheets, commands include `<target>` placeholders that match the script conventions. User copies, replaces one variable, runs. Most cheatsheets use hardcoded IPs. | LOW | Convention in existing scripts already. Carry forward to docs. |
-| "I want to..." task index page | Most pentest docs organize by tool. Organizing by TASK ("I want to find live hosts", "I want to crack a hash") is rare and valuable. Maps directly to existing use-case scripts. | MEDIUM | The existing USECASES.md pattern. Becomes a Starlight page with links to relevant tool pages. |
-| Guided learning paths (progression) | HTB Academy and TryHackMe offer learning paths. A static site can offer ordered "start here" sequences: Recon Path, Web App Path, Network Debugging Path. Rare for open-source tool docs. | MEDIUM | Starlight sidebar ordering + a few "path" pages that link tools in recommended order. |
-| Lab walkthrough integrated into docs | The existing 8-phase lab walkthrough (lab-walkthrough.md) is unique content. Making it a first-class guided page with step-by-step commands tied to lab targets is a differentiator. | MEDIUM | Content exists. Needs formatting into Starlight pages with asides/callouts for tips and warnings. |
-| OS-specific install tabs | Starlight Tabs component can show macOS (Homebrew) vs. Linux (apt/yum) install commands side-by-side. Better than "install it somehow." | LOW | Use Starlight `<Tabs>` component. Each tool page gets an install section. |
-| Difficulty/complexity indicators per example | Flag commands as Beginner/Intermediate/Advanced. Helps learners gauge what to try first. Rare in cheatsheet sites. | LOW | Starlight asides (note/tip/caution) or badge components. |
-| Cross-references between tools | "After scanning with nmap, use nikto for web vuln scanning" links. Creates a workflow, not just isolated tool pages. | LOW | Markdown links between pages. Minimal effort, high value for learning flow. |
-
-### Anti-Features (Commonly Requested, Often Problematic)
-
-Features that seem good but create problems.
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Interactive terminal in browser | "Run commands from the docs!" | Massive security and complexity liability. Requires backend, sandboxing, auth. Completely out of scope for static site. | Copy button + clear instructions. Link to lab targets for practice. |
-| User accounts and progress tracking | "Track my learning progress!" | Requires backend, database, auth. Transforms static docs into a full web app. | Suggest users bookmark pages. The value is reference, not courseware. |
-| Video walkthroughs embedded | "Show me, don't tell me." | Video is expensive to produce, maintain, and host. Goes stale quickly as tools update. | Detailed step-by-step text with expected output shown in code blocks. |
-| Real-time tool output rendering | "Show live scan results." | Requires server infrastructure. Output varies per environment. | Show representative sample output in static code blocks. |
-| Comments/discussion per page | "Let users contribute tips." | Moderation burden. Spam. Outdated comments. | Link to GitHub Issues/Discussions for feedback. |
-| Multilingual/i18n | "Reach wider audience." | Translation maintenance burden for technical content that changes frequently. | English-only. Starlight supports i18n if needed later, but defer. |
-| Blog section | "Share updates and tutorials." | Maintenance commitment. Goes stale. Scope creep from reference docs. | Changelog in a single page if needed. Focus on reference content. |
+**Reference sites analyzed:** Kali Linux Docs (kali.org/docs), HackTricks (book.hacktricks.wiki), Hack The Box resources (hackthebox.com), and cybersecurity design best practices.
 
 ---
 
-## Area 2: Diagnostic Network Scripts
+## Table Stakes
 
-### Table Stakes (Users Expect These)
+Features that polished security documentation sites universally have. Missing these makes the site look unfinished or amateur.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| DNS diagnostic script | DNS resolution failures are the most common networking issue. Must check: resolution against multiple nameservers, record types (A, AAAA, MX, NS, SOA), propagation comparison, reverse lookup. | MEDIUM | Uses dig. Single command: `bash scripts/dig/diagnose-dns.sh example.com` produces full report. |
-| Connectivity diagnostic script | "Is it the network or the app?" Must check: ping reachability, port open/closed, TCP handshake, HTTP response code, SSL certificate validity. | MEDIUM | Uses ping, nc, curl. Single command produces layered report. |
-| Latency/path diagnostic script | "Why is it slow?" Must check: traceroute hops, per-hop latency, packet loss percentage, MTR-style continuous results. | MEDIUM | Uses traceroute/mtr. Report shows where latency spikes. |
-| Structured text output (not raw tool dumps) | Existing scripts use colored `info/warn/error` output. Diagnostic scripts must do the same -- summarize findings, not dump raw output. | LOW | Follows existing common.sh patterns. Adds a `summary` section at end. |
-| macOS + Linux compatibility | Existing project constraint. Tools like `lsof` vs `ss`, `netstat` flags differ. Diagnostics must handle both. | MEDIUM | Use `check_cmd` to detect platform and choose correct flags. Already have this pattern. |
-| No external dependencies beyond standard tools | Diagnostic scripts should use tools that come pre-installed (ping, dig, curl, nc, traceroute). Users should not need to install anything to run basic diagnostics. | LOW | dig and traceroute are pre-installed on macOS. Linux may need `dnsutils` and `traceroute` packages. Provide install hints via `require_cmd`. |
-| Non-destructive (safe to run anytime) | Diagnostic scripts must NEVER modify system state. Read-only network probes. No safety_banner needed since these are passive. | LOW | Architecture decision: diagnostics skip `safety_banner`, use a lighter "diagnostic mode" header. |
-
-### Differentiators (Competitive Advantage)
-
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Single-command full report | Most diagnostic guides say "run ping, then run dig, then run traceroute." This project runs ALL checks with one command and produces a consolidated report. Matches project core value. | MEDIUM | Main script: `diagnose-connectivity.sh <target>` that calls sub-checks and prints organized report. |
-| Layer-by-layer diagnosis | Report walks OSI layers: DNS resolution -> IP reachability -> TCP port -> HTTP response -> TLS certificate. Shows WHERE the problem is, not just THAT there is a problem. | MEDIUM | Script logic follows diagnostic ladder. Each layer prints pass/fail before moving to next. |
-| Machine-parseable output option | Add `--json` flag for structured output. Rare in bash diagnostic scripts. Useful for piping into other tools. | HIGH | Defer to v2. Nice-to-have, not essential. JSON from bash is fragile. |
-| Comparison mode (test against multiple targets) | `diagnose-dns.sh example.com --compare 8.8.8.8 1.1.1.1 9.9.9.9` shows results from multiple resolvers side-by-side. | MEDIUM | Valuable for DNS debugging. Loop over resolvers, format as table. |
-| Port discovery + service identification combined | Scan common ports AND identify what service is behind them in one report. Combines nmap + lsof patterns from existing `identify-ports.sh`. | LOW | Extend existing pattern. Already 80% built in `identify-ports.sh`. |
-
-### Anti-Features (Commonly Requested, Often Problematic)
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Continuous monitoring/daemon mode | "Monitor my network 24/7." | Scripts are run-once tools, not daemons. Monitoring is a different domain (Nagios, Prometheus). PROJECT.md explicitly excludes this. | Run the diagnostic script when you notice a problem. Suggest monitoring tools in docs. |
-| Automatic fix/remediation | "Fix my DNS for me." | Modifying system DNS, routes, or firewall is dangerous and out of scope. PROJECT.md excludes automated remediation. | Diagnose the problem and print what the user should do manually. |
-| GUI/TUI dashboard | "Show results in a nice dashboard." | Adds ncurses or similar dependency. Bash TUI is fragile across terminals. | Clean colored text output with clear sections. Structured enough to read, simple enough to maintain. |
-| Email/Slack alerting | "Notify me when something fails." | Requires credentials, auth, external service setup. Way beyond script scope. | Pipe output to wherever you want: `diagnose-connectivity.sh target \| mail -s "report" user@example.com`. |
+| Custom project logo in header | Every professional docs site (Kali, HTB, HackTricks) has branded identity. The current site uses the default Starlight sparkle icon. Without a logo, it looks like a template demo. | LOW | Starlight `logo` config accepts SVG/PNG with `light`/`dark` variants. Place in `src/assets/`. Single config change in `astro.config.mjs`. |
+| Dark-first color theme | Security/hacker community overwhelmingly prefers dark mode. Kali uses dark backgrounds with accent colors. HTB uses dark green/black. Current site uses Starlight defaults (blue accent, standard grays). | LOW | Override `--sl-color-accent-*` and `--sl-color-gray-*` CSS custom properties in a custom CSS file. Starlight supports this natively via `customCss` config. |
+| Custom favicon matching project branding | Current favicon is the default Starlight sparkle SVG. Every branded site has a matching favicon. Visitors see this in browser tabs. | LOW | Replace `public/favicon.svg` with project-branded SVG. Supports dark/light via `prefers-color-scheme` media query (current default already does this). |
+| Organized sidebar without redundant entries | Current autogenerated sidebar shows "Tools", "Guides", "Diagnostics" index pages alongside their children, creating redundant navigation. Kali and HackTricks have clean, hierarchy-only navigation. | LOW | Add `sidebar: { hidden: true }` frontmatter to `tools/index.md`, `guides/index.md`, `diagnostics/index.md`. Starlight supports per-page sidebar hiding in autogenerated groups. |
+| Consistent accent color throughout UI | Links, active sidebar items, hover states, buttons, and focus rings should all use the same brand accent. Currently Starlight default blue. Professional sites have cohesive palette. | LOW | Setting `--sl-color-accent-low`, `--sl-color-accent`, `--sl-color-accent-high` in custom CSS handles all UI elements at once -- links, sidebar highlights, buttons, focus states. |
+| Readable code blocks in dark theme | Security docs are command-heavy. Code blocks need adequate contrast against dark backgrounds. Current defaults work but don't match a custom theme. | LOW | Starlight's Expressive Code handles syntax highlighting. May need minor tweaks to `--sl-color-bg-inline-code` to match new palette. |
 
 ---
 
-## Area 3: New Tool Onboarding (dig, curl, netcat, traceroute/mtr, gobuster/ffuf)
+## Differentiators
 
-### Table Stakes (Users Expect These)
-
-Each new tool MUST follow the established pattern: `examples.sh` + use-case scripts + notes/*.md + Makefile targets.
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| `examples.sh` per tool (10 examples) | Established pattern across all 11 existing tools. Consistency is the entire project's identity. | LOW per tool | 5 tools x 10 examples = 50 example commands total. |
-| 2-3 use-case scripts per tool | Established pattern. Existing tools average 2.5 use-case scripts each. | MEDIUM per tool | See tool-specific breakdown below. |
-| `notes/<tool>.md` per tool | Every existing tool has one. Quick reference outside the docs site. | LOW per tool | Template: What It Does, Key Flags, Scan Progression, Practice section. |
-| Makefile targets | Every existing tool has `make <tool>` and use-case targets. | LOW | Extend Makefile with new entries. |
-| `check-tools.sh` integration | Script detects installed tools. New tools must be added. | LOW | Add to TOOLS array and TOOL_ORDER. |
-| Install hints per platform | `require_cmd` shows install instructions when tool is missing. | LOW | Homebrew for macOS, apt for Debian/Ubuntu. |
-
-### Tool-Specific Essential Use Cases
-
-**dig (DNS toolkit)**
-
-| Use Case Script | Why Essential | Complexity |
-|-----------------|---------------|------------|
-| `query-dns-records.sh` | Core dig use: query A, AAAA, MX, NS, TXT, SOA records for a domain. Every DNS guide starts here. | LOW |
-| `check-dns-propagation.sh` | Compare DNS results across resolvers (8.8.8.8, 1.1.1.1, authoritative NS). Common real-world need after DNS changes. | MEDIUM |
-| `attempt-zone-transfer.sh` | AXFR is a fundamental pentesting technique. dig is the standard tool. Reveals all records if misconfigured. | LOW |
-
-**curl (HTTP toolkit)**
-
-| Use Case Script | Why Essential | Complexity |
-|-----------------|---------------|------------|
-| `test-http-endpoints.sh` | GET/POST/PUT/DELETE with headers, auth, JSON payloads. The most common curl use case. | LOW |
-| `check-ssl-certificate.sh` | Verify SSL cert validity, expiry, chain. Common debugging scenario. `curl -vI https://target 2>&1 \| grep -A6 "Server certificate"`. | LOW |
-| `debug-http-response.sh` | Verbose mode showing DNS resolution, TCP connect, TLS handshake, headers, timing breakdown. Essential for "why is this request slow?" | MEDIUM |
-
-**netcat (TCP/UDP Swiss Army knife)**
-
-| Use Case Script | Why Essential | Complexity |
-|-----------------|---------------|------------|
-| `scan-ports.sh` | Basic port scanning without nmap. `nc -zv target 1-1000`. Useful when nmap isn't installed. | LOW |
-| `setup-listener.sh` | Listen on a port for incoming connections. Foundation for reverse shells and file transfer. | LOW |
-| `transfer-files.sh` | Send/receive files over TCP. Classic netcat use case: pipe in on one end, pipe out on the other. | LOW |
-
-**traceroute/mtr (path analysis)**
-
-| Use Case Script | Why Essential | Complexity |
-|-----------------|---------------|------------|
-| `trace-network-path.sh` | Basic traceroute with annotation of what each hop means. | LOW |
-| `diagnose-latency.sh` | mtr with packet loss and jitter stats per hop. Identifies where slowness occurs. | MEDIUM |
-| `compare-routes.sh` | Trace to same target via TCP vs. ICMP vs. UDP. Different protocols can take different paths, revealing firewall behavior. | MEDIUM |
-
-**gobuster/ffuf (web content discovery)**
-
-| Use Case Script | Why Essential | Complexity |
-|-----------------|---------------|------------|
-| `discover-directories.sh` | Basic directory brute-forcing against a web target. The primary use case. | LOW |
-| `enumerate-subdomains.sh` | DNS subdomain enumeration. Gobuster's `dns` mode or ffuf with Host header fuzzing. | MEDIUM |
-| `fuzz-parameters.sh` | Parameter fuzzing to find hidden inputs. ffuf excels here with FUZZ placeholder. | MEDIUM |
-
-### Differentiators (Competitive Advantage)
+Features that elevate the site from "functional docs" to "professional security toolkit." Not expected on every docs site, but noticeably valuable.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Networking tools treated as first-class (not afterthought) | Most pentesting tool collections ignore dig/curl/traceroute as "too basic." But these are the tools people use daily and still forget flags for. | LOW | Give them the same treatment as nmap: full examples.sh, use cases, docs page. |
-| Wordlist management for gobuster/ffuf | Include a `wordlists/download.sh` (already exists for rockyou.txt) that also fetches SecLists common directories/subdomains. | LOW | Extend existing download script. Essential for gobuster/ffuf to be useful. |
-| Cross-tool workflows in use cases | "First dig for DNS, then curl to test HTTP, then nmap for full scan." Use-case scripts that chain tools together in realistic workflow. | MEDIUM | New pattern: workflow scripts in a `workflows/` directory. |
+| Card-based homepage with tool grid | Kali's docs homepage uses 300px cards in a flex-wrap grid, each with icon + title + description. Current homepage is plain markdown with a bullet list. Cards make 18 tools scannable at a glance vs. reading a list. | MEDIUM | Convert `index.md` to `index.mdx`. Use Starlight's built-in `<CardGrid>` and `<Card>` components. Each tool gets a card with an icon (Starlight has `seti:*` icons for terminal/code). Guide links below the grid. |
+| Hero section with branded identity | Current hero has generic tagline and "Get Started" + "View on GitHub" actions. Kali and HTB sites have hero sections that immediately communicate what the project is. A stronger hero with a project-specific tagline and visual identity sets the tone. | LOW | Starlight's built-in `hero` frontmatter supports `title`, `tagline`, `image`, and `actions`. Add a hero image/logo. Refine tagline to be punchier. No custom component needed. |
+| Section overview cards on category pages | The `tools/index.md`, `guides/index.md`, and `diagnostics/index.md` currently show a single paragraph. Replacing these with card grids linking to child pages (like Kali's docs homepage categories) improves navigation. | MEDIUM | Convert to `.mdx`, import `<CardGrid>` + `<LinkCard>`. Each child page becomes a clickable card. Provides visual navigation that complements the sidebar. |
+| Custom accent palette (orange/amber on dark) | Security tools sites use distinctive color schemes: Kali = blue/purple, HTB = green/black, HackTricks = dark with green accents. Orange/amber on dark gray is distinctive, signals "warning/power" (fitting for security tools), and is not used by major competitors. | LOW | Define orange/amber hue values for `--sl-color-accent-*` properties. Dark gray tones for `--sl-color-gray-*`. Single CSS file, approximately 20 variable overrides. |
+| Dark-mode-only enforcement | Security tool sites like HTB and many hacker-oriented projects are dark-only. Removes visual inconsistency of maintaining two themes. Signals "this is a tool for technical users." | LOW | Override Starlight's `ThemeSelect` component or use `ThemeProvider` override to force dark theme. Alternatively, set the same colors for both light/dark tokens so toggling has no effect. |
+| Sidebar group icons | Starlight supports adding icons to sidebar groups via the `starlight-plugin-icons` plugin or custom sidebar configuration. Icons for "Tools" (terminal), "Guides" (open-book), "Diagnostics" (setting) make sidebar sections instantly scannable. | LOW | Use Starlight's built-in icon names in sidebar label configuration, or use a community plugin. Verify exact support -- may need the `starlight-plugin-icons` package. |
+| Styled category badges on tool cards | Differentiate tool types visually: "Offensive" (red badge), "Defensive" (blue badge), "Networking" (green badge) on tool cards. Kali categorizes tools this way. Helps users find tools by purpose. | LOW | Starlight `<Card>` doesn't natively support badges, but wrapping cards in custom Astro components or using HTML within MDX cards achieves this. Alternatively, group cards by category heading. |
 
-### Anti-Features (Commonly Requested, Often Problematic)
+---
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| wget as curl alternative | "Some people prefer wget." | wget and curl overlap significantly. Maintaining examples for both doubles work. curl is more capable and more commonly available. | Cover curl only. Note wget equivalents in docs if relevant. |
-| socat as netcat alternative | "socat is more powerful." | socat syntax is much more complex. This is a learning tool -- netcat's simplicity is the point. | Mention socat in docs as "advanced alternative" but don't build scripts for it. |
-| nslookup alongside dig | "nslookup is what I learned first." | dig provides superset of nslookup functionality with better output. nslookup is considered deprecated by many. | Use dig exclusively. Note in docs that dig replaces nslookup. |
-| Recursive directory brute-force by default | "Scan all nested directories automatically." | Extremely noisy, slow, and can trigger WAF bans. gobuster doesn't support recursion. ffuf can but shouldn't by default. | Default to single-level scan. Document recursive option as advanced use case with warnings. |
-| Automated wordlist download on first run | "Just download everything needed automatically." | Downloads can be large (SecLists is 500MB+). Surprise bandwidth usage is rude. | Provide `make wordlists` and document what's needed per tool. Explicit opt-in. |
+## Anti-Features
+
+Features that seem valuable for a visual refresh but create problems or scope creep.
+
+| Anti-Feature | Why It Seems Good | Why Avoid | What to Do Instead |
+|--------------|-------------------|-----------|-------------------|
+| Custom React/Svelte interactive components | "Add interactive tool selectors, animated cards, search filters." | Adds JS framework dependency to what is currently a zero-JS static site. Starlight's built-in components cover 95% of needs. Custom interactive components need maintenance, increase bundle size, and fight Starlight's architecture. | Use Starlight's built-in `<CardGrid>`, `<Card>`, `<LinkCard>`, `<Tabs>`, `<Badge>` components. They handle responsive layout, dark mode, and accessibility out of the box. |
+| Completely custom homepage layout (bypass Starlight) | "Build a pixel-perfect landing page like Kali's." | Kali's homepage is a custom site, not a docs framework. Bypassing Starlight's `splash` template means maintaining a parallel layout system. Breaks when Starlight updates. | Use `template: splash` + MDX with `<CardGrid>`. The splash template already removes sidebar for a wide layout. Add custom CSS for spacing/sizing rather than replacing the template. |
+| Animated backgrounds or particle effects | "HackTricks has animated particles. Looks hackerish." | Accessibility issues (motion sensitivity), performance cost, distracts from content. Professional security sites (Kali, HTB Academy docs) do NOT use them -- only marketing pages do. | Subtle CSS effects only: hover transitions on cards (Kali uses `translateY(-5px)` on hover), smooth color transitions on theme toggle. No animation libraries. |
+| Full Tailwind CSS integration | "Use Tailwind for easier styling." | Adds significant tooling complexity. Starlight's CSS custom properties already provide comprehensive theming. Tailwind classes in MDX files make content harder to read and maintain. The visual refresh is ~20 CSS variable overrides, not a design system rewrite. | Use Starlight's native CSS custom property system. One `custom.css` file with variable overrides. Clean, maintainable, upgrade-safe. |
+| Custom search UI | "Build a prominent search bar like Kali's banner search." | Starlight includes Pagefind search with keyboard shortcut (Ctrl+K). Replacing the search UI means maintaining compatibility with Pagefind's API. The built-in search modal works well. | Keep Starlight's built-in search. If more prominent placement is desired, override the `Search` component slot to reposition it, but keep Pagefind's implementation. |
+| Custom font loading | "Use a hacker-style monospace font for headings." | Web fonts add loading time and FOUT (flash of unstyled text). Starlight's system font stack is already fast and readable. Novelty fonts hurt readability for the command-heavy content. | Use system fonts via `--sl-font-system`. If a monospace accent is wanted for headings, use `--sl-font-system-mono` which is already available. No external font loading. |
+| Multi-page homepage (separate landing + docs) | "Have a marketing landing page separate from the docs." | This is a documentation site, not a product. Two entry points confuse navigation. The splash template IS the landing page. | Single homepage using `splash` template with hero + card grid. Direct entry into docs. One URL to share. |
+| Progressive enhancement with JS-heavy features | "Add tool comparison tables, dynamic filtering, live terminal previews." | Static site should stay static. Every JS feature is a maintenance burden, accessibility concern, and potential breakage point. The content is the product. | Keep the site zero-custom-JS. Starlight's built-in components add minimal JS for theme toggle and search. That is enough. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Astro Site
-    |-- requires --> Tool reference pages (content from notes/*.md)
-    |-- requires --> Use-case index page (content from USECASES.md)
-    |-- enhances <-- Lab walkthrough pages (content from lab-walkthrough.md)
-    |-- enhances <-- Learning path pages (new content, references tool pages)
+Project Logo (SVG asset)
+    |-- used by --> Header logo config (astro.config.mjs)
+    |-- used by --> Favicon (public/favicon.svg)
+    |-- used by --> Hero section image (optional)
+    (Logo must exist before any branding work)
 
-Diagnostic Scripts
-    |-- requires --> dig installed (for DNS diagnostics)
-    |-- requires --> curl installed (for connectivity diagnostics)
-    |-- requires --> traceroute/mtr installed (for latency diagnostics)
-    |-- requires --> New tool examples.sh (so users can learn the underlying tools)
-    |-- enhances <-- Docs site (diagnostic scripts get their own docs section)
+Custom CSS Theme File
+    |-- used by --> All pages (accent colors, backgrounds, text)
+    |-- depends on --> Color palette decision (orange/amber on dark)
+    |-- registered in --> astro.config.mjs customCss array
+    (Theme file must be created and registered before visual changes appear)
 
-New Tool: dig
-    |-- requires --> check-tools.sh update
-    |-- requires --> Makefile update
-    |-- enhances --> DNS diagnostic scripts (provides the underlying tool knowledge)
+Homepage Redesign (index.md -> index.mdx)
+    |-- requires --> Custom CSS theme (cards should match new palette)
+    |-- requires --> Logo asset (for hero section)
+    |-- uses --> Starlight CardGrid + Card components (built-in)
+    |-- references --> All 18 tool pages (card links)
+    |-- references --> Guide pages (guide links section)
 
-New Tool: curl
-    |-- requires --> check-tools.sh update
-    |-- requires --> Makefile update
-    |-- enhances --> Connectivity diagnostic scripts
+Sidebar Cleanup
+    |-- modifies --> tools/index.md frontmatter (sidebar.hidden)
+    |-- modifies --> guides/index.md frontmatter (sidebar.hidden)
+    |-- modifies --> diagnostics/index.md frontmatter (sidebar.hidden)
+    (Independent of other features -- can be done anytime)
 
-New Tool: netcat
-    |-- requires --> check-tools.sh update
-    |-- requires --> Makefile update
-    (independent -- no diagnostic scripts depend on it)
+Section Overview Pages (tools/index, guides/index, diagnostics/index)
+    |-- requires --> Convert .md to .mdx
+    |-- uses --> Starlight LinkCard components
+    |-- requires --> Custom CSS theme (for visual consistency)
 
-New Tool: traceroute/mtr
-    |-- requires --> check-tools.sh update
-    |-- requires --> Makefile update
-    |-- enhances --> Latency diagnostic scripts
-
-New Tool: gobuster/ffuf
-    |-- requires --> check-tools.sh update
-    |-- requires --> Makefile update
-    |-- requires --> wordlists (extend download.sh)
-    (independent -- no diagnostic scripts depend on it)
-
-Diagnostic Scripts --> depend on --> dig, curl, traceroute being onboarded first
-Docs Site --> depends on --> all tool content existing (can build incrementally)
-Learning Paths --> depend on --> tool pages + diagnostic script docs existing
+Dark-Mode-Only Enforcement (optional)
+    |-- requires --> Custom CSS theme file completed
+    |-- may require --> ThemeProvider component override
+    (Do after theme is finalized to avoid toggling confusion during development)
 ```
 
-### Dependency Notes
+### Dependency Order Summary
 
-- **Diagnostic scripts require new tools onboarded first:** The DNS diagnostic script calls dig, the connectivity diagnostic calls curl and nc, the latency diagnostic calls traceroute/mtr. Tool onboarding must happen before or alongside diagnostics.
-- **Docs site can be built incrementally:** Start with existing 11 tools, add new tool pages as they are built. No hard dependency on all content being ready.
-- **Learning paths require all other content:** These are meta-content that links existing pages together. Build last.
-- **gobuster/ffuf requires wordlists:** Unlike other new tools, gobuster and ffuf are useless without wordlists. Extend `wordlists/download.sh` as part of onboarding.
-
----
-
-## MVP Definition
-
-### Launch With (v1)
-
-Minimum viable expansion -- what's needed to validate the new directions.
-
-- [ ] **Astro/Starlight site with existing content** -- Deploy the 11 existing tool pages (from notes/*.md), the lab walkthrough, and the USECASES task index. Proves the docs site concept with zero new content creation.
-- [ ] **dig, curl, netcat examples.sh + use-case scripts** -- These three tools are the most universally needed networking tools. Pre-installed on most systems. Low barrier.
-- [ ] **DNS diagnostic script** -- Single most useful diagnostic. "Why can't I resolve this domain?" is the #1 networking question.
-- [ ] **Connectivity diagnostic script** -- Layer-by-layer check from DNS through HTTP. Demonstrates the diagnostic report pattern.
-- [ ] **check-tools.sh and Makefile updates** -- Keep the project's integration points current with new tools.
-
-### Add After Validation (v1.x)
-
-Features to add once core is working.
-
-- [ ] **traceroute/mtr onboarding + latency diagnostic** -- Add once the diagnostic pattern is proven with DNS and connectivity scripts.
-- [ ] **gobuster/ffuf onboarding + wordlist expansion** -- Add once site and tool pattern is stable. These need wordlists and are pentest-specific (not networking diagnostic).
-- [ ] **Learning path pages on docs site** -- Beginner/Intermediate/Advanced paths linking tool pages in recommended order. Requires enough tool pages to make paths meaningful.
-- [ ] **OS-specific install tabs on docs site** -- Starlight Tabs showing macOS vs. Linux install commands per tool page.
-- [ ] **Cross-tool workflow scripts** -- Scripts that chain multiple tools in a realistic sequence (recon workflow, web app testing workflow).
-
-### Future Consideration (v2+)
-
-Features to defer until the expansion is established.
-
-- [ ] **Machine-parseable output (--json)** -- Structured output from diagnostic scripts. Nice but bash JSON is fragile. Defer.
-- [ ] **Docs site search analytics** -- Track what people search for to guide future content. Requires analytics setup.
-- [ ] **Community contribution guide** -- Templates for adding new tools, style guide for scripts. Only needed if external contributors appear.
-- [ ] **Performance diagnostic script** -- Throughput testing, bandwidth measurement. More specialized than DNS/connectivity.
+1. **Logo asset** -- everything visual depends on having the brand identity
+2. **Custom CSS file** -- colors affect all pages, do before content changes
+3. **Sidebar cleanup** -- independent, quick win, can parallel with anything
+4. **Homepage redesign** -- depends on logo + theme
+5. **Section overview pages** -- depends on theme, parallels homepage
+6. **Dark-mode enforcement** -- last, after theme is validated
 
 ---
 
-## Feature Prioritization Matrix
+## MVP Recommendation
 
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Astro/Starlight site (existing content) | HIGH | MEDIUM | P1 |
-| dig examples.sh + use cases | HIGH | LOW | P1 |
-| curl examples.sh + use cases | HIGH | LOW | P1 |
-| netcat examples.sh + use cases | MEDIUM | LOW | P1 |
-| DNS diagnostic script | HIGH | MEDIUM | P1 |
-| Connectivity diagnostic script | HIGH | MEDIUM | P1 |
-| check-tools.sh + Makefile updates | MEDIUM | LOW | P1 |
-| traceroute/mtr examples.sh + use cases | MEDIUM | LOW | P2 |
-| Latency diagnostic script | MEDIUM | MEDIUM | P2 |
-| gobuster/ffuf examples.sh + use cases | MEDIUM | MEDIUM | P2 |
-| Wordlist expansion for gobuster/ffuf | MEDIUM | LOW | P2 |
-| Learning path pages | MEDIUM | MEDIUM | P2 |
-| "I want to..." task index on site | HIGH | LOW | P2 |
-| OS-specific install tabs | LOW | LOW | P2 |
-| Lab walkthrough as Starlight pages | MEDIUM | LOW | P2 |
-| Cross-tool workflow scripts | MEDIUM | HIGH | P3 |
-| Machine-parseable diagnostic output | LOW | HIGH | P3 |
-| Difficulty indicators per example | LOW | LOW | P3 |
-| DNS comparison mode (multi-resolver) | LOW | MEDIUM | P3 |
+### Must Ship (defines "visual refresh complete")
 
-**Priority key:**
-- P1: Must have for first milestone delivery
-- P2: Should have, add in subsequent phases
-- P3: Nice to have, future consideration
+1. **Custom CSS theme file** with orange/amber accent on dark gray palette -- affects every page instantly with ~20 variable overrides
+2. **Project logo** in SVG with dark variant -- appears in header, establishes brand
+3. **Custom favicon** matching project identity -- replaces default Starlight sparkle
+4. **Homepage card grid** -- convert to MDX, add `<CardGrid>` with tool cards organized by category, guide links section below
+5. **Sidebar cleanup** -- hide redundant index pages from autogenerated groups
+
+### Should Ship (noticeably improves polish)
+
+6. **Section overview cards** on tools/guides/diagnostics index pages -- replaces paragraph text with navigable card grids
+7. **Hero refinement** -- punchier tagline, possibly hero image using the new logo
+
+### Defer (nice but not essential for "visual refresh")
+
+8. **Dark-mode-only enforcement** -- works as shipped with dark/light toggle, forcing dark is opinionated
+9. **Sidebar group icons** -- may require plugin, verify feasibility first
+10. **Category badges on tool cards** -- requires custom component wrapping, adds complexity
 
 ---
 
-## Competitor Feature Analysis
+## Starlight Built-in Components Available for Visual Refresh
 
-| Feature | HackTricks | ired.team | highon.coffee | This Project |
-|---------|-----------|-----------|---------------|--------------|
-| Searchable docs site | Yes (custom search) | Yes (GitBook search) | No (Ctrl+F only) | Yes (Starlight Pagefind) |
-| Copy-to-clipboard code | Yes | Yes | No | Yes (Starlight built-in) |
-| Tool-organized pages | Yes (by service/port) | Yes (by technique) | Yes (by tool) | Yes (by tool + by task) |
-| Task-organized index | No | No | No | **Yes -- differentiator** |
-| Runnable scripts | No (reference only) | No | No | **Yes -- differentiator** |
-| Lab environment | No | No | No | **Yes -- differentiator** |
-| Learning paths | No | Partial (sections ordered) | No | **Yes -- differentiator** |
-| Diagnostic scripts | No | No | No | **Yes -- differentiator** |
-| Dark mode | Yes | Yes (GitBook) | No | Yes (Starlight built-in) |
-| Mobile responsive | Yes | Yes | Partial | Yes (Starlight built-in) |
-| Guided walkthroughs | No | No | No | **Yes (lab walkthrough) -- differentiator** |
+These components ship with `@astrojs/starlight` and require no additional packages. All are importable in MDX files from `@astrojs/starlight/components`.
 
-Key insight: HackTricks and ired.team are reference-only. They document commands but provide no runnable scripts, no lab environment, and no diagnostic tools. This project's combination of docs + scripts + lab is unique in the space.
+| Component | Use in Visual Refresh | Import |
+|-----------|----------------------|--------|
+| `CardGrid` | Homepage tool grid, section overview pages | `@astrojs/starlight/components` |
+| `Card` | Individual tool cards with icons and descriptions | `@astrojs/starlight/components` |
+| `LinkCard` | Clickable cards linking to guide/tool pages | `@astrojs/starlight/components` |
+| `Icon` | Decorative icons on homepage sections | `@astrojs/starlight/components` |
+| `Badge` | Tool category indicators (if used) | `@astrojs/starlight/components` |
+
+### Available Icons Relevant to This Project
+
+Starlight includes these built-in icons usable with `<Card icon="...">` and `<Icon name="...">`:
+
+- **Navigation/UI:** `rocket`, `star`, `open-book`, `puzzle`, `setting`, `magnifier`, `laptop`
+- **Development:** `seti:shell` (terminal), `seti:python`, `seti:json`, `seti:yaml`
+- **Platforms:** `linux`, `apple`, `github`
+- **Status:** `warning`, `error`, `approve-check-circle`, `information`
+
+For tool cards, `seti:shell` (terminal icon) or `rocket` work well as generic tool indicators. Category-specific icons can differentiate sections.
+
+### CSS Custom Properties for Theme Override
+
+Key variables to override in `src/styles/custom.css` (registered via `customCss` in config):
+
+| Variable | Controls | Current Default |
+|----------|----------|----------------|
+| `--sl-color-accent-low` | Accent backgrounds, hover states | Blue (Starlight default) |
+| `--sl-color-accent` | Links, active sidebar items, buttons | Blue |
+| `--sl-color-accent-high` | Accent text, high-contrast elements | Blue |
+| `--sl-color-gray-1` through `--sl-color-gray-7` | Background gradient from lightest to darkest | Standard grays |
+| `--sl-color-bg` | Main page background | White (light) / Dark gray (dark) |
+| `--sl-color-bg-nav` | Top navigation bar | Slightly tinted |
+| `--sl-color-bg-sidebar` | Sidebar background | Slightly tinted |
+| `--sl-color-text` | Body text | Near-black (light) / Near-white (dark) |
+| `--sl-color-text-accent` | Accented text elements | Accent color |
+
+### Overridable Components Relevant to Visual Refresh
+
+| Component | Override Purpose | Risk Level |
+|-----------|-----------------|------------|
+| `Hero` | Custom hero layout beyond frontmatter options | LOW -- well-documented override |
+| `SiteTitle` | Custom header branding beyond logo config | LOW -- simple replacement |
+| `ThemeSelect` | Force dark-only mode | LOW -- remove toggle UI |
+| `Sidebar` | Custom sidebar styling or structure | MEDIUM -- complex component |
+| `Header` | Major navigation redesign | HIGH -- many sub-components |
+
+**Recommendation:** Avoid component overrides unless CSS-only customization proves insufficient. CSS custom properties handle 90% of the visual refresh needs.
+
+---
+
+## Competitor Feature Benchmark (Visual/UX Only)
+
+| Feature | Kali Docs | HackTricks | HTB Academy | This Project (Current) | This Project (After Refresh) |
+|---------|-----------|------------|-------------|----------------------|------------------------------|
+| Card-based homepage | Yes (300px cards, flex grid) | No (text hierarchy) | Yes (course cards) | No (bullet list) | **Yes (CardGrid)** |
+| Custom dark theme | Yes (dark gray + blue/purple) | Yes (dark + green) | Yes (dark + green) | No (Starlight defaults) | **Yes (dark + orange/amber)** |
+| Project logo/branding | Yes (Kali dragon) | Yes (book icon) | Yes (HTB cube) | No (default sparkle) | **Yes (custom SVG)** |
+| Prominent search | Yes (banner search bar) | Yes (search bar) | Yes (search bar) | Yes (Pagefind modal) | Yes (Pagefind -- unchanged) |
+| Clean sidebar | Yes (categories only) | Yes (hierarchical) | Yes (course tree) | Partial (redundant index) | **Yes (hidden index items)** |
+| Tool categorization | Yes (by type) | Yes (by technique) | Yes (by module) | Partial (flat list) | **Yes (grouped cards)** |
+| Hover effects on cards | Yes (translateY lift) | No | Yes (shadow + scale) | No (no cards) | **Yes (CSS hover effects)** |
+| Mobile responsive nav | Yes | Yes | Yes | Yes (Starlight built-in) | Yes (unchanged) |
+| Consistent accent color | Yes (blue throughout) | Yes (green throughout) | Yes (green throughout) | No (default blue) | **Yes (orange/amber throughout)** |
+| Custom favicon | Yes (Kali dragon) | Yes (custom) | Yes (HTB cube) | No (Starlight sparkle) | **Yes (project logo)** |
+
+**Key insight:** The gap between "current" and "Kali-level polish" is primarily CSS theming + homepage layout. Starlight's built-in components and CSS custom property system close this gap without custom code. The heaviest lift is creating the logo asset, not writing code.
 
 ---
 
 ## Sources
 
-- [HackTricks Wiki](https://book.hacktricks.wiki/) -- Comprehensive pentesting reference site. MEDIUM confidence (verified features via WebFetch).
-- [Red Team Notes (ired.team)](https://www.ired.team/offensive-security-experiments/offensive-security-cheetsheets) -- Pentesting cheatsheets organized by technique. MEDIUM confidence.
-- [highon.coffee Pentest Cheat Sheet](https://highon.coffee/blog/penetration-testing-tools-cheat-sheet/) -- Tool-organized cheatsheet covering 50+ tools. MEDIUM confidence.
-- [Astro Starlight Official Docs](https://starlight.astro.build/) -- Documentation theme features: search, dark mode, tabs, code blocks, i18n, sidebar. HIGH confidence (official docs verified via WebFetch).
-- [Starlight Code Components](https://starlight.astro.build/components/code/) -- Expressive Code integration with copy buttons, syntax highlighting, file labels. HIGH confidence.
-- [Framework Computer Network Diagnostic Scripts](https://github.com/FrameworkComputer/linux-docs/tree/main/Network-Diagnostic-Scripts) -- Real-world bash diagnostic script patterns. MEDIUM confidence.
-- [DigitalOcean MTR/Traceroute Guide](https://www.digitalocean.com/community/tutorials/how-to-use-traceroute-and-mtr-to-diagnose-network-issues) -- Traceroute/MTR diagnostic patterns. MEDIUM confidence.
-- [ffuf GitHub](https://github.com/ffuf/ffuf) -- Web fuzzer features and capabilities. HIGH confidence (official repo).
-- [gobuster GitHub](https://github.com/OJ/gobuster) -- Directory/DNS/VHost busting capabilities. HIGH confidence (official repo).
-- [Netcat for Pentester (hackingarticles.in)](https://www.hackingarticles.in/netcat-for-pentester/) -- Netcat use case catalog. MEDIUM confidence.
-- [DNS Pentesting Methodology (BlackWolfed)](https://github.com/BlackWolfed/DNS-Penetration-Testing-Methodology) -- dig use cases for pentesting. MEDIUM confidence.
+- [Starlight CSS & Styling Guide](https://starlight.astro.build/guides/css-and-tailwind/) -- CSS custom properties, cascade layers, customCss config. HIGH confidence.
+- [Starlight Customization Guide](https://starlight.astro.build/guides/customization/) -- Logo variants, fonts, social links, component overrides. HIGH confidence.
+- [Starlight Card Grids Documentation](https://starlight.astro.build/components/card-grids/) -- CardGrid, Card, LinkCard components and props. HIGH confidence.
+- [Starlight Component Overrides Reference](https://starlight.astro.build/reference/overrides/) -- All overridable components: Hero, Header, SiteTitle, ThemeSelect, Sidebar. HIGH confidence.
+- [Starlight Sidebar Documentation](https://starlight.astro.build/guides/sidebar/) -- Autogenerate, hidden frontmatter, label/order customization. HIGH confidence.
+- [Starlight Frontmatter Reference](https://starlight.astro.build/reference/frontmatter/) -- hero, template, sidebar.hidden, banner options. HIGH confidence.
+- [Starlight Icons Reference](https://starlight.astro.build/reference/icons/) -- Complete list of built-in icon names. HIGH confidence.
+- [Starlight Pages Guide](https://starlight.astro.build/guides/pages/) -- Custom .astro pages, StarlightPage component, splash template. HIGH confidence.
+- [Starlight props.css on GitHub](https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css) -- Full CSS custom property definitions. HIGH confidence.
+- [Kali Linux Documentation](https://www.kali.org/docs/) -- Card grid homepage design, search banner, dark theme implementation. MEDIUM confidence (layout inspected via WebFetch).
+- [Kali Linux Tools Page](https://www.kali.org/tools/) -- Tool card layout with icons, hierarchical package display, interactive search. MEDIUM confidence.
+- [HackTricks Wiki](https://book.hacktricks.wiki/en/index.html) -- Dark/light toggle, sidebar navigation, sponsor sections, language support. MEDIUM confidence.
+- [Cybersecurity Website Design Best Practices](https://digi-tx.com/design/best-examples-cybersecurity-website-design/) -- Dark gray (#121212) over pure black, 4.5:1 contrast ratios, minimal layouts. MEDIUM confidence.
+- [Inclusive Dark Mode Design (Smashing Magazine)](https://www.smashingmagazine.com/2025/04/inclusive-dark-mode-designing-accessible-dark-themes/) -- Accessible dark theme patterns. MEDIUM confidence.
 
 ---
-*Feature research for: pentesting/networking learning lab expansion*
-*Researched: 2026-02-10*
+*Feature research for: Networking Tools site visual refresh milestone*
+*Researched: 2026-02-11*
