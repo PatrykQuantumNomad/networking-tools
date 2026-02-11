@@ -1,10 +1,15 @@
 # Makefile — Common operations for networking-tools
 
-.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity traceroute trace-path diagnose-latency compare-routes diagnose-performance gobuster discover-dirs enum-subdomains ffuf fuzz-params
+.PHONY: check lab-up lab-down lab-status help lint wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity traceroute trace-path diagnose-latency compare-routes diagnose-performance gobuster discover-dirs enum-subdomains ffuf fuzz-params
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+lint: ## Run ShellCheck on all shell scripts
+	@echo "Running ShellCheck (severity=warning)..."
+	@find . -name '*.sh' -not -path './site/*' -not -path './.planning/*' -not -path './node_modules/*' -exec shellcheck --severity=warning {} +
+	@echo "All scripts pass ShellCheck."
 
 wordlists: ## Download wordlists for password cracking and web enumeration
 	@bash wordlists/download.sh

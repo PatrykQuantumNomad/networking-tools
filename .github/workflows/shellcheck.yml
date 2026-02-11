@@ -1,0 +1,30 @@
+name: ShellCheck
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: Lint shell scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Run ShellCheck
+        run: |
+          echo "ShellCheck version:"
+          shellcheck --version
+          echo ""
+          find . -name '*.sh' \
+            -not -path './site/*' \
+            -not -path './.planning/*' \
+            -not -path './node_modules/*' \
+            -exec shellcheck --severity=warning {} +
+          echo "All scripts pass ShellCheck."
