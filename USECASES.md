@@ -33,6 +33,15 @@ Find the right script by what you're trying to do. All commands support `--help`
 | Dump a database via SQLi | `make dump-db TARGET=<url>` | sqlmap |
 | Bypass WAF/IDS with tamper scripts | `make bypass-waf TARGET=<url>` | sqlmap |
 
+## Web Enumeration & Fuzzing
+
+| I want to... | Command | Tool |
+| -------------- | --------- | ------ |
+| Discover hidden directories and files | `make discover-dirs TARGET=<url>` | gobuster |
+| Enumerate subdomains | `make enum-subdomains TARGET=<domain>` | gobuster |
+| Fuzz GET/POST parameters | `make fuzz-params TARGET=<url>` | ffuf |
+| Download wordlists for enumeration | `make wordlists` | curl |
+
 ## Password Cracking
 
 | I want to... | Command | Tool |
@@ -110,6 +119,8 @@ bash scripts/<tool>/<script>.sh [target] [--help]
                  make diagnose-latency TARGET=<host>
                  make diagnose-performance TARGET=<host>
 2. Port scan     make identify-ports TARGET=<ip>
+2b. Enumerate    make discover-dirs TARGET=<url>
+                 make fuzz-params TARGET=<url>
 3. Web scan      make scan-web-vulns TARGET=<ip>
                  make scan-vulns TARGET=<url>
 4. SQLi test     make test-params TARGET=<url>
