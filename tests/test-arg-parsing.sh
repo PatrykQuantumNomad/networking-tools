@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# test-arg-parsing.sh -- Verify Phase 14 argument parsing and dual-mode pattern
+# test-arg-parsing.sh -- Verify argument parsing and dual-mode pattern across all scripts
 # Usage: bash tests/test-arg-parsing.sh
 #
-# Validates all 5 phase success criteria for argument parsing, plus unit tests
-# for parse_common_args(). Exits 0 if all pass, 1 if any fail.
+# Validates Phase 14 success criteria (nmap pilot) and Phase 15 success criteria
+# (all 17 examples.sh scripts). Exits 0 if all pass, 1 if any fail.
 
 set +eEu  # Disable strict mode for the test harness itself
 
@@ -183,7 +183,8 @@ export -f show_help 2>/dev/null || true
 
 # Source common.sh (this will set strict mode, which we then disable)
 source "${PROJECT_ROOT}/scripts/common.sh"
-set +eEu  # Re-disable strict mode for the test harness
+set +eEuo pipefail  # Re-disable strict mode for the test harness
+trap - ERR          # Clear ERR trap so subshells don't print stack traces
 
 # --- Test: -v sets VERBOSE and LOG_LEVEL ---
 VERBOSE=0
@@ -313,6 +314,124 @@ if [[ "$empty_expand_ok" == "true" ]]; then
     check_pass "empty REMAINING_ARGS expansion succeeds under set -u"
 else
     check_fail "empty REMAINING_ARGS expansion fails under set -u"
+fi
+echo ""
+
+# ============================================================================
+# All 17 scripts: --help exits 0
+# ============================================================================
+echo "=== All scripts: --help exits 0 ==="
+
+for tool_dir in "${PROJECT_ROOT}/scripts"/*/; do
+    script="${tool_dir}examples.sh"
+    [[ -f "$script" ]] || continue
+    tool=$(basename "$tool_dir")
+
+    if bash "$script" --help &>/dev/null; then
+        check_pass "${tool}: --help exits 0"
+    else
+        check_fail "${tool}: --help exits non-zero"
+    fi
+done
+echo ""
+
+# ============================================================================
+# All 17 scripts: -x rejects non-interactive stdin
+# ============================================================================
+echo "=== All scripts: -x rejects non-interactive stdin ==="
+
+declare -A TOOL_TARGETS=(
+    [nmap]="scanme.nmap.org"
+    [dig]="example.com"
+    [curl]="example.com"
+    [hping3]="example.com"
+    [gobuster]="http://example.com"
+    [ffuf]="http://example.com"
+    [nikto]="http://example.com"
+    [sqlmap]="http://example.com"
+    [skipfish]="http://example.com"
+    [traceroute]="example.com"
+    [netcat]="127.0.0.1"
+    [foremost]=""
+    [tshark]=""
+    [metasploit]=""
+    [hashcat]=""
+    [john]=""
+    [aircrack-ng]=""
+)
+
+for tool_dir in "${PROJECT_ROOT}/scripts"/*/; do
+    script="${tool_dir}examples.sh"
+    [[ -f "$script" ]] || continue
+    tool=$(basename "$tool_dir")
+    target="${TOOL_TARGETS[$tool]:-}"
+
+    exec_output=$(echo "" | bash "$script" -x $target 2>&1)
+    exec_exit=$?
+    if [[ $exec_exit -ne 0 ]]; then
+        check_pass "${tool}: -x rejects non-interactive ($exec_exit)"
+    else
+        check_fail "${tool}: -x does not reject non-interactive"
+    fi
+done
+echo ""
+
+# ============================================================================
+# Makefile backward compatibility: 12 targets with examples.sh
+# ============================================================================
+echo "=== Makefile backward compatibility: 12 targets ==="
+
+if command -v make &>/dev/null; then
+    declare -A MAKE_TARGETS=(
+        [nmap]="scanme.nmap.org"
+        [tshark]=""
+        [sqlmap]="http://example.com"
+        [nikto]="http://example.com"
+        [hping3]="example.com"
+        [foremost]=""
+        [dig]="example.com"
+        [curl]="example.com"
+        [netcat]="127.0.0.1"
+        [traceroute]="example.com"
+        [gobuster]="http://example.com"
+        [ffuf]="http://example.com"
+    )
+
+    # Map tool names to their actual command names for availability check
+    declare -A TOOL_CMDS=(
+        [netcat]="nc"
+    )
+
+    for make_tool in "${!MAKE_TARGETS[@]}"; do
+        # Check if the tool command is available (skip if not installed)
+        cmd="${TOOL_CMDS[$make_tool]:-$make_tool}"
+        if ! command -v "$cmd" &>/dev/null; then
+            echo "  SKIP: make ${make_tool} (${cmd} not installed)"
+            continue
+        fi
+
+        target="${MAKE_TARGETS[$make_tool]}"
+        if [[ -n "$target" ]]; then
+            make_output=$(make -C "${PROJECT_ROOT}" "$make_tool" TARGET="$target" 2>/dev/null)
+        else
+            make_output=$(make -C "${PROJECT_ROOT}" "$make_tool" 2>/dev/null)
+        fi
+        make_exit=$?
+
+        if [[ $make_exit -eq 0 ]]; then
+            check_pass "make ${make_tool}: exits 0"
+        else
+            check_fail "make ${make_tool}: exits $make_exit (expected 0)"
+        fi
+
+        if echo "$make_output" | grep -q "1)"; then
+            check_pass "make ${make_tool}: output contains '1)'"
+        else
+            check_fail "make ${make_tool}: output does not contain '1)'"
+        fi
+    done
+else
+    echo "  SKIP: make not available"
 fi
 echo ""
 
