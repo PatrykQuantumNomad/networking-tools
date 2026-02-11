@@ -67,11 +67,11 @@ Plans:
   3. Running `VERBOSE=1 bash scripts/nmap/examples.sh scanme.nmap.org` shows debug-level messages and timestamps; running without VERBOSE shows normal output
   4. Piping any script through `cat` (non-terminal stdout) produces output with zero ANSI escape codes
   5. A script that creates temp files via `make_temp()` cleans them up on normal exit, error exit, and Ctrl+C
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 13-01: TBD
-- [ ] 13-02: TBD
+- [ ] 13-01-PLAN.md — Create 8 library modules in scripts/lib/ and rewrite common.sh as entry point
+- [ ] 13-02-PLAN.md — Smoke test and backward compatibility verification of all 5 success criteria
 
 ### Phase 14: Argument Parsing and Dual-Mode Pattern
 **Goal**: Every script can accept `-h`, `-v`, `-q`, `-x` flags through a shared parser, and `run_or_show()` either displays educational content or executes commands based on the flag
