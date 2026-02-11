@@ -94,7 +94,7 @@ info "10) Check OCSP stapling status"
 echo "    curl -v https://${TARGET} 2>&1 | grep -i 'OCSP'"
 echo ""
 
-# Interactive demo
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Check SSL certificate for ${TARGET} now? [y/N] " answer

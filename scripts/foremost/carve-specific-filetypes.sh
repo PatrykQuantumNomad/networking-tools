@@ -97,7 +97,7 @@ info "10) Compare specific vs all recovery"
 echo "    foremost -t jpg -i disk.img -o jpg_only/ && foremost -t all -i disk.img -o everything/"
 echo ""
 
-# Non-interactive exit guard
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 # Interactive demo

@@ -150,7 +150,7 @@ else
 fi
 echo ""
 
-# Interactive demo -- skip listener (would block), demo port scan instead
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Demo: check if port 22 is open on localhost? [y/N] " answer

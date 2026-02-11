@@ -79,8 +79,8 @@ info "10) SOA record — zone authority and serial number"
 echo "    dig SOA ${TARGET}"
 echo ""
 
-# Interactive demo
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 read -rp "Run a quick A record lookup on ${TARGET} now? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     info "Running: dig +short ${TARGET}"

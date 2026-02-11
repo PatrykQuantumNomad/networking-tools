@@ -93,7 +93,7 @@ info "10) Full DNS analysis with timestamps and source IPs"
 echo "    sudo tshark -i ${TARGET} -Y 'dns' -T fields -e frame.time_relative -e ip.src -e dns.flags.response -e dns.qry.name -e dns.a -c 50"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Capture 20 DNS queries on ${TARGET}? [y/N] " answer

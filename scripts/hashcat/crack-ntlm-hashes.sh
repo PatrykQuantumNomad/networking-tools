@@ -96,7 +96,7 @@ info "10) Output cracked hashes to file"
 echo "    hashcat -m 1000 -a 0 ${HFILE} wordlist.txt -o cracked.txt --outfile-format=2"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 echo ""

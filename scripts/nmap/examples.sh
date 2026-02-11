@@ -80,8 +80,8 @@ info "10) Save results (-oA = normal + XML + grepable)"
 echo "    nmap -sV -oA scan-results ${TARGET}"
 echo ""
 
-# Run a basic demo scan
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 read -rp "Run a quick ping scan on ${TARGET} now? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     info "Running: nmap -sn ${TARGET}"

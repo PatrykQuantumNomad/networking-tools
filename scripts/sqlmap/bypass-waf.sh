@@ -101,7 +101,7 @@ info "10) List all available tamper scripts"
 echo "    sqlmap --list-tampers"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 echo ""

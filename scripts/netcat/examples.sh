@@ -126,8 +126,8 @@ echo "    # Sender (connector):"
 echo "    nc ${TARGET} 4444 < file_to_send"
 echo ""
 
-# Interactive demo
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 read -rp "Run a quick port scan on ${TARGET} port 80? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     info "Running: nc -zv ${TARGET} 80 -w 3"

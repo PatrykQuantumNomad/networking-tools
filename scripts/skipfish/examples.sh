@@ -79,7 +79,8 @@ info "10) Results are saved as an HTML report"
 echo "    open skipfish-output/index.html"
 echo ""
 
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 read -rp "Run a basic scan against ${TARGET} now? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     output_dir="$PROJECT_ROOT/skipfish-output"

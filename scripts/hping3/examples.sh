@@ -82,7 +82,8 @@ info "10) FIN scan — stealthier than SYN"
 echo "    sudo hping3 -F -p 80 -c 3 ${TARGET}"
 echo ""
 
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 read -rp "Run a quick SYN probe to port 80 on ${TARGET}? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     info "Running: sudo hping3 -S -p 80 -c 3 ${TARGET}"

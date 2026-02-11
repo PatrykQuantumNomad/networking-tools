@@ -94,7 +94,7 @@ info "10) Save successful zone transfer to file"
 echo "    dig axfr ${TARGET} @\$(dig ${TARGET} NS +short | head -1) > zone-${TARGET}.txt"
 echo ""
 
-# Interactive demo — just show nameservers (safe, no transfer attempt)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Look up nameservers for ${TARGET} now? [y/N] " answer

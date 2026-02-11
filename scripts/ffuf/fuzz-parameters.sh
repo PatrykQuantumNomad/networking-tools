@@ -99,8 +99,8 @@ info "10) Combine name + value fuzzing — test parameter names and values toget
 echo "    ffuf -u \"${TARGET}/page.php?FUZZ=FUZ2\" -w ${WORDLIST}:FUZZ -w ${WORDLIST}:FUZ2 -fs 0 -t 10"
 echo ""
 
-# Interactive demo
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 
 read -rp "Run a GET parameter discovery against ${TARGET}? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then

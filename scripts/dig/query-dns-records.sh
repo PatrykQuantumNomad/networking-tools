@@ -91,7 +91,7 @@ info "10) Query via specific DNS server (Cloudflare)"
 echo "    dig @1.1.1.1 ${TARGET} A +noall +answer"
 echo ""
 
-# Interactive demo
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Run a quick A record lookup on ${TARGET} now? [y/N] " answer

@@ -78,7 +78,7 @@ info "10) Use custom configuration file"
 echo "    foremost -c /usr/local/etc/foremost.conf -i image.dd -o recovered/"
 echo ""
 
-# Non-interactive exit guard
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 # Interactive demo

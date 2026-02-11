@@ -75,8 +75,8 @@ info "10) Filter traffic to/from specific IP"
 echo "    tshark -r capture.pcap -Y 'ip.addr == 192.168.1.1'"
 echo ""
 
-# Demo: list interfaces
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 read -rp "List available capture interfaces now? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     info "Running: tshark -D"

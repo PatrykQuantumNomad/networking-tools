@@ -92,7 +92,7 @@ info "10) Follow redirects and show the redirect chain"
 echo "    curl -L -v -s -o /dev/null ${TARGET} 2>&1 | grep -E '< HTTP/|< location:'"
 echo ""
 
-# Interactive demo
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Check HTTP status code for ${TARGET} now? [y/N] " answer

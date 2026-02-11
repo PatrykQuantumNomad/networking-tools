@@ -94,7 +94,8 @@ echo "    john --restore=session_name"
 echo ""
 
 info "Supported formats: john --list=formats | wc -l"
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 read -rp "Show all supported hash formats? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     john --list=formats 2>/dev/null | head -20

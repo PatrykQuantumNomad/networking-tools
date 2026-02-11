@@ -87,7 +87,7 @@ info "10) Run a time-limited cracking session (60 seconds)"
 echo "    hashcat -m 1000 --runtime=60 hashes.txt wordlist.txt"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Run a quick benchmark for MD5 and NTLM? [y/N] " answer

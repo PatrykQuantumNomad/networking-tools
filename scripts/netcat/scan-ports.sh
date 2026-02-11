@@ -92,7 +92,7 @@ echo "        nc -zv -w 2 ${TARGET} \$port 2>&1 && echo \"Port \$port: OPEN\" ||
 echo "    done"
 echo ""
 
-# Interactive demo
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Run a quick port scan on ${TARGET} port 80? [y/N] " answer

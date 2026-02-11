@@ -89,7 +89,7 @@ info "10) Full credential extraction pipeline"
 echo "    sudo tshark -i ${TARGET} -Y 'http.request.method==POST and http contains \"login\"' -T fields -e frame.time -e ip.src -e http.host -e http.request.uri -e http.file_data"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Capture 10 HTTP packets on lo0 (loopback — safe, local only)? [y/N] " answer

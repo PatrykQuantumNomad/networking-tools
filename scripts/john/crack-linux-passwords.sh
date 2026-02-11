@@ -90,7 +90,7 @@ info "10) Review cracked usernames and passwords"
 echo "    john --show --format=sha512crypt unshadowed.txt | cut -d: -f1,2"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 echo ""

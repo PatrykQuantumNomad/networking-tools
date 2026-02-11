@@ -99,7 +99,7 @@ info "10) Crack with a mask if you know the password pattern"
 echo "    john --mask='?d?d?d?d' zip.hash"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 echo ""

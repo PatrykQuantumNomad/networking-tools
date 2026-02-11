@@ -79,8 +79,8 @@ info "10) Save output to file for later analysis"
 echo "    gobuster dir -u ${TARGET} -w wordlists/common.txt -o gobuster-results.txt -t 10"
 echo ""
 
-# Interactive demo
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 
 WORDLIST="${PROJECT_ROOT}/wordlists/common.txt"
 if [[ ! -f "$WORDLIST" ]]; then

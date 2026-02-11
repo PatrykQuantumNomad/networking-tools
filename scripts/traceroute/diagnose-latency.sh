@@ -98,8 +98,8 @@ echo "    mtr --report -n -c 10 8.8.8.8"
 echo "    Tip: compare loss% and avg latency at each hop"
 echo ""
 
-# Interactive demo
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 
 read -rp "Run mtr report to ${TARGET} (5 cycles, ~5 seconds)? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then

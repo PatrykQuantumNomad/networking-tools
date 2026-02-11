@@ -89,7 +89,7 @@ info "10) Scan a subnet for all open services"
 echo "    msfconsole -q -x \"use auxiliary/scanner/portscan/tcp; set RHOSTS ${TARGET}/24; set PORTS 22,80,443,8080; run; exit\""
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 if [[ "$TARGET" == "localhost" || "$TARGET" == "127.0.0.1" ]]; then

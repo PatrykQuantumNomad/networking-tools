@@ -100,7 +100,7 @@ info "10) Auto-detect format by running John directly"
 echo "    john hash.txt"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 if [[ -n "$HASH" ]]; then

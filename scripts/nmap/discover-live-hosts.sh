@@ -93,7 +93,7 @@ info "10) Aggressive discovery combining all methods"
 echo "    sudo nmap -sn -PE -PP -PM -PS21,22,25,80,443,8080 -PA80,443 -PU53 ${TARGET}/24"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Run a ping sweep on ${TARGET} now? [y/N] " answer

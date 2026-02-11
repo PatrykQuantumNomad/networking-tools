@@ -99,8 +99,8 @@ info "10) Full enumeration — custom resolver, show IPs, save results"
 echo "    gobuster dns -do ${TARGET} -w ${WORDLIST} -r 8.8.8.8:53 --show-ips -o subdomains.txt -t 10"
 echo ""
 
-# Interactive demo
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 
 read -rp "Run a subdomain scan against ${TARGET}? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then

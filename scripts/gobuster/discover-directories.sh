@@ -100,8 +100,8 @@ info "10) Save results to file and show progress"
 echo "    gobuster dir -u ${TARGET} -w ${WORDLIST} -o dir-results.txt -v -t 10"
 echo ""
 
-# Interactive demo
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 
 read -rp "Run a basic directory scan against ${TARGET}? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then

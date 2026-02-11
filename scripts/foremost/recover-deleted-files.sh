@@ -89,7 +89,7 @@ info "10) Full recovery pipeline with audit"
 echo "    foremost -v -T -i disk.img -o recovered/ && ls -lR recovered/"
 echo ""
 
-# Non-interactive exit guard
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 # Interactive demo

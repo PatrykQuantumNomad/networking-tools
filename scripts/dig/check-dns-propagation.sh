@@ -108,7 +108,7 @@ echo "        printf '%-16s %s\n' \"\$dns\" \"\$(dig @\$dns ${TARGET} A +short)\
 echo "    done"
 echo ""
 
-# Interactive demo
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Check ${TARGET} A record across 3 resolvers now? [y/N] " answer

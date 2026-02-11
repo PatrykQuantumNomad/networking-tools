@@ -88,8 +88,8 @@ info "10) Crack WPA/WPA2 (mode 22000)"
 echo "    hashcat -m 22000 -a 0 handshake.hc22000 wordlist.txt"
 echo ""
 
-# Demo
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 read -rp "Run a quick benchmark? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     info "Running: hashcat -b -m 0 (MD5 benchmark)"

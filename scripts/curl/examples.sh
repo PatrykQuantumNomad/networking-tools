@@ -79,8 +79,8 @@ info "10) Ignore SSL certificate errors (testing only — never in production)"
 echo "    curl -k https://${TARGET#*://}"
 echo ""
 
-# Interactive demo
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 read -rp "Fetch response headers from ${TARGET} now? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     info "Running: curl -I -s ${TARGET} | head -10"

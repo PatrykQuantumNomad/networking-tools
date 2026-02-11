@@ -90,7 +90,7 @@ info "10) Comprehensive: all web vuln scripts + service detection"
 echo "    sudo nmap -sV -p80,443,8080,8443 --script \"http-vuln-* or http-enum or http-methods\" ${TARGET}"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 if [[ "$TARGET" == "localhost" || "$TARGET" == "127.0.0.1" ]]; then

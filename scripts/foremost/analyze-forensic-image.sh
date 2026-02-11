@@ -92,7 +92,7 @@ info "10) Full forensic workflow (image, hash, carve)"
 echo "    dd if=/dev/sdb of=evidence.dd bs=4k status=progress && sha256sum evidence.dd > evidence.sha256 && foremost -v -T -i evidence.dd -o case001/"
 echo ""
 
-# Non-interactive exit guard
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 # Interactive demo

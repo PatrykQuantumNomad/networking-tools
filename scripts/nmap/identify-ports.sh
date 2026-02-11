@@ -80,7 +80,7 @@ echo "    sudo nmap -sV -p- ${TARGET} -oG - | grep open"
 echo "    lsof -i -P -n | grep LISTEN"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 if [[ "$TARGET" == "localhost" || "$TARGET" == "127.0.0.1" ]]; then

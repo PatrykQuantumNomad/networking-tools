@@ -82,7 +82,8 @@ echo "    nikto -h ${TARGET} -evasion 1"
 echo "    # 1=Random URI, 2=Self-ref, 3=Premature end, 4=Long URL"
 echo ""
 
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 read -rp "Run a basic scan against ${TARGET} now? [y/N] " answer
 if [[ "$answer" =~ ^[Yy]$ ]]; then
     info "Running: nikto -h ${TARGET}"

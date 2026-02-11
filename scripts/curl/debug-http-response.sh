@@ -95,7 +95,7 @@ info "10) Save full debug trace to file for analysis"
 echo "    curl --trace curl-trace.log --trace-time ${TARGET} -o /dev/null"
 echo ""
 
-# Interactive demo
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 read -rp "Run timing breakdown on ${TARGET} now? [y/N] " answer

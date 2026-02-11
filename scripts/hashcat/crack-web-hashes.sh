@@ -101,7 +101,7 @@ info "10) Identify unknown hash type"
 echo "    hashcat --identify hash.txt"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 echo ""

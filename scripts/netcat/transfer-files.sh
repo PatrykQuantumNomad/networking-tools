@@ -139,7 +139,7 @@ echo "    # Sender (encrypt):"
 echo "    openssl enc -aes-256-cbc -pbkdf2 -pass pass:SECRET < file_to_send.txt | nc ${TARGET} 4444"
 echo ""
 
-# Interactive demo -- file transfer needs two terminals, offer port scan instead
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 echo ""

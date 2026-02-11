@@ -83,8 +83,8 @@ info "10) Rate limiting — limit requests per second"
 echo "    ffuf -u ${TARGET}/FUZZ -w wordlists/common.txt -rate 50 -t 10"
 echo ""
 
-# Interactive demo
-[[ -t 0 ]] || exit 0
+# Interactive demo (skip if non-interactive)
+[[ ! -t 0 ]] && exit 0
 
 WORDLIST="${PROJECT_ROOT}/wordlists/common.txt"
 if [[ ! -f "$WORDLIST" ]]; then

@@ -94,7 +94,7 @@ info "10) Full automated dump workflow"
 echo "    sqlmap -u ${URL} --batch --dbs --tables --dump --threads=5"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 echo ""

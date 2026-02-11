@@ -94,7 +94,7 @@ info "10) Complete export workflow — capture then extract"
 echo "    sudo tshark -i en0 -f 'port 80' -w traffic.pcap -c 500 && tshark -r traffic.pcap --export-objects http,extracted/"
 echo ""
 
-# Interactive demo (skip if non-interactive, e.g. running via make)
+# Interactive demo (skip if non-interactive)
 [[ ! -t 0 ]] && exit 0
 
 if [[ -n "$FILE" && -f "$FILE" ]]; then
