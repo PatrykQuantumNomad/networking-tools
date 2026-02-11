@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 ## Current Position
 
 Phase: 12 of 17 (Pre-Refactor Cleanup)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-11 -- Roadmap created for v1.2 Script Hardening (6 phases, 30 requirements)
+Plan: 1 of 1 in current phase (COMPLETE)
+Status: Phase 12 complete -- ready for Phase 13 planning
+Last activity: 2026-02-11 -- Completed 12-01 normalize guards plan
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 17%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 23
+- Total plans completed: 24
 - Average duration: 4min
-- Total execution time: 1.30 hours
+- Total execution time: 1.40 hours
 
 **By Phase:**
 
@@ -38,6 +38,7 @@ Progress: [░░░░░░░░░░] 0%
 | 09-brand-identity | 1 | 2min | 2min |
 | 10-navigation-cleanup | 1 | 2min | 2min |
 | 11-homepage-redesign | 1 | 2min | 2min |
+| 12-pre-refactor-cleanup | 1 | 6min | 6min |
 
 *Updated after each plan completion*
 
@@ -55,6 +56,9 @@ Recent decisions affecting v1.2:
 - Research: ERR trap prints stack trace to stderr (not silent log file)
 - Research: Unknown flags pass through to REMAINING_ARGS (permissive)
 - Research: Enhance existing info/warn/error in-place (not parallel log_* functions)
+- 12-01: Standard comment "# Interactive demo (skip if non-interactive)" for all guards
+- 12-01: Version guard before set -euo pipefail using only Bash 2.x+ syntax
+- 12-01: Three source-path entries in .shellcheckrc (SCRIPTDIR, SCRIPTDIR/.., SCRIPTDIR/../lib)
 
 ### Pending Todos
 
@@ -74,5 +78,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Roadmap created for v1.2 Script Hardening milestone
+Stopped at: Completed 12-01-PLAN.md (normalize guards) -- Phase 12 complete
 Resume file: None

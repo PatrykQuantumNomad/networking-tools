@@ -35,7 +35,7 @@ Archived to `.planning/milestones/v1.1-ROADMAP.md`
 
 **Milestone Goal:** Transform 66 educational bash scripts into production-grade dual-mode CLI tools backed by a modular library with strict mode, structured logging, argument parsing, and ShellCheck compliance.
 
-- [ ] **Phase 12: Pre-Refactor Cleanup** - Normalize inconsistencies before structural changes
+- [x] **Phase 12: Pre-Refactor Cleanup** - Normalize inconsistencies before structural changes (completed 2026-02-11)
 - [ ] **Phase 13: Library Infrastructure** - Split common.sh into modules with strict mode, logging, traps, and helpers
 - [ ] **Phase 14: Argument Parsing and Dual-Mode Pattern** - Build the arg parser and run_or_show mechanism, prove with pilot
 - [ ] **Phase 15: Examples Script Migration** - Upgrade all 17 examples.sh to dual-mode
@@ -55,7 +55,7 @@ Archived to `.planning/milestones/v1.1-ROADMAP.md`
 **Plans**: 1 plan
 
 Plans:
-- [ ] 12-01-PLAN.md — Normalize guards, add bash version check, create .shellcheckrc
+- [x] 12-01-PLAN.md — Normalize guards, add bash version check, create .shellcheckrc (completed 2026-02-11)
 
 ### Phase 13: Library Infrastructure
 **Goal**: Scripts source a modular library that provides strict mode, stack traces on error, log-level filtering, automatic temp cleanup, and retry logic -- all behind the existing common.sh entry point
@@ -141,7 +141,7 @@ Plans:
 | 9. Brand Identity | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 10. Navigation Cleanup | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 11. Homepage Redesign | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 12. Pre-Refactor Cleanup | v1.2 | 0/1 | Not started | - |
+| 12. Pre-Refactor Cleanup | v1.2 | 1/1 | Complete | 2026-02-11 |
 | 13. Library Infrastructure | v1.2 | 0/TBD | Not started | - |
 | 14. Argument Parsing + Dual-Mode | v1.2 | 0/TBD | Not started | - |
 | 15. Examples Script Migration | v1.2 | 0/TBD | Not started | - |
