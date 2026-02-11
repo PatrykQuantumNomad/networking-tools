@@ -53,10 +53,10 @@ Plans:
   1. Site header displays a custom SVG logo that reflects a technical/hacker aesthetic (not generic placeholder)
   2. Logo renders correctly at nav bar height (32-40px) in both dark and light modes without becoming invisible
   3. Browser tab shows a project-specific favicon that matches the logo identity (not the default Starlight rocket)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 09-01: TBD
+- [ ] 09-01-PLAN.md -- Terminal-prompt SVG logo, favicon, and Astro config registration
 
 ### Phase 10: Navigation Cleanup
 **Goal**: Sidebar navigation shows only meaningful page links without redundant section headers
