@@ -46,6 +46,7 @@ Progress: [████████░░] 80%
 
 *Updated after each plan completion*
 | Phase 16 P05 | 6min | 2 tasks | 6 files |
+| Phase 16 P04 | 8min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,8 @@ Recent decisions affecting v1.2:
 - [Phase 16]: 16-03: ffuf FUZZ keyword is tool marker not placeholder -- all 10 examples convertible
 - [Phase 16]: 16-05: sqlmap dvwa-specific examples (-D dvwa) kept as static info+echo
 - [Phase 16]: 16-05: netcat setup-listener/transfer-files are structural-only (0 run_or_show) -- all variant-specific
+- [Phase 16]: 16-04: Multi-positional args (TARGET+WORDLIST) preserved through parse_common_args + set -- in gobuster scripts
+- [Phase 16]: 16-04: HAS_MTR conditional wraps run_or_show (true branch) with info+echo fallback (false branch) in compare-routes.sh
 
 ### Pending Todos
 
