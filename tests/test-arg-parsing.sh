@@ -2,8 +2,9 @@
 # test-arg-parsing.sh -- Verify argument parsing and dual-mode pattern across all scripts
 # Usage: bash tests/test-arg-parsing.sh
 #
-# Validates Phase 14 success criteria (nmap pilot) and Phase 15 success criteria
-# (all 17 examples.sh scripts). Exits 0 if all pass, 1 if any fail.
+# Validates Phase 14 success criteria (nmap pilot), Phase 15 success criteria
+# (all 17 examples.sh scripts), and Phase 16 success criteria (all 46 use-case
+# scripts). Exits 0 if all pass, 1 if any fail.
 
 set +eEu  # Disable strict mode for the test harness itself
 
@@ -433,6 +434,123 @@ if command -v make &>/dev/null; then
 else
     echo "  SKIP: make not available"
 fi
+echo ""
+
+# ============================================================================
+# Use-case scripts: define all 46 script paths
+# ============================================================================
+
+USE_CASE_SCRIPTS=(
+    scripts/nmap/discover-live-hosts.sh
+    scripts/nmap/scan-web-vulnerabilities.sh
+    scripts/nmap/identify-ports.sh
+    scripts/hping3/test-firewall-rules.sh
+    scripts/hping3/detect-firewall.sh
+    scripts/dig/query-dns-records.sh
+    scripts/dig/attempt-zone-transfer.sh
+    scripts/dig/check-dns-propagation.sh
+    scripts/curl/check-ssl-certificate.sh
+    scripts/curl/debug-http-response.sh
+    scripts/curl/test-http-endpoints.sh
+    scripts/nikto/scan-specific-vulnerabilities.sh
+    scripts/nikto/scan-multiple-hosts.sh
+    scripts/nikto/scan-with-auth.sh
+    scripts/skipfish/scan-authenticated-app.sh
+    scripts/skipfish/quick-scan-web-app.sh
+    scripts/ffuf/fuzz-parameters.sh
+    scripts/gobuster/discover-directories.sh
+    scripts/gobuster/enumerate-subdomains.sh
+    scripts/traceroute/trace-network-path.sh
+    scripts/traceroute/diagnose-latency.sh
+    scripts/traceroute/compare-routes.sh
+    scripts/sqlmap/dump-database.sh
+    scripts/sqlmap/test-all-parameters.sh
+    scripts/sqlmap/bypass-waf.sh
+    scripts/netcat/scan-ports.sh
+    scripts/netcat/setup-listener.sh
+    scripts/netcat/transfer-files.sh
+    scripts/foremost/analyze-forensic-image.sh
+    scripts/foremost/carve-specific-filetypes.sh
+    scripts/foremost/recover-deleted-files.sh
+    scripts/tshark/capture-http-credentials.sh
+    scripts/tshark/analyze-dns-queries.sh
+    scripts/tshark/extract-files-from-capture.sh
+    scripts/metasploit/generate-reverse-shell.sh
+    scripts/metasploit/scan-network-services.sh
+    scripts/metasploit/setup-listener.sh
+    scripts/hashcat/crack-ntlm-hashes.sh
+    scripts/hashcat/benchmark-gpu.sh
+    scripts/hashcat/crack-web-hashes.sh
+    scripts/john/crack-linux-passwords.sh
+    scripts/john/crack-archive-passwords.sh
+    scripts/john/identify-hash-type.sh
+    scripts/aircrack-ng/capture-handshake.sh
+    scripts/aircrack-ng/crack-wpa-handshake.sh
+    scripts/aircrack-ng/analyze-wireless-networks.sh
+)
+
+# ============================================================================
+# Use-case scripts: --help exits 0 for all 46
+# ============================================================================
+echo "=== Use-case scripts: --help exits 0 ==="
+
+for script_rel in "${USE_CASE_SCRIPTS[@]}"; do
+    script="${PROJECT_ROOT}/${script_rel}"
+    label=$(echo "$script_rel" | sed 's|scripts/||')
+
+    help_output=$(bash "$script" --help 2>&1)
+    help_exit=$?
+    if [[ $help_exit -eq 0 ]]; then
+        check_pass "${label}: --help exits 0"
+    else
+        check_fail "${label}: --help exits $help_exit (expected 0)"
+    fi
+
+    if echo "$help_output" | grep -q "Usage:"; then
+        check_pass "${label}: --help contains 'Usage:'"
+    else
+        check_fail "${label}: --help does not contain 'Usage:'"
+    fi
+done
+echo ""
+
+# ============================================================================
+# Use-case scripts: -x rejects non-interactive stdin for all 46
+# ============================================================================
+echo "=== Use-case scripts: -x rejects non-interactive stdin ==="
+
+for script_rel in "${USE_CASE_SCRIPTS[@]}"; do
+    script="${PROJECT_ROOT}/${script_rel}"
+    label=$(echo "$script_rel" | sed 's|scripts/||')
+
+    # All use-case scripts have sensible defaults (no require_target), so no
+    # extra target arg needed. In -x mode they will hit confirm_execute (rejects
+    # non-interactive) or require_cmd (tool not installed) -- both exit non-zero.
+    exec_output=$(echo "" | bash "$script" -x 2>&1)
+    exec_exit=$?
+    if [[ $exec_exit -ne 0 ]]; then
+        check_pass "${label}: -x rejects non-interactive ($exec_exit)"
+    else
+        check_fail "${label}: -x does not reject non-interactive"
+    fi
+done
+echo ""
+
+# ============================================================================
+# Use-case scripts: parse_common_args present in all 46
+# ============================================================================
+echo "=== Use-case scripts: parse_common_args present ==="
+
+for script_rel in "${USE_CASE_SCRIPTS[@]}"; do
+    script="${PROJECT_ROOT}/${script_rel}"
+    label=$(echo "$script_rel" | sed 's|scripts/||')
+
+    if grep -q 'parse_common_args' "$script"; then
+        check_pass "${label}: contains parse_common_args"
+    else
+        check_fail "${label}: missing parse_common_args"
+    fi
+done
 echo ""
 
 # ============================================================================

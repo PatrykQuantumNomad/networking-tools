@@ -22,6 +22,7 @@ set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 require_cmd john "brew install john"
 
 safety_banner
+confirm_execute
 
 HASH="${1:-}"
 
