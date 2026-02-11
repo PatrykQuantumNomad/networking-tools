@@ -52,10 +52,10 @@ Archived to `.planning/milestones/v1.1-ROADMAP.md`
   1. Every script with an interactive guard uses identical `[[ ! -t 0 ]] && exit 0` syntax (zero variants)
   2. Running any script with Bash 3.x produces a clear version error instead of cryptic failures
   3. ShellCheck resolves `source common.sh` paths without manual overrides when run from any directory
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 12-01-PLAN.md — Normalize guards, add bash version check, create .shellcheckrc
 
 ### Phase 13: Library Infrastructure
 **Goal**: Scripts source a modular library that provides strict mode, stack traces on error, log-level filtering, automatic temp cleanup, and retry logic -- all behind the existing common.sh entry point
@@ -141,7 +141,7 @@ Plans:
 | 9. Brand Identity | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 10. Navigation Cleanup | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 11. Homepage Redesign | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 12. Pre-Refactor Cleanup | v1.2 | 0/TBD | Not started | - |
+| 12. Pre-Refactor Cleanup | v1.2 | 0/1 | Not started | - |
 | 13. Library Infrastructure | v1.2 | 0/TBD | Not started | - |
 | 14. Argument Parsing + Dual-Mode | v1.2 | 0/TBD | Not started | - |
 | 15. Examples Script Migration | v1.2 | 0/TBD | Not started | - |
