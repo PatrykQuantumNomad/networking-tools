@@ -89,42 +89,42 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| NORM-01 | — | Pending |
-| NORM-02 | — | Pending |
-| NORM-03 | — | Pending |
-| STRICT-01 | — | Pending |
-| STRICT-02 | — | Pending |
-| STRICT-03 | — | Pending |
-| STRICT-04 | — | Pending |
-| STRICT-05 | — | Pending |
-| LOG-01 | — | Pending |
-| LOG-02 | — | Pending |
-| LOG-03 | — | Pending |
-| LOG-04 | — | Pending |
-| LOG-05 | — | Pending |
-| ARGS-01 | — | Pending |
-| ARGS-02 | — | Pending |
-| ARGS-03 | — | Pending |
-| ARGS-04 | — | Pending |
-| DUAL-01 | — | Pending |
-| DUAL-02 | — | Pending |
-| DUAL-03 | — | Pending |
-| DUAL-04 | — | Pending |
-| DUAL-05 | — | Pending |
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| LINT-01 | — | Pending |
-| LINT-02 | — | Pending |
-| LINT-03 | — | Pending |
-| LINT-04 | — | Pending |
+| NORM-01 | Phase 12 | Pending |
+| NORM-02 | Phase 12 | Pending |
+| NORM-03 | Phase 12 | Pending |
+| STRICT-01 | Phase 13 | Pending |
+| STRICT-02 | Phase 13 | Pending |
+| STRICT-03 | Phase 13 | Pending |
+| STRICT-04 | Phase 13 | Pending |
+| STRICT-05 | Phase 13 | Pending |
+| LOG-01 | Phase 13 | Pending |
+| LOG-02 | Phase 13 | Pending |
+| LOG-03 | Phase 13 | Pending |
+| LOG-04 | Phase 13 | Pending |
+| LOG-05 | Phase 13 | Pending |
+| ARGS-01 | Phase 14 | Pending |
+| ARGS-02 | Phase 14 | Pending |
+| ARGS-03 | Phase 14 | Pending |
+| ARGS-04 | Phase 14 | Pending |
+| DUAL-01 | Phase 14 | Pending |
+| DUAL-02 | Phase 15 | Pending |
+| DUAL-03 | Phase 16 | Pending |
+| DUAL-04 | Phase 15 | Pending |
+| DUAL-05 | Phase 15 | Pending |
+| INFRA-01 | Phase 13 | Pending |
+| INFRA-02 | Phase 13 | Pending |
+| INFRA-03 | Phase 13 | Pending |
+| INFRA-04 | Phase 13 | Pending |
+| LINT-01 | Phase 17 | Pending |
+| LINT-02 | Phase 17 | Pending |
+| LINT-03 | Phase 17 | Pending |
+| LINT-04 | Phase 17 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 30 total
-- Mapped to phases: 0
-- Unmapped: 30 (pending roadmap creation)
+- Mapped to phases: 30
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-11*
-*Last updated: 2026-02-11 after initial definition*
+*Last updated: 2026-02-11 after roadmap creation*
