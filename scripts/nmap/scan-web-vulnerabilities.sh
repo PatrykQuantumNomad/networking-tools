@@ -16,12 +16,14 @@ show_help() {
     echo "  $(basename "$0") --help       # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd nmap "brew install nmap"
 
 TARGET="${1:-localhost}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Web Vulnerability Scanning with NSE ==="
@@ -41,70 +43,62 @@ echo "   You can also target specific scripts by name."
 echo ""
 
 # 1. All vulnerability scripts
-info "1) Run all vulnerability scripts on web ports"
-echo "   nmap -p80,443 --script vuln ${TARGET}"
-echo ""
+run_or_show "1) Run all vulnerability scripts on web ports" \
+    nmap -p80,443 --script vuln "$TARGET"
 
 # 2. Directory enumeration
-info "2) Enumerate web directories and files"
-echo "   nmap -p80,8080 --script http-enum ${TARGET}"
-echo ""
+run_or_show "2) Enumerate web directories and files" \
+    nmap -p80,8080 --script http-enum "$TARGET"
 
 # 3. HTTP methods
-info "3) Check allowed HTTP methods"
-echo "   nmap -p80 --script http-methods ${TARGET}"
-echo ""
+run_or_show "3) Check allowed HTTP methods" \
+    nmap -p80 --script http-methods "$TARGET"
 
 # 4. WAF detection
-info "4) Detect web app firewalls"
-echo "   nmap -p80 --script http-waf-detect ${TARGET}"
-echo ""
+run_or_show "4) Detect web app firewalls" \
+    nmap -p80 --script http-waf-detect "$TARGET"
 
 # 5. Shellshock
-info "5) Check for Shellshock vulnerability"
-echo "   nmap -p80 --script http-shellshock ${TARGET}"
-echo ""
+run_or_show "5) Check for Shellshock vulnerability" \
+    nmap -p80 --script http-shellshock "$TARGET"
 
 # 6. SQL injection
-info "6) Find SQL injection points"
-echo "   nmap -p80 --script http-sql-injection ${TARGET}"
-echo ""
+run_or_show "6) Find SQL injection points" \
+    nmap -p80 --script http-sql-injection "$TARGET"
 
 # 7. Heartbleed
-info "7) Detect heartbleed on HTTPS"
-echo "   nmap -p443 --script ssl-heartbleed ${TARGET}"
-echo ""
+run_or_show "7) Detect heartbleed on HTTPS" \
+    nmap -p443 --script ssl-heartbleed "$TARGET"
 
 # 8. Security headers
-info "8) Full HTTP security header check"
-echo "   nmap -p80 --script http-security-headers ${TARGET}"
-echo ""
+run_or_show "8) Full HTTP security header check" \
+    nmap -p80 --script http-security-headers "$TARGET"
 
 # 9. Server info
-info "9) Enumerate web server info + headers"
-echo "   nmap -sV -p80,443,8080 --script http-headers,http-title ${TARGET}"
-echo ""
+run_or_show "9) Enumerate web server info + headers" \
+    nmap -sV -p80,443,8080 --script http-headers,http-title "$TARGET"
 
 # 10. Comprehensive scan
-info "10) Comprehensive: all web vuln scripts + service detection"
-echo "    sudo nmap -sV -p80,443,8080,8443 --script \"http-vuln-* or http-enum or http-methods\" ${TARGET}"
-echo ""
+run_or_show "10) Comprehensive: all web vuln scripts + service detection" \
+    sudo nmap -sV -p80,443,8080,8443 --script "http-vuln-* or http-enum or http-methods" "$TARGET"
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-if [[ "$TARGET" == "localhost" || "$TARGET" == "127.0.0.1" ]]; then
-    read -rp "Scan lab ports (8080,3000,8888,8180) with http-enum? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: nmap -p8080,3000,8888,8180 --script http-enum ${TARGET}"
-        echo ""
-        nmap -p8080,3000,8888,8180 --script http-enum "$TARGET"
-    fi
-else
-    read -rp "Scan ${TARGET} port 80 with http-enum? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: nmap -p80 --script http-enum ${TARGET}"
-        echo ""
-        nmap -p80 --script http-enum "$TARGET"
+    if [[ "$TARGET" == "localhost" || "$TARGET" == "127.0.0.1" ]]; then
+        read -rp "Scan lab ports (8080,3000,8888,8180) with http-enum? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: nmap -p8080,3000,8888,8180 --script http-enum ${TARGET}"
+            echo ""
+            nmap -p8080,3000,8888,8180 --script http-enum "$TARGET"
+        fi
+    else
+        read -rp "Scan ${TARGET} port 80 with http-enum? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: nmap -p80 --script http-enum ${TARGET}"
+            echo ""
+            nmap -p80 --script http-enum "$TARGET"
+        fi
     fi
 fi

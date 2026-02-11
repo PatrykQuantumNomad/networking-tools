@@ -16,9 +16,12 @@ show_help() {
     echo "  $(basename "$0") --help       # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 TARGET="${1:-localhost}"
+
+confirm_execute "${1:-}"
 
 info "=== Port Identification ==="
 info "Target: ${TARGET}"
@@ -55,24 +58,20 @@ echo "   netstat -an -p tcp | grep LISTEN"
 echo ""
 
 # 6. Nmap service version detection
-info "6) Nmap service probing (remote — works on any target)"
-echo "   nmap -sV ${TARGET}"
-echo ""
+run_or_show "6) Nmap service probing (remote — works on any target)" \
+    nmap -sV "$TARGET"
 
 # 7. Nmap version detection on specific ports
-info "7) Probe specific ports only"
-echo "   nmap -sV -p 8080,3030,8888 ${TARGET}"
-echo ""
+run_or_show "7) Probe specific ports only" \
+    nmap -sV -p 8080,3030,8888 "$TARGET"
 
 # 8. Aggressive nmap version detection
-info "8) Maximum version detection effort (slow)"
-echo "   nmap -sV --version-all ${TARGET}"
-echo ""
+run_or_show "8) Maximum version detection effort (slow)" \
+    nmap -sV --version-all "$TARGET"
 
 # 9. Nmap with default scripts for more detail
-info "9) Service detection + default scripts"
-echo "   nmap -sV -sC ${TARGET}"
-echo ""
+run_or_show "9) Service detection + default scripts" \
+    nmap -sV -sC "$TARGET"
 
 # 10. Combined: nmap scan then local lookup
 info "10) Full workflow: scan then identify"
@@ -81,21 +80,23 @@ echo "    lsof -i -P -n | grep LISTEN"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-if [[ "$TARGET" == "localhost" || "$TARGET" == "127.0.0.1" ]]; then
-    read -rp "Show all listening ports on this machine now? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: lsof -iTCP -P -n | grep LISTEN"
-        echo ""
-        printf "%-20s %-8s %-10s %s\n" "COMMAND" "PID" "USER" "ADDRESS"
-        printf "%-20s %-8s %-10s %s\n" "-------" "---" "----" "-------"
-        lsof -iTCP -P -n 2>/dev/null | grep LISTEN | awk '{printf "%-20s %-8s %-10s %s\n", $1, $2, $3, $9}'
-    fi
-else
-    read -rp "Run service detection on ${TARGET} now? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: nmap -sV --top-ports 100 ${TARGET}"
-        nmap -sV --top-ports 100 "$TARGET"
+    if [[ "$TARGET" == "localhost" || "$TARGET" == "127.0.0.1" ]]; then
+        read -rp "Show all listening ports on this machine now? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: lsof -iTCP -P -n | grep LISTEN"
+            echo ""
+            printf "%-20s %-8s %-10s %s\n" "COMMAND" "PID" "USER" "ADDRESS"
+            printf "%-20s %-8s %-10s %s\n" "-------" "---" "----" "-------"
+            lsof -iTCP -P -n 2>/dev/null | grep LISTEN | awk '{printf "%-20s %-8s %-10s %s\n", $1, $2, $3, $9}'
+        fi
+    else
+        read -rp "Run service detection on ${TARGET} now? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: nmap -sV --top-ports 100 ${TARGET}"
+            nmap -sV --top-ports 100 "$TARGET"
+        fi
     fi
 fi

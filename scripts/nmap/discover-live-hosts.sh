@@ -18,12 +18,14 @@ show_help() {
     echo "  $(basename "$0") --help          # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd nmap "brew install nmap"
 
 TARGET="${1:-localhost}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Host Discovery ==="
@@ -44,61 +46,53 @@ echo "   Combine methods for the most complete results."
 echo ""
 
 # 1. Basic ping sweep
-info "1) Basic ping sweep of a subnet"
-echo "   nmap -sn ${TARGET}/24"
-echo ""
+run_or_show "1) Basic ping sweep of a subnet" \
+    nmap -sn "$TARGET/24"
 
 # 2. ARP discovery
-info "2) ARP discovery on local network — fastest method"
-echo "   sudo nmap -sn -PR ${TARGET}/24"
-echo ""
+run_or_show "2) ARP discovery on local network — fastest method" \
+    sudo nmap -sn -PR "$TARGET/24"
 
 # 3. TCP SYN discovery
-info "3) TCP SYN discovery on common ports"
-echo "   sudo nmap -sn -PS22,80,443 ${TARGET}/24"
-echo ""
+run_or_show "3) TCP SYN discovery on common ports" \
+    sudo nmap -sn -PS22,80,443 "$TARGET/24"
 
 # 4. TCP ACK discovery
-info "4) TCP ACK discovery — bypasses stateless firewalls"
-echo "   sudo nmap -sn -PA80,443 ${TARGET}/24"
-echo ""
+run_or_show "4) TCP ACK discovery — bypasses stateless firewalls" \
+    sudo nmap -sn -PA80,443 "$TARGET/24"
 
 # 5. UDP discovery
-info "5) UDP discovery"
-echo "   sudo nmap -sn -PU53,161 ${TARGET}/24"
-echo ""
+run_or_show "5) UDP discovery" \
+    sudo nmap -sn -PU53,161 "$TARGET/24"
 
 # 6. ICMP combined probes
-info "6) ICMP echo + timestamp + netmask probes combined"
-echo "   sudo nmap -sn -PE -PP -PM ${TARGET}/24"
-echo ""
+run_or_show "6) ICMP echo + timestamp + netmask probes combined" \
+    sudo nmap -sn -PE -PP -PM "$TARGET/24"
 
 # 7. List scan
-info "7) List scan — DNS resolution only, no packets sent"
-echo "   nmap -sL ${TARGET}/24"
-echo ""
+run_or_show "7) List scan — DNS resolution only, no packets sent" \
+    nmap -sL "$TARGET/24"
 
 # 8. No-ping fast discovery with OS hints
-info "8) No-ping fast discovery with OS hints"
-echo "   sudo nmap -sn -PE -PP -PS21,22,25,80,443,3389 ${TARGET}/24"
-echo ""
+run_or_show "8) No-ping fast discovery with OS hints" \
+    sudo nmap -sn -PE -PP -PS21,22,25,80,443,3389 "$TARGET/24"
 
 # 9. Output to greppable format
-info "9) Output results to greppable format"
-echo "   sudo nmap -sn ${TARGET}/24 -oG live-hosts.txt"
-echo ""
+run_or_show "9) Output results to greppable format" \
+    sudo nmap -sn "$TARGET/24" -oG live-hosts.txt
 
 # 10. Aggressive combined discovery
-info "10) Aggressive discovery combining all methods"
-echo "    sudo nmap -sn -PE -PP -PM -PS21,22,25,80,443,8080 -PA80,443 -PU53 ${TARGET}/24"
-echo ""
+run_or_show "10) Aggressive discovery combining all methods" \
+    sudo nmap -sn -PE -PP -PM -PS21,22,25,80,443,8080 -PA80,443 -PU53 "$TARGET/24"
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Run a ping sweep on ${TARGET} now? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: nmap -sn ${TARGET}"
-    echo ""
-    nmap -sn "$TARGET"
+    read -rp "Run a ping sweep on ${TARGET} now? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: nmap -sn ${TARGET}"
+        echo ""
+        nmap -sn "$TARGET"
+    fi
 fi
