@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 Phase: 11 of 11 (all complete)
 Plan: N/A
 Status: Ready for next milestone
-Last activity: 2026-02-11 — v1.1 milestone complete
+Last activity: 2026-02-11 — Completed quick task 001: Remove light theme and theme selector, enforce dark-mode only
 
 Progress: [██████████] 100% (v1.0 + v1.1 shipped)
 
@@ -56,6 +56,12 @@ None.
 ### Blockers/Concerns
 
 None.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 001 | Remove light theme and theme selector, enforce dark-mode only | 2026-02-11 | 1d9f9f0 | [001-remove-light-theme-and-theme-selector-en](./quick/001-remove-light-theme-and-theme-selector-en/) |
 
 ## Session Continuity
 
