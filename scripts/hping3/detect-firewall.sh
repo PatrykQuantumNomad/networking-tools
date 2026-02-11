@@ -16,12 +16,14 @@ show_help() {
     echo "  $(basename "$0") --help       # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd hping3 "brew install draftbrew/tap/hping"
 
 TARGET="${1:-localhost}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Firewall Detection with hping3 ==="
@@ -46,49 +48,40 @@ echo "     FIN  -> RST (always)"
 echo ""
 
 # 1. SYN probe — baseline response
-info "1) SYN probe — establish baseline response"
-echo "   sudo hping3 -S -p 80 -c 1 ${TARGET}"
-echo ""
+run_or_show "1) SYN probe — establish baseline response" \
+    sudo hping3 -S -p 80 -c 1 "$TARGET"
 
 # 2. ACK probe — detect stateful filtering
-info "2) ACK probe — detect stateful filtering"
-echo "   sudo hping3 -A -p 80 -c 1 ${TARGET}"
-echo ""
+run_or_show "2) ACK probe — detect stateful filtering" \
+    sudo hping3 -A -p 80 -c 1 "$TARGET"
 
 # 3. FIN probe — detect packet inspection
-info "3) FIN probe — detect deep packet inspection"
-echo "   sudo hping3 -F -p 80 -c 1 ${TARGET}"
-echo ""
+run_or_show "3) FIN probe — detect deep packet inspection" \
+    sudo hping3 -F -p 80 -c 1 "$TARGET"
 
 # 4. Test on known open port
-info "4) Test on known open port"
-echo "   sudo hping3 -S -p 80 -c 1 ${TARGET}"
-echo ""
+run_or_show "4) Test on known open port" \
+    sudo hping3 -S -p 80 -c 1 "$TARGET"
 
 # 5. Test on known closed port
-info "5) Test on known closed port"
-echo "   sudo hping3 -S -p 61234 -c 1 ${TARGET}"
-echo ""
+run_or_show "5) Test on known closed port" \
+    sudo hping3 -S -p 61234 -c 1 "$TARGET"
 
 # 6. Test on likely filtered port
-info "6) Test on likely filtered port (telnet)"
-echo "   sudo hping3 -S -p 23 -c 1 ${TARGET}"
-echo ""
+run_or_show "6) Test on likely filtered port (telnet)" \
+    sudo hping3 -S -p 23 -c 1 "$TARGET"
 
 # 7. UDP probe — test UDP filtering
-info "7) UDP probe — test UDP filtering"
-echo "   sudo hping3 --udp -p 53 -c 1 ${TARGET}"
-echo ""
+run_or_show "7) UDP probe — test UDP filtering" \
+    sudo hping3 --udp -p 53 -c 1 "$TARGET"
 
 # 8. ICMP probe — test ICMP filtering
-info "8) ICMP probe — test ICMP filtering"
-echo "   sudo hping3 --icmp -c 1 ${TARGET}"
-echo ""
+run_or_show "8) ICMP probe — test ICMP filtering" \
+    sudo hping3 --icmp -c 1 "$TARGET"
 
 # 9. Traceroute to find firewall hop
-info "9) Traceroute to find the firewall hop"
-echo "   sudo hping3 -S -p 80 -T ${TARGET}"
-echo ""
+run_or_show "9) Traceroute to find the firewall hop" \
+    sudo hping3 -S -p 80 -T "$TARGET"
 
 # 10. Full firewall detection workflow
 info "10) Full firewall detection workflow (SYN + ACK + FIN on port 80)"
@@ -96,27 +89,29 @@ echo "    sudo hping3 -S -p 80 -c 1 ${TARGET}; sudo hping3 -A -p 80 -c 1 ${TARGE
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Run a 3-probe firewall detection test on ${TARGET}? (requires sudo) [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running SYN probe on port 80..."
-    echo "   sudo hping3 -S -p 80 -c 1 ${TARGET}"
-    sudo hping3 -S -p 80 -c 1 "$TARGET" 2>&1 || true
-    echo ""
+    read -rp "Run a 3-probe firewall detection test on ${TARGET}? (requires sudo) [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running SYN probe on port 80..."
+        echo "   sudo hping3 -S -p 80 -c 1 ${TARGET}"
+        sudo hping3 -S -p 80 -c 1 "$TARGET" 2>&1 || true
+        echo ""
 
-    info "Running ACK probe on port 80..."
-    echo "   sudo hping3 -A -p 80 -c 1 ${TARGET}"
-    sudo hping3 -A -p 80 -c 1 "$TARGET" 2>&1 || true
-    echo ""
+        info "Running ACK probe on port 80..."
+        echo "   sudo hping3 -A -p 80 -c 1 ${TARGET}"
+        sudo hping3 -A -p 80 -c 1 "$TARGET" 2>&1 || true
+        echo ""
 
-    info "Running FIN probe on port 80..."
-    echo "   sudo hping3 -F -p 80 -c 1 ${TARGET}"
-    sudo hping3 -F -p 80 -c 1 "$TARGET" 2>&1 || true
-    echo ""
+        info "Running FIN probe on port 80..."
+        echo "   sudo hping3 -F -p 80 -c 1 ${TARGET}"
+        sudo hping3 -F -p 80 -c 1 "$TARGET" 2>&1 || true
+        echo ""
 
-    info "Interpretation:"
-    echo "   If ACK got RST but FIN got no reply -> Stateful firewall"
-    echo "   If both ACK and FIN got RST        -> No firewall or stateless"
-    echo "   If both got no reply               -> Strict filtering (all dropped)"
+        info "Interpretation:"
+        echo "   If ACK got RST but FIN got no reply -> Stateful firewall"
+        echo "   If both ACK and FIN got RST        -> No firewall or stateless"
+        echo "   If both got no reply               -> Strict filtering (all dropped)"
+    fi
 fi

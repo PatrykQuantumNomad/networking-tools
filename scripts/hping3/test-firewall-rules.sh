@@ -16,12 +16,14 @@ show_help() {
     echo "  $(basename "$0") --help       # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd hping3 "brew install draftbrew/tap/hping"
 
 TARGET="${1:-localhost}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Firewall Rule Testing with hping3 ==="
@@ -43,49 +45,40 @@ echo "     ICMP unreachable = Administratively filtered"
 echo ""
 
 # 1. SYN scan — test if port is open
-info "1) SYN scan — test if port is open"
-echo "   sudo hping3 -S -p 80 -c 3 ${TARGET}"
-echo ""
+run_or_show "1) SYN scan — test if port is open" \
+    sudo hping3 -S -p 80 -c 3 "$TARGET"
 
 # 2. ACK scan — detect stateful firewall
-info "2) ACK scan — detect stateful firewall"
-echo "   sudo hping3 -A -p 80 -c 3 ${TARGET}"
-echo ""
+run_or_show "2) ACK scan — detect stateful firewall" \
+    sudo hping3 -A -p 80 -c 3 "$TARGET"
 
 # 3. FIN scan — bypass simple packet filters
-info "3) FIN scan — bypass simple packet filters"
-echo "   sudo hping3 -F -p 80 -c 3 ${TARGET}"
-echo ""
+run_or_show "3) FIN scan — bypass simple packet filters" \
+    sudo hping3 -F -p 80 -c 3 "$TARGET"
 
 # 4. Xmas scan — FIN+PUSH+URG flags
-info "4) Xmas scan — FIN+PUSH+URG flags"
-echo "   sudo hping3 -F -P -U -p 80 -c 3 ${TARGET}"
-echo ""
+run_or_show "4) Xmas scan — FIN+PUSH+URG flags" \
+    sudo hping3 -F -P -U -p 80 -c 3 "$TARGET"
 
 # 5. NULL scan — no flags set
-info "5) NULL scan — no flags set"
-echo "   sudo hping3 -p 80 -c 3 ${TARGET}"
-echo ""
+run_or_show "5) NULL scan — no flags set" \
+    sudo hping3 -p 80 -c 3 "$TARGET"
 
 # 6. Scan port range incrementally
-info "6) Scan port range incrementally (ports 1-100)"
-echo "   sudo hping3 -S -p ++1 -c 100 ${TARGET}"
-echo ""
+run_or_show "6) Scan port range incrementally (ports 1-100)" \
+    sudo hping3 -S -p ++1 -c 100 "$TARGET"
 
 # 7. SYN scan with specific source port (DNS spoofing)
-info "7) SYN scan with specific source port (appear as DNS traffic)"
-echo "   sudo hping3 -S -p 80 -s 53 -c 3 ${TARGET}"
-echo ""
+run_or_show "7) SYN scan with specific source port (appear as DNS traffic)" \
+    sudo hping3 -S -p 80 -s 53 -c 3 "$TARGET"
 
 # 8. Set custom TTL to test routing
-info "8) Set custom TTL to test routing"
-echo "   sudo hping3 -S -p 80 -t 10 -c 3 ${TARGET}"
-echo ""
+run_or_show "8) Set custom TTL to test routing" \
+    sudo hping3 -S -p 80 -t 10 -c 3 "$TARGET"
 
 # 9. SYN scan with decoy source IP
-info "9) SYN scan with decoy source IP"
-echo "   sudo hping3 -S -p 80 -a 192.168.1.100 -c 3 ${TARGET}"
-echo ""
+run_or_show "9) SYN scan with decoy source IP" \
+    sudo hping3 -S -p 80 -a 192.168.1.100 -c 3 "$TARGET"
 
 # 10. Compare SYN vs ACK responses to map firewall
 info "10) Compare SYN vs ACK responses to map firewall"
@@ -93,16 +86,18 @@ echo "    sudo hping3 -S -p 80 -c 1 ${TARGET} && sudo hping3 -A -p 80 -c 1 ${TAR
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Run a SYN probe on port 80 of ${TARGET}? (requires sudo) [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: sudo hping3 -S -p 80 -c 1 ${TARGET}"
-    echo ""
-    sudo hping3 -S -p 80 -c 1 "$TARGET"
-    echo ""
-    info "Response interpretation:"
-    echo "   flags=SA  -> Port 80 is OPEN (SYN-ACK received)"
-    echo "   flags=RA  -> Port 80 is CLOSED (RST-ACK received)"
-    echo "   No reply  -> Port 80 is FILTERED (firewall dropping packets)"
+    read -rp "Run a SYN probe on port 80 of ${TARGET}? (requires sudo) [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: sudo hping3 -S -p 80 -c 1 ${TARGET}"
+        echo ""
+        sudo hping3 -S -p 80 -c 1 "$TARGET"
+        echo ""
+        info "Response interpretation:"
+        echo "   flags=SA  -> Port 80 is OPEN (SYN-ACK received)"
+        echo "   flags=RA  -> Port 80 is CLOSED (RST-ACK received)"
+        echo "   No reply  -> Port 80 is FILTERED (firewall dropping packets)"
+    fi
 fi
