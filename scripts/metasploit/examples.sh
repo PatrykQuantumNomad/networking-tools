@@ -17,9 +17,11 @@ Examples:
 EOF
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd msfconsole "https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html"
+confirm_execute
 safety_banner
 
 info "=== Metasploit Framework Examples ==="
@@ -93,7 +95,8 @@ echo "    msfconsole -r my_script.rc"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-
-warn "Metasploit is interactive — run 'msfconsole' to start."
-warn "Practice against the lab targets (make lab-up) — NEVER against unauthorized systems."
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    warn "Metasploit is interactive — run 'msfconsole' to start."
+    warn "Practice against the lab targets (make lab-up) — NEVER against unauthorized systems."
+fi

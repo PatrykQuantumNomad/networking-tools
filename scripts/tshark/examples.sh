@@ -17,9 +17,11 @@ Examples:
 EOF
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd tshark "brew install wireshark"
+confirm_execute
 safety_banner
 
 info "=== TShark (Wireshark CLI) Examples ==="
@@ -76,9 +78,11 @@ echo "    tshark -r capture.pcap -Y 'ip.addr == 192.168.1.1'"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-read -rp "List available capture interfaces now? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: tshark -D"
-    tshark -D 2>/dev/null || warn "May need sudo: sudo tshark -D"
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    read -rp "List available capture interfaces now? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: tshark -D"
+        tshark -D 2>/dev/null || warn "May need sudo: sudo tshark -D"
+    fi
 fi
