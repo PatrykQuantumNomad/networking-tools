@@ -65,10 +65,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Sidebar groups for Tools, Guides, and Diagnostics no longer show a redundant index entry within their own group
   2. All existing documentation pages remain reachable from the sidebar (no pages lost by cleanup)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 10-01: TBD
+- [ ] 10-01-PLAN.md -- Add sidebar.hidden frontmatter to section index pages
 
 ### Phase 11: Homepage Redesign
 **Goal**: Homepage serves as a compelling entry point that showcases the full toolkit and guides visitors to what they need
@@ -94,5 +94,5 @@ Phases execute in numeric order: 8 -> 9 -> 10 -> 11
 |-------|-----------|----------------|--------|-----------|
 | 8. Theme Foundation | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 9. Brand Identity | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 10. Navigation Cleanup | v1.1 | 0/TBD | Not started | - |
+| 10. Navigation Cleanup | v1.1 | 0/1 | Not started | - |
 | 11. Homepage Redesign | v1.1 | 0/TBD | Not started | - |
