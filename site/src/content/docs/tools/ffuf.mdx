@@ -1,0 +1,168 @@
+---
+title: "ffuf -- Web Fuzzer"
+description: "Flexible web fuzzer for directory discovery, parameter fuzzing, virtual host enumeration, and more"
+sidebar:
+  order: 18
+---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## What It Does
+
+**ffuf** (Fuzz Faster U Fool) is a flexible, high-speed web fuzzer written in Go. It replaces the keyword `FUZZ` in URLs, headers, POST data, or any part of an HTTP request with entries from a wordlist. Unlike [gobuster](/networking-tools/tools/gobuster/) which focuses on directory enumeration, ffuf can fuzz **any part** of an HTTP request -- making it the go-to tool for parameter discovery, POST data brute-forcing, virtual host enumeration, and more.
+
+Key capabilities:
+- **Directory fuzzing** -- discover hidden paths and files
+- **Parameter discovery** -- find hidden GET/POST parameters
+- **Value fuzzing** -- brute-force parameter values (passwords, IDs)
+- **Header fuzzing** -- discover virtual hosts via Host header
+- **Multi-position fuzzing** -- use FUZZ and FUZ2 for combined attacks
+
+## Running the Examples Script
+
+```bash
+# Requires a target argument (URL)
+bash scripts/ffuf/examples.sh <url>
+
+# Or via Makefile
+make ffuf TARGET=<url>
+
+# Examples
+bash scripts/ffuf/examples.sh http://localhost:8080
+bash scripts/ffuf/examples.sh http://example.com
+```
+
+The script prints 10 example commands covering directory fuzzing, parameter discovery, POST data attacks, header fuzzing, and output options, then offers to run a basic directory fuzz interactively.
+
+## Key Flags to Remember
+
+| Flag | What It Does |
+| ---- | ------------ |
+| `-u URL` | Target URL (must contain the FUZZ keyword) |
+| `-w FILE` | Path to wordlist (use `:KEYWORD` for named keywords) |
+| `-t N` | Number of concurrent threads (default: 40 -- use 10 for labs) |
+| `-mc CODES` | Match HTTP status codes (e.g., `200,301`) |
+| `-fc CODES` | Filter (hide) HTTP status codes (e.g., `404,403`) |
+| `-fs SIZE` | Filter by response size (bytes) |
+| `-fw COUNT` | Filter by word count in response |
+| `-fl COUNT` | Filter by line count in response |
+| `-ac` | Auto-calibration -- automatically filter common responses |
+| `-X METHOD` | HTTP method (default: GET) |
+| `-d DATA` | POST data (use FUZZ in the data string) |
+| `-H HEADER` | Add custom header (e.g., `Host: FUZZ.example.com`) |
+| `-o FILE` | Output file path |
+| `-of FORMAT` | Output format: json, ejson, html, md, csv, all |
+| `-rate N` | Maximum requests per second |
+| `-recursion` | Enable recursive fuzzing |
+| `-e EXTS` | Comma-separated list of extensions (e.g., `.php,.html`) |
+
+## Install
+
+<Tabs syncKey="os">
+  <TabItem label="macOS" icon="apple">
+
+    ```bash
+    brew install ffuf
+    ```
+
+  </TabItem>
+  <TabItem label="Debian / Ubuntu" icon="linux">
+
+    Download the latest binary from the [ffuf releases page](https://github.com/ffuf/ffuf/releases):
+
+    ```bash
+    # Download latest release (check URL for current version)
+    wget https://github.com/ffuf/ffuf/releases/latest/download/ffuf_2.1.0_linux_amd64.tar.gz
+    tar xzf ffuf_2.1.0_linux_amd64.tar.gz
+    sudo mv ffuf /usr/local/bin/
+    ```
+
+    Note: ffuf is not available in the default apt repositories.
+
+  </TabItem>
+  <TabItem label="Go install" icon="seti:go">
+
+    If you have Go installed:
+
+    ```bash
+    go install github.com/ffuf/ffuf/v2@latest
+    ```
+
+  </TabItem>
+</Tabs>
+
+## Use-Case Scripts
+
+### fuzz-parameters.sh -- Parameter discovery and value fuzzing
+
+Discovers hidden GET and POST parameters on web applications and fuzzes their values. Finds debug flags, admin toggles, IDOR vulnerabilities, and undocumented API parameters that are not visible in the UI.
+
+**When to use:** After directory enumeration, when you want to explore what parameters each discovered page accepts. Especially useful for finding privilege escalation paths and hidden functionality on lab targets like DVWA.
+
+**Key commands:**
+
+```bash
+# Discover hidden GET parameters
+ffuf -u "http://localhost:8080/page.php?FUZZ=test" -w wordlists/common.txt -fs 0 -t 10
+
+# Brute-force a known parameter's value
+ffuf -u "http://localhost:8080/page.php?id=FUZZ" -w wordlists/common.txt -fs 0 -t 10
+
+# Discover hidden POST parameters
+ffuf -u http://localhost:8080/login.php -X POST -d "FUZZ=test" -w wordlists/common.txt -fs 0 -t 10
+
+# JSON API parameter discovery
+ffuf -u http://localhost:8080/api/endpoint -X POST -H "Content-Type: application/json" -d '{"FUZZ":"test"}' -w wordlists/common.txt -fs 0 -t 10
+```
+
+**Make target:** `make fuzz-params TARGET=<url>`
+
+## The FUZZ Keyword
+
+The `FUZZ` keyword is what makes ffuf flexible. Place it anywhere in the request to control what gets fuzzed:
+
+| Position | Effect | Example |
+| -------- | ------ | ------- |
+| URL path | Directory/file fuzzing | `-u http://target/FUZZ` |
+| Query parameter name | Parameter discovery | `-u "http://target/page?FUZZ=test"` |
+| Query parameter value | Value brute-forcing | `-u "http://target/page?id=FUZZ"` |
+| POST data | Form field fuzzing | `-d "FUZZ=test"` or `-d "password=FUZZ"` |
+| Header value | Virtual host discovery | `-H "Host: FUZZ.example.com"` |
+
+For two-position fuzzing, use `FUZZ` and `FUZ2` with named wordlists:
+
+```bash
+ffuf -u "http://target/page?FUZZ=FUZ2" -w params.txt:FUZZ -w values.txt:FUZ2
+```
+
+## Wordlists
+
+ffuf requires a wordlist (`-w`) for every scan. This project includes a download helper:
+
+```bash
+make wordlists
+```
+
+This downloads SecLists wordlists to the `wordlists/` directory:
+
+| Wordlist | Entries | Use For |
+| -------- | ------- | ------- |
+| `common.txt` | ~4,700 | Quick directory scans, parameter discovery |
+| `directory-list-2.3-small.txt` | ~87,000 | Thorough directory scans |
+| `subdomains-top1million-5000.txt` | ~5,000 | Virtual host and subdomain fuzzing |
+
+If you see "Wordlist not found" errors, run `make wordlists` first.
+
+## Notes
+
+- ffuf defaults to **40 concurrent threads**. Use `-t 10` for lab targets to avoid overwhelming Docker containers.
+- The `-ac` (auto-calibration) flag is very useful for filtering noise -- it automatically detects and filters the most common response size/word count.
+- Use `-fs 0` to filter empty responses, which are common when fuzzing parameters that do not exist.
+- Unlike gobuster, ffuf does not have separate modes -- the FUZZ keyword position determines what you are testing.
+- The `-rate` flag limits requests per second and is useful for avoiding WAF detection or rate limiting.
+- Output format `-of json` is recommended for machine-readable results that can be piped to other tools.
+
+## Related Tools
+
+- [gobuster](/networking-tools/tools/gobuster/) -- directory enumeration and DNS subdomain discovery (simpler but focused)
+- [nikto](/networking-tools/tools/nikto/) -- web server vulnerability scanner (checks known vulnerabilities, not brute-force)
+- [sqlmap](/networking-tools/tools/sqlmap/) -- after finding parameters with ffuf, test them for SQL injection

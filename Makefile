@@ -1,6 +1,6 @@
 # Makefile — Common operations for networking-tools
 
-.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity traceroute trace-path diagnose-latency compare-routes diagnose-performance gobuster discover-dirs enum-subdomains
+.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity traceroute trace-path diagnose-latency compare-routes diagnose-performance gobuster discover-dirs enum-subdomains ffuf fuzz-params
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -216,3 +216,9 @@ discover-dirs: ## Discover directories (usage: make discover-dirs TARGET=<url>)
 
 enum-subdomains: ## Enumerate subdomains (usage: make enum-subdomains TARGET=<domain>)
 	@bash scripts/gobuster/enumerate-subdomains.sh $(or $(TARGET),example.com)
+
+ffuf: ## Run ffuf examples (usage: make ffuf TARGET=<url>)
+	@bash scripts/ffuf/examples.sh $(TARGET)
+
+fuzz-params: ## Fuzz parameters (usage: make fuzz-params TARGET=<url>)
+	@bash scripts/ffuf/fuzz-parameters.sh $(or $(TARGET),http://localhost:8080)

@@ -42,10 +42,11 @@ declare -A TOOLS=(
     [traceroute]="apt install traceroute (Debian/Ubuntu) | dnf install traceroute (RHEL/Fedora) | pre-installed on macOS"
     [mtr]="apt install mtr (Debian/Ubuntu) | dnf install mtr (RHEL/Fedora) | brew install mtr (macOS)"
     [gobuster]="brew install gobuster (or: go install github.com/OJ/gobuster/v3@latest)"
+    [ffuf]="brew install ffuf (or: go install github.com/ffuf/ffuf/v2@latest)"
 )
 
 # Ordered list for display
-TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto foremost dig curl nc traceroute mtr gobuster)
+TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto foremost dig curl nc traceroute mtr gobuster ffuf)
 
 installed=0
 total=${#TOOL_ORDER[@]}
@@ -74,6 +75,9 @@ get_version() {
             ;;
         gobuster)
             gobuster version 2>/dev/null | head -1
+            ;;
+        ffuf)
+            ffuf -V 2>&1 | head -1
             ;;
         *)
             timeout 5 "$tool" --version 2>/dev/null | head -1 || echo "installed"
