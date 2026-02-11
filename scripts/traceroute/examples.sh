@@ -17,10 +17,13 @@ Examples:
 EOF
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd traceroute "apt install traceroute (Debian/Ubuntu) | dnf install traceroute (RHEL/Fedora) | pre-installed on macOS"
 require_target "${1:-}"
+
+confirm_execute "${1:-}"
 safety_banner
 
 TARGET="$1"
@@ -33,33 +36,29 @@ info "Target: ${TARGET}"
 echo ""
 
 # 1. Basic traceroute
-info "1) Basic traceroute — show the path to a host"
-echo "   traceroute ${TARGET}"
-echo ""
+run_or_show "1) Basic traceroute — show the path to a host" \
+    traceroute "$TARGET"
 
 # 2. Numeric output — skip DNS lookups for speed
-info "2) Numeric output — skip DNS lookups for speed"
-echo "   traceroute -n ${TARGET}"
-echo ""
+run_or_show "2) Numeric output — skip DNS lookups for speed" \
+    traceroute -n "$TARGET"
 
 # 3. ICMP traceroute — requires sudo
-info "3) ICMP traceroute — use ICMP ECHO instead of UDP (requires sudo)"
-echo "   sudo traceroute -I ${TARGET}"
-echo ""
+run_or_show "3) ICMP traceroute — use ICMP ECHO instead of UDP (requires sudo)" \
+    sudo traceroute -I "$TARGET"
 
 # 4. Limit to 15 hops, 1 probe per hop
-info "4) Limit to 15 hops, 1 probe per hop (faster)"
-echo "   traceroute -m 15 -q 1 ${TARGET}"
-echo ""
+run_or_show "4) Limit to 15 hops, 1 probe per hop (faster)" \
+    traceroute -m 15 -q 1 "$TARGET"
 
 # 5. TCP traceroute — platform-specific
-info "5) TCP traceroute — bypasses firewalls that block ICMP/UDP (requires sudo)"
 if [[ "$(uname -s)" == "Darwin" ]]; then
-    echo "   sudo traceroute -P tcp ${TARGET}"
+    run_or_show "5) TCP traceroute — bypasses firewalls (requires sudo)" \
+        sudo traceroute -P tcp "$TARGET"
 else
-    echo "   sudo traceroute -T ${TARGET}"
+    run_or_show "5) TCP traceroute — bypasses firewalls (requires sudo)" \
+        sudo traceroute -T "$TARGET"
 fi
-echo ""
 
 # 6. mtr — continuous traceroute with live statistics
 info "6) mtr — continuous traceroute with live statistics"
@@ -91,10 +90,11 @@ echo "    mtr --report -m 20 -c 10 ${TARGET}"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-
-read -rp "Run a basic traceroute to ${TARGET}? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: traceroute -n -q 1 -m 15 ${TARGET}"
-    traceroute -n -q 1 -m 15 "$TARGET"
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    read -rp "Run a basic traceroute to ${TARGET}? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: traceroute -n -q 1 -m 15 ${TARGET}"
+        traceroute -n -q 1 -m 15 "$TARGET"
+    fi
 fi
