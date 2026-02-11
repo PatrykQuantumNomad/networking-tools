@@ -9,6 +9,11 @@ export default defineConfig({
 		starlight({
 			title: 'Networking Tools',
 			description: 'Pentesting and network diagnostic learning lab',
+			logo: {
+				dark: './src/assets/logo-dark.svg',
+				light: './src/assets/logo-light.svg',
+				alt: 'Networking Tools',
+			},
 			customCss: ['./src/styles/custom.css'],
 			social: [
 				{
