@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 ## Current Position
 
 Phase: 15 of 17 (Examples Script Migration) -- IN PROGRESS
-Plan: 1 of 4 in current phase
-Status: Completed 15-01 simple target scripts migration
-Last activity: 2026-02-11 -- Completed 15-01 (dig, hping3, gobuster, ffuf, skipfish, nikto, sqlmap)
+Plan: 3 of 4 in current phase
+Status: Completed 15-03 no-target static scripts migration
+Last activity: 2026-02-11 -- Completed 15-03 (tshark, metasploit, hashcat, john, aircrack-ng)
 
-Progress: [██████░░░░] 60%
+Progress: [██████░░░░] 63%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 29
+- Total plans completed: 30
 - Average duration: 4min
-- Total execution time: 1.71 hours
+- Total execution time: 1.78 hours
 
 **By Phase:**
 
@@ -41,7 +41,7 @@ Progress: [██████░░░░] 60%
 | 12-pre-refactor-cleanup | 1 | 6min | 6min |
 | 13-library-infrastructure | 2 | 10min | 5min |
 | 14-argument-parsing-and-dual-mode-pattern | 2 | 5min | 3min |
-| 15-examples-script-migration | 1 | 4min | 4min |
+| 15-examples-script-migration | 2 | 8min | 4min |
 
 *Updated after each plan completion*
 
@@ -76,6 +76,9 @@ Recent decisions affecting v1.2:
 - 15-01: Static/annotated examples kept as info+echo (no $TARGET, placeholders, or multi-line comments)
 - 15-01: exit 0 removed from show_help() in scripts that had embedded exit (skipfish, nikto, sqlmap)
 - 15-01: EXECUTE_MODE guard wraps entire interactive demo section, not just the tty check
+- 15-03: No run_or_show conversions for no-target scripts -- all 50 examples are static reference commands
+- 15-03: confirm_execute called without argument for no-target scripts
+- 15-03: Sample file creation (hashcat/john) left after parse_common_args -- --help exits before creating samples
 
 ### Pending Todos
 
@@ -95,5 +98,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 15-01-PLAN.md (simple target scripts migration) -- 7 scripts migrated, 15-02 next
+Stopped at: Completed 15-03-PLAN.md (no-target static scripts migration) -- 5 scripts migrated, 15-04 next
 Resume file: None

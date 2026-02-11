@@ -103,7 +103,7 @@ Plans:
 Plans:
 - [x] 15-01-PLAN.md — Migrate 7 simple target-required scripts (dig, hping3, gobuster, ffuf, skipfish, nikto, sqlmap) (completed 2026-02-11)
 - [ ] 15-02-PLAN.md — Migrate 4 target scripts with edge cases (curl, traceroute, netcat, foremost)
-- [ ] 15-03-PLAN.md — Migrate 5 no-target static scripts (tshark, metasploit, hashcat, john, aircrack-ng)
+- [x] 15-03-PLAN.md — Migrate 5 no-target static scripts (tshark, metasploit, hashcat, john, aircrack-ng) (completed 2026-02-11)
 - [ ] 15-04-PLAN.md — Extend test suite to verify all 17 scripts
 
 ### Phase 16: Use-Case Script Migration
