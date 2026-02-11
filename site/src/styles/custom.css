@@ -25,6 +25,7 @@
  * Orange/amber accents against dark backgrounds.
  * ============================================================ */
 :root {
+	color-scheme: dark only;
 	--sl-color-accent-low: hsl(30, 50%, 16%);
 	--sl-color-accent: hsl(35, 95%, 55%);
 	--sl-color-accent-high: hsl(38, 95%, 82%);

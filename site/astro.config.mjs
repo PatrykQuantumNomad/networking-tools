@@ -17,7 +17,7 @@ export default defineConfig({
 			head: [
 				{
 					tag: 'script',
-					content: `document.documentElement.setAttribute('data-theme', 'dark');`,
+					content: `localStorage.setItem('starlight-theme', 'dark'); document.documentElement.setAttribute('data-theme', 'dark');`,
 				},
 			],
 			social: [
