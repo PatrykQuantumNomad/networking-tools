@@ -80,10 +80,10 @@ Plans:
   3. Homepage displays feature highlight cards (tool count, use-case scripts, Docker lab, diagnostics) that convey project scope at a glance
   4. Homepage includes clickable links to guides and learning paths below the tool grid
   5. Homepage layout is responsive -- usable on mobile (375px), tablet (768px), and desktop (1440px+)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 11-01: TBD
+- [ ] 11-01-PLAN.md -- Homepage MDX rewrite with hero, feature cards, tool grids, and guide links
 
 ## Progress
 
@@ -95,4 +95,4 @@ Phases execute in numeric order: 8 -> 9 -> 10 -> 11
 | 8. Theme Foundation | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 9. Brand Identity | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 10. Navigation Cleanup | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 11. Homepage Redesign | v1.1 | 0/TBD | Not started | - |
+| 11. Homepage Redesign | v1.1 | 0/1 | Not started | - |
