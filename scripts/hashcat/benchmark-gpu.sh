@@ -12,13 +12,16 @@ show_help() {
     echo ""
     echo "Examples:"
     echo "  $(basename "$0")        # Show benchmark commands"
+    echo "  $(basename "$0") -x     # Run benchmarks interactively"
     echo "  $(basename "$0") --help # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd hashcat "brew install hashcat"
 
+confirm_execute
 safety_banner
 
 info "=== GPU Cracking Benchmark ==="
@@ -38,49 +41,40 @@ echo "   At 40 billion NTLM/s = ~5 seconds to exhaust keyspace."
 echo ""
 
 # 1. Benchmark all hash types
-info "1) Benchmark all supported hash types"
-echo "   hashcat -b"
-echo ""
+run_or_show "1) Benchmark all supported hash types" \
+    hashcat -b
 
 # 2. Benchmark NTLM only
-info "2) Benchmark NTLM only (mode 1000)"
-echo "   hashcat -b -m 1000"
-echo ""
+run_or_show "2) Benchmark NTLM only (mode 1000)" \
+    hashcat -b -m 1000
 
 # 3. Benchmark MD5
-info "3) Benchmark MD5 (mode 0)"
-echo "   hashcat -b -m 0"
-echo ""
+run_or_show "3) Benchmark MD5 (mode 0)" \
+    hashcat -b -m 0
 
 # 4. Benchmark SHA-256
-info "4) Benchmark SHA-256 (mode 1400)"
-echo "   hashcat -b -m 1400"
-echo ""
+run_or_show "4) Benchmark SHA-256 (mode 1400)" \
+    hashcat -b -m 1400
 
 # 5. Benchmark bcrypt (slow hash)
-info "5) Benchmark bcrypt (mode 3200) — intentionally slow"
-echo "   hashcat -b -m 3200"
-echo ""
+run_or_show "5) Benchmark bcrypt (mode 3200) — intentionally slow" \
+    hashcat -b -m 3200
 
 # 6. Benchmark WPA/WPA2
-info "6) Benchmark WPA/WPA2 (mode 22000)"
-echo "   hashcat -b -m 22000"
-echo ""
+run_or_show "6) Benchmark WPA/WPA2 (mode 22000)" \
+    hashcat -b -m 22000
 
 # 7. List available compute devices
-info "7) List available compute devices (GPUs, CPUs)"
-echo "   hashcat -I"
-echo ""
+run_or_show "7) List available compute devices (GPUs, CPUs)" \
+    hashcat -I
 
 # 8. Benchmark with specific device
-info "8) Benchmark with a specific device"
-echo "   hashcat -b -d 1"
-echo ""
+run_or_show "8) Benchmark with a specific device" \
+    hashcat -b -d 1
 
 # 9. Benchmark with workload tuning
-info "9) Benchmark with maximum workload profile"
-echo "   hashcat -b -w 3"
-echo ""
+run_or_show "9) Benchmark with maximum workload profile" \
+    hashcat -b -w 3
 
 # 10. Time-limited cracking run
 info "10) Run a time-limited cracking session (60 seconds)"
@@ -88,11 +82,13 @@ echo "    hashcat -m 1000 --runtime=60 hashes.txt wordlist.txt"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Run a quick benchmark for MD5 and NTLM? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: hashcat -b -m 0 -m 1000"
-    echo ""
-    hashcat -b -m 0 -m 1000 2>/dev/null || warn "Benchmark failed — check GPU/driver support"
+    read -rp "Run a quick benchmark for MD5 and NTLM? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: hashcat -b -m 0 -m 1000"
+        echo ""
+        hashcat -b -m 0 -m 1000 2>/dev/null || warn "Benchmark failed — check GPU/driver support"
+    fi
 fi

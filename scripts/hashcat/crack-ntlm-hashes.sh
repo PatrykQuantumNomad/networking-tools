@@ -16,13 +16,15 @@ show_help() {
     echo "  $(basename "$0") --help       # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd hashcat "brew install hashcat"
 
 HASHFILE="${1:-}"
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
+confirm_execute
 safety_banner
 
 info "=== NTLM Hash Cracking ==="
@@ -97,21 +99,23 @@ echo "    hashcat -m 1000 -a 0 ${HFILE} wordlist.txt -o cracked.txt --outfile-fo
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-echo ""
-info "Demo: Crack a known NTLM hash"
-echo "   The NTLM hash of 'password' is: a4f49c406510bdcab6824ee7c30fd852"
-echo ""
-read -rp "Create a temp hash file and attempt to crack it? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    TMPFILE=$(mktemp /tmp/ntlm-demo.XXXXXX)
-    echo "a4f49c406510bdcab6824ee7c30fd852" > "$TMPFILE"
-    info "Hash written to: ${TMPFILE}"
-    info "Running: hashcat -m 1000 -a 0 ${TMPFILE} --show (checking potfile first)"
-    hashcat -m 1000 -a 0 "$TMPFILE" --show 2>/dev/null || true
     echo ""
-    info "Running: hashcat -m 1000 -a 3 ${TMPFILE} ?l?l?l?l?l?l?l?l"
-    hashcat -m 1000 -a 3 "$TMPFILE" '?l?l?l?l?l?l?l?l' 2>/dev/null || true
-    rm -f "$TMPFILE"
+    info "Demo: Crack a known NTLM hash"
+    echo "   The NTLM hash of 'password' is: a4f49c406510bdcab6824ee7c30fd852"
+    echo ""
+    read -rp "Create a temp hash file and attempt to crack it? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        TMPFILE=$(mktemp /tmp/ntlm-demo.XXXXXX)
+        echo "a4f49c406510bdcab6824ee7c30fd852" > "$TMPFILE"
+        info "Hash written to: ${TMPFILE}"
+        info "Running: hashcat -m 1000 -a 0 ${TMPFILE} --show (checking potfile first)"
+        hashcat -m 1000 -a 0 "$TMPFILE" --show 2>/dev/null || true
+        echo ""
+        info "Running: hashcat -m 1000 -a 3 ${TMPFILE} ?l?l?l?l?l?l?l?l"
+        hashcat -m 1000 -a 3 "$TMPFILE" '?l?l?l?l?l?l?l?l' 2>/dev/null || true
+        rm -f "$TMPFILE"
+    fi
 fi

