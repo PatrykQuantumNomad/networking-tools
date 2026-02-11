@@ -17,10 +17,12 @@ Examples:
 EOF
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd aircrack-ng "brew install aircrack-ng"
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
+confirm_execute
 safety_banner
 
 info "=== Aircrack-ng Suite Examples ==="
@@ -83,14 +85,15 @@ echo "     sudo airmon-ng stop wlan0mon"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-
-warn "On macOS, monitor mode tools (airmon-ng, airodump-ng) are not available."
-info "What works on macOS: cracking .cap files, benchmarking, converting captures."
-echo ""
-read -rp "Run aircrack-ng benchmark to test cracking speed? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: aircrack-ng -S"
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    warn "On macOS, monitor mode tools (airmon-ng, airodump-ng) are not available."
+    info "What works on macOS: cracking .cap files, benchmarking, converting captures."
     echo ""
-    aircrack-ng -S 2>&1 || true
+    read -rp "Run aircrack-ng benchmark to test cracking speed? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: aircrack-ng -S"
+        echo ""
+        aircrack-ng -S 2>&1 || true
+    fi
 fi

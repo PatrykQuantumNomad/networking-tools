@@ -17,9 +17,11 @@ Examples:
 EOF
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd john "brew install john"
+confirm_execute
 safety_banner
 
 SAMPLE_DIR="$PROJECT_ROOT/scripts/john/samples"
@@ -95,9 +97,11 @@ echo ""
 
 info "Supported formats: john --list=formats | wc -l"
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-read -rp "Show all supported hash formats? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    john --list=formats 2>/dev/null | head -20
-    echo "... (use 'john --list=formats' for full list)"
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    read -rp "Show all supported hash formats? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        john --list=formats 2>/dev/null | head -20
+        echo "... (use 'john --list=formats' for full list)"
+    fi
 fi

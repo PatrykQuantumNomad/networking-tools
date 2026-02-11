@@ -17,9 +17,11 @@ Examples:
 EOF
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd hashcat "brew install hashcat"
+confirm_execute
 safety_banner
 
 SAMPLE_DIR="$PROJECT_ROOT/scripts/hashcat/samples"
@@ -89,9 +91,11 @@ echo "    hashcat -m 22000 -a 0 handshake.hc22000 wordlist.txt"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-read -rp "Run a quick benchmark? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: hashcat -b -m 0 (MD5 benchmark)"
-    hashcat -b -m 0 2>/dev/null || warn "Hashcat benchmark may need OpenCL drivers"
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    read -rp "Run a quick benchmark? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: hashcat -b -m 0 (MD5 benchmark)"
+        hashcat -b -m 0 2>/dev/null || warn "Hashcat benchmark may need OpenCL drivers"
+    fi
 fi
