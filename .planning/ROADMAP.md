@@ -38,7 +38,7 @@ Archived to `.planning/milestones/v1.1-ROADMAP.md`
 - [x] **Phase 12: Pre-Refactor Cleanup** - Normalize inconsistencies before structural changes (completed 2026-02-11)
 - [x] **Phase 13: Library Infrastructure** - Split common.sh into modules with strict mode, logging, traps, and helpers (completed 2026-02-11)
 - [x] **Phase 14: Argument Parsing and Dual-Mode Pattern** - Build the arg parser and run_or_show mechanism, prove with pilot (completed 2026-02-11)
-- [ ] **Phase 15: Examples Script Migration** - Upgrade all 17 examples.sh to dual-mode
+- [x] **Phase 15: Examples Script Migration** - Upgrade all 17 examples.sh to dual-mode (completed 2026-02-11)
 - [ ] **Phase 16: Use-Case Script Migration** - Upgrade all 28 use-case scripts to dual-mode
 - [ ] **Phase 17: ShellCheck Compliance and CI** - Zero warnings across all scripts with CI gating
 
@@ -104,7 +104,7 @@ Plans:
 - [x] 15-01-PLAN.md — Migrate 7 simple target-required scripts (dig, hping3, gobuster, ffuf, skipfish, nikto, sqlmap) (completed 2026-02-11)
 - [x] 15-02-PLAN.md — Migrate 4 target scripts with edge cases (curl, traceroute, netcat, foremost) (completed 2026-02-11)
 - [x] 15-03-PLAN.md — Migrate 5 no-target static scripts (tshark, metasploit, hashcat, john, aircrack-ng) (completed 2026-02-11)
-- [ ] 15-04-PLAN.md — Extend test suite to verify all 17 scripts
+- [x] 15-04-PLAN.md — Extend test suite to verify all 17 scripts (completed 2026-02-11)
 
 ### Phase 16: Use-Case Script Migration
 **Goal**: All 28 use-case scripts work in dual mode with argument parsing
@@ -146,6 +146,6 @@ Plans:
 | 12. Pre-Refactor Cleanup | v1.2 | 1/1 | Complete | 2026-02-11 |
 | 13. Library Infrastructure | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 14. Argument Parsing + Dual-Mode | v1.2 | 2/2 | Complete | 2026-02-11 |
-| 15. Examples Script Migration | v1.2 | 2/4 | In progress | - |
+| 15. Examples Script Migration | v1.2 | 4/4 | Complete | 2026-02-11 |
 | 16. Use-Case Script Migration | v1.2 | 0/TBD | Not started | - |
 | 17. ShellCheck Compliance + CI | v1.2 | 0/TBD | Not started | - |

@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** v1.2 Script Hardening -- Phase 15 Examples Script Migration
+**Current focus:** v1.2 Script Hardening -- Phase 16 Use-Case Script Migration
 
 ## Current Position
 
-Phase: 15 of 17 (Examples Script Migration) -- IN PROGRESS
-Plan: 3 of 4 in current phase (01, 02, 03 done -- 04 remaining)
-Status: Completed 15-02 edge-case target scripts migration
-Last activity: 2026-02-11 -- Completed 15-02 (curl, traceroute, netcat, foremost)
+Phase: 16 of 17 (Use-Case Script Migration) -- NOT STARTED
+Plan: 0 of TBD in current phase
+Status: Phase 15 complete, ready for Phase 16
+Last activity: 2026-02-11 -- Completed 15-04 (test suite extension, all 17 scripts verified)
 
-Progress: [██████░░░░] 63%
+Progress: [██████░░░░] 65%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 31
+- Total plans completed: 32
 - Average duration: 4min
-- Total execution time: 1.90 hours
+- Total execution time: 1.93 hours
 
 **By Phase:**
 
@@ -41,7 +41,7 @@ Progress: [██████░░░░] 63%
 | 12-pre-refactor-cleanup | 1 | 6min | 6min |
 | 13-library-infrastructure | 2 | 10min | 5min |
 | 14-argument-parsing-and-dual-mode-pattern | 2 | 5min | 3min |
-| 15-examples-script-migration | 3 | 15min | 5min |
+| 15-examples-script-migration | 4 | 17min | 4min |
 
 *Updated after each plan completion*
 
@@ -83,6 +83,8 @@ Recent decisions affecting v1.2:
 - 15-02: Variant-specific case/if examples (netcat) are inherently show-only -- kept as info+echo
 - 15-02: Optional target scripts (foremost) call confirm_execute with empty arg
 - 15-02: Platform conditionals (traceroute) wrap run_or_show calls, not the other way around
+- 15-04: Skip make targets for tools not installed rather than failing (graceful degradation)
+- 15-04: Clear ERR trap after sourcing common.sh in test harness to prevent stack trace noise
 
 ### Pending Todos
 
@@ -102,5 +104,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 15-02-PLAN.md (edge-case target scripts migration) -- Plans 01, 02, 03 done, 15-04 next
+Stopped at: Completed 15-04-PLAN.md (test suite extension) -- Phase 15 complete, Phase 16 next
 Resume file: None
