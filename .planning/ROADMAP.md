@@ -36,7 +36,7 @@ Archived to `.planning/milestones/v1.1-ROADMAP.md`
 **Milestone Goal:** Transform 66 educational bash scripts into production-grade dual-mode CLI tools backed by a modular library with strict mode, structured logging, argument parsing, and ShellCheck compliance.
 
 - [x] **Phase 12: Pre-Refactor Cleanup** - Normalize inconsistencies before structural changes (completed 2026-02-11)
-- [ ] **Phase 13: Library Infrastructure** - Split common.sh into modules with strict mode, logging, traps, and helpers
+- [x] **Phase 13: Library Infrastructure** - Split common.sh into modules with strict mode, logging, traps, and helpers (completed 2026-02-11)
 - [ ] **Phase 14: Argument Parsing and Dual-Mode Pattern** - Build the arg parser and run_or_show mechanism, prove with pilot
 - [ ] **Phase 15: Examples Script Migration** - Upgrade all 17 examples.sh to dual-mode
 - [ ] **Phase 16: Use-Case Script Migration** - Upgrade all 28 use-case scripts to dual-mode
@@ -71,7 +71,7 @@ Plans:
 
 Plans:
 - [x] 13-01-PLAN.md — Create 8 library modules in scripts/lib/ and rewrite common.sh as entry point (completed 2026-02-11)
-- [ ] 13-02-PLAN.md — Smoke test and backward compatibility verification of all 5 success criteria
+- [x] 13-02-PLAN.md — Smoke test and backward compatibility verification of all 5 success criteria (completed 2026-02-11)
 
 ### Phase 14: Argument Parsing and Dual-Mode Pattern
 **Goal**: Every script can accept `-h`, `-v`, `-q`, `-x` flags through a shared parser, and `run_or_show()` either displays educational content or executes commands based on the flag
@@ -142,7 +142,7 @@ Plans:
 | 10. Navigation Cleanup | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 11. Homepage Redesign | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 12. Pre-Refactor Cleanup | v1.2 | 1/1 | Complete | 2026-02-11 |
-| 13. Library Infrastructure | v1.2 | 1/2 | In progress | - |
+| 13. Library Infrastructure | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 14. Argument Parsing + Dual-Mode | v1.2 | 0/TBD | Not started | - |
 | 15. Examples Script Migration | v1.2 | 0/TBD | Not started | - |
 | 16. Use-Case Script Migration | v1.2 | 0/TBD | Not started | - |

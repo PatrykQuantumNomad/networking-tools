@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** v1.2 Script Hardening -- Phase 13 Library Infrastructure
+**Current focus:** v1.2 Script Hardening -- Phase 14 Argument Parsing and Dual-Mode Pattern
 
 ## Current Position
 
 Phase: 13 of 17 (Library Infrastructure)
-Plan: 1 of 2 in current phase (COMPLETE)
-Status: Plan 13-01 complete -- ready for 13-02 consumer migration verification
-Last activity: 2026-02-11 -- Completed 13-01 library modules plan
+Plan: 2 of 2 in current phase (COMPLETE)
+Status: Phase 13 complete -- ready for Phase 14 planning
+Last activity: 2026-02-11 -- Completed 13-02 smoke test and verification plan
 
-Progress: [██░░░░░░░░] 33%
+Progress: [███░░░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 25
+- Total plans completed: 26
 - Average duration: 4min
-- Total execution time: 1.48 hours
+- Total execution time: 1.56 hours
 
 **By Phase:**
 
@@ -39,7 +39,7 @@ Progress: [██░░░░░░░░] 33%
 | 10-navigation-cleanup | 1 | 2min | 2min |
 | 11-homepage-redesign | 1 | 2min | 2min |
 | 12-pre-refactor-cleanup | 1 | 6min | 6min |
-| 13-library-infrastructure | 1 | 5min | 5min |
+| 13-library-infrastructure | 2 | 10min | 5min |
 
 *Updated after each plan completion*
 
@@ -64,6 +64,7 @@ Recent decisions affecting v1.2:
 - 13-01: EXIT trap only (not INT/TERM) per Greg's Wiki -- avoids double execution
 - 13-01: Colors disabled via empty strings (not unset) preserving variable references
 - 13-01: VERBOSE >= 1 overrides LOG_LEVEL to debug for single-knob verbosity
+- 13-02: Base temp directory instead of array tracking for make_temp -- avoids subshell array loss
 
 ### Pending Todos
 
@@ -83,5 +84,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 13-01-PLAN.md (library modules) -- ready for 13-02
+Stopped at: Completed 13-02-PLAN.md (smoke test and verification) -- Phase 13 complete, ready for Phase 14
 Resume file: None
