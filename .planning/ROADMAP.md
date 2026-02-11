@@ -101,7 +101,7 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — Migrate 7 simple target-required scripts (dig, hping3, gobuster, ffuf, skipfish, nikto, sqlmap)
+- [x] 15-01-PLAN.md — Migrate 7 simple target-required scripts (dig, hping3, gobuster, ffuf, skipfish, nikto, sqlmap) (completed 2026-02-11)
 - [ ] 15-02-PLAN.md — Migrate 4 target scripts with edge cases (curl, traceroute, netcat, foremost)
 - [ ] 15-03-PLAN.md — Migrate 5 no-target static scripts (tshark, metasploit, hashcat, john, aircrack-ng)
 - [ ] 15-04-PLAN.md — Extend test suite to verify all 17 scripts
@@ -146,6 +146,6 @@ Plans:
 | 12. Pre-Refactor Cleanup | v1.2 | 1/1 | Complete | 2026-02-11 |
 | 13. Library Infrastructure | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 14. Argument Parsing + Dual-Mode | v1.2 | 2/2 | Complete | 2026-02-11 |
-| 15. Examples Script Migration | v1.2 | 0/TBD | Not started | - |
+| 15. Examples Script Migration | v1.2 | 1/4 | In progress | - |
 | 16. Use-Case Script Migration | v1.2 | 0/TBD | Not started | - |
 | 17. ShellCheck Compliance + CI | v1.2 | 0/TBD | Not started | - |

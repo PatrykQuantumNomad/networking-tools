@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** v1.2 Script Hardening -- Phase 14 Argument Parsing and Dual-Mode Pattern
+**Current focus:** v1.2 Script Hardening -- Phase 15 Examples Script Migration
 
 ## Current Position
 
-Phase: 14 of 17 (Argument Parsing and Dual-Mode Pattern) -- COMPLETE
-Plan: 2 of 2 in current phase (all done)
-Status: Phase 14 complete -- ready for Phase 15 planning
-Last activity: 2026-02-11 -- Completed 14-02 arg parsing verification
+Phase: 15 of 17 (Examples Script Migration) -- IN PROGRESS
+Plan: 1 of 4 in current phase
+Status: Completed 15-01 simple target scripts migration
+Last activity: 2026-02-11 -- Completed 15-01 (dig, hping3, gobuster, ffuf, skipfish, nikto, sqlmap)
 
-Progress: [██████░░░░] 57%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 28
+- Total plans completed: 29
 - Average duration: 4min
-- Total execution time: 1.64 hours
+- Total execution time: 1.71 hours
 
 **By Phase:**
 
@@ -41,6 +41,7 @@ Progress: [██████░░░░] 57%
 | 12-pre-refactor-cleanup | 1 | 6min | 6min |
 | 13-library-infrastructure | 2 | 10min | 5min |
 | 14-argument-parsing-and-dual-mode-pattern | 2 | 5min | 3min |
+| 15-examples-script-migration | 1 | 4min | 4min |
 
 *Updated after each plan completion*
 
@@ -72,6 +73,9 @@ Recent decisions affecting v1.2:
 - 14-01: Example 9 (hardcoded subnet) kept as static info+echo -- run_or_show only for $TARGET commands
 - 14-02: warn() outputs to stdout not stderr -- tests check combined output for interactive terminal warning
 - 14-02: Unit tests reset globals between parse_common_args calls for isolation
+- 15-01: Static/annotated examples kept as info+echo (no $TARGET, placeholders, or multi-line comments)
+- 15-01: exit 0 removed from show_help() in scripts that had embedded exit (skipfish, nikto, sqlmap)
+- 15-01: EXECUTE_MODE guard wraps entire interactive demo section, not just the tty check
 
 ### Pending Todos
 
@@ -91,5 +95,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 14-02-PLAN.md (arg parsing verification) -- Phase 14 COMPLETE, ready for Phase 15 planning
+Stopped at: Completed 15-01-PLAN.md (simple target scripts migration) -- 7 scripts migrated, 15-02 next
 Resume file: None
