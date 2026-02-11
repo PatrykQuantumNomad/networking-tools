@@ -3,7 +3,7 @@
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute]"
     echo ""
     echo "Description:"
     echo "  Demonstrates file transfer techniques using netcat. Shows how to"
@@ -17,13 +17,15 @@ show_help() {
     echo "  $(basename "$0") --help          # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd nc "apt install netcat-openbsd (Debian/Ubuntu) | brew install netcat (macOS)"
 
 TARGET="${1:-127.0.0.1}"
 NC_VARIANT=$(detect_nc_variant)
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== File Transfer with Netcat ==="
@@ -140,14 +142,16 @@ echo "    openssl enc -aes-256-cbc -pbkdf2 -pass pass:SECRET < file_to_send.txt 
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-echo ""
-info "Note: File transfer requires two terminals (listener + sender)."
-info "Instead, here is a quick connectivity demo."
-echo ""
-read -rp "Check if port 80 is open on ${TARGET}? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: nc -zv ${TARGET} 80 -w 3"
-    nc -zv "$TARGET" 80 -w 3 2>&1 || true
+    echo ""
+    info "Note: File transfer requires two terminals (listener + sender)."
+    info "Instead, here is a quick connectivity demo."
+    echo ""
+    read -rp "Check if port 80 is open on ${TARGET}? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: nc -zv ${TARGET} 80 -w 3"
+        nc -zv "$TARGET" 80 -w 3 2>&1 || true
+    fi
 fi

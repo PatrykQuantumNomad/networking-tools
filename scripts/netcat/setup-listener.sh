@@ -3,7 +3,7 @@
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [port] [-h|--help]"
+    echo "Usage: $(basename "$0") [port] [-h|--help] [-x|--execute]"
     echo ""
     echo "Description:"
     echo "  Demonstrates how to set up netcat listeners for various purposes:"
@@ -17,13 +17,15 @@ show_help() {
     echo "  $(basename "$0") --help          # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd nc "apt install netcat-openbsd (Debian/Ubuntu) | brew install netcat (macOS)"
 
 PORT="${1:-4444}"
 NC_VARIANT=$(detect_nc_variant)
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Netcat Listener Setup ==="
@@ -151,10 +153,12 @@ fi
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Demo: check if port 22 is open on localhost? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: nc -zv 127.0.0.1 22 -w 2"
-    nc -zv 127.0.0.1 22 -w 2 2>&1 || true
+    read -rp "Demo: check if port 22 is open on localhost? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: nc -zv 127.0.0.1 22 -w 2"
+        nc -zv 127.0.0.1 22 -w 2 2>&1 || true
+    fi
 fi
