@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 ## Current Position
 
 Phase: 16 of 17 (Use-Case Script Migration) -- IN PROGRESS
-Plan: 1 of 8 in current phase
+Plan: 6 of 8 in current phase
 Status: Executing Phase 16 plans
-Last activity: 2026-02-11 -- Completed 16-01 (nmap + hping3 use-case script migration, 5 scripts)
+Last activity: 2026-02-11 -- Completed 16-06 (foremost + tshark use-case script migration, 6 scripts)
 
-Progress: [██████░░░░] 65%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 33
+- Total plans completed: 38
 - Average duration: 4min
-- Total execution time: 2.01 hours
+- Total execution time: 2.51 hours
 
 **By Phase:**
 
@@ -42,7 +42,7 @@ Progress: [██████░░░░] 65%
 | 13-library-infrastructure | 2 | 10min | 5min |
 | 14-argument-parsing-and-dual-mode-pattern | 2 | 5min | 3min |
 | 15-examples-script-migration | 4 | 17min | 4min |
-| 16-use-case-script-migration | 1 | 5min | 5min |
+| 16-use-case-script-migration | 6 | 35min | 6min |
 
 *Updated after each plan completion*
 
@@ -88,6 +88,12 @@ Recent decisions affecting v1.2:
 - 15-04: Clear ERR trap after sourcing common.sh in test harness to prevent stack trace noise
 - 16-01: identify-ports.sh keeps no safety_banner (local introspection, not active scanning)
 - 16-01: Multi-command examples (&&, ;, |) kept as info+echo -- run_or_show for single commands only
+- 16-06: tshark interface examples ($TARGET) converted to run_or_show; hardcoded lo0/pcap kept as info+echo
+- 16-06: extract-files-from-capture uses FILE variable -- confirm_execute with empty arg for optional pcap
+- 16-06: Piped commands (sort | uniq -c) kept as info+echo -- run_or_show cannot handle shell pipes
+- 16-02: Pipe commands (curl | grep) kept as info+echo -- run_or_show cannot handle shell pipes
+- 16-02: curl format strings (-w '%{http_code}') kept as info+echo per Phase 15-02 precedent
+- 16-02: check-ssl-certificate.sh is structural-only -- all 10 examples use pipes or format strings
 
 ### Pending Todos
 
@@ -107,5 +113,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 16-01-PLAN.md (nmap + hping3 use-case migration) -- 5 of 46 scripts migrated
+Stopped at: Completed 16-06-PLAN.md (foremost + tshark use-case migration) -- 6 scripts migrated in this plan
 Resume file: None
