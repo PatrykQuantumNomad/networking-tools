@@ -45,6 +45,7 @@ Progress: [████████░░] 80%
 | 16-use-case-script-migration | 6 | 35min | 6min |
 
 *Updated after each plan completion*
+| Phase 16 P05 | 6min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ Recent decisions affecting v1.2:
 - 16-02: Pipe commands (curl | grep) kept as info+echo -- run_or_show cannot handle shell pipes
 - 16-02: curl format strings (-w '%{http_code}') kept as info+echo per Phase 15-02 precedent
 - 16-02: check-ssl-certificate.sh is structural-only -- all 10 examples use pipes or format strings
+- [Phase 16]: 16-03: scan-multiple-hosts has 0 convertible examples -- structural-only migration
+- [Phase 16]: 16-03: ffuf FUZZ keyword is tool marker not placeholder -- all 10 examples convertible
+- [Phase 16]: 16-05: sqlmap dvwa-specific examples (-D dvwa) kept as static info+echo
 
 ### Pending Todos
 
@@ -113,5 +117,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 16-06-PLAN.md (foremost + tshark use-case migration) -- 6 scripts migrated in this plan
+Stopped at: Completed 16-03-PLAN.md (web scanning scripts: nikto/skipfish/ffuf migration) -- 6 scripts migrated
 Resume file: None
