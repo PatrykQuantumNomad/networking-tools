@@ -41,10 +41,11 @@ declare -A TOOLS=(
     [nc]="apt install netcat-openbsd (Debian/Ubuntu) | brew install netcat (macOS)"
     [traceroute]="apt install traceroute (Debian/Ubuntu) | dnf install traceroute (RHEL/Fedora) | pre-installed on macOS"
     [mtr]="apt install mtr (Debian/Ubuntu) | dnf install mtr (RHEL/Fedora) | brew install mtr (macOS)"
+    [gobuster]="brew install gobuster (or: go install github.com/OJ/gobuster/v3@latest)"
 )
 
 # Ordered list for display
-TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto foremost dig curl nc traceroute mtr)
+TOOL_ORDER=(nmap tshark msfconsole aircrack-ng hashcat skipfish sqlmap hping3 john nikto foremost dig curl nc traceroute mtr gobuster)
 
 installed=0
 total=${#TOOL_ORDER[@]}
@@ -70,6 +71,9 @@ get_version() {
         traceroute)
             # macOS BSD traceroute has no --version flag
             echo "installed"
+            ;;
+        gobuster)
+            gobuster version 2>/dev/null | head -1
             ;;
         *)
             timeout 5 "$tool" --version 2>/dev/null | head -1 || echo "installed"

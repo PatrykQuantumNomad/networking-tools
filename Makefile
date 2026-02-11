@@ -1,6 +1,6 @@
 # Makefile — Common operations for networking-tools
 
-.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity traceroute trace-path diagnose-latency compare-routes diagnose-performance
+.PHONY: check lab-up lab-down lab-status help wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity traceroute trace-path diagnose-latency compare-routes diagnose-performance gobuster discover-dirs enum-subdomains
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -207,3 +207,12 @@ compare-routes: ## Compare TCP/ICMP/UDP routes (usage: make compare-routes TARGE
 
 diagnose-performance: ## Run performance diagnostic (usage: make diagnose-performance TARGET=<host>)
 	@bash scripts/diagnostics/performance.sh $(or $(TARGET),example.com)
+
+gobuster: ## Run gobuster examples (usage: make gobuster TARGET=<url>)
+	@bash scripts/gobuster/examples.sh $(TARGET)
+
+discover-dirs: ## Discover directories (usage: make discover-dirs TARGET=<url>)
+	@bash scripts/gobuster/discover-directories.sh $(or $(TARGET),http://localhost:8080)
+
+enum-subdomains: ## Enumerate subdomains (usage: make enum-subdomains TARGET=<domain>)
+	@bash scripts/gobuster/enumerate-subdomains.sh $(or $(TARGET),example.com)

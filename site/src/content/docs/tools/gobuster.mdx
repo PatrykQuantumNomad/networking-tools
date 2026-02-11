@@ -1,0 +1,180 @@
+---
+title: "gobuster -- Web Content Discovery"
+description: "Discover hidden directories, files, DNS subdomains, and virtual hosts on web servers"
+sidebar:
+  order: 17
+---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## What It Does
+
+**gobuster** is a fast, multi-threaded web content discovery tool written in Go. It brute-forces directories, files, DNS subdomains, and virtual hosts by sending requests using entries from a wordlist. Unlike crawlers that follow links, gobuster systematically tests paths that may not be linked from anywhere on the site -- uncovering admin panels, backup files, configuration endpoints, and other hidden content.
+
+Gobuster has several modes:
+- **dir** -- directory and file enumeration on web servers
+- **dns** -- DNS subdomain enumeration via brute-forcing
+- **vhost** -- virtual host discovery on web servers
+- **fuzz** -- basic fuzzing (for more advanced fuzzing, see [ffuf](/networking-tools/tools/ffuf/))
+
+## Running the Examples Script
+
+```bash
+# Requires a target argument (URL for dir mode)
+bash scripts/gobuster/examples.sh <url>
+
+# Or via Makefile
+make gobuster TARGET=<url>
+
+# Examples
+bash scripts/gobuster/examples.sh http://localhost:8080
+bash scripts/gobuster/examples.sh http://example.com
+```
+
+The script prints 10 example commands covering directory enumeration, DNS subdomain discovery, and virtual host scanning, then offers to run a basic directory scan interactively.
+
+## Key Flags to Remember
+
+### dir mode (directory/file enumeration)
+
+| Flag | What It Does |
+| ---- | ------------ |
+| `-u URL` | Target URL to scan |
+| `-w FILE` | Path to wordlist |
+| `-x EXT` | File extensions to search for (e.g., `php,html,txt`) |
+| `-t N` | Number of concurrent threads (default: 10) |
+| `-s CODES` | Show only these status codes (e.g., `200,301`) |
+| `-b CODES` | Hide these status codes (e.g., `404,403`) |
+| `-r` | Follow redirects |
+| `-H HEADER` | Add custom header (e.g., `Cookie: session=abc`) |
+| `-o FILE` | Save output to file |
+| `-a AGENT` | Set custom User-Agent string |
+
+### dns mode (subdomain enumeration)
+
+| Flag | What It Does |
+| ---- | ------------ |
+| `-d DOMAIN` | Target domain to enumerate |
+| `-w FILE` | Path to subdomain wordlist |
+| `-r RESOLVER` | Custom DNS resolver (e.g., `8.8.8.8:53`) |
+| `--show-ips` | Show IP addresses for discovered subdomains |
+| `--show-cname` | Show CNAME records for discovered subdomains |
+| `-t N` | Number of concurrent threads |
+
+### vhost mode (virtual host discovery)
+
+| Flag | What It Does |
+| ---- | ------------ |
+| `-u URL` | Target URL |
+| `-w FILE` | Wordlist of potential hostnames |
+| `--append-domain` | Append base domain to each wordlist entry |
+| `-t N` | Number of concurrent threads |
+
+## Install
+
+<Tabs syncKey="os">
+  <TabItem label="macOS" icon="apple">
+
+    ```bash
+    brew install gobuster
+    ```
+
+  </TabItem>
+  <TabItem label="Debian / Ubuntu" icon="linux">
+
+    ```bash
+    sudo apt install gobuster
+    ```
+
+  </TabItem>
+  <TabItem label="Go install" icon="seti:go">
+
+    If you have Go installed:
+
+    ```bash
+    go install github.com/OJ/gobuster/v3@latest
+    ```
+
+  </TabItem>
+</Tabs>
+
+## Use-Case Scripts
+
+### discover-directories.sh -- Directory and file enumeration
+
+Discovers hidden directories, files, and backup artifacts on a web server. Checks for admin panels, configuration files, backup archives, and development artifacts that are not linked from the main site.
+
+**When to use:** First step in web application testing -- find what the server is hosting beyond the visible pages. Especially useful against lab targets like DVWA where many paths exist but are not linked.
+
+**Key commands:**
+
+```bash
+# Basic directory scan with common wordlist
+gobuster dir -u http://localhost:8080 -w wordlists/common.txt -t 10
+
+# Search for PHP, HTML, and backup files
+gobuster dir -u http://localhost:8080 -w wordlists/common.txt -x php,html,bak -t 10
+
+# Authenticated scan with session cookie
+gobuster dir -u http://localhost:8080 -w wordlists/common.txt -H "Cookie: PHPSESSID=abc123" -t 10
+
+# Thorough scan with larger wordlist
+gobuster dir -u http://localhost:8080 -w wordlists/directory-list-2.3-small.txt -t 10
+```
+
+**Make target:** `make discover-dirs TARGET=<url>`
+
+---
+
+### enumerate-subdomains.sh -- DNS subdomain discovery
+
+Enumerates subdomains for a target domain using DNS brute-forcing. Discovers staging environments, internal tools, mail servers, and forgotten infrastructure that expands the attack surface.
+
+**When to use:** During reconnaissance to map an organization's external infrastructure. Each discovered subdomain is a potential entry point that may be less hardened than the main site.
+
+**Key commands:**
+
+```bash
+# Basic subdomain enumeration
+gobuster dns -d example.com -w wordlists/subdomains-top1million-5000.txt -t 10
+
+# Show IP addresses for discovered subdomains
+gobuster dns -d example.com -w wordlists/subdomains-top1million-5000.txt --show-ips -t 10
+
+# Use custom DNS resolver to bypass caching
+gobuster dns -d example.com -w wordlists/subdomains-top1million-5000.txt -r 8.8.8.8:53 -t 10
+```
+
+**Make target:** `make enum-subdomains TARGET=<domain>`
+
+## Wordlists
+
+Gobuster requires a wordlist (`-w`) for every scan. This project includes a download helper:
+
+```bash
+make wordlists
+```
+
+This downloads three SecLists wordlists to the `wordlists/` directory:
+
+| Wordlist | Entries | Use For |
+| -------- | ------- | ------- |
+| `common.txt` | ~4,700 | Quick directory scans |
+| `directory-list-2.3-small.txt` | ~87,000 | Thorough directory scans |
+| `subdomains-top1million-5000.txt` | ~5,000 | Subdomain enumeration |
+
+If you see "Wordlist not found" errors, run `make wordlists` first.
+
+## Notes
+
+- gobuster defaults to **10 threads** (`-t 10`). This is safe for lab targets. Increase for remote scans where latency is high, but be mindful of rate limits and WAFs.
+- Use `-b 404` to hide "Not Found" responses and focus on interesting results.
+- The `-x` flag for file extensions only works in `dir` mode. Each extension multiplies the number of requests (10 extensions = 10x requests per wordlist entry).
+- gobuster does **not** follow redirects by default. Use `-r` if you want to see where 301/302 responses lead.
+- Wildcard DNS responses can cause false positives in `dns` mode. gobuster detects and warns about wildcards automatically.
+- For more flexible fuzzing (POST data, headers, parameter discovery), see [ffuf](/networking-tools/tools/ffuf/) which supports a FUZZ keyword that can be placed anywhere in a request.
+
+## Related Tools
+
+- [ffuf](/networking-tools/tools/ffuf/) -- flexible web fuzzer with FUZZ keyword for parameter, header, and POST data fuzzing
+- [nikto](/networking-tools/tools/nikto/) -- web server vulnerability scanner (checks for known issues, not brute-force)
+- [nmap](/networking-tools/tools/nmap/) -- port scanning and service detection (discover what ports are open before directory scanning)
