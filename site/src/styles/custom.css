@@ -1,5 +1,5 @@
 /*
- * Orange/Amber Accent Theme for Networking Tools
+ * Orange/Amber Accent Theme for Networking Tools (dark-mode-only)
  *
  * Overrides Starlight's default blue accent with an orange/amber palette
  * that gives the pentesting toolkit a distinct visual identity.
@@ -10,17 +10,14 @@
  * so simple :root variable overrides here will win over Starlight's defaults
  * without needing !important or specificity hacks.
  *
- * IMPORTANT CONSTRAINTS:
+ * CONSTRAINTS:
  * - Only :root variable overrides are used here -- no element or class selectors.
  *   Bare selectors (a {}, button {}, .sidebar {}) would unconditionally override
  *   ALL Starlight component styles, breaking the design system. Variable overrides
  *   flow through Starlight's own selectors safely.
  * - Derived variables like --sl-color-text-accent auto-inherit from the three
  *   accent source variables, so we only need to set the sources.
- * - Both dark and light mode MUST be overridden separately. Starlight inverts
- *   the meaning of "high" and "low" between modes:
- *     Dark mode:  accent-high = lightest (text emphasis), accent-low = darkest (backgrounds)
- *     Light mode: accent-high = darkest (text emphasis), accent-low = lightest (backgrounds)
+ * - Dark mode is enforced site-wide via an inline head script in astro.config.mjs.
  */
 
 /* ============================================================
@@ -39,15 +36,11 @@
 }
 
 /* ============================================================
- * LIGHT MODE
- * Darker amber values tuned for WCAG AA contrast against white.
- * Standard amber (#f59e0b) on white is only 2.7:1 -- fails AA.
- * We use darker shades to achieve >= 4.5:1 contrast ratio.
+ * HIDE THEME TOGGLE
+ * Site is dark-mode-only; the toggle is unnecessary.
  * ============================================================ */
-:root[data-theme='light'] {
-	--sl-color-accent-low: hsl(38, 90%, 90%);
-	--sl-color-accent: hsl(32, 95%, 40%);
-	--sl-color-accent-high: hsl(28, 85%, 28%);
+starlight-theme-select {
+	display: none !important;
 }
 
 /* ============================================================
