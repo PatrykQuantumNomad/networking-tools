@@ -19,12 +19,14 @@ show_help() {
     echo "  $(basename "$0") --help   # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd aircrack-ng "brew install aircrack-ng"
 
 INTERFACE="${1:-wlan0}"
 
+confirm_execute
 safety_banner
 
 info "=== Wireless Network Analysis ==="
@@ -104,25 +106,27 @@ echo "    sudo airodump-ng -w survey --output-format kismet-newcore ${INTERFACE}
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-if check_cmd airmon-ng; then
-    read -rp "List wireless interfaces with airmon-ng? (requires sudo) [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: sudo airmon-ng"
+    if check_cmd airmon-ng; then
+        read -rp "List wireless interfaces with airmon-ng? (requires sudo) [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: sudo airmon-ng"
+            echo ""
+            sudo airmon-ng 2>&1 || true
+        fi
+    else
+        warn "Monitor mode tools (airmon-ng, airodump-ng) require Linux."
         echo ""
-        sudo airmon-ng 2>&1 || true
-    fi
-else
-    warn "Monitor mode tools (airmon-ng, airodump-ng) require Linux."
-    echo ""
-    read -rp "Show macOS WiFi interface info? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: system_profiler SPAirPortDataType"
-        echo ""
-        system_profiler SPAirPortDataType 2>&1 || true
-        echo ""
-        info "On macOS, the built-in WiFi card does not support monitor mode."
-        info "Use a Linux VM (Kali) with a USB WiFi adapter for full aircrack-ng features."
+        read -rp "Show macOS WiFi interface info? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: system_profiler SPAirPortDataType"
+            echo ""
+            system_profiler SPAirPortDataType 2>&1 || true
+            echo ""
+            info "On macOS, the built-in WiFi card does not support monitor mode."
+            info "Use a Linux VM (Kali) with a USB WiFi adapter for full aircrack-ng features."
+        fi
     fi
 fi

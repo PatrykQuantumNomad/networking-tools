@@ -16,13 +16,15 @@ show_help() {
     echo "  $(basename "$0") --help          # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd aircrack-ng "brew install aircrack-ng"
 
 CAPFILE="${1:-}"
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
+confirm_execute
 safety_banner
 
 info "=== WPA/WPA2 Handshake Cracking ==="
@@ -98,20 +100,22 @@ echo "    aircrack-ng -S"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-if [[ -n "$CAPFILE" && -f "$CAPFILE" ]]; then
-    read -rp "Show handshake details for ${CAPFILE}? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: aircrack-ng ${CAPFILE}"
-        echo ""
-        aircrack-ng "$CAPFILE" 2>&1 || true
-    fi
-else
-    read -rp "Run aircrack-ng benchmark to test cracking speed? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: aircrack-ng -S"
-        echo ""
-        aircrack-ng -S 2>&1 || true
+    if [[ -n "$CAPFILE" && -f "$CAPFILE" ]]; then
+        read -rp "Show handshake details for ${CAPFILE}? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: aircrack-ng ${CAPFILE}"
+            echo ""
+            aircrack-ng "$CAPFILE" 2>&1 || true
+        fi
+    else
+        read -rp "Run aircrack-ng benchmark to test cracking speed? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: aircrack-ng -S"
+            echo ""
+            aircrack-ng -S 2>&1 || true
+        fi
     fi
 fi

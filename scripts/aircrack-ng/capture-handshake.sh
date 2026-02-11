@@ -19,12 +19,14 @@ show_help() {
     echo "  $(basename "$0") --help   # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd aircrack-ng "brew install aircrack-ng"
 
 INTERFACE="${1:-wlan0}"
 
+confirm_execute
 safety_banner
 
 info "=== WPA/WPA2 Handshake Capture ==="
@@ -104,25 +106,27 @@ echo "    sudo airmon-ng start ${INTERFACE} && sudo airodump-ng --bssid BSSID -c
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-if check_cmd airmon-ng; then
-    read -rp "List wireless interfaces with airmon-ng? (requires sudo) [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: sudo airmon-ng"
+    if check_cmd airmon-ng; then
+        read -rp "List wireless interfaces with airmon-ng? (requires sudo) [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: sudo airmon-ng"
+            echo ""
+            sudo airmon-ng 2>&1 || true
+        fi
+    else
+        warn "Handshake capture requires Linux with a monitor-mode WiFi adapter."
         echo ""
-        sudo airmon-ng 2>&1 || true
-    fi
-else
-    warn "Handshake capture requires Linux with a monitor-mode WiFi adapter."
-    echo ""
-    read -rp "Run aircrack-ng benchmark to test cracking speed? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: aircrack-ng -S"
-        echo ""
-        aircrack-ng -S 2>&1 || true
-        echo ""
-        info "To practice cracking, get a sample .cap file and run:"
-        echo "   make crack-wpa TARGET=sample.cap"
+        read -rp "Run aircrack-ng benchmark to test cracking speed? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: aircrack-ng -S"
+            echo ""
+            aircrack-ng -S 2>&1 || true
+            echo ""
+            info "To practice cracking, get a sample .cap file and run:"
+            echo "   make crack-wpa TARGET=sample.cap"
+        fi
     fi
 fi

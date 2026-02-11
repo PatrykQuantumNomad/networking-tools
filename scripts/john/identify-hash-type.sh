@@ -16,11 +16,12 @@ show_help() {
     echo "  $(basename "$0") --help                                # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd john "brew install john"
 
-safety_banner "brew install john"
+safety_banner
 
 HASH="${1:-}"
 
@@ -101,52 +102,54 @@ echo "    john hash.txt"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-if [[ -n "$HASH" ]]; then
-    echo ""
-    info "Analyzing provided hash: ${HASH}"
-    HLEN=${#HASH}
-    echo "   Length: ${HLEN} characters"
+    if [[ -n "$HASH" ]]; then
+        echo ""
+        info "Analyzing provided hash: ${HASH}"
+        HLEN=${#HASH}
+        echo "   Length: ${HLEN} characters"
 
-    # Pattern matching for common hash types
-    if [[ "$HASH" =~ ^\$6\$ ]]; then
-        echo "   Prefix: \$6\$ — SHA-512crypt (Linux)"
-        echo "   John format: --format=sha512crypt"
-    elif [[ "$HASH" =~ ^\$5\$ ]]; then
-        echo "   Prefix: \$5\$ — SHA-256crypt (Linux)"
-        echo "   John format: --format=sha256crypt"
-    elif [[ "$HASH" =~ ^\$1\$ ]]; then
-        echo "   Prefix: \$1\$ — MD5crypt (Linux)"
-        echo "   John format: --format=md5crypt"
-    elif [[ "$HASH" =~ ^\$2[aby]\$ ]]; then
-        echo "   Prefix: \$2b\$ — bcrypt"
-        echo "   John format: --format=bcrypt"
-    elif [[ "$HASH" =~ ^\$y\$ ]]; then
-        echo "   Prefix: \$y\$ — yescrypt"
-        echo "   John format: --format=crypt"
-    elif [[ "$HASH" =~ ^\$P\$|^\$H\$ ]]; then
-        echo "   Prefix: \$P\$/\$H\$ — phpass (WordPress/phpBB)"
-        echo "   John format: --format=phpass"
-    elif [[ $HLEN -eq 32 ]] && [[ "$HASH" =~ ^[0-9a-fA-F]+$ ]]; then
-        echo "   32 hex chars — likely MD5 or NTLM"
-        echo "   John format: --format=raw-md5 or --format=nt"
-    elif [[ $HLEN -eq 40 ]] && [[ "$HASH" =~ ^[0-9a-fA-F]+$ ]]; then
-        echo "   40 hex chars — likely SHA-1"
-        echo "   John format: --format=raw-sha1"
-    elif [[ $HLEN -eq 64 ]] && [[ "$HASH" =~ ^[0-9a-fA-F]+$ ]]; then
-        echo "   64 hex chars — likely SHA-256"
-        echo "   John format: --format=raw-sha256"
-    elif [[ $HLEN -eq 128 ]] && [[ "$HASH" =~ ^[0-9a-fA-F]+$ ]]; then
-        echo "   128 hex chars — likely SHA-512"
-        echo "   John format: --format=raw-sha512"
+        # Pattern matching for common hash types
+        if [[ "$HASH" =~ ^\$6\$ ]]; then
+            echo "   Prefix: \$6\$ — SHA-512crypt (Linux)"
+            echo "   John format: --format=sha512crypt"
+        elif [[ "$HASH" =~ ^\$5\$ ]]; then
+            echo "   Prefix: \$5\$ — SHA-256crypt (Linux)"
+            echo "   John format: --format=sha256crypt"
+        elif [[ "$HASH" =~ ^\$1\$ ]]; then
+            echo "   Prefix: \$1\$ — MD5crypt (Linux)"
+            echo "   John format: --format=md5crypt"
+        elif [[ "$HASH" =~ ^\$2[aby]\$ ]]; then
+            echo "   Prefix: \$2b\$ — bcrypt"
+            echo "   John format: --format=bcrypt"
+        elif [[ "$HASH" =~ ^\$y\$ ]]; then
+            echo "   Prefix: \$y\$ — yescrypt"
+            echo "   John format: --format=crypt"
+        elif [[ "$HASH" =~ ^\$P\$|^\$H\$ ]]; then
+            echo "   Prefix: \$P\$/\$H\$ — phpass (WordPress/phpBB)"
+            echo "   John format: --format=phpass"
+        elif [[ $HLEN -eq 32 ]] && [[ "$HASH" =~ ^[0-9a-fA-F]+$ ]]; then
+            echo "   32 hex chars — likely MD5 or NTLM"
+            echo "   John format: --format=raw-md5 or --format=nt"
+        elif [[ $HLEN -eq 40 ]] && [[ "$HASH" =~ ^[0-9a-fA-F]+$ ]]; then
+            echo "   40 hex chars — likely SHA-1"
+            echo "   John format: --format=raw-sha1"
+        elif [[ $HLEN -eq 64 ]] && [[ "$HASH" =~ ^[0-9a-fA-F]+$ ]]; then
+            echo "   64 hex chars — likely SHA-256"
+            echo "   John format: --format=raw-sha256"
+        elif [[ $HLEN -eq 128 ]] && [[ "$HASH" =~ ^[0-9a-fA-F]+$ ]]; then
+            echo "   128 hex chars — likely SHA-512"
+            echo "   John format: --format=raw-sha512"
+        else
+            echo "   Could not auto-identify — try: john --list=formats | grep -i <keyword>"
+        fi
+        echo ""
     else
-        echo "   Could not auto-identify — try: john --list=formats | grep -i <keyword>"
+        echo ""
+        info "Tip: Pass a hash as an argument for automatic pattern analysis."
+        echo "   $(basename "$0") '5f4dcc3b5aa765d61d8327deb882cf99'"
+        echo ""
     fi
-    echo ""
-else
-    echo ""
-    info "Tip: Pass a hash as an argument for automatic pattern analysis."
-    echo "   $(basename "$0") '5f4dcc3b5aa765d61d8327deb882cf99'"
-    echo ""
 fi

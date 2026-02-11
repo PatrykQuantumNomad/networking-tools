@@ -16,13 +16,15 @@ show_help() {
     echo "  $(basename "$0") --help           # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd john "brew install john"
 
 ARCHIVE="${1:-}"
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
+confirm_execute
 safety_banner
 
 info "=== Archive Password Cracking ==="
@@ -100,34 +102,36 @@ echo "    john --mask='?d?d?d?d' zip.hash"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-echo ""
-info "Demo: Create and crack a password-protected ZIP"
-echo "   Will create a ZIP with password 'test123', extract the hash, and crack it."
-echo ""
-read -rp "Run the ZIP cracking demo? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    TMPDIR=$(mktemp -d /tmp/john-zip-demo.XXXXXX)
-    echo "This is a test file for password cracking demo." > "${TMPDIR}/secret.txt"
+    echo ""
+    info "Demo: Create and crack a password-protected ZIP"
+    echo "   Will create a ZIP with password 'test123', extract the hash, and crack it."
+    echo ""
+    read -rp "Run the ZIP cracking demo? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        TMPDIR=$(mktemp -d /tmp/john-zip-demo.XXXXXX)
+        echo "This is a test file for password cracking demo." > "${TMPDIR}/secret.txt"
 
-    if check_cmd zip; then
-        zip -j -P test123 "${TMPDIR}/protected.zip" "${TMPDIR}/secret.txt" 2>/dev/null
-        info "Created: ${TMPDIR}/protected.zip (password: test123)"
+        if check_cmd zip; then
+            zip -j -P test123 "${TMPDIR}/protected.zip" "${TMPDIR}/secret.txt" 2>/dev/null
+            info "Created: ${TMPDIR}/protected.zip (password: test123)"
 
-        if check_cmd zip2john; then
-            zip2john "${TMPDIR}/protected.zip" > "${TMPDIR}/zip.hash" 2>/dev/null
-            info "Extracted hash to: ${TMPDIR}/zip.hash"
-            info "Running: john --format=PKZIP ${TMPDIR}/zip.hash"
-            john --format=PKZIP "${TMPDIR}/zip.hash" 2>/dev/null || warn "John exited — check output above"
-            echo ""
-            info "Running: john --show ${TMPDIR}/zip.hash"
-            john --show "${TMPDIR}/zip.hash" 2>/dev/null || true
+            if check_cmd zip2john; then
+                zip2john "${TMPDIR}/protected.zip" > "${TMPDIR}/zip.hash" 2>/dev/null
+                info "Extracted hash to: ${TMPDIR}/zip.hash"
+                info "Running: john --format=PKZIP ${TMPDIR}/zip.hash"
+                john --format=PKZIP "${TMPDIR}/zip.hash" 2>/dev/null || warn "John exited — check output above"
+                echo ""
+                info "Running: john --show ${TMPDIR}/zip.hash"
+                john --show "${TMPDIR}/zip.hash" 2>/dev/null || true
+            else
+                warn "zip2john not found — install john with: brew install john"
+            fi
         else
-            warn "zip2john not found — install john with: brew install john"
+            warn "zip command not found — cannot create demo archive"
         fi
-    else
-        warn "zip command not found — cannot create demo archive"
+        rm -rf "$TMPDIR"
     fi
-    rm -rf "$TMPDIR"
 fi

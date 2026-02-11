@@ -15,11 +15,13 @@ show_help() {
     echo "  $(basename "$0") --help # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd john "brew install john"
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
+confirm_execute
 safety_banner
 
 info "=== Linux Password Cracking ==="
@@ -91,32 +93,34 @@ echo "    john --show --format=sha512crypt unshadowed.txt | cut -d: -f1,2"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-echo ""
-info "Demo: Crack a sample shadow hash"
-echo "   Creating a test SHA-512 hash of password 'letmein' with a known salt."
-echo ""
-read -rp "Create a sample hash and crack it with John? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    TMPFILE=$(mktemp /tmp/john-demo.XXXXXX)
-    # Generate a SHA-512crypt hash for "letmein" using openssl or python
-    if check_cmd python3; then
-        HASH=$(python3 -c "import crypt; print('testuser:' + crypt.crypt('letmein', '\$6\$rounds=5000\$testsalt\$'))" 2>/dev/null) || true
+    echo ""
+    info "Demo: Crack a sample shadow hash"
+    echo "   Creating a test SHA-512 hash of password 'letmein' with a known salt."
+    echo ""
+    read -rp "Create a sample hash and crack it with John? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        TMPFILE=$(mktemp /tmp/john-demo.XXXXXX)
+        # Generate a SHA-512crypt hash for "letmein" using openssl or python
+        if check_cmd python3; then
+            HASH=$(python3 -c "import crypt; print('testuser:' + crypt.crypt('letmein', '\$6\$rounds=5000\$testsalt\$'))" 2>/dev/null) || true
+        fi
+        if [[ -z "${HASH:-}" ]] && check_cmd openssl; then
+            HASH="testuser:\$6\$testsalt\$$(openssl passwd -6 -salt testsalt 'letmein' 2>/dev/null)" || true
+        fi
+        if [[ -n "${HASH:-}" ]]; then
+            echo "$HASH" > "$TMPFILE"
+            info "Test hash written to: ${TMPFILE}"
+            info "Running: john --wordlist --format=sha512crypt ${TMPFILE}"
+            john --format=sha512crypt "$TMPFILE" 2>/dev/null || warn "John exited — check output above"
+            echo ""
+            info "Running: john --show ${TMPFILE}"
+            john --show "$TMPFILE" 2>/dev/null || true
+        else
+            warn "Could not generate test hash (need python3 or openssl)"
+        fi
+        rm -f "$TMPFILE"
     fi
-    if [[ -z "${HASH:-}" ]] && check_cmd openssl; then
-        HASH="testuser:\$6\$testsalt\$$(openssl passwd -6 -salt testsalt 'letmein' 2>/dev/null)" || true
-    fi
-    if [[ -n "${HASH:-}" ]]; then
-        echo "$HASH" > "$TMPFILE"
-        info "Test hash written to: ${TMPFILE}"
-        info "Running: john --wordlist --format=sha512crypt ${TMPFILE}"
-        john --format=sha512crypt "$TMPFILE" 2>/dev/null || warn "John exited — check output above"
-        echo ""
-        info "Running: john --show ${TMPFILE}"
-        john --show "$TMPFILE" 2>/dev/null || true
-    else
-        warn "Could not generate test hash (need python3 or openssl)"
-    fi
-    rm -f "$TMPFILE"
 fi
