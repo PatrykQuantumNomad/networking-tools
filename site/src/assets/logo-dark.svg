@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Terminal window outline -->
+  <rect x="2" y="4" width="28" height="24" rx="3" stroke="#f5c97a" stroke-width="2" fill="none"/>
+  <!-- Chevron > -->
+  <polyline points="8,12 14,16 8,20" stroke="#f5c97a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Underscore cursor _ -->
+  <line x1="17" y1="20" x2="24" y2="20" stroke="#f5c97a" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
