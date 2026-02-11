@@ -26,7 +26,7 @@ Archived to `.planning/milestones/v1.0-ROADMAP.md`
 
 - [x] **Phase 8: Theme Foundation** - Dark + orange/amber accent palette with light mode support (completed 2026-02-11)
 - [x] **Phase 9: Brand Identity** - Custom SVG logo and matching favicon (completed 2026-02-11)
-- [ ] **Phase 10: Navigation Cleanup** - Remove redundant sidebar index entries
+- [x] **Phase 10: Navigation Cleanup** - Remove redundant sidebar index entries (completed 2026-02-11)
 - [ ] **Phase 11: Homepage Redesign** - Hero section, tool card grid, feature highlights, and guide links
 
 ## Phase Details
@@ -68,7 +68,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 10-01-PLAN.md -- Add sidebar.hidden frontmatter to section index pages
+- [x] 10-01-PLAN.md -- Add sidebar.hidden frontmatter to section index pages
 
 ### Phase 11: Homepage Redesign
 **Goal**: Homepage serves as a compelling entry point that showcases the full toolkit and guides visitors to what they need
@@ -94,5 +94,5 @@ Phases execute in numeric order: 8 -> 9 -> 10 -> 11
 |-------|-----------|----------------|--------|-----------|
 | 8. Theme Foundation | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 9. Brand Identity | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 10. Navigation Cleanup | v1.1 | 0/1 | Not started | - |
+| 10. Navigation Cleanup | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 11. Homepage Redesign | v1.1 | 0/TBD | Not started | - |
