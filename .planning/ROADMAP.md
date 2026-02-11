@@ -3,7 +3,7 @@
 ## Milestones
 
 - [x] **v1.0 Networking Tools Expansion** - Phases 1-7 (shipped 2026-02-11)
-- [ ] **v1.1 Site Visual Refresh** - Phases 8-11 (in progress)
+- [x] **v1.1 Site Visual Refresh** - Phases 8-11 (shipped 2026-02-11)
 
 ## Phases
 
@@ -27,7 +27,7 @@ Archived to `.planning/milestones/v1.0-ROADMAP.md`
 - [x] **Phase 8: Theme Foundation** - Dark + orange/amber accent palette with light mode support (completed 2026-02-11)
 - [x] **Phase 9: Brand Identity** - Custom SVG logo and matching favicon (completed 2026-02-11)
 - [x] **Phase 10: Navigation Cleanup** - Remove redundant sidebar index entries (completed 2026-02-11)
-- [ ] **Phase 11: Homepage Redesign** - Hero section, tool card grid, feature highlights, and guide links
+- [x] **Phase 11: Homepage Redesign** - Hero section, tool card grid, feature highlights, and guide links (completed 2026-02-11)
 
 ## Phase Details
 
@@ -83,7 +83,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 11-01-PLAN.md -- Homepage MDX rewrite with hero, feature cards, tool grids, and guide links
+- [x] 11-01-PLAN.md -- Homepage MDX rewrite with hero, feature cards, tool grids, and guide links
 
 ## Progress
 
@@ -95,4 +95,4 @@ Phases execute in numeric order: 8 -> 9 -> 10 -> 11
 | 8. Theme Foundation | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 9. Brand Identity | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 10. Navigation Cleanup | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 11. Homepage Redesign | v1.1 | 0/1 | Not started | - |
+| 11. Homepage Redesign | v1.1 | 1/1 | Complete | 2026-02-11 |
