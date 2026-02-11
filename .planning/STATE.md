@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 ## Current Position
 
 Phase: 15 of 17 (Examples Script Migration) -- IN PROGRESS
-Plan: 3 of 4 in current phase
-Status: Completed 15-03 no-target static scripts migration
-Last activity: 2026-02-11 -- Completed 15-03 (tshark, metasploit, hashcat, john, aircrack-ng)
+Plan: 3 of 4 in current phase (01, 02, 03 done -- 04 remaining)
+Status: Completed 15-02 edge-case target scripts migration
+Last activity: 2026-02-11 -- Completed 15-02 (curl, traceroute, netcat, foremost)
 
 Progress: [██████░░░░] 63%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 30
+- Total plans completed: 31
 - Average duration: 4min
-- Total execution time: 1.78 hours
+- Total execution time: 1.90 hours
 
 **By Phase:**
 
@@ -41,7 +41,7 @@ Progress: [██████░░░░] 63%
 | 12-pre-refactor-cleanup | 1 | 6min | 6min |
 | 13-library-infrastructure | 2 | 10min | 5min |
 | 14-argument-parsing-and-dual-mode-pattern | 2 | 5min | 3min |
-| 15-examples-script-migration | 2 | 8min | 4min |
+| 15-examples-script-migration | 3 | 15min | 5min |
 
 *Updated after each plan completion*
 
@@ -79,6 +79,10 @@ Recent decisions affecting v1.2:
 - 15-03: No run_or_show conversions for no-target scripts -- all 50 examples are static reference commands
 - 15-03: confirm_execute called without argument for no-target scripts
 - 15-03: Sample file creation (hashcat/john) left after parse_common_args -- --help exits before creating samples
+- 15-02: Complex format strings (curl timing) and missing-tool commands (mtr) kept as info+echo
+- 15-02: Variant-specific case/if examples (netcat) are inherently show-only -- kept as info+echo
+- 15-02: Optional target scripts (foremost) call confirm_execute with empty arg
+- 15-02: Platform conditionals (traceroute) wrap run_or_show calls, not the other way around
 
 ### Pending Todos
 
@@ -98,5 +102,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 15-03-PLAN.md (no-target static scripts migration) -- 5 scripts migrated, 15-04 next
+Stopped at: Completed 15-02-PLAN.md (edge-case target scripts migration) -- Plans 01, 02, 03 done, 15-04 next
 Resume file: None
