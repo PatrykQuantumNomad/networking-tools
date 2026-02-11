@@ -40,10 +40,10 @@ Archived to `.planning/milestones/v1.0-ROADMAP.md`
   2. Light mode accent colors are visible and readable against white/light backgrounds (no invisible orange-on-white links)
   3. Code blocks on tool documentation pages remain readable -- syntax highlighting has adequate contrast against the themed background
   4. Existing pages with Tabs components (tool install instructions) render correctly with the new palette
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 08-01: TBD
+- [ ] 08-01-PLAN.md -- Orange/amber CSS custom property overrides and config registration
 
 ### Phase 9: Brand Identity
 **Goal**: Site header and browser tab display a recognizable project-specific brand instead of generic Starlight defaults
@@ -92,7 +92,7 @@ Phases execute in numeric order: 8 -> 9 -> 10 -> 11
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 8. Theme Foundation | v1.1 | 0/TBD | Not started | - |
+| 8. Theme Foundation | v1.1 | 0/1 | Not started | - |
 | 9. Brand Identity | v1.1 | 0/TBD | Not started | - |
 | 10. Navigation Cleanup | v1.1 | 0/TBD | Not started | - |
 | 11. Homepage Redesign | v1.1 | 0/TBD | Not started | - |
