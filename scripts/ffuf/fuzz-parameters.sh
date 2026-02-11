@@ -18,7 +18,8 @@ show_help() {
     echo "  $(basename "$0") --help                            # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd ffuf "brew install ffuf (or: go install github.com/ffuf/ffuf/v2@latest)"
 
@@ -32,6 +33,7 @@ if [[ ! -f "$WORDLIST" ]]; then
     exit 1
 fi
 
+confirm_execute "$TARGET"
 safety_banner
 
 info "=== Fuzz Parameters ==="
@@ -50,60 +52,52 @@ echo "   Discovering these can reveal privilege escalation paths and hidden func
 echo ""
 
 # 1. Discover GET parameters
-info "1) Discover GET parameters — find hidden query parameters"
-echo "   ffuf -u \"${TARGET}/page.php?FUZZ=test\" -w ${WORDLIST} -fs 0 -t 10"
-echo ""
+run_or_show "1) Discover GET parameters — find hidden query parameters" \
+    ffuf -u "$TARGET/page.php?FUZZ=test" -w "$WORDLIST" -fs 0 -t 10
 
 # 2. Discover parameter values
-info "2) Discover parameter values — fuzz a known parameter's value"
-echo "   ffuf -u \"${TARGET}/page.php?id=FUZZ\" -w ${WORDLIST} -fs 0 -t 10"
-echo ""
+run_or_show "2) Discover parameter values — fuzz a known parameter's value" \
+    ffuf -u "$TARGET/page.php?id=FUZZ" -w "$WORDLIST" -fs 0 -t 10
 
 # 3. POST parameter discovery
-info "3) POST parameter discovery — find hidden form fields"
-echo "   ffuf -u ${TARGET}/login.php -X POST -d \"FUZZ=test\" -w ${WORDLIST} -fs 0 -t 10"
-echo ""
+run_or_show "3) POST parameter discovery — find hidden form fields" \
+    ffuf -u "$TARGET/login.php" -X POST -d "FUZZ=test" -w "$WORDLIST" -fs 0 -t 10
 
 # 4. POST value fuzzing
-info "4) POST value fuzzing — brute-force a known parameter"
-echo "   ffuf -u ${TARGET}/login.php -X POST -d \"username=admin&password=FUZZ\" -w ${WORDLIST} -fc 401 -t 10"
-echo ""
+run_or_show "4) POST value fuzzing — brute-force a known parameter" \
+    ffuf -u "$TARGET/login.php" -X POST -d "username=admin&password=FUZZ" -w "$WORDLIST" -fc 401 -t 10
 
 # 5. Filter by response code to remove redirects
-info "5) Filter by response code — remove redirect noise"
-echo "   ffuf -u \"${TARGET}/page.php?FUZZ=test\" -w ${WORDLIST} -fc 302 -t 10"
-echo ""
+run_or_show "5) Filter by response code — remove redirect noise" \
+    ffuf -u "$TARGET/page.php?FUZZ=test" -w "$WORDLIST" -fc 302 -t 10
 
 # 6. Filter by response size to remove noise
-info "6) Filter by response size — remove default page responses"
-echo "   ffuf -u \"${TARGET}/page.php?FUZZ=test\" -w ${WORDLIST} -fs 4242 -t 10"
-echo ""
+run_or_show "6) Filter by response size — remove default page responses" \
+    ffuf -u "$TARGET/page.php?FUZZ=test" -w "$WORDLIST" -fs 4242 -t 10
 
 # 7. Filter by word count for consistent responses
-info "7) Filter by word count — remove pages with same word count"
-echo "   ffuf -u \"${TARGET}/page.php?FUZZ=test\" -w ${WORDLIST} -fw 42 -t 10"
-echo ""
+run_or_show "7) Filter by word count — remove pages with same word count" \
+    ffuf -u "$TARGET/page.php?FUZZ=test" -w "$WORDLIST" -fw 42 -t 10
 
 # 8. Match by response line count
-info "8) Match by line count — find responses with specific line counts"
-echo "   ffuf -u \"${TARGET}/page.php?FUZZ=test\" -w ${WORDLIST} -ml 100 -t 10"
-echo ""
+run_or_show "8) Match by line count — find responses with specific line counts" \
+    ffuf -u "$TARGET/page.php?FUZZ=test" -w "$WORDLIST" -ml 100 -t 10
 
 # 9. JSON POST fuzzing
-info "9) JSON POST fuzzing — discover JSON API parameters"
-echo "   ffuf -u ${TARGET}/api/endpoint -X POST -H \"Content-Type: application/json\" -d '{\"FUZZ\":\"test\"}' -w ${WORDLIST} -fs 0 -t 10"
-echo ""
+run_or_show "9) JSON POST fuzzing — discover JSON API parameters" \
+    ffuf -u "$TARGET/api/endpoint" -X POST -H "Content-Type: application/json" -d '{"FUZZ":"test"}' -w "$WORDLIST" -fs 0 -t 10
 
 # 10. Combine parameter name and value fuzzing
-info "10) Combine name + value fuzzing — test parameter names and values together"
-echo "    ffuf -u \"${TARGET}/page.php?FUZZ=FUZ2\" -w ${WORDLIST}:FUZZ -w ${WORDLIST}:FUZ2 -fs 0 -t 10"
-echo ""
+run_or_show "10) Combine name + value fuzzing — test parameter names and values together" \
+    ffuf -u "$TARGET/page.php?FUZZ=FUZ2" -w "$WORDLIST:FUZZ" -w "$WORDLIST:FUZ2" -fs 0 -t 10
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Run a GET parameter discovery against ${TARGET}? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: ffuf -u ${TARGET}/FUZZ -w ${WORDLIST} -t 10"
-    ffuf -u "${TARGET}/FUZZ" -w "$WORDLIST" -t 10 || true
+    read -rp "Run a GET parameter discovery against ${TARGET}? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: ffuf -u ${TARGET}/FUZZ -w ${WORDLIST} -t 10"
+        ffuf -u "${TARGET}/FUZZ" -w "$WORDLIST" -t 10 || true
+    fi
 fi

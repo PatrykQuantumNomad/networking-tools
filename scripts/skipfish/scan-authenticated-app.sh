@@ -16,12 +16,14 @@ show_help() {
     echo "  $(basename "$0") --help                   # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd skipfish "sudo port install skipfish"
 
 TARGET="${1:-http://localhost:8080}"
 
+confirm_execute "$TARGET"
 safety_banner
 
 info "=== Skipfish Authenticated Scanning ==="
@@ -43,49 +45,40 @@ echo "     4. Pass it to skipfish with -C flag"
 echo ""
 
 # 1. Scan with session cookie
-info "1) Scan with session cookie"
-echo "   skipfish -o output/ -C \"PHPSESSID=abc123\" ${TARGET}"
-echo ""
+run_or_show "1) Scan with session cookie" \
+    skipfish -o output/ -C "PHPSESSID=abc123" "$TARGET"
 
 # 2. Scan with multiple cookies
-info "2) Scan with multiple cookies"
-echo "   skipfish -o output/ -C \"PHPSESSID=abc123\" -C \"security=low\" ${TARGET}"
-echo ""
+run_or_show "2) Scan with multiple cookies" \
+    skipfish -o output/ -C "PHPSESSID=abc123" -C "security=low" "$TARGET"
 
 # 3. Form-based authentication
-info "3) Form-based authentication"
-echo "   skipfish -o output/ --auth-form ${TARGET}/login --auth-user admin --auth-pass password ${TARGET}"
-echo ""
+run_or_show "3) Form-based authentication" \
+    skipfish -o output/ --auth-form "$TARGET/login" --auth-user admin --auth-pass password "$TARGET"
 
 # 4. Custom header authentication
-info "4) Custom header authentication (Bearer token)"
-echo "   skipfish -o output/ -H \"Authorization: Bearer token123\" ${TARGET}"
-echo ""
+run_or_show "4) Custom header authentication (Bearer token)" \
+    skipfish -o output/ -H "Authorization: Bearer token123" "$TARGET"
 
 # 5. Exclude logout pages (stay authenticated)
-info "5) Exclude logout pages to stay authenticated"
-echo "   skipfish -o output/ -C \"PHPSESSID=abc123\" -X /logout -X /signout ${TARGET}"
-echo ""
+run_or_show "5) Exclude logout pages to stay authenticated" \
+    skipfish -o output/ -C "PHPSESSID=abc123" -X /logout -X /signout "$TARGET"
 
 # 6. Include only specific paths
-info "6) Include only specific paths (admin/dashboard)"
-echo "   skipfish -o output/ -C \"PHPSESSID=abc123\" -I /admin -I /dashboard ${TARGET}"
-echo ""
+run_or_show "6) Include only specific paths (admin/dashboard)" \
+    skipfish -o output/ -C "PHPSESSID=abc123" -I /admin -I /dashboard "$TARGET"
 
 # 7. Scan with authentication + depth limit
-info "7) Authenticated scan with depth limit"
-echo "   skipfish -o output/ -C \"PHPSESSID=abc123\" -d 3 ${TARGET}"
-echo ""
+run_or_show "7) Authenticated scan with depth limit" \
+    skipfish -o output/ -C "PHPSESSID=abc123" -d 3 "$TARGET"
 
 # 8. Authenticated scan with custom wordlist
-info "8) Authenticated scan with custom wordlist"
-echo "   skipfish -o output/ -C \"PHPSESSID=abc123\" -W /path/to/wordlist.txt ${TARGET}"
-echo ""
+run_or_show "8) Authenticated scan with custom wordlist" \
+    skipfish -o output/ -C "PHPSESSID=abc123" -W /path/to/wordlist.txt "$TARGET"
 
 # 9. Rate-limited authenticated scan
-info "9) Rate-limited authenticated scan"
-echo "   skipfish -o output/ -C \"PHPSESSID=abc123\" -l 10 ${TARGET}"
-echo ""
+run_or_show "9) Rate-limited authenticated scan" \
+    skipfish -o output/ -C "PHPSESSID=abc123" -l 10 "$TARGET"
 
 # 10. Full DVWA authenticated scan
 info "10) Full DVWA authenticated scan"
@@ -93,25 +86,27 @@ echo "    skipfish -o dvwa_scan/ -C \"PHPSESSID=SESSION; security=low\" -d 3 htt
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-info "To scan DVWA with authentication, follow these steps:"
-echo ""
-echo "   1. Start DVWA:  make lab-up"
-echo "   2. Open browser: http://localhost:8080"
-echo "   3. Log in with:  admin / password"
-echo "   4. Open DevTools (F12) -> Application -> Cookies"
-echo "   5. Copy the PHPSESSID value"
-echo "   6. Run:"
-echo "      skipfish -o dvwa_scan/ -C \"PHPSESSID=YOUR_SESSION; security=low\" -d 2 http://localhost:8080"
-echo ""
-read -rp "Would you like to see the exact command for your session cookie? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    read -rp "Paste your PHPSESSID cookie value: " session_cookie
-    if [[ -n "$session_cookie" ]]; then
-        info "Run this command:"
-        echo "   skipfish -o dvwa_scan/ -C \"PHPSESSID=${session_cookie}; security=low\" -d 2 ${TARGET}"
-    else
-        warn "No cookie provided. Log in to DVWA first and copy the PHPSESSID."
+    info "To scan DVWA with authentication, follow these steps:"
+    echo ""
+    echo "   1. Start DVWA:  make lab-up"
+    echo "   2. Open browser: http://localhost:8080"
+    echo "   3. Log in with:  admin / password"
+    echo "   4. Open DevTools (F12) -> Application -> Cookies"
+    echo "   5. Copy the PHPSESSID value"
+    echo "   6. Run:"
+    echo "      skipfish -o dvwa_scan/ -C \"PHPSESSID=YOUR_SESSION; security=low\" -d 2 http://localhost:8080"
+    echo ""
+    read -rp "Would you like to see the exact command for your session cookie? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        read -rp "Paste your PHPSESSID cookie value: " session_cookie
+        if [[ -n "$session_cookie" ]]; then
+            info "Run this command:"
+            echo "   skipfish -o dvwa_scan/ -C \"PHPSESSID=${session_cookie}; security=low\" -d 2 ${TARGET}"
+        else
+            warn "No cookie provided. Log in to DVWA first and copy the PHPSESSID."
+        fi
     fi
 fi
