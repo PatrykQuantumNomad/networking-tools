@@ -1,362 +1,527 @@
-# Domain Pitfalls
+# Domain Pitfalls: Bash Script Hardening for Networking Tools
 
-**Domain:** Starlight site visual refresh (custom theme, SVG logo, homepage redesign, sidebar cleanup)
+**Domain:** Adding strict mode, structured logging, argument parsing, and dual-mode execution to 65+ existing educational bash scripts
 **Researched:** 2026-02-11
+**Overall confidence:** HIGH -- pitfalls verified against actual codebase patterns, bash documentation, and community reports
 
 ## Critical Pitfalls
 
-Mistakes that cause broken builds, invisible regressions across 30+ existing pages, or deployment failures.
-
-### Pitfall 1: Custom CSS overrides Starlight's cascade layers, breaking existing component styles
-
-**What goes wrong:** You add a `custom.css` file via the `customCss` config option and write CSS that targets base element selectors (e.g., `a {}`, `button {}`, `table {}`, `code {}`). Because Starlight puts its own styles inside `@layer starlight` while your custom CSS is unlayered, CSS cascade rules give unlayered CSS higher priority than any layered CSS -- regardless of specificity. Your innocent `a { color: var(--sl-color-accent); }` nukes the styling of navigation links, sidebar links, breadcrumbs, and Starlight's built-in Card/LinkCard/Tabs components simultaneously.
-
-**Why it happens:** Starlight adopted CSS cascade layers internally. Unlayered CSS always beats layered CSS per the CSS spec. This is the opposite of how most developers expect CSS specificity to work. The Starlight docs explain this, but it is easy to miss. Prior to Starlight's cascade layer adoption, the same CSS would have been overridden by Starlight. Now it wins unconditionally.
-
-**Consequences:** Existing content pages with Tabs, Cards, code blocks, and navigation all break in subtle ways. The homepage might look perfect while the 17 tool MDX pages with `<Tabs>` components render with wrong link colors, broken tab borders, or misaligned elements. These regressions are invisible unless you check every page.
-
-**Prevention:**
-1. Only override CSS custom properties (variables), not element selectors. Target `:root` and `[data-theme='light']:root` to set `--sl-color-*` variables. This is the intended customization path.
-2. If you must write selector-based CSS, wrap it in an explicit layer:
-   ```css
-   @layer my-overrides {
-     .hero-card { /* safe: scoped to your own class */ }
-   }
-   ```
-   And declare layer order at the top of your file:
-   ```css
-   @layer starlight, my-overrides;
-   ```
-3. Never use bare element selectors (`a`, `table`, `p`) in customCss files. Always scope to a class or Starlight's data attributes.
-4. After adding custom CSS, visually check at least: one tool MDX page with Tabs, the homepage, and the sidebar navigation.
-
-**Detection:** Homepage looks fine. Open any tool page -- Tabs component has wrong colors, navigation links have unexpected styles, code blocks have wrong backgrounds.
-
-**Phase mapping:** Address first, before any other visual work. Establish the custom CSS file with only variable overrides, test against existing pages, then build on top.
-
-**Confidence:** HIGH -- verified via [Starlight CSS docs](https://starlight.astro.build/guides/css-and-tailwind/), [cascade layer issue #3162](https://github.com/withastro/starlight/issues/3162), and [customCss reset issue #2237](https://github.com/withastro/starlight/issues/2237).
+Mistakes that break currently-working scripts, cause silent failures in CI, or require touching every script twice.
 
 ---
 
-### Pitfall 2: Dark/light mode color overrides applied to wrong selector, invisible in one theme
+### Pitfall 1: `set -e` kills `read -rp` interactive demos when stdin is not a terminal
 
-**What goes wrong:** You override `--sl-color-accent` and the gray scale variables in `:root` only. The site looks great in dark mode (the default). You never toggle to light mode during development. In light mode, the accent color has insufficient contrast against the white background, text becomes unreadable, or the orange/amber theme makes links invisible on light backgrounds.
+**What goes wrong:** All 65+ scripts inherit `set -euo pipefail` from `common.sh` (line 5). The `read` builtin returns exit code 1 when it encounters EOF on stdin. When scripts run non-interactively (piped input, `make` targets, CI), stdin is not a terminal and `read` hits EOF immediately, returning 1. With `set -e` active, the script dies at the `read -rp` line instead of gracefully skipping the interactive demo.
 
-**Why it happens:** Starlight defines dark mode variables on `:root` and overrides them for light mode on `:root[data-theme='light']`. The gray scale is fully inverted between themes -- `--sl-color-gray-1` is near-white in dark mode but near-black in light mode. If you only set variables on `:root`, your light mode inherits dark mode values, producing wrong contrast. If you forget the light mode selector entirely, every color that works in dark mode may fail in light mode.
+**Why it happens:** The scripts already have `[[ ! -t 0 ]] && exit 0` or `[[ -t 0 ]] || exit 0` guards before `read -rp` (found in all 63 scripts with interactive demos). These guards correctly prevent `read` from running in non-interactive contexts today. The pitfall arises if someone refactors the interactive section -- for example, wrapping the guard and `read` inside a function, where `exit 0` would exit the function but `set -e` would still kill the script if the function returns non-zero. Or if someone adds a second `read` call after the guard without realizing the guard only protects the first one.
 
-The CSS variable naming is counterintuitive: `--sl-color-white` becomes the background in dark mode (it is actually a very dark color) and `--sl-color-black` becomes the background in light mode (it is actually white). The names refer to semantic roles, not actual colors. `--sl-color-gray-1` through `--sl-color-gray-7` are a scale where 1 is lightest in dark mode but darkest in light mode.
+**This is already partially mitigated** in the current codebase. The danger is during refactoring.
 
-**Consequences:** Half your users (those preferring light mode) see an unusable site. With an orange/amber accent, light mode is especially prone to contrast failures -- amber on white is notoriously hard to read.
+**Consequences:** Scripts that work perfectly today die with exit code 1 when run via `make` or in CI. The error is silent -- no error message, just an abrupt exit.
 
 **Prevention:**
-1. Always define theme colors for BOTH selectors:
-   ```css
-   :root {
-     --sl-color-accent-low: hsl(30, 80%, 15%);
-     --sl-color-accent: hsl(30, 90%, 55%);
-     --sl-color-accent-high: hsl(30, 80%, 85%);
-   }
-   :root[data-theme='light'] {
-     --sl-color-accent-low: hsl(30, 80%, 90%);
-     --sl-color-accent: hsl(30, 90%, 40%);
-     --sl-color-accent-high: hsl(30, 80%, 20%);
-   }
-   ```
-   Note: accent-low/high meanings flip between themes. In dark mode, "high" means bright (for emphasis). In light mode, "high" means dark (for emphasis).
-2. Test BOTH themes before committing. Toggle the theme picker in the Starlight header.
-3. For orange/amber themes specifically, check WCAG contrast ratios. Amber (#f59e0b) on white fails AA. You need a darker shade (closer to #d97706 or #b45309) for light mode text-accent.
-4. Use Starlight's built-in color theme picker tool on the Starlight docs site to generate correct HSL values for both modes.
+1. When refactoring interactive sections into functions, use `read -rp "..." answer || return 0` to handle EOF gracefully.
+2. Never move the `[[ -t 0 ]]` guard into a function that uses `exit 0` -- `exit` in a function exits the whole script in some contexts, not just the function.
+3. For dual-mode execution, the interactive demo section should be a separate function called only from `main()`, never from the library path.
+4. Add a smoke test: `echo "" | bash scripts/nmap/examples.sh scanme.nmap.org` should not produce a non-zero exit code.
 
-**Detection:** Dark mode looks perfect. Toggle theme picker to light -- accent text vanishes, links unreadable, sidebar highlight invisible.
+**Detection:** Run `make nmap TARGET=scanme.nmap.org` and verify exit code 0. Run each script with stdin redirected from `/dev/null`.
 
-**Phase mapping:** Theme colors must be implemented and tested in both modes from the start. Do not defer light mode testing.
+**Affected scripts:** All 63 scripts with `read -rp` patterns. Two equivalent guard styles exist:
+- `[[ -t 0 ]] || exit 0` (19 scripts, examples.sh pattern)
+- `[[ ! -t 0 ]] && exit 0` (44 scripts, use-case script pattern)
 
-**Confidence:** HIGH -- verified via [Starlight props.css source](https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css), [Starlight customization docs](https://starlight.astro.build/guides/customization/), and [dark mode discussion #1829](https://github.com/withastro/starlight/discussions/1829).
+**Phase mapping:** Address in strict mode phase. Create a canonical `run_interactive_demo()` wrapper that handles all edge cases.
+
+**Confidence:** HIGH -- verified by examining all 63 `read -rp` locations in the codebase and the existing `set -euo pipefail` in `common.sh`.
 
 ---
 
-### Pitfall 3: Logo and favicon paths break on GitHub Pages subpath deployment
+### Pitfall 2: `((counter++))` returns exit code 1 when counter starts at 0, killing script under `set -e`
 
-**What goes wrong:** You add an SVG logo via `logo: { src: './src/assets/logo.svg' }` and a custom favicon to `public/favicon.svg`. The logo works in dev and on GitHub Pages because Starlight handles the `src/assets/` import path correctly through Astro's asset pipeline. But the favicon fails in production -- it resolves to `/favicon.svg` instead of `/networking-tools/favicon.svg` on GitHub Pages.
+**What goes wrong:** Bash arithmetic `(( ))` returns exit code 1 when the expression evaluates to 0. The expression `((counter++))` post-increments: it returns the old value (0) as the expression result, which maps to exit code 1. Under `set -e`, this kills the script on the very first increment.
 
-Additionally, if you add a separate dark-mode favicon via `<link>` tags in the `head` config, the `head` config does not automatically prepend the base path. You must manually include it.
+**Why it happens:** In bash, `((0))` has exit code 1 (false) and `((1))` has exit code 0 (true). Post-increment `((x++))` evaluates to the value BEFORE increment. So when `x=0`, `((x++))` evaluates to 0, which is exit code 1, even though x is now 1.
 
-**Why it happens:** Two different asset systems are at play:
-- `logo.src` uses Astro's import system, which respects `base` automatically.
-- `favicon` in Starlight config expects a path relative to `public/`, and Starlight does handle prefixing the base path for the default favicon config.
-- But custom `head` entries are raw HTML -- they are NOT processed by Astro's asset pipeline and do NOT get the base path prepended. The Starlight docs explicitly state: "Entries in head are converted directly to HTML elements and do not pass through Astro's script or style processing."
+**This is already known and guarded.** The codebase uses `((installed++)) || true` in `check-tools.sh` (line 92) and `((errors++)) || true` in `check-docs-completeness.sh` (line 16). The diagnostic scripts use `PASS_COUNT=$((PASS_COUNT + 1))` which is safe because `$(( ))` is arithmetic expansion (always exit 0), not arithmetic evaluation.
 
-**Consequences:** Logo appears correctly but favicon shows the default Starlight icon or a broken image on GitHub Pages. If you add extra link tags via `head` config for favicon variants, those are 404s in production.
+**Consequences:** Without `|| true`, any counter starting from 0 kills the script on first increment. The `check-tools.sh` script would die after finding the first installed tool.
 
 **Prevention:**
-1. For the logo, use `logo: { src: './src/assets/logo.svg' }` -- this goes through Astro's asset pipeline and handles base path automatically.
-2. For the favicon, use the `favicon` config option -- Starlight handles the base path for this: `favicon: '/favicon.svg'` (file lives in `public/favicon.svg`).
-3. For any custom `head` entries, manually prepend the base path:
-   ```js
-   head: [
-     {
-       tag: 'link',
-       attrs: {
-         rel: 'icon',
-         href: '/networking-tools/favicon-32x32.png',
-         sizes: '32x32',
-       },
-     },
-   ],
-   ```
-4. After deployment, verify favicon loads by checking browser dev tools Network tab for 404s on icon resources.
+1. Use `count=$((count + 1))` (arithmetic expansion) instead of `((count++))` (arithmetic evaluation). The `$()` form always returns exit 0.
+2. If `(( ))` is preferred for readability, always append `|| true`: `((count++)) || true`.
+3. Establish a project convention: "Always use `var=$((var + 1))` for counters. Never use `((var++))` without `|| true`."
+4. The diagnostic scripts already follow the safe pattern -- do not regress when adding new counters.
 
-**Detection:** Logo appears correctly everywhere. Favicon shows correctly in dev (`localhost:4321`) but shows default icon or broken on `github.io/networking-tools/`.
+**Detection:** `shellcheck` catches this with warning SC2219: "Instead of `let expr`, prefer `(( expr ))` for clarity. Alternatively, use `(( expr )) || true` to allow it to fail."
 
-**Phase mapping:** Address during logo and favicon implementation. Test by running `astro build && astro preview` (which respects base path) before pushing.
+**Affected scripts:** `check-tools.sh`, `check-docs-completeness.sh`, and all 3 diagnostic scripts (`dns.sh`, `connectivity.sh`, `performance.sh`) which use `PASS_COUNT`, `FAIL_COUNT`, `WARN_COUNT` counters.
 
-**Confidence:** HIGH -- verified via [Starlight configuration reference](https://starlight.astro.build/reference/configuration/), [favicon discussion #1058](https://github.com/withastro/starlight/discussions/1058), [favicon base path issue #2647](https://github.com/withastro/starlight/issues/2647), and [Astro base path issue #4229](https://github.com/withastro/astro/issues/4229).
+**Phase mapping:** Address in strict mode phase. Audit and standardize all counter patterns.
+
+**Confidence:** HIGH -- verified from [BashFAQ/105](https://mywiki.wooledge.org/BashFAQ/105), [Bash Hackers arithmetic expressions](https://bash-hackers.gabe565.com/syntax/arith_expr/), and confirmed in the actual codebase.
 
 ---
 
-### Pitfall 4: Homepage redesign breaks existing content styling when moving from Markdown to MDX/Astro
+### Pitfall 3: `grep` returns exit code 1 on no match, breaking pipelines under `set -e` + `pipefail`
 
-**What goes wrong:** You redesign the homepage `index.md` to a richer layout with card grids, custom sections, and styled hero content. In doing so, you either (a) convert to MDX and add custom Astro components that introduce scoped styles conflicting with the splash template, or (b) add extensive inline HTML/CSS that works for the homepage but bleeds into the splash template's built-in styling.
+**What goes wrong:** `grep` returns exit code 0 on match, 1 on no match, 2 on error. With `set -o pipefail`, a `grep` with no match in ANY position of a pipeline kills the script. The pattern `some_command | grep "pattern" | head -1` fails when `grep` finds nothing -- even though "no match" is a perfectly valid outcome for networking tool output.
 
-The splash template has specific CSS expectations. Content placed below the hero in a splash page has no max-width constraint (unlike doc pages which have `--sl-content-width`). If you add cards or grids assuming a constrained width, they stretch full-viewport on large screens. If you constrain them manually with `max-width`, the value you pick may not match Starlight's content width, creating visual inconsistency.
+**Why it happens:** `pipefail` makes the pipeline's exit code the rightmost non-zero exit code from any command in the pipe. `grep` returning 1 (no match) is treated identically to a real error.
 
-**Why it happens:** The `splash` template intentionally removes sidebar and content-width constraints to allow full-width hero layouts. But most card-based content still needs horizontal constraints to be readable. There is no built-in mechanism in Starlight for "full-width hero, constrained content below hero" within the splash template. You must handle this yourself.
+**This is already partially handled.** The codebase has 40+ instances of `|| true` guards, many specifically protecting `grep`:
+- `grep -cE '...' || true` in `performance.sh` (line 99)
+- `grep -nE '...' || true` in `performance.sh` (line 110)
+- `grep -oE '...' ... | awk '{print $1}' || true` in `performance.sh` (line 246)
 
-**Consequences:** Homepage looks fine on your monitor width but is broken on ultra-wide displays (cards stretched across 2560px) or narrow mobile (cards overflow). Existing pages are unaffected but the homepage becomes the worst-looking page on the site.
+**But not all grep usages are guarded.** Several scripts use grep in pipelines without guards:
+- `connectivity.sh` line 176: `echo "$ping_output" | grep -E 'packets|received' | tail -1` -- safe because it is inside an `if` conditional (set -e is suspended in conditionals)
+- `check-tools.sh` line 25: `echo "$help_text" | grep -qi 'ncat'` in `detect_nc_variant()` -- safe because it is inside an `if`
+- `curl/check-ssl-certificate.sh` line 104: `curl ... 2>&1 | grep -E "subject:|issuer:|expire|SSL connection"` -- this is in the interactive demo section, and if the grep finds nothing (e.g., self-signed cert with different output), the script dies
+
+**Consequences:** Scripts that work today against expected targets fail against targets with unexpected output. DNS diagnostics fail when a record type does not exist. SSL checks fail when certificate format differs. Port scans fail when no ports are open.
 
 **Prevention:**
-1. Use Starlight's built-in `<CardGrid>` and `<Card>` components from `@astrojs/starlight/components` rather than custom HTML. These are already responsive and theme-aware.
-2. If you need custom sections below the hero, wrap them in a container with explicit max-width matching Starlight's content width:
-   ```css
-   .homepage-content {
-     max-width: var(--sl-content-width);
-     margin: 0 auto;
-     padding: 0 1rem;
-   }
+1. Any `grep` that could legitimately find zero matches MUST have `|| true` (standalone) or be inside an `if`/`while` conditional.
+2. For pipelines: `command | grep "pattern" || true` guards the WHOLE pipeline. For finer control: `command | { grep "pattern" || true; }`.
+3. In diagnostic scripts, "no match" is information, not an error. Use `result=$(grep ... || true)` and check `[[ -n "$result" ]]`.
+4. Create a helper function: `safe_grep() { grep "$@" || true; }` for consistent usage.
+5. Note: `grep -c` returns 0 (the count) as output but exit code 1 when count is 0. Both the output and exit code matter.
+
+**Detection:** Run diagnostic scripts against hosts that return unusual output. Run SSL check against a self-signed cert. Run DNS check against a nonexistent domain.
+
+**Affected scripts:** All 3 diagnostic scripts (24 grep usages), `detect_nc_variant()` in `common.sh`, `check-tools.sh`, and any interactive demo that pipes through grep.
+
+**Phase mapping:** Address in strict mode phase. Audit every `grep` call -- categorize as "inside conditional" (safe), "has || true" (safe), or "unguarded" (needs fix).
+
+**Confidence:** HIGH -- verified from codebase grep analysis (40+ `|| true` guards already present means the team knows about this), [Bash Strict Mode article](http://redsymbol.net/articles/unofficial-bash-strict-mode/), and [BashFAQ/105](https://mywiki.wooledge.org/BashFAQ/105).
+
+---
+
+### Pitfall 4: Tools that output to stderr cause false pipeline failures under `pipefail`
+
+**What goes wrong:** Several networking tools write their output to stderr, not stdout:
+- `nc -h` exits non-zero AND writes to stderr (already guarded with `2>&1 || true`)
+- `hashcat --help` writes to stderr
+- `dig -v` writes version to stderr
+- `hping3` writes scan output to stderr
+- `aircrack-ng -S` writes to stderr
+- `curl -v` writes verbose headers to stderr
+
+When capturing output with `2>&1`, the tool's non-zero exit code propagates through the pipeline. When using `2>/dev/null` to suppress, the diagnostic information is lost.
+
+**Why it happens:** Security tools frequently use stderr for their primary output because stdout is reserved for machine-parseable data (like nmap -oX -). This is correct behavior for the tools but surprising when scripting around them.
+
+**This is already well-handled in the codebase.** The pattern `tool_command 2>&1 || true` appears 20+ times. The `detect_nc_variant()` function (common.sh line 77) correctly uses `nc -h 2>&1 || true`. The `check-tools.sh` `get_version()` function handles each tool's stderr quirks individually.
+
+**Consequences:** Adding new tool wrappers or refactoring existing ones without understanding each tool's stderr behavior breaks the script. The most dangerous case is when a tool writes useful output to stderr AND returns non-zero -- `2>&1` captures the output but `set -e` kills the script.
+
+**Prevention:**
+1. Document each tool's stderr behavior in a comment near its usage. The codebase already does this implicitly with `|| true` guards.
+2. For any command that might return non-zero but produce useful output: `output=$(command 2>&1) || true`.
+3. For commands where you need to distinguish "failed with error" from "succeeded with stderr output": capture exit code explicitly:
+   ```bash
+   output=$(command 2>&1) && rc=0 || rc=$?
    ```
-3. Test the homepage at viewport widths: 375px (mobile), 768px (tablet), 1440px (laptop), and 2560px (ultra-wide).
-4. Keep the homepage as `.mdx` (not a custom `.astro` page) to inherit Starlight's page shell, fonts, and theme integration automatically.
+4. Maintain a per-tool compatibility table documenting stderr/exit-code behavior.
 
-**Detection:** Homepage looks great at 1440px. Open on mobile -- cards overflow. Open on ultra-wide -- cards are stretched with huge gaps.
+**Detection:** Remove `|| true` guards and see which scripts fail. (Do not actually do this -- the guards are correct.)
 
-**Phase mapping:** Homepage redesign phase. Build with Starlight's built-in Card/CardGrid components first, only add custom styling if those are insufficient.
+**Affected scripts:** `common.sh` detect_nc_variant, `check-tools.sh` get_version, all interactive demos that run external tools (`hping3`, `aircrack-ng`, `nikto`, `hashcat`, `nc`).
 
-**Confidence:** MEDIUM -- inferred from splash template behavior documented in [Starlight frontmatter reference](https://starlight.astro.build/reference/frontmatter/) and [Starlight pages guide](https://starlight.astro.build/guides/pages/). No direct community reports of this exact issue, but the splash template's full-width behavior is documented.
+**Phase mapping:** Document tool behaviors during strict mode phase. Create a tool compatibility matrix as part of the hardening work.
+
+**Confidence:** HIGH -- verified from codebase analysis (20+ `2>&1 || true` patterns) and tool documentation.
+
+---
+
+### Pitfall 5: Dual-mode execution (`source` vs execute) breaks `set -e` propagation
+
+**What goes wrong:** If scripts are refactored to support dual-mode (sourceable as library + executable), `set -e` behaves differently when a file is sourced vs executed:
+- **Executed:** `set -e` in `common.sh` applies to the child script's entire execution.
+- **Sourced:** `set -e` in `common.sh` modifies the CALLING shell's options. If the caller did not have `set -e`, it now does. If the caller already had `set -e`, functions from the sourced file may unexpectedly be "immune" when called from conditional contexts.
+
+Additionally, the `BASH_SOURCE[0]` vs `$0` check used for dual-mode (`if [[ "$0" == "${BASH_SOURCE[0]}" ]]`) interacts with `set -u` -- `BASH_SOURCE` is always set in bash, but accessing `BASH_SOURCE[0]` in certain contexts can trigger issues.
+
+**Why it happens:** Bash's `set -e` has notoriously complex scoping rules. When a function is called in a conditional context (`if my_func; then`), `set -e` is suspended INSIDE that function, even if the function itself set `set -e`. This is a bash spec behavior, not a bug. When dual-mode scripts are sourced, all their functions run in the caller's shell, inheriting the caller's `set -e` context -- which may be different from the script's intended context.
+
+**Consequences:** Functions that rely on `set -e` for error handling silently swallow errors when called from conditional contexts. This is especially dangerous for `require_cmd`, `require_target`, and `require_root` -- these are meant to exit on failure, but if called as `if require_cmd nmap; then`, the `exit 1` inside the function DOES still exit the script (exit is not affected by set -e), but any intermediate commands that fail before the explicit `exit` are silently ignored.
+
+**Prevention:**
+1. Do not rely on `set -e` for control flow inside library functions. Use explicit `return 1` and check return values.
+2. For dual-mode, use the standard guard pattern and keep it simple:
+   ```bash
+   main() {
+       # All script logic here
+   }
+   [[ "${BASH_SOURCE[0]}" == "$0" ]] && main "$@"
+   ```
+3. `common.sh` should NOT set `set -euo pipefail` if it is being sourced by a script that might have different expectations. However, since ALL scripts in this project source `common.sh` and expect strict mode, this is safe for this specific project. The pitfall is if `common.sh` is ever sourced from an external script.
+4. Keep the current architecture: `common.sh` sets strict mode, all scripts source it. Do not add dual-mode to `common.sh` itself.
+
+**Detection:** Source `common.sh` from an interactive shell and observe that your shell now has `set -e` enabled. Type a command that fails -- your shell exits.
+
+**Affected scripts:** `common.sh` (already sets strict mode for all scripts), any script that gets refactored for dual-mode.
+
+**Phase mapping:** Address in dual-mode execution phase. Decide upfront whether dual-mode applies to `common.sh`, examples scripts, or both. Recommendation: only add dual-mode to individual scripts, not to `common.sh`.
+
+**Confidence:** HIGH -- verified from [BashFAQ/105](https://mywiki.wooledge.org/BashFAQ/105) and [Greg's Wiki BashGuide/Practices](https://mywiki.wooledge.org/BashGuide/Practices).
+
+---
 
 ## Moderate Pitfalls
 
-### Pitfall 5: Sidebar autogenerate creates duplicate entries for index.md pages
+---
 
-**What goes wrong:** The project currently has `index.md` files in `tools/`, `guides/`, and `diagnostics/` directories. With autogenerated sidebars, these index pages appear as sidebar entries alongside the group label, creating confusing duplication. For example, the "Tools" sidebar group shows both the "Tools" group heading and a "Tools" link underneath it that points to the index page.
+### Pitfall 6: `set -u` breaks scripts that check `$1` without default value in certain positions
 
-**Why it happens:** Starlight's autogenerate treats every `.md`/`.mdx` file in the directory as a sidebar entry, including `index.md`. The group label comes from the `label` property in the sidebar config, and the index page title comes from its frontmatter. When both exist with similar names, users see apparent duplicates. This is tracked as a known limitation in [issue #370](https://github.com/withastro/starlight/issues/370).
+**What goes wrong:** `set -u` (nounset) causes the script to exit when referencing an unset variable. The current codebase correctly uses `${1:-}` for all positional parameter checks. But adding argument parsing with `getopts` or `while` loops introduces new contexts where `$1`, `$OPTARG`, or shift-ed arguments might be unset.
 
-**Consequences:** The sidebar shows redundant "Tools" entries. Users do not know which one to click. It looks unprofessional, especially after a visual refresh meant to improve the site's appearance.
+**Why it happens:** After `shift`, `$1` becomes the next argument. If there are no more arguments, `$1` is unset. Under `set -u`, accessing `$1` after shifting past the last argument kills the script. Similarly, `getopts` sets `OPTARG` for options with required arguments, but `OPTARG` is unset for options without arguments.
+
+**Consequences:** Argument parsing loop exits the script prematurely when it encounters the last argument or an option without a required argument.
 
 **Prevention:**
-1. Use `sidebar: { hidden: true }` in the frontmatter of each `index.md` to hide it from the autogenerated sidebar:
-   ```yaml
-   ---
-   title: Tools
-   sidebar:
-     hidden: true
-   ---
+1. In `while` loops over arguments, always check `$#` before accessing `$1`:
+   ```bash
+   while [[ $# -gt 0 ]]; do
+       case "$1" in
+           -v|--verbose) VERBOSE=true; shift ;;
+           *) TARGET="$1"; shift ;;
+       esac
+   done
    ```
-2. The index page is still accessible via direct URL, but does not appear in the sidebar navigation.
-3. Alternatively, if the index page has unique overview content that belongs in the sidebar, give it a distinct label via frontmatter: `sidebar: { label: 'Overview' }` and set `order: 0` to place it first.
+2. With `getopts`, initialize `OPTARG` or always use `${OPTARG:-}`.
+3. For the help check pattern `[[ "${1:-}" =~ ^(-h|--help)$ ]]` -- this is already correct. Do not "simplify" to `[[ "$1" =~ ... ]]`.
+4. After parsing, use defaults: `TARGET="${TARGET:-localhost}"`.
 
-**Detection:** After sidebar cleanup, check that no sidebar group has an entry with the same name as the group heading.
+**Detection:** Run scripts with zero arguments, with only `--help`, with only flags and no positional argument.
 
-**Phase mapping:** Address during sidebar cleanup phase. Simple frontmatter change.
+**Affected scripts:** All 65+ scripts. The existing `${1:-}` pattern is correct and must be preserved through any argument parsing refactor.
 
-**Confidence:** HIGH -- verified via [Starlight sidebar docs](https://starlight.astro.build/guides/sidebar/) and [index page issue #370](https://github.com/withastro/starlight/issues/370).
+**Phase mapping:** Address in argument parsing phase.
+
+**Confidence:** HIGH -- verified from [Bash Strict Mode article](http://redsymbol.net/articles/unofficial-bash-strict-mode/) and codebase analysis showing consistent `${1:-}` usage.
 
 ---
 
-### Pitfall 6: Expressive Code (code block) styling desynchronizes from custom theme
+### Pitfall 7: Structured logging breaks educational output when applied uniformly
 
-**What goes wrong:** You set a custom orange/amber accent color for the site. Code blocks still use Starlight's default blue-tinted syntax highlighting theme (`starlight-dark` / `starlight-light`). The code blocks look visually disconnected from the rest of the site. Or worse, you try to customize Expressive Code's theme and inadvertently break syntax highlighting contrast.
+**What goes wrong:** The scripts are educational tools whose primary value is human-readable output. Adding structured logging (JSON, syslog format, or even just timestamps + severity levels to every line) destroys the carefully formatted example output. The scripts currently use `info "1) Ping scan -- is the host up?"` followed by `echo "   nmap -sn ${TARGET}"` -- this formatting IS the product.
 
-**Why it happens:** Starlight uses Expressive Code for code blocks, which has its own theming system separate from CSS custom properties. By default, Starlight syncs some UI colors (frame backgrounds, borders) with CSS variables via the `useStarlightUiThemeColors` option. But the actual syntax token colors (strings, keywords, functions) are determined by the Expressive Code theme, not by your CSS variables.
+**Why it happens:** Structured logging is designed for machine-parseable operational scripts, not for educational CLI tools. Applying it uniformly treats the scripts as services instead of teaching tools.
 
-This project has 17 MDX tool pages, each with multiple code blocks. Code blocks are the primary content type. If they look wrong, the entire site looks wrong.
-
-**Consequences:** Two visual outcomes, both bad: (1) code block frames match your theme but syntax colors feel "off" because they were designed for Starlight's default blue palette, or (2) you override Expressive Code theme colors and some token types become unreadable against the modified background.
+**Consequences:** Every `echo` statement would need to be categorized as "log" vs "output". The numbered examples (the core educational content) should NOT be logged -- they ARE the output. But operational information (which tool is being run, what target, whether it succeeded) should be structured. Mixing both creates confusing output.
 
 **Prevention:**
-1. For a visual refresh that changes accent colors but keeps the default code theme, this works out of the box. Starlight's `useStarlightUiThemeColors` (default: true) syncs code block UI chrome with your accent color. Token colors remain the same, which is fine.
-2. Do NOT override Expressive Code themes unless you have a specific visual need. The default `starlight-dark`/`starlight-light` themes are designed for broad readability.
-3. If you want to customize code block backgrounds to match your dark theme more closely, use `expressiveCode.styleOverrides`:
-   ```js
-   starlight({
-     expressiveCode: {
-       styleOverrides: {
-         codeBackground: 'var(--sl-color-bg)',
-       },
-     },
-   }),
-   ```
-4. Test code blocks with multiple languages (bash, js, json) after any theme change. Different token types have different colors; one that is readable for bash may be unreadable for JSON.
+1. Distinguish between "script operations" (setup, validation, errors) and "educational content" (examples, explanations). Only structure the operations.
+2. Keep the existing `info/warn/error/success` functions for operational messages. These can gain structured output (JSON to a file, timestamps) without changing their terminal appearance.
+3. The `echo "   command"` lines (educational content) should NEVER go through the logging system.
+4. For diagnostic scripts (Pattern B), structured logging makes more sense because their output IS operational data. The `report_pass/fail/warn` functions could gain structured output.
+5. Implement logging levels: `--verbose` shows structured operational logs, default shows clean educational output.
 
-**Detection:** After theme change, open a tool page with code blocks. If syntax highlighting looks washed out, low contrast, or uses colors that clash with the page background, the Expressive Code theme needs attention.
+**Detection:** Run an examples.sh script after adding structured logging. If the 10 numbered examples are buried in log metadata, the educational value is destroyed.
 
-**Phase mapping:** Address after establishing the main color theme. Code block theming is a polish step, not a foundation step.
+**Affected scripts:** All 17 examples.sh scripts (educational output), all 28 use-case scripts (mixed), 3 diagnostic scripts (operational output).
 
-**Confidence:** MEDIUM -- verified via [Expressive Code configuration docs](https://expressive-code.com/reference/configuration/) and [Starlight configuration reference](https://starlight.astro.build/reference/configuration/). The interaction between Starlight CSS variables and Expressive Code is documented but the specific visual mismatch risk is inferred.
+**Phase mapping:** Address in structured logging phase. Define the boundary between "educational content" and "operational logging" before writing any code.
+
+**Confidence:** HIGH -- this is an architecture decision informed by the project's stated purpose in CLAUDE.md: "scripts demonstrating 10 open-source security tools... print example commands with explanations."
 
 ---
 
-### Pitfall 7: SVG logo not accounting for dark and light mode variants
+### Pitfall 8: `getopts` cannot parse long options, and `getopt` is not portable across macOS/Linux
 
-**What goes wrong:** You create an SVG logo with dark text (for display on light backgrounds) and set it as the single logo. In dark mode (Starlight's default), the dark logo text is invisible or barely visible against the dark header background. Or conversely, you design for dark mode and the logo vanishes in light mode.
+**What goes wrong:** The project targets both macOS (BSD tools) and Linux (GNU tools). `getopts` (bash builtin) only supports short options (`-v`, `-t`). GNU `getopt` supports long options (`--verbose`, `--target`) but macOS ships BSD `getopt` which has different syntax and does not support long options. The current help pattern `[[ "${1:-}" =~ ^(-h|--help)$ ]]` handles both short and long help flags, but a full argument parser needs more.
 
-**Why it happens:** Starlight renders the logo in the header, which has a dark background in dark mode and a light background in light mode. A single SVG with hardcoded fill colors can only be optimized for one theme. Unlike CSS-styled elements, SVG fill colors embedded in the logo file are not affected by Starlight's CSS custom properties.
+**Why it happens:** The scripts currently use positional arguments (`$1` = target, `$2` = optional parameter) and a simple help check. Adding flags like `--verbose`, `--json`, `--non-interactive` requires parsing mixed flags and positional arguments. `getopts` cannot handle long options. GNU `getopt` is not available on macOS without `brew install gnu-getopt`.
 
-**Consequences:** The logo, the most prominent branding element, is invisible or illegible in one of the two themes. Users switching themes see the logo vanish.
+**Consequences:** Either the argument parser only supports short flags (poor UX for educational scripts), or it depends on GNU `getopt` (breaks macOS portability), or a custom parser is implemented (complexity, bugs).
 
 **Prevention:**
-1. Use Starlight's built-in dark/light logo variant support:
-   ```js
-   logo: {
-     light: './src/assets/logo-light.svg',
-     dark: './src/assets/logo-dark.svg',
-   },
+1. Use a manual `while/case` argument parser. This is the most portable approach and is already the de facto standard for cross-platform bash scripts:
+   ```bash
+   while [[ $# -gt 0 ]]; do
+       case "$1" in
+           -h|--help) show_help; exit 0 ;;
+           -v|--verbose) VERBOSE=true; shift ;;
+           -j|--json) JSON_OUTPUT=true; shift ;;
+           --) shift; break ;;  # end of flags
+           -*) error "Unknown option: $1"; exit 1 ;;
+           *) break ;;  # positional args
+       esac
+   done
    ```
-2. Alternatively, design a single SVG using `currentColor` for fills/strokes. Starlight sets the text color via CSS, and `currentColor` inherits it, making the logo automatically adapt to both themes.
-3. If using the `currentColor` approach, verify it works for complex logos with multiple colors. `currentColor` only provides one color -- if your logo has multiple colors, you need the two-file approach.
-4. Set `replacesTitle: true` if the logo includes the site name, to avoid displaying both the logo and a text title.
+2. Do NOT use `getopts` -- it cannot handle long options and the scripts already have long option expectations (`--help`).
+3. Do NOT use `getopt` -- it is not portable between macOS BSD and Linux GNU.
+4. Keep the argument parser simple. These are educational scripts, not complex CLI tools. Support: `--help`, `--verbose`/`-v`, and the target as a positional argument. That is likely sufficient.
 
-**Detection:** Toggle the theme picker. If the logo becomes invisible, unreadable, or looks wrong in one mode, you need variants.
+**Detection:** Test argument parsing on both macOS and Linux (or in a Docker container).
 
-**Phase mapping:** Address during logo implementation. Decide on single-SVG (`currentColor`) or dual-SVG (light/dark variants) before creating the logo file(s).
+**Affected scripts:** All 65+ scripts if argument parsing is standardized.
 
-**Confidence:** HIGH -- verified via [Starlight customization docs](https://starlight.astro.build/guides/customization/) and [Starlight configuration reference](https://starlight.astro.build/reference/configuration/).
+**Phase mapping:** Address in argument parsing phase. Build the parser in `common.sh` as a reusable function.
+
+**Confidence:** HIGH -- verified from [getopts POSIX spec](https://pubs.opengroup.org/onlinepubs/7908799/xcu/getopts.html), [Bash Hackers getopts tutorial](https://bash-hackers.gabe565.com/howto/getopts_tutorial/), and confirmed that macOS ships BSD getopt by default.
 
 ---
 
-### Pitfall 8: Custom homepage content loses Starlight styling when using raw HTML in MDX
+### Pitfall 9: Two inconsistent interactive-guard patterns create maintenance confusion
 
-**What goes wrong:** You add custom HTML sections to the homepage MDX (card grids, feature lists, badges) using raw HTML tags (`<div>`, `<section>`, `<span>`) with inline styles or CSS classes. The raw HTML does not inherit Starlight's typography styles, spacing, or responsive behavior. Text inside raw HTML blocks uses browser defaults rather than Starlight's font stack and sizing. The homepage looks inconsistent with the rest of the documentation.
+**What goes wrong:** The codebase uses two logically equivalent but syntactically different patterns for the interactive guard:
+- Pattern A (19 scripts): `[[ -t 0 ]] || exit 0`
+- Pattern B (44 scripts): `[[ ! -t 0 ]] && exit 0`
 
-**Why it happens:** Starlight applies its typography and spacing styles to Markdown-rendered content via CSS selectors targeting `.sl-markdown-content`. Raw HTML inserted into MDX is technically inside this container but may not use the same semantic elements (e.g., `<div>` instead of `<p>`). Additionally, if you use CSS classes, those classes are not part of Starlight's design system and need explicit styling.
+These are functionally identical but look different. When adding dual-mode execution, the refactor must touch all 63 of these lines. Inconsistency increases the chance that some are missed or refactored differently.
 
-**Consequences:** The homepage has inconsistent font sizes, line heights, and spacing compared to documentation pages. Cards have different text sizing than the rest of the site. The visual refresh looks unfinished.
+**Why it happens:** The two patterns evolved at different times. The `examples.sh` scripts (written first) use Pattern A. The use-case scripts (written later) use Pattern B.
+
+**Consequences:** Not a runtime issue -- both patterns work correctly. But during the hardening refactor, if only one pattern is searched for, ~30% of scripts are missed. Additionally, code review becomes harder when the same concept is expressed two different ways.
 
 **Prevention:**
-1. Use Starlight's built-in components (`Card`, `CardGrid`, `LinkCard`) for structured content. These inherit theme styling.
-2. For custom HTML, reference Starlight's CSS variables for consistency:
-   ```css
-   .custom-section {
-     font-family: var(--sl-font);
-     font-size: var(--sl-text-body);
-     line-height: var(--sl-line-height);
-     color: var(--sl-color-text);
+1. Standardize on ONE pattern before beginning the dual-mode refactor. Recommendation: `[[ ! -t 0 ]] && exit 0` (Pattern B) because it reads more naturally ("if not interactive, exit").
+2. Or better: replace both with a function call:
+   ```bash
+   # In common.sh
+   require_interactive() {
+       [[ -t 0 ]] || exit 0
    }
    ```
-3. Avoid inline styles. Put all custom styling in the `customCss` file using Starlight variables.
-4. Compare your custom homepage content with a standard doc page side-by-side at the same viewport width. Font sizes and spacing should feel consistent.
+   Then all scripts use `require_interactive` before the demo section.
+3. Use a single search-and-replace pass to normalize before beginning other refactoring.
 
-**Detection:** Open the homepage next to a tool page. If fonts, spacing, or colors look different in the content areas, the raw HTML is not inheriting Starlight's styles.
+**Detection:** `grep -rn '\-t 0\]' scripts/` shows both patterns.
 
-**Phase mapping:** Address during homepage redesign. Prefer Starlight built-in components; only drop to raw HTML for layouts not supported by built-ins.
+**Affected scripts:** All 63 scripts with interactive demos.
 
-**Confidence:** MEDIUM -- inferred from [Starlight CSS architecture](https://starlight.astro.build/guides/css-and-tailwind/) and how MDX renders raw HTML outside Starlight's content selectors.
+**Phase mapping:** Address FIRST, before dual-mode or any other refactoring. This is a 5-minute normalization that prevents mistakes in later phases.
+
+**Confidence:** HIGH -- directly observed in codebase grep results.
+
+---
+
+### Pitfall 10: `awk "BEGIN {exit !($var > threshold)}"` pattern for float comparison is fragile under `set -e`
+
+**What goes wrong:** The diagnostic scripts use awk for floating-point comparison:
+```bash
+if awk "BEGIN {exit !($total_time > 5.0)}" 2>/dev/null; then
+```
+This works because awk's `exit` with 0 means "true" (the condition was met) and exit 1 means "false". But if `$total_time` is empty, malformed, or contains characters that break awk syntax, awk crashes with exit code 2. Under `set -e`, even inside an `if` conditional, a syntax error in the awk program can cause unexpected behavior.
+
+The pattern also embeds shell variables directly into awk programs via string interpolation, which is an injection risk if variables contain unexpected characters (e.g., from parsed network output containing spaces or special characters).
+
+**Why it happens:** Bash has no native floating-point arithmetic. The awk workaround is standard but fragile. Network tool output can contain unexpected characters, and the diagnostic scripts parse this output into variables that are then interpolated into awk programs.
+
+**Consequences:** Diagnostic scripts crash on edge cases: latency values like "N/A", negative values, or empty strings from tools that timed out. The `2>/dev/null` suppresses the awk error message but the exit code still propagates.
+
+**Prevention:**
+1. Always validate the variable before the awk comparison:
+   ```bash
+   if [[ -n "$total_time" && "$total_time" =~ ^[0-9]+\.?[0-9]*$ ]] && \
+      awk "BEGIN {exit !($total_time > 5.0)}" 2>/dev/null; then
+   ```
+2. The current code partially does this with `[[ -n "$total_time" ]] &&` but does not validate the format.
+3. Consider a helper function:
+   ```bash
+   float_gt() {
+       local a="${1:-0}" b="${2:-0}"
+       [[ "$a" =~ ^[0-9]+\.?[0-9]*$ ]] || return 1
+       [[ "$b" =~ ^[0-9]+\.?[0-9]*$ ]] || return 1
+       awk "BEGIN {exit !($a > $b)}" 2>/dev/null
+   }
+   ```
+4. Alternatively, use `bc` where available: `(( $(echo "$total_time > 5.0" | bc -l) ))` -- but `bc` is not always installed.
+
+**Detection:** Run performance diagnostic against a host that returns unusual mtr/traceroute output (e.g., all hops timeout, giving empty timing values).
+
+**Affected scripts:** `diagnostics/performance.sh` (6 instances), `diagnostics/connectivity.sh` (1 instance).
+
+**Phase mapping:** Address in strict mode phase when auditing all conditional patterns.
+
+**Confidence:** MEDIUM -- the current guards are partially effective. The injection risk is theoretical (variables come from tool output, not user input). But the empty/malformed value case is a real edge case.
+
+---
 
 ## Minor Pitfalls
 
-### Pitfall 9: Content links in MDX files do not auto-prepend base path
+---
 
-**What goes wrong:** Existing MDX files contain hardcoded links like `[tshark](/networking-tools/tools/tshark/)` with the base path already included (correct for this project). When adding new links during the visual refresh (e.g., homepage cards linking to tool pages), you might forget to include `/networking-tools/` or inconsistently use root-relative paths like `/tools/tshark/`.
+### Pitfall 11: macOS `date` syntax differs from GNU `date` for timestamp formatting
+
+**What goes wrong:** Adding structured logging with timestamps requires `date` formatting. macOS ships BSD `date` which uses `-j -f` for custom formats. GNU/Linux `date` uses `-d` for date parsing. The connectivity diagnostic already handles this (line 273-274):
+```bash
+expire_epoch=$(date -j -f "%b %d %T %Y %Z" "$expire_line" "+%s" 2>/dev/null || \
+               date -d "$expire_line" "+%s" 2>/dev/null || echo "")
+```
 
 **Prevention:**
-1. All internal links in MDX content must include the base path: `/networking-tools/guides/getting-started/`, not `/guides/getting-started/`.
-2. Starlight's sidebar navigation handles this automatically, but content links (in MDX body text, in Card `href` attributes, in LinkCard links) do not.
-3. After the visual refresh, grep all MDX files for `href=` and `link:` patterns that lack the `/networking-tools/` prefix.
+1. For timestamps in logs, `date +"%Y-%m-%dT%H:%M:%S%z"` (ISO 8601) works on both macOS and Linux.
+2. For epoch timestamps, `date +%s` works on both platforms.
+3. For parsing dates (like certificate expiry), use the fallback pattern already in the codebase.
+4. Avoid `date -v` (macOS-only) and `date -d` (GNU-only) in new code without a fallback.
 
-**Detection:** Links work in dev (where base is handled differently) but 404 on GitHub Pages.
+**Detection:** Run on both macOS and Linux (or in Docker).
 
-**Confidence:** HIGH -- verified via [Starlight base path discussion #2158](https://github.com/withastro/starlight/discussions/2158) and confirmed by examining existing MDX files which already use the base path.
+**Affected scripts:** Any new logging infrastructure added to `common.sh`.
+
+**Phase mapping:** Address in structured logging phase.
+
+**Confidence:** HIGH -- the codebase already handles this in `connectivity.sh`.
 
 ---
 
-### Pitfall 10: Component override complexity exceeds what is needed for a visual refresh
+### Pitfall 12: Adding argument parsing to scripts that share positional parameter conventions with the Makefile
 
-**What goes wrong:** The temptation to override Starlight components (Hero, Header, Footer, PageFrame) for visual customization leads to creating custom `.astro` component files. These overrides must correctly handle Astro slots, named slots, prop drilling, and stay compatible across Starlight updates. For a visual refresh, this is almost always unnecessary.
+**What goes wrong:** The Makefile passes `TARGET` to scripts as `$1`:
+```makefile
+nmap: ## Run nmap examples
+    @bash scripts/nmap/examples.sh $(TARGET)
+```
+If argument parsing is added and the script starts expecting `--target` instead of a positional argument, all 50+ Makefile targets break simultaneously.
 
 **Prevention:**
-1. Do NOT override components for visual changes. CSS custom properties and the `customCss` option handle 95% of visual refresh needs.
-2. The only component override that might be justified for this project is the Hero component if the homepage needs a radically different layout. Even then, try CSS-only approaches first.
-3. If you must override a component, keep the override minimal -- import and re-render the original component with modified props rather than rebuilding from scratch.
+1. Maintain backward compatibility: positional `$1` MUST still work as the target. New flags are additive.
+2. The parser should treat the first non-flag argument as TARGET:
+   ```bash
+   # These must all work:
+   # ./script.sh 192.168.1.1
+   # ./script.sh --verbose 192.168.1.1
+   # ./script.sh 192.168.1.1 --verbose
+   ```
+3. Update the Makefile only after all scripts are updated and tested.
+4. Do NOT add `--` requirements between flags and positional arguments for simple scripts.
 
-**Detection:** You are creating files in `src/components/` that override Starlight internals. This is a signal you are overengineering the visual refresh.
+**Detection:** Run `make nmap TARGET=scanme.nmap.org` after adding argument parsing. Must still work.
 
-**Confidence:** HIGH -- verified via [Starlight component override docs](https://starlight.astro.build/guides/overriding-components/) which explicitly recommend exhausting CSS options before component overrides.
+**Affected scripts:** All 50+ scripts called from Makefile targets.
+
+**Phase mapping:** Address in argument parsing phase. Test Makefile compatibility before and after.
+
+**Confidence:** HIGH -- directly observed from Makefile analysis.
 
 ---
 
-### Pitfall 11: Sidebar ordering confusion when mixing frontmatter `order` with autogenerate
+### Pitfall 13: Over-engineering the logging system with external dependencies (jq, logger, etc.)
 
-**What goes wrong:** Some tool pages already have `sidebar: { order: N }` in their frontmatter (e.g., nmap has `order: 1`). When cleaning up the sidebar, you might change some orders, add orders to previously unordered pages, or remove them. Pages without an explicit `order` sort alphabetically, while pages with `order` sort numerically. Mixing the two creates unpredictable ordering where some pages appear "out of place."
+**What goes wrong:** Structured logging articles recommend using `jq` for JSON output, `logger` for syslog integration, or external logging libraries. Adding any external dependency to the logging path means every script now requires that dependency. The project's value proposition is "run one command, get what you need" -- adding `jq` as a requirement for basic script operation contradicts this.
 
 **Prevention:**
-1. Either give ALL pages in a group an explicit `order` value, or give NONE of them explicit ordering (use alphabetical).
-2. If using explicit ordering, use increments of 10 (10, 20, 30...) to leave room for future insertions.
-3. After sidebar changes, run the dev server and verify sidebar order in the browser. The build output does not show sidebar order.
+1. The logging system must use ONLY bash builtins and `printf`/`date` (universally available).
+2. JSON output (if needed) should be generated with `printf` string formatting, not `jq`.
+3. `logger` (syslog) is optional and should never be required for script operation.
+4. The default output MUST remain human-readable colored text (the current format). Structured output is an OPT-IN mode triggered by `--json` or an environment variable like `LOG_FORMAT=json`.
+5. Do not add `jq`, `yq`, or any other JSON processor as a dependency.
 
-**Detection:** Sidebar shows nmap at position 1 (explicit order), then aircrack-ng (alphabetical), then curl (alphabetical), then hashcat (alphabetical) -- but ffuf somehow appears between curl and hashcat because it has an explicit order that happens to sort it there.
+**Detection:** Run `scripts/check-tools.sh` -- the logging system should work even if only the most basic Unix tools are installed.
 
-**Confidence:** HIGH -- verified via [Starlight sidebar docs](https://starlight.astro.build/guides/sidebar/).
+**Affected scripts:** `common.sh` logging functions, all 65+ scripts that use `info/warn/error/success`.
+
+**Phase mapping:** Address in structured logging phase. Define constraints before implementation.
+
+**Confidence:** HIGH -- architectural decision based on project principles in CLAUDE.md.
 
 ---
 
-### Pitfall 12: Dev server hot reload does not reflect astro.config.mjs changes
+### Pitfall 14: Dual-mode `main()` wrapper hides errors that `set -e` would catch at top level
 
-**What goes wrong:** You edit `astro.config.mjs` to add `customCss`, change the `logo`, modify `favicon`, or update sidebar configuration. The dev server does not pick up the changes. The old configuration persists. You think your changes are not working and start debugging the wrong thing.
+**What goes wrong:** Wrapping script logic in `main() { ... }` and calling it as `main "$@"` changes how `set -e` behaves. If `main` is ever called from a conditional context (e.g., `if main; then` or `main || handle_error`), `set -e` is SUSPENDED inside `main`. Errors that would have killed the script at top level now silently pass.
+
+**Why it happens:** This is bash spec behavior: "The ERR trap and the -e setting are not inherited by command substitutions" and "The -e setting is disabled while executing a compound list following the while, until, if, or elif reserved word, a pipeline beginning with !, or any command of an AND-OR list except the last."
+
+**Consequences:** A script that "works" when run directly may silently swallow errors when called from another script with error handling.
 
 **Prevention:**
-1. After any change to `astro.config.mjs`, restart the dev server. Changes to this file are NOT hot-reloaded.
-2. CSS file changes (the files referenced by `customCss`) ARE hot-reloaded after the initial config is loaded.
-3. If you add a new file to `customCss`, you need a restart. If you edit an already-referenced CSS file, hot reload works.
+1. The `main` function should ALWAYS be called unconditionally at the bottom of the script:
+   ```bash
+   [[ "${BASH_SOURCE[0]}" == "$0" ]] && main "$@"
+   ```
+   Never: `[[ "${BASH_SOURCE[0]}" == "$0" ]] && main "$@" || exit 1`
+2. Do not call `main` from conditional contexts.
+3. Inside `main`, use explicit error checking (`if ! command; then exit 1; fi`) rather than relying on `set -e` for critical operations.
+4. For library usage (when sourced), callers should call individual functions, not `main`.
 
-**Detection:** You added `customCss: ['./src/styles/custom.css']` to the config and nothing happens. Or you changed the logo path and the old logo still shows.
+**Detection:** Hard to detect. Requires understanding of bash's `set -e` scoping rules.
 
-**Confidence:** HIGH -- standard Astro behavior, not Starlight-specific.
+**Affected scripts:** Any script refactored to use `main()` wrapper.
+
+**Phase mapping:** Address in dual-mode execution phase. Document the pattern clearly.
+
+**Confidence:** HIGH -- verified from [BashFAQ/105](https://mywiki.wooledge.org/BashFAQ/105) and [Greg's Wiki](https://mywiki.wooledge.org/BashGuide/Practices).
+
+---
+
+### Pitfall 15: `declare -A` (associative array) in `check-tools.sh` requires bash 4+, but macOS ships bash 3.2
+
+**What goes wrong:** `check-tools.sh` uses `declare -A TOOLS=()` (line 27) for associative arrays. macOS ships bash 3.2 (from 2007, due to GPLv3 licensing). Associative arrays require bash 4.0+. The script currently works because most macOS users have a newer bash from Homebrew, and the shebang `#!/usr/bin/env bash` picks up the Homebrew version.
+
+**Why it happens:** macOS system bash is `/bin/bash` (version 3.2). Homebrew bash is `/opt/homebrew/bin/bash` or `/usr/local/bin/bash` (version 5.x). The `#!/usr/bin/env bash` shebang finds whichever is first in `$PATH`. If a user has not installed Homebrew bash, `declare -A` fails with a syntax error.
+
+**Consequences:** Not a new issue -- this exists today. But when hardening scripts, be aware that adding new bash 4+ features (like `${var,,}` for lowercase, `${!array[@]}` for indirect expansion, or `readarray`/`mapfile`) makes the macOS system bash problem worse.
+
+**Prevention:**
+1. Document that bash 4+ is required in the project README.
+2. `common.sh` could add a version check: `[[ ${BASH_VERSINFO[0]} -lt 4 ]] && error "Requires bash 4+" && exit 1`.
+3. Avoid adding more bash 4+ features unless they provide clear value.
+4. The `_run_with_timeout` function in `common.sh` already handles the macOS `timeout` absence -- apply the same portability mindset to bash features.
+
+**Detection:** Run `check-tools.sh` with `/bin/bash` on macOS: `/bin/bash scripts/check-tools.sh`.
+
+**Affected scripts:** `check-tools.sh` (currently), potentially all scripts if new features are added.
+
+**Phase mapping:** Address at the start of the hardening work with a bash version check in `common.sh`.
+
+**Confidence:** HIGH -- verified: macOS Sequoia still ships bash 3.2.57.
+
+---
 
 ## Phase-Specific Warnings
 
 | Phase Topic | Likely Pitfall | Mitigation |
 |-------------|---------------|------------|
-| Custom CSS theme setup | Cascade layer override breaks Tabs/Cards on existing pages (Pitfall 1) | Only override CSS custom properties, not element selectors |
-| Dark/light theme colors | Orange/amber accent unreadable in light mode (Pitfall 2) | Define both `:root` and `[data-theme='light']:root` overrides; test both themes |
-| SVG logo addition | Logo invisible in one theme (Pitfall 7) | Use dark/light variants or `currentColor` fill |
-| Favicon configuration | Favicon 404 on GitHub Pages due to base path (Pitfall 3) | Use Starlight's `favicon` config option; test with `astro preview` |
-| Homepage card layout | Cards stretch on wide screens / overflow on mobile (Pitfall 4) | Use built-in `CardGrid`/`Card` components; constrain max-width |
-| Homepage custom HTML | Raw HTML loses Starlight typography (Pitfall 8) | Reference Starlight CSS variables; prefer built-in components |
-| Homepage internal links | Links missing `/networking-tools/` prefix (Pitfall 9) | Include base path in all MDX content links |
-| Sidebar cleanup | Duplicate index entries in autogenerated groups (Pitfall 5) | Use `sidebar: { hidden: true }` in index.md frontmatter |
-| Sidebar reordering | Mixed explicit/alphabetical ordering (Pitfall 11) | Use consistent ordering strategy: all explicit or all alphabetical |
-| Code block appearance | Syntax highlighting clashes with new theme (Pitfall 6) | Keep default Expressive Code themes; only adjust frame colors if needed |
-| Config changes | Dev server not reflecting config edits (Pitfall 12) | Restart dev server after astro.config.mjs changes |
-| Overall approach | Over-engineering with component overrides (Pitfall 10) | CSS variables first; component overrides as absolute last resort |
+| Strict mode audit | `grep` without `|| true` in non-conditional context (Pitfall 3) | Audit every grep call; categorize by context |
+| Strict mode audit | `((counter++))` from zero (Pitfall 2) | Standardize on `var=$((var + 1))` |
+| Strict mode audit | awk float comparison with empty/malformed variables (Pitfall 10) | Add format validation before awk calls |
+| Structured logging | Logging metadata obscures educational content (Pitfall 7) | Separate "operations" from "educational content" |
+| Structured logging | External dependencies like jq (Pitfall 13) | Use only bash builtins for logging |
+| Structured logging | macOS date format differences (Pitfall 11) | Use ISO 8601 format which works on both platforms |
+| Argument parsing | `getopt` not portable (Pitfall 8) | Use manual `while/case` parser |
+| Argument parsing | Makefile backward compatibility (Pitfall 12) | Positional `$1` must still work as target |
+| Argument parsing | `set -u` after shift (Pitfall 6) | Check `$#` before accessing `$1` in parse loops |
+| Dual-mode execution | `set -e` not inherited in conditional contexts (Pitfall 14) | Call `main` unconditionally |
+| Dual-mode execution | `set -e` propagation when sourced (Pitfall 5) | Do not add dual-mode to `common.sh` |
+| Pre-refactor cleanup | Two interactive guard patterns (Pitfall 9) | Normalize to one pattern before other refactoring |
+| Cross-platform | bash 4+ features on macOS system bash (Pitfall 15) | Add version check to `common.sh` |
+| Tool wrappers | stderr output tools under pipefail (Pitfall 4) | Document per-tool stderr behavior |
+
+## Over-Engineering Traps
+
+These are not pitfalls in the traditional sense, but traps where the hardening work itself becomes counterproductive.
+
+### Trap A: Adding `set -e` error handling that is MORE fragile than no error handling
+
+`set -e` has so many exceptions and edge cases that it can give a false sense of safety. Code that "works" without `set -e` can break WITH it due to the complex rules about conditional contexts, subshells, and command lists. The current codebase already has `set -euo pipefail` in `common.sh` and handles the known edge cases. Do not add additional layers of error handling on top (like trap ERR) unless there is a specific gap.
+
+### Trap B: Making every script accept 15 flags when it only needs 2
+
+These are educational scripts. The argument parser should support `--help`, `--verbose` (maybe), and the target as a positional argument. Do not add `--format`, `--output-file`, `--timeout`, `--no-color`, `--config` etc. unless there is a demonstrated need. Each flag is a maintenance burden multiplied by 65+ scripts.
+
+### Trap C: Building a "framework" instead of hardening scripts
+
+The goal is to harden existing scripts, not to build a bash framework. If the common.sh changes require every script to be restructured around a new execution model, the scope has expanded beyond the original goal. Changes to common.sh should be additive -- new functions that scripts can opt into, not breaking changes to existing functions.
+
+### Trap D: JSON logging that nobody will parse
+
+If no downstream system (CI, monitoring, log aggregation) consumes JSON logs, then JSON output is overhead without benefit. Add structured logging only if there is a consumer. For this educational project, the consumer is a human reading the terminal -- the current colored text format is already optimized for this consumer.
 
 ## Sources
 
-- [Starlight CSS & Styling guide](https://starlight.astro.build/guides/css-and-tailwind/) -- cascade layer system, customCss usage
-- [Starlight cascade layer issue #3162](https://github.com/withastro/starlight/issues/3162) -- layer ordering bugs and workarounds
-- [Starlight customCss reset issue #2237](https://github.com/withastro/starlight/issues/2237) -- element selectors override Starlight
-- [Starlight customization guide](https://starlight.astro.build/guides/customization/) -- logo configuration, dark/light variants
-- [Starlight configuration reference](https://starlight.astro.build/reference/configuration/) -- favicon, logo, head, customCss options
-- [Starlight frontmatter reference](https://starlight.astro.build/reference/frontmatter/) -- sidebar.hidden, template, hero
-- [Starlight sidebar guide](https://starlight.astro.build/guides/sidebar/) -- autogenerate, ordering, hidden pages
-- [Starlight component overrides guide](https://starlight.astro.build/guides/overriding-components/) -- when and how to override components
-- [Starlight overrides reference](https://starlight.astro.build/reference/overrides/) -- slot transfer requirements
-- [Starlight props.css source](https://github.com/withastro/starlight/blob/main/packages/starlight/style/props.css) -- complete CSS custom property list
-- [Starlight index page issue #370](https://github.com/withastro/starlight/issues/370) -- duplicate sidebar entries for index.md
-- [Starlight dark mode discussion #1829](https://github.com/withastro/starlight/discussions/1829) -- dark/light theme handling
-- [Starlight favicon discussion #1058](https://github.com/withastro/starlight/discussions/1058) -- favicon configuration gotchas
-- [Starlight favicon base path issue #2647](https://github.com/withastro/starlight/issues/2647) -- favicon with absolute URL prefix
-- [Starlight base path discussion #2158](https://github.com/withastro/starlight/discussions/2158) -- base path and content links
-- [Astro base path issue #4229](https://github.com/withastro/astro/issues/4229) -- asset paths with base option
-- [Expressive Code configuration](https://expressive-code.com/reference/configuration/) -- code block theming options
-- [Starlight Card Grid docs](https://starlight.astro.build/components/card-grids/) -- built-in card layout components
-- [Starlight Pages guide](https://starlight.astro.build/guides/pages/) -- splash template behavior
+- [BashFAQ/105 - Why doesn't set -e do what I expected?](https://mywiki.wooledge.org/BashFAQ/105) -- comprehensive set -e pitfalls
+- [Unofficial Bash Strict Mode](http://redsymbol.net/articles/unofficial-bash-strict-mode/) -- grep, arithmetic, and pipefail issues
+- [Bash Hackers Wiki - Arithmetic Expressions](https://bash-hackers.gabe565.com/syntax/arith_expr/) -- exit code behavior of `(( ))`
+- [Greg's Wiki - BashGuide/Practices](https://mywiki.wooledge.org/BashGuide/Practices) -- sourcing, error handling, and dual-mode patterns
+- [Greg's Wiki - BashPitfalls](https://mywiki.wooledge.org/BashPitfalls) -- comprehensive list of common bash mistakes
+- [getopts POSIX specification](https://pubs.opengroup.org/onlinepubs/7908799/xcu/getopts.html) -- long option limitations
+- [Bash Hackers - getopts tutorial](https://bash-hackers.gabe565.com/howto/getopts_tutorial/) -- getopts capabilities and constraints
+- [set -e pipefail explanation (GitHub Gist)](https://gist.github.com/mohanpedala/1e2ff5661761d3abd0385e8223e16425) -- community-maintained set -e reference
+- Codebase analysis: 65+ scripts in `/Users/patrykattc/work/git/networking-tools/scripts/`, `common.sh`, Makefile
