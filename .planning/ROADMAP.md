@@ -24,7 +24,7 @@ Archived to `.planning/milestones/v1.0-ROADMAP.md`
 - Integer phases (8, 9, 10, 11): Planned milestone work
 - Decimal phases (e.g., 9.1): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 8: Theme Foundation** - Dark + orange/amber accent palette with light mode support
+- [x] **Phase 8: Theme Foundation** - Dark + orange/amber accent palette with light mode support (completed 2026-02-11)
 - [ ] **Phase 9: Brand Identity** - Custom SVG logo and matching favicon
 - [ ] **Phase 10: Navigation Cleanup** - Remove redundant sidebar index entries
 - [ ] **Phase 11: Homepage Redesign** - Hero section, tool card grid, feature highlights, and guide links
@@ -43,7 +43,7 @@ Archived to `.planning/milestones/v1.0-ROADMAP.md`
 **Plans**: 1 plan
 
 Plans:
-- [ ] 08-01-PLAN.md -- Orange/amber CSS custom property overrides and config registration
+- [x] 08-01-PLAN.md -- Orange/amber CSS custom property overrides and config registration
 
 ### Phase 9: Brand Identity
 **Goal**: Site header and browser tab display a recognizable project-specific brand instead of generic Starlight defaults
@@ -92,7 +92,7 @@ Phases execute in numeric order: 8 -> 9 -> 10 -> 11
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 8. Theme Foundation | v1.1 | 0/1 | Not started | - |
+| 8. Theme Foundation | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 9. Brand Identity | v1.1 | 0/TBD | Not started | - |
 | 10. Navigation Cleanup | v1.1 | 0/TBD | Not started | - |
 | 11. Homepage Redesign | v1.1 | 0/TBD | Not started | - |
