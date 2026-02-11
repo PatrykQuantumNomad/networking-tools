@@ -3,7 +3,7 @@
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-v|--verbose] [-q|--quiet]"
     echo ""
     echo "Description:"
     echo "  Inspects SSL/TLS certificates using curl. Shows how to check"
@@ -15,10 +15,12 @@ show_help() {
     echo "  $(basename "$0")                  # Check example.com"
     echo "  $(basename "$0") google.com       # Check google.com cert"
     echo "  $(basename "$0") 10.0.0.1         # Check internal server"
+    echo "  $(basename "$0") -x google.com    # Execute checks against google.com"
     echo "  $(basename "$0") --help           # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd curl "apt install curl (Debian/Ubuntu) | brew install curl (macOS)"
 
@@ -27,6 +29,7 @@ TARGET="${1:-example.com}"
 TARGET="${TARGET#https://}"
 TARGET="${TARGET#http://}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Check SSL Certificate ==="
@@ -95,11 +98,13 @@ echo "    curl -v https://${TARGET} 2>&1 | grep -i 'OCSP'"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Check SSL certificate for ${TARGET} now? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: curl -vI https://${TARGET} 2>&1 | grep -E 'subject:|issuer:|expire|SSL connection'"
-    echo ""
-    curl -vI "https://${TARGET}" 2>&1 | grep -E "subject:|issuer:|expire|SSL connection"
+    read -rp "Check SSL certificate for ${TARGET} now? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: curl -vI https://${TARGET} 2>&1 | grep -E 'subject:|issuer:|expire|SSL connection'"
+        echo ""
+        curl -vI "https://${TARGET}" 2>&1 | grep -E "subject:|issuer:|expire|SSL connection"
+    fi
 fi

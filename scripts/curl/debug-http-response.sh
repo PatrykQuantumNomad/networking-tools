@@ -3,7 +3,7 @@
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-v|--verbose] [-q|--quiet]"
     echo ""
     echo "Description:"
     echo "  Diagnoses HTTP response behavior using curl's timing and debug"
@@ -15,15 +15,18 @@ show_help() {
     echo "  $(basename "$0")                           # Debug example.com"
     echo "  $(basename "$0") http://localhost:8080      # Debug local server"
     echo "  $(basename "$0") https://api.example.com    # Debug API endpoint"
+    echo "  $(basename "$0") -x https://example.com     # Execute timing checks"
     echo "  $(basename "$0") --help                     # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd curl "apt install curl (Debian/Ubuntu) | brew install curl (macOS)"
 
 TARGET="${1:-https://example.com}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Debug HTTP Response ==="
@@ -96,11 +99,13 @@ echo "    curl --trace curl-trace.log --trace-time ${TARGET} -o /dev/null"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Run timing breakdown on ${TARGET} now? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: curl -o /dev/null -s -w <timing-format> ${TARGET}"
-    echo ""
-    curl -o /dev/null -s -w "DNS Lookup:    %{time_namelookup}s\nTCP Connect:   %{time_connect}s\nTLS Handshake: %{time_appconnect}s\nFirst Byte:    %{time_starttransfer}s\nTotal:         %{time_total}s\n" "$TARGET"
+    read -rp "Run timing breakdown on ${TARGET} now? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: curl -o /dev/null -s -w <timing-format> ${TARGET}"
+        echo ""
+        curl -o /dev/null -s -w "DNS Lookup:    %{time_namelookup}s\nTCP Connect:   %{time_connect}s\nTLS Handshake: %{time_appconnect}s\nFirst Byte:    %{time_starttransfer}s\nTotal:         %{time_total}s\n" "$TARGET"
+    fi
 fi

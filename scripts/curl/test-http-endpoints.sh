@@ -3,7 +3,7 @@
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-v|--verbose] [-q|--quiet]"
     echo ""
     echo "Description:"
     echo "  Demonstrates HTTP method testing with curl. Shows how to send"
@@ -15,15 +15,18 @@ show_help() {
     echo "  $(basename "$0")                          # Test example.com"
     echo "  $(basename "$0") http://localhost:8080     # Test local server"
     echo "  $(basename "$0") https://api.example.com   # Test API endpoint"
+    echo "  $(basename "$0") -x https://example.com    # Execute HTTP method tests"
     echo "  $(basename "$0") --help                    # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd curl "apt install curl (Debian/Ubuntu) | brew install curl (macOS)"
 
 TARGET="${1:-https://example.com}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Test HTTP Endpoints ==="
@@ -73,14 +76,12 @@ echo "   curl -X PATCH -H 'Content-Type: application/json' -d '{\"status\":\"act
 echo ""
 
 # 7. HEAD request
-info "7) HEAD request — headers only, no body"
-echo "   curl -I -s ${TARGET}"
-echo ""
+run_or_show "7) HEAD request — headers only, no body" \
+    curl -I -s "$TARGET"
 
 # 8. OPTIONS request
-info "8) OPTIONS request — discover allowed methods and CORS"
-echo "   curl -X OPTIONS -i -s ${TARGET}"
-echo ""
+run_or_show "8) OPTIONS request — discover allowed methods and CORS" \
+    curl -X OPTIONS -i -s "$TARGET"
 
 # 9. Custom User-Agent
 info "9) Send with custom User-Agent"
@@ -93,12 +94,14 @@ echo "    curl -L -v -s -o /dev/null ${TARGET} 2>&1 | grep -E '< HTTP/|< locatio
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Check HTTP status code for ${TARGET} now? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: curl -s -o /dev/null -w 'HTTP %{http_code}' ${TARGET}"
-    echo ""
-    curl -s -o /dev/null -w "HTTP %{http_code}" "$TARGET"
-    echo ""
+    read -rp "Check HTTP status code for ${TARGET} now? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: curl -s -o /dev/null -w 'HTTP %{http_code}' ${TARGET}"
+        echo ""
+        curl -s -o /dev/null -w "HTTP %{http_code}" "$TARGET"
+        echo ""
+    fi
 fi
