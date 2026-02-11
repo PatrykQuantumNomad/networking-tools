@@ -16,12 +16,14 @@ show_help() {
     echo "  $(basename "$0") --help       # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd nikto "brew install nikto"
 
 HOSTFILE="${1:-}"
 
+confirm_execute "${HOSTFILE:-multiple hosts}"
 safety_banner
 
 info "=== Nikto Multi-Host Scanning ==="
@@ -92,27 +94,29 @@ echo "    nmap -sn 192.168.1.0/24 -oG - | awk '/Up/{print \$2}' > hosts.txt && n
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-if [[ -z "$HOSTFILE" ]]; then
-    read -rp "Scan localhost on all lab ports (8080,3030,8888,8180) with quick tuning? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: nikto -h localhost -p 8080,3030,8888,8180 -Tuning 2 -maxtime 60s"
-        echo ""
-        nikto -h localhost -p 8080,3030,8888,8180 -Tuning 2 -maxtime 60s || true
-    fi
-else
-    if [[ -f "$HOSTFILE" ]]; then
-        read -rp "Run a quick scan against hosts in ${HOSTFILE}? [y/N] " answer
+    if [[ -z "$HOSTFILE" ]]; then
+        read -rp "Scan localhost on all lab ports (8080,3030,8888,8180) with quick tuning? [y/N] " answer
         if [[ "$answer" =~ ^[Yy]$ ]]; then
-            info "Running: nikto -h ${HOSTFILE} -Tuning 2 -maxtime 120s"
+            info "Running: nikto -h localhost -p 8080,3030,8888,8180 -Tuning 2 -maxtime 60s"
             echo ""
-            nikto -h "$HOSTFILE" -Tuning 2 -maxtime 120s || true
+            nikto -h localhost -p 8080,3030,8888,8180 -Tuning 2 -maxtime 60s || true
         fi
     else
-        error "File not found: ${HOSTFILE}"
-        info "Create a host file with one target per line, e.g.:"
-        echo "   echo 'http://192.168.1.10' > hosts.txt"
-        echo "   echo 'http://192.168.1.20:8080' >> hosts.txt"
+        if [[ -f "$HOSTFILE" ]]; then
+            read -rp "Run a quick scan against hosts in ${HOSTFILE}? [y/N] " answer
+            if [[ "$answer" =~ ^[Yy]$ ]]; then
+                info "Running: nikto -h ${HOSTFILE} -Tuning 2 -maxtime 120s"
+                echo ""
+                nikto -h "$HOSTFILE" -Tuning 2 -maxtime 120s || true
+            fi
+        else
+            error "File not found: ${HOSTFILE}"
+            info "Create a host file with one target per line, e.g.:"
+            echo "   echo 'http://192.168.1.10' > hosts.txt"
+            echo "   echo 'http://192.168.1.20:8080' >> hosts.txt"
+        fi
     fi
 fi

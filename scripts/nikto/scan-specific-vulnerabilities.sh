@@ -16,12 +16,14 @@ show_help() {
     echo "  $(basename "$0") --help                   # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd nikto "brew install nikto"
 
 TARGET="${1:-http://localhost:8080}"
 
+confirm_execute "$TARGET"
 safety_banner
 
 info "=== Nikto Targeted Vulnerability Scanning ==="
@@ -48,70 +50,62 @@ echo "                                x = Reverse Tuning (exclude instead of inc
 echo ""
 
 # 1. SQL injection only
-info "1) Scan for SQL injection only"
-echo "   nikto -h ${TARGET} -Tuning 9"
-echo ""
+run_or_show "1) Scan for SQL injection only" \
+    nikto -h "$TARGET" -Tuning 9
 
 # 2. XSS only
-info "2) Scan for XSS only"
-echo "   nikto -h ${TARGET} -Tuning 4"
-echo ""
+run_or_show "2) Scan for XSS only" \
+    nikto -h "$TARGET" -Tuning 4
 
 # 3. File upload issues
-info "3) Scan for file upload issues"
-echo "   nikto -h ${TARGET} -Tuning 0"
-echo ""
+run_or_show "3) Scan for file upload issues" \
+    nikto -h "$TARGET" -Tuning 0
 
 # 4. Interesting files/directories
-info "4) Scan for interesting files and directories"
-echo "   nikto -h ${TARGET} -Tuning 2"
-echo ""
+run_or_show "4) Scan for interesting files and directories" \
+    nikto -h "$TARGET" -Tuning 2
 
 # 5. Information disclosure
-info "5) Scan for information disclosure"
-echo "   nikto -h ${TARGET} -Tuning 3"
-echo ""
+run_or_show "5) Scan for information disclosure" \
+    nikto -h "$TARGET" -Tuning 3
 
 # 6. Command execution
-info "6) Scan for command execution vulnerabilities"
-echo "   nikto -h ${TARGET} -Tuning 8"
-echo ""
+run_or_show "6) Scan for command execution vulnerabilities" \
+    nikto -h "$TARGET" -Tuning 8
 
 # 7. Combined: SQLi + XSS + command exec
-info "7) Combine: SQLi + XSS + command execution"
-echo "   nikto -h ${TARGET} -Tuning 498"
-echo ""
+run_or_show "7) Combine: SQLi + XSS + command execution" \
+    nikto -h "$TARGET" -Tuning 498
 
 # 8. Misconfigurations
-info "8) Scan for server misconfigurations"
-echo "   nikto -h ${TARGET} -Tuning b"
-echo ""
+run_or_show "8) Scan for server misconfigurations" \
+    nikto -h "$TARGET" -Tuning b
 
 # 9. Remote file retrieval
-info "9) Scan for remote file retrieval"
-echo "   nikto -h ${TARGET} -Tuning 7"
-echo ""
+run_or_show "9) Scan for remote file retrieval" \
+    nikto -h "$TARGET" -Tuning 7
 
 # 10. Full scan excluding DOS tests
-info "10) Full scan excluding denial-of-service tests"
-echo "    nikto -h ${TARGET} -Tuning x6"
-echo ""
+run_or_show "10) Full scan excluding denial-of-service tests" \
+    nikto -h "$TARGET" -Tuning x6
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-if [[ "$TARGET" == *"localhost"* || "$TARGET" == *"127.0.0.1"* ]]; then
-    read -rp "Run a quick Tuning 2 scan (interesting files) against ${TARGET}? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: nikto -h ${TARGET} -Tuning 2"
-        echo ""
-        nikto -h "$TARGET" -Tuning 2 || true
-    fi
-else
-    read -rp "Run a quick Tuning 2 scan (interesting files) against ${TARGET}? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: nikto -h ${TARGET} -Tuning 2"
-        echo ""
-        nikto -h "$TARGET" -Tuning 2 || true
+    if [[ "$TARGET" == *"localhost"* || "$TARGET" == *"127.0.0.1"* ]]; then
+        read -rp "Run a quick Tuning 2 scan (interesting files) against ${TARGET}? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: nikto -h ${TARGET} -Tuning 2"
+            echo ""
+            nikto -h "$TARGET" -Tuning 2 || true
+        fi
+    else
+        read -rp "Run a quick Tuning 2 scan (interesting files) against ${TARGET}? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: nikto -h ${TARGET} -Tuning 2"
+            echo ""
+            nikto -h "$TARGET" -Tuning 2 || true
+        fi
     fi
 fi

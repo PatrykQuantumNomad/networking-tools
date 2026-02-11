@@ -16,12 +16,14 @@ show_help() {
     echo "  $(basename "$0") --help                   # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd nikto "brew install nikto"
 
 TARGET="${1:-http://localhost:8080}"
 
+confirm_execute "$TARGET"
 safety_banner
 
 info "=== Nikto Authenticated Scanning ==="
@@ -39,19 +41,16 @@ echo "   This typically doubles or triples the attack surface found."
 echo ""
 
 # 1. HTTP Basic Authentication
-info "1) HTTP Basic Authentication"
-echo "   nikto -h ${TARGET} -id admin:password"
-echo ""
+run_or_show "1) HTTP Basic Authentication" \
+    nikto -h "$TARGET" -id admin:password
 
 # 2. Cookie-based authentication
-info "2) Cookie-based authentication"
-echo "   nikto -h ${TARGET} -C \"PHPSESSID=abc123; security=low\""
-echo ""
+run_or_show "2) Cookie-based authentication" \
+    nikto -h "$TARGET" -C "PHPSESSID=abc123; security=low"
 
 # 3. Custom header authentication
-info "3) Custom header authentication (Bearer token)"
-echo "   nikto -h ${TARGET} -H \"Authorization: Bearer token123\""
-echo ""
+run_or_show "3) Custom header authentication (Bearer token)" \
+    nikto -h "$TARGET" -H "Authorization: Bearer token123"
 
 # 4. Scan DVWA with low security
 info "4) Scan DVWA with low security setting"
@@ -69,9 +68,8 @@ echo "   nikto -h ${TARGET} -id admin:password -Tuning 249"
 echo ""
 
 # 7. Follow redirects during auth scan
-info "7) Follow redirects during authenticated scan"
-echo "   nikto -h ${TARGET} -id admin:password -followredirects"
-echo ""
+run_or_show "7) Follow redirects during authenticated scan" \
+    nikto -h "$TARGET" -id admin:password -followredirects
 
 # 8. Authenticated scan saving output
 info "8) Authenticated scan saving HTML report"
@@ -79,30 +77,30 @@ echo "   nikto -h ${TARGET} -id admin:password -output auth_scan.html -Format ht
 echo ""
 
 # 9. Use a proxy to capture authenticated traffic
-info "9) Use a proxy to capture authenticated traffic (e.g., Burp Suite)"
-echo "   nikto -h ${TARGET} -id admin:password -useproxy http://127.0.0.1:8080"
-echo ""
+run_or_show "9) Use a proxy to capture authenticated traffic (e.g., Burp Suite)" \
+    nikto -h "$TARGET" -id admin:password -useproxy http://127.0.0.1:8080
 
 # 10. Digest authentication
-info "10) Digest authentication"
-echo "    nikto -h ${TARGET} -id admin:password -authtype digest"
-echo ""
+run_or_show "10) Digest authentication" \
+    nikto -h "$TARGET" -id admin:password -authtype digest
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-if [[ "$TARGET" == *"localhost:8080"* || "$TARGET" == *"127.0.0.1:8080"* ]]; then
-    read -rp "Run a quick authenticated scan against DVWA (admin:password)? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: nikto -h ${TARGET} -id admin:password -Tuning 2 -maxtime 60s"
-        echo ""
-        nikto -h "$TARGET" -id admin:password -Tuning 2 -maxtime 60s || true
-    fi
-else
-    read -rp "Run a quick authenticated scan against ${TARGET}? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: nikto -h ${TARGET} -id admin:password -Tuning 2 -maxtime 60s"
-        echo ""
-        nikto -h "$TARGET" -id admin:password -Tuning 2 -maxtime 60s || true
+    if [[ "$TARGET" == *"localhost:8080"* || "$TARGET" == *"127.0.0.1:8080"* ]]; then
+        read -rp "Run a quick authenticated scan against DVWA (admin:password)? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: nikto -h ${TARGET} -id admin:password -Tuning 2 -maxtime 60s"
+            echo ""
+            nikto -h "$TARGET" -id admin:password -Tuning 2 -maxtime 60s || true
+        fi
+    else
+        read -rp "Run a quick authenticated scan against ${TARGET}? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: nikto -h ${TARGET} -id admin:password -Tuning 2 -maxtime 60s"
+            echo ""
+            nikto -h "$TARGET" -id admin:password -Tuning 2 -maxtime 60s || true
+        fi
     fi
 fi
