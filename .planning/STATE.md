@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Phase: 7 of 7 (Web Enumeration Tools)
-Plan: 3 of 3 in current phase
-Status: Executing Phase 7 -- Plan 03 (wordlists & USECASES) complete
-Last activity: 2026-02-10 -- Completed 07-03 wordlist downloader extension and USECASES.md update
+Plan: 2 of 3 in current phase (07-01 and 07-03 complete, 07-02 remaining)
+Status: Executing Phase 7 -- Plan 01 (gobuster) complete
+Last activity: 2026-02-11 -- Completed 07-01 gobuster scripts, check-tools integration, and site docs
 
-Progress: [####################] 100%
+Progress: [###################.] 95%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
+- Total plans completed: 18
 - Average duration: 4min
-- Total execution time: 1.05 hours
+- Total execution time: 1.13 hours
 
 **By Phase:**
 
@@ -33,10 +33,10 @@ Progress: [####################] 100%
 | 04-content-migration-and-tool-pages | 3 | 17min | 6min |
 | 05-advanced-tools | 2 | 11min | 6min |
 | 06-site-polish-and-learning-paths | 3 | 16min | 5min |
-| 07-web-enumeration-tools | 1 | 2min | 2min |
+| 07-web-enumeration-tools | 2 | 7min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (7min), 06-01 (7min), 06-02 (6min), 06-03 (3min), 07-03 (2min)
+- Last 5 plans: 06-01 (7min), 06-02 (6min), 06-03 (3min), 07-03 (2min), 07-01 (5min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -94,6 +94,10 @@ Recent decisions affecting current work:
 - [06-03]: || true guard on ((errors++)) to prevent set -e exit when post-increment evaluates to 0 (falsy)
 - [07-03]: No exit 1 on SecLists download failure (non-critical, unlike rockyou.txt) -- script continues if supplementary wordlist fails
 - [07-03]: Updated Makefile wordlists help text to reflect expanded scope (password cracking + web enumeration)
+- [07-01]: Used -d flag for gobuster DNS mode (standard documented flag) instead of plan's -do which was based on uncertain research
+- [07-01]: gobuster version detection uses 'gobuster version' subcommand with head -1 pipe
+- [07-01]: Wordlist-dependent scripts check file existence before demo, print 'make wordlists' instruction if missing
+- [07-01]: Thread count -t 10 in all gobuster examples to keep safe for Docker lab targets
 
 ### Pending Todos
 
@@ -105,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10
-Stopped at: Completed 07-03-PLAN.md -- wordlist downloader extended, USECASES.md updated
+Last session: 2026-02-11
+Stopped at: Completed 07-01-PLAN.md -- gobuster scripts, check-tools integration, and site docs complete
 Resume file: None
