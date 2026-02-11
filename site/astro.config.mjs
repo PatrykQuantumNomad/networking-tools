@@ -10,11 +10,16 @@ export default defineConfig({
 			title: 'Networking Tools',
 			description: 'Pentesting and network diagnostic learning lab',
 			logo: {
-				dark: './src/assets/logo-dark.svg',
-				light: './src/assets/logo-light.svg',
+				src: './src/assets/logo-dark.svg',
 				alt: 'Networking Tools',
 			},
 			customCss: ['./src/styles/custom.css'],
+			head: [
+				{
+					tag: 'script',
+					content: `document.documentElement.setAttribute('data-theme', 'dark');`,
+				},
+			],
 			social: [
 				{
 					icon: 'github',
