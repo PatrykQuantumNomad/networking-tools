@@ -6,26 +6,21 @@
 [[ -n "${_CLEANUP_LOADED:-}" ]] && return 0
 _CLEANUP_LOADED=1
 
-# Tracking arrays for automatic cleanup
-_CLEANUP_FILES=()
-_CLEANUP_DIRS=()
+# Base temp directory — all make_temp outputs live inside this directory.
+# Using a single base directory avoids the bash subshell limitation where
+# array modifications inside $() command substitution are lost.
+_CLEANUP_BASE_DIR=$(mktemp -d "${TMPDIR:-/tmp}/ntool-session.XXXXXX")
+
+# Registered cleanup commands (still array-based; register_cleanup is called
+# directly, not via command substitution, so array propagation works fine)
 _CLEANUP_COMMANDS=()
 
-# EXIT trap handler — cleans up temp files, dirs, and runs registered commands
+# EXIT trap handler — removes base temp dir and runs registered commands
 _cleanup_handler() {
     local exit_code=$?
 
-    # Remove tracked temp files
-    local f
-    for f in "${_CLEANUP_FILES[@]+"${_CLEANUP_FILES[@]}"}"; do
-        rm -f "$f" 2>/dev/null || true
-    done
-
-    # Remove tracked temp directories
-    local d
-    for d in "${_CLEANUP_DIRS[@]+"${_CLEANUP_DIRS[@]}"}"; do
-        rm -rf "$d" 2>/dev/null || true
-    done
+    # Remove the entire base temp directory (covers all make_temp outputs)
+    rm -rf "$_CLEANUP_BASE_DIR" 2>/dev/null || true
 
     # Execute registered cleanup commands
     local cmd
@@ -45,6 +40,8 @@ register_cleanup() {
 }
 
 # Create a temporary file or directory that is auto-cleaned on exit
+# All temp items are created inside $_CLEANUP_BASE_DIR so the EXIT trap
+# cleans them up automatically — even when called from a subshell.
 # Usage: make_temp [file|dir] [prefix]
 make_temp() {
     local type="${1:-file}"
@@ -52,11 +49,9 @@ make_temp() {
     local path
 
     if [[ "$type" == "dir" ]]; then
-        path=$(mktemp -d "${TMPDIR:-/tmp}/${prefix}.XXXXXX")
-        _CLEANUP_DIRS+=("$path")
+        path=$(mktemp -d "${_CLEANUP_BASE_DIR}/${prefix}.XXXXXX")
     else
-        path=$(mktemp "${TMPDIR:-/tmp}/${prefix}.XXXXXX")
-        _CLEANUP_FILES+=("$path")
+        path=$(mktemp "${_CLEANUP_BASE_DIR}/${prefix}.XXXXXX")
     fi
 
     echo "$path"
