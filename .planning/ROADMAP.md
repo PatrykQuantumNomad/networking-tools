@@ -98,11 +98,13 @@ Plans:
   2. Running any examples.sh without `-x` produces the same educational output as before the migration
   3. Running any examples.sh with `-x` displays a confirmation prompt before executing active scanning commands
   4. All `make <tool> TARGET=<ip>` Makefile targets produce identical behavior to pre-migration
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 15-01: TBD
-- [ ] 15-02: TBD
+- [ ] 15-01-PLAN.md — Migrate 7 simple target-required scripts (dig, hping3, gobuster, ffuf, skipfish, nikto, sqlmap)
+- [ ] 15-02-PLAN.md — Migrate 4 target scripts with edge cases (curl, traceroute, netcat, foremost)
+- [ ] 15-03-PLAN.md — Migrate 5 no-target static scripts (tshark, metasploit, hashcat, john, aircrack-ng)
+- [ ] 15-04-PLAN.md — Extend test suite to verify all 17 scripts
 
 ### Phase 16: Use-Case Script Migration
 **Goal**: All 28 use-case scripts work in dual mode with argument parsing
