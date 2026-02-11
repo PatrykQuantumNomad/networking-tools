@@ -22,6 +22,8 @@ is_interactive() {
 }
 
 # Project root directory (lib/ is two levels below project root)
+# Used by sourcing scripts for wordlist/sample paths
+# shellcheck disable=SC2034
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Run a command or display it, depending on EXECUTE_MODE

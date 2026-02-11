@@ -163,7 +163,7 @@ else
 fi
 
 # Flag ordering: positional arg before flag
-order_output=$(bash "${PROJECT_ROOT}/scripts/nmap/examples.sh" scanme.nmap.org --custom-thing 2>/dev/null)
+_order_output=$(bash "${PROJECT_ROOT}/scripts/nmap/examples.sh" scanme.nmap.org --custom-thing 2>/dev/null)
 order_exit=$?
 if [[ $order_exit -eq 0 ]]; then
     check_pass "positional then --custom-thing exits 0"

@@ -15,11 +15,18 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Disable colors when NO_COLOR is set (https://no-color.org/) or stdout is not a terminal
+# Color variables used by sourcing scripts via common.sh
 if [[ -n "${NO_COLOR:-}" ]] || [[ ! -t 1 ]]; then
+    # shellcheck disable=SC2034
     RED=''
+    # shellcheck disable=SC2034
     GREEN=''
+    # shellcheck disable=SC2034
     YELLOW=''
+    # shellcheck disable=SC2034
     BLUE=''
+    # shellcheck disable=SC2034
     CYAN=''
+    # shellcheck disable=SC2034
     NC=''
 fi

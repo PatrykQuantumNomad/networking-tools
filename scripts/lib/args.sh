@@ -34,6 +34,8 @@ parse_common_args() {
                 LOG_LEVEL="debug"
                 ;;
             -q|--quiet)
+                # Used by logging.sh _should_log()
+                # shellcheck disable=SC2034
                 LOG_LEVEL="warn"
                 ;;
             -x|--execute)

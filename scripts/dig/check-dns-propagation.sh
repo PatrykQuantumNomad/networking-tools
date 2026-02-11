@@ -43,7 +43,6 @@ echo ""
 # Public resolvers for comparison
 # Google (8.8.8.8, 8.8.4.4), Cloudflare (1.1.1.1, 1.0.0.1),
 # OpenDNS (208.67.222.222), Quad9 (9.9.9.9)
-RESOLVERS=("8.8.8.8" "8.8.4.4" "1.1.1.1" "1.0.0.1" "208.67.222.222" "9.9.9.9")
 
 # 1. Check A record across resolvers
 info "1) Check A record across multiple resolvers"

@@ -84,13 +84,11 @@ echo ""
 
 # --- Check 6: Functions from nc_detect.sh ---
 echo "=== Check 6: nc_detect.sh functions ==="
-for fn in detect_nc_variant; do
-    if declare -F "$fn" > /dev/null 2>&1; then
-        check_pass "$fn() is defined"
-    else
-        check_fail "$fn() is NOT defined"
-    fi
-done
+if declare -F "detect_nc_variant" > /dev/null 2>&1; then
+    check_pass "detect_nc_variant() is defined"
+else
+    check_fail "detect_nc_variant() is NOT defined"
+fi
 echo ""
 
 # --- Check 7: Source guards ---
