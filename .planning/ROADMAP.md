@@ -135,10 +135,10 @@ Plans:
   2. `make lint` runs ShellCheck validation and reports results
   3. A PR that introduces a ShellCheck warning fails CI checks
   4. No `local var=$(cmd)` patterns remain (SC2155 fully resolved)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 17-01: TBD
+- [ ] 17-01-PLAN.md — Fix 11 ShellCheck warnings, add make lint target, create GitHub Actions CI workflow
 
 ## Progress
 
@@ -154,4 +154,4 @@ Plans:
 | 14. Argument Parsing + Dual-Mode | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 15. Examples Script Migration | v1.2 | 4/4 | Complete | 2026-02-11 |
 | 16. Use-Case Script Migration | v1.2 | 8/8 | Complete | 2026-02-11 |
-| 17. ShellCheck Compliance + CI | v1.2 | 0/TBD | Not started | - |
+| 17. ShellCheck Compliance + CI | v1.2 | 0/1 | Not started | - |
