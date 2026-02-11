@@ -16,12 +16,14 @@ show_help() {
     echo "  $(basename "$0") --help           # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd foremost "brew install foremost"
 
 TARGET="${1:-}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Forensic Image Analysis with Foremost ==="
@@ -93,11 +95,11 @@ echo "    dd if=/dev/sdb of=evidence.dd bs=4k status=progress && sha256sum evide
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-
-# Interactive demo
-read -rp "Check foremost installation and show version? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: foremost -V"
-    foremost -V
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    read -rp "Check foremost installation and show version? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: foremost -V"
+        foremost -V
+    fi
 fi
