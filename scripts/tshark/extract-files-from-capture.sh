@@ -16,12 +16,14 @@ show_help() {
     echo "  $(basename "$0") --help           # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd tshark "brew install wireshark"
 
 FILE="${1:-}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== File Extraction from Packet Captures ==="
@@ -95,20 +97,21 @@ echo "    sudo tshark -i en0 -f 'port 80' -w traffic.pcap -c 500 && tshark -r tr
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-
-if [[ -n "$FILE" && -f "$FILE" ]]; then
-    read -rp "Run HTTP transfer statistics on ${FILE}? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        info "Running: tshark -r ${FILE} -q -z http,tree"
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    if [[ -n "$FILE" && -f "$FILE" ]]; then
+        read -rp "Run HTTP transfer statistics on ${FILE}? [y/N] " answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            info "Running: tshark -r ${FILE} -q -z http,tree"
+            echo ""
+            tshark -r "$FILE" -q -z http,tree
+        fi
+    else
         echo ""
-        tshark -r "$FILE" -q -z http,tree
+        info "To extract files, provide a .pcap file as argument:"
+        echo "   $(basename "$0") /path/to/capture.pcap"
+        echo ""
+        info "To create a capture file first:"
+        echo "   sudo tshark -i en0 -f 'port 80' -w traffic.pcap -c 500"
     fi
-else
-    echo ""
-    info "To extract files, provide a .pcap file as argument:"
-    echo "   $(basename "$0") /path/to/capture.pcap"
-    echo ""
-    info "To create a capture file first:"
-    echo "   sudo tshark -i en0 -f 'port 80' -w traffic.pcap -c 500"
 fi

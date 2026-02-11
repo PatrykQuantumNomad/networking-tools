@@ -17,12 +17,14 @@ show_help() {
     echo "  $(basename "$0") --help # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd tshark "brew install wireshark"
 
 TARGET="${1:-en0}"
 
+confirm_execute "$TARGET"
 safety_banner
 
 info "=== DNS Query Analysis ==="
@@ -44,14 +46,12 @@ echo "   - NXDOMAIN floods (domain generation algorithms / DGA)"
 echo ""
 
 # 1. Real-time DNS queries
-info "1) Show all DNS queries in real-time"
-echo "   sudo tshark -i ${TARGET} -Y 'dns.flags.response==0' -T fields -e dns.qry.name"
-echo ""
+run_or_show "1) Show all DNS queries in real-time" \
+    sudo tshark -i "$TARGET" -Y 'dns.flags.response==0' -T fields -e dns.qry.name
 
 # 2. Queries with responses
-info "2) Show DNS queries with responses"
-echo "   sudo tshark -i ${TARGET} -Y 'dns' -T fields -e dns.qry.name -e dns.a"
-echo ""
+run_or_show "2) Show DNS queries with responses" \
+    sudo tshark -i "$TARGET" -Y 'dns' -T fields -e dns.qry.name -e dns.a
 
 # 3. DNS statistics
 info "3) DNS query statistics summary"
@@ -59,19 +59,16 @@ echo "   tshark -r capture.pcap -q -z dns,tree"
 echo ""
 
 # 4. Filter specific domain
-info "4) Filter for specific domain queries"
-echo "   sudo tshark -i ${TARGET} -Y 'dns.qry.name contains \"example.com\"' -T fields -e frame.time -e dns.qry.name"
-echo ""
+run_or_show "4) Filter for specific domain queries" \
+    sudo tshark -i "$TARGET" -Y 'dns.qry.name contains "example.com"' -T fields -e frame.time -e dns.qry.name
 
 # 5. Zone transfer attempts
-info "5) Detect DNS zone transfer attempts"
-echo "   sudo tshark -i ${TARGET} -Y 'dns.qry.type==252'"
-echo ""
+run_or_show "5) Detect DNS zone transfer attempts" \
+    sudo tshark -i "$TARGET" -Y 'dns.qry.type==252'
 
 # 6. TXT record queries
-info "6) Find TXT record queries (potential C2)"
-echo "   sudo tshark -i ${TARGET} -Y 'dns.qry.type==16' -T fields -e dns.qry.name -e dns.txt"
-echo ""
+run_or_show "6) Find TXT record queries (potential C2)" \
+    sudo tshark -i "$TARGET" -Y 'dns.qry.type==16' -T fields -e dns.qry.name -e dns.txt
 
 # 7. DNS failures
 info "7) Show DNS response codes for failures"
@@ -79,9 +76,8 @@ echo "   tshark -r capture.pcap -Y 'dns.flags.rcode!=0' -T fields -e dns.qry.nam
 echo ""
 
 # 8. Long domain names (tunneling)
-info "8) Monitor for unusually long DNS names (tunneling)"
-echo "   sudo tshark -i ${TARGET} -Y 'dns.qry.name.len > 50' -T fields -e dns.qry.name"
-echo ""
+run_or_show "8) Monitor for unusually long DNS names (tunneling)" \
+    sudo tshark -i "$TARGET" -Y 'dns.qry.name.len > 50' -T fields -e dns.qry.name
 
 # 9. Count queries per domain
 info "9) Count queries per domain"
@@ -89,16 +85,16 @@ echo "   tshark -r capture.pcap -Y 'dns.flags.response==0' -T fields -e dns.qry.
 echo ""
 
 # 10. Full DNS analysis
-info "10) Full DNS analysis with timestamps and source IPs"
-echo "    sudo tshark -i ${TARGET} -Y 'dns' -T fields -e frame.time_relative -e ip.src -e dns.flags.response -e dns.qry.name -e dns.a -c 50"
-echo ""
+run_or_show "10) Full DNS analysis with timestamps and source IPs" \
+    sudo tshark -i "$TARGET" -Y 'dns' -T fields -e frame.time_relative -e ip.src -e dns.flags.response -e dns.qry.name -e dns.a -c 50
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-
-read -rp "Capture 20 DNS queries on ${TARGET}? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: sudo tshark -i ${TARGET} -Y 'dns.flags.response==0' -T fields -e frame.time_relative -e dns.qry.name -c 20"
-    echo ""
-    sudo tshark -i "$TARGET" -Y 'dns.flags.response==0' -T fields -e frame.time_relative -e dns.qry.name -c 20
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    read -rp "Capture 20 DNS queries on ${TARGET}? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: sudo tshark -i ${TARGET} -Y 'dns.flags.response==0' -T fields -e frame.time_relative -e dns.qry.name -c 20"
+        echo ""
+        sudo tshark -i "$TARGET" -Y 'dns.flags.response==0' -T fields -e frame.time_relative -e dns.qry.name -c 20
+    fi
 fi

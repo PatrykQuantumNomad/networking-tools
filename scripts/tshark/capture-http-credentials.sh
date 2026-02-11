@@ -16,12 +16,14 @@ show_help() {
     echo "  $(basename "$0") --help # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd tshark "brew install wireshark"
 
 TARGET="${1:-en0}"
 
+confirm_execute "$TARGET"
 safety_banner
 
 info "=== HTTP Credential Capture ==="
@@ -40,19 +42,16 @@ echo "   unencrypted HTTP traffic — perfect for testing your lab targets."
 echo ""
 
 # 1. HTTP POST requests
-info "1) Capture HTTP POST requests showing form data"
-echo "   sudo tshark -i ${TARGET} -Y 'http.request.method==POST' -T fields -e http.host -e http.request.uri -e http.file_data"
-echo ""
+run_or_show "1) Capture HTTP POST requests showing form data" \
+    sudo tshark -i "$TARGET" -Y 'http.request.method==POST' -T fields -e http.host -e http.request.uri -e http.file_data
 
 # 2. Basic Authentication
-info "2) Extract HTTP Basic Authentication headers"
-echo "   sudo tshark -i ${TARGET} -Y 'http.authbasic' -T fields -e ip.src -e http.authbasic"
-echo ""
+run_or_show "2) Extract HTTP Basic Authentication headers" \
+    sudo tshark -i "$TARGET" -Y 'http.authbasic' -T fields -e ip.src -e http.authbasic
 
 # 3. Password fields
-info "3) Filter for packets containing \"password\""
-echo "   sudo tshark -i ${TARGET} -Y 'http contains \"password\"' -T fields -e ip.src -e http.host -e http.file_data"
-echo ""
+run_or_show "3) Filter for packets containing \"password\"" \
+    sudo tshark -i "$TARGET" -Y 'http contains "password"' -T fields -e ip.src -e http.host -e http.file_data
 
 # 4. Login forms on specific port
 info "4) Capture login form submissions on specific port"
@@ -60,14 +59,12 @@ echo "   sudo tshark -i lo0 -f 'port 8080' -Y 'http.request.method==POST' -T fie
 echo ""
 
 # 5. Full HTTP pairs
-info "5) Show full HTTP request/response pairs"
-echo "   sudo tshark -i ${TARGET} -Y 'http' -V -c 10"
-echo ""
+run_or_show "5) Show full HTTP request/response pairs" \
+    sudo tshark -i "$TARGET" -Y 'http' -V -c 10
 
 # 6. Cookie extraction
-info "6) Extract cookies from HTTP traffic"
-echo "   sudo tshark -i ${TARGET} -Y 'http.cookie' -T fields -e http.host -e http.cookie"
-echo ""
+run_or_show "6) Extract cookies from HTTP traffic" \
+    sudo tshark -i "$TARGET" -Y 'http.cookie' -T fields -e http.host -e http.cookie
 
 # 7. Read from capture file
 info "7) Read credentials from a saved capture file"
@@ -75,26 +72,24 @@ echo "   tshark -r capture.pcap -Y 'http.request.method==POST' -T fields -e http
 echo ""
 
 # 8. FTP credentials
-info "8) Monitor FTP login attempts"
-echo "   sudo tshark -i ${TARGET} -Y 'ftp.request.command==USER || ftp.request.command==PASS' -T fields -e ftp.request.arg"
-echo ""
+run_or_show "8) Monitor FTP login attempts" \
+    sudo tshark -i "$TARGET" -Y 'ftp.request.command==USER || ftp.request.command==PASS' -T fields -e ftp.request.arg
 
 # 9. Save for later analysis
-info "9) Save HTTP POST traffic to file for later analysis"
-echo "   sudo tshark -i ${TARGET} -f 'port 80' -Y 'http.request.method==POST' -w http_posts.pcap -c 100"
-echo ""
+run_or_show "9) Save HTTP POST traffic to file for later analysis" \
+    sudo tshark -i "$TARGET" -f 'port 80' -Y 'http.request.method==POST' -w http_posts.pcap -c 100
 
 # 10. Full extraction pipeline
-info "10) Full credential extraction pipeline"
-echo "    sudo tshark -i ${TARGET} -Y 'http.request.method==POST and http contains \"login\"' -T fields -e frame.time -e ip.src -e http.host -e http.request.uri -e http.file_data"
-echo ""
+run_or_show "10) Full credential extraction pipeline" \
+    sudo tshark -i "$TARGET" -Y 'http.request.method==POST and http contains "login"' -T fields -e frame.time -e ip.src -e http.host -e http.request.uri -e http.file_data
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
-
-read -rp "Capture 10 HTTP packets on lo0 (loopback — safe, local only)? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: sudo tshark -i lo0 -Y 'http' -c 10"
-    echo ""
-    sudo tshark -i lo0 -Y 'http' -c 10
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    read -rp "Capture 10 HTTP packets on lo0 (loopback — safe, local only)? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: sudo tshark -i lo0 -Y 'http' -c 10"
+        echo ""
+        sudo tshark -i lo0 -Y 'http' -c 10
+    fi
 fi
