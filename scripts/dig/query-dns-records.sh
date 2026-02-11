@@ -3,7 +3,7 @@
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-v|--verbose] [-q|--quiet]"
     echo ""
     echo "Description:"
     echo "  Queries common DNS record types (A, AAAA, MX, NS, TXT, SOA) for a"
@@ -15,15 +15,18 @@ show_help() {
     echo "  $(basename "$0")                  # Query example.com"
     echo "  $(basename "$0") google.com       # Query google.com records"
     echo "  $(basename "$0") target.local     # Query internal domain"
+    echo "  $(basename "$0") -x google.com    # Execute queries against google.com"
     echo "  $(basename "$0") --help           # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd dig "apt install dnsutils (Debian/Ubuntu) | dnf install bind-utils (RHEL/Fedora) | brew install bind (macOS)"
 
 TARGET="${1:-example.com}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Query DNS Records ==="
@@ -42,61 +45,53 @@ echo "   Querying all types reveals the full picture of a domain's setup."
 echo ""
 
 # 1. A record — IPv4 address
-info "1) A record — IPv4 address"
-echo "   dig ${TARGET} A +noall +answer"
-echo ""
+run_or_show "1) A record — IPv4 address" \
+    dig "$TARGET" A +noall +answer
 
 # 2. AAAA record — IPv6 address
-info "2) AAAA record — IPv6 address"
-echo "   dig ${TARGET} AAAA +noall +answer"
-echo ""
+run_or_show "2) AAAA record — IPv6 address" \
+    dig "$TARGET" AAAA +noall +answer
 
 # 3. MX records — mail servers
-info "3) MX records — mail exchange servers"
-echo "   dig ${TARGET} MX +noall +answer"
-echo ""
+run_or_show "3) MX records — mail exchange servers" \
+    dig "$TARGET" MX +noall +answer
 
 # 4. NS records — nameservers
-info "4) NS records — authoritative nameservers"
-echo "   dig ${TARGET} NS +noall +answer"
-echo ""
+run_or_show "4) NS records — authoritative nameservers" \
+    dig "$TARGET" NS +noall +answer
 
 # 5. TXT records — SPF, DKIM, verification
-info "5) TXT records — SPF, DKIM, domain verification"
-echo "   dig ${TARGET} TXT +noall +answer"
-echo ""
+run_or_show "5) TXT records — SPF, DKIM, domain verification" \
+    dig "$TARGET" TXT +noall +answer
 
 # 6. SOA record — zone authority
-info "6) SOA record — zone authority and serial number"
-echo "   dig ${TARGET} SOA +noall +answer"
-echo ""
+run_or_show "6) SOA record — zone authority and serial number" \
+    dig "$TARGET" SOA +noall +answer
 
 # 7. CNAME records — aliases
-info "7) CNAME records — domain aliases"
-echo "   dig www.${TARGET} CNAME +noall +answer"
-echo ""
+run_or_show "7) CNAME records — domain aliases" \
+    dig "www.$TARGET" CNAME +noall +answer
 
 # 8. ALL records
-info "8) ALL records — query everything available"
-echo "   dig ${TARGET} ANY +noall +answer"
-echo ""
+run_or_show "8) ALL records — query everything available" \
+    dig "$TARGET" ANY +noall +answer
 
 # 9. Short output for scripting
-info "9) Short output — clean results for scripting"
-echo "   dig ${TARGET} A +short"
-echo ""
+run_or_show "9) Short output — clean results for scripting" \
+    dig "$TARGET" A +short
 
 # 10. Query specific DNS server
-info "10) Query via specific DNS server (Cloudflare)"
-echo "    dig @1.1.1.1 ${TARGET} A +noall +answer"
-echo ""
+run_or_show "10) Query via specific DNS server (Cloudflare)" \
+    dig @1.1.1.1 "$TARGET" A +noall +answer
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Run a quick A record lookup on ${TARGET} now? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: dig ${TARGET} A +short"
-    echo ""
-    dig "$TARGET" A +short
+    read -rp "Run a quick A record lookup on ${TARGET} now? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: dig ${TARGET} A +short"
+        echo ""
+        dig "$TARGET" A +short
+    fi
 fi

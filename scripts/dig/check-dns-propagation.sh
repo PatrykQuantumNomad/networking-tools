@@ -3,7 +3,7 @@
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-v|--verbose] [-q|--quiet]"
     echo ""
     echo "Description:"
     echo "  Compares DNS responses across multiple public resolvers to check"
@@ -14,15 +14,18 @@ show_help() {
     echo "Examples:"
     echo "  $(basename "$0")                  # Check example.com propagation"
     echo "  $(basename "$0") mysite.com       # Check mysite.com across resolvers"
+    echo "  $(basename "$0") -x mysite.com    # Execute checks against mysite.com"
     echo "  $(basename "$0") --help           # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd dig "apt install dnsutils (Debian/Ubuntu) | dnf install bind-utils (RHEL/Fedora) | brew install bind (macOS)"
 
 TARGET="${1:-example.com}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Check DNS Propagation ==="
@@ -109,13 +112,15 @@ echo "    done"
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Check ${TARGET} A record across 3 resolvers now? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    echo ""
-    for dns in 8.8.8.8 1.1.1.1 9.9.9.9; do
-        result=$(dig @"$dns" "$TARGET" A +short)
-        info "${dns}: ${result}"
-    done
+    read -rp "Check ${TARGET} A record across 3 resolvers now? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        echo ""
+        for dns in 8.8.8.8 1.1.1.1 9.9.9.9; do
+            result=$(dig @"$dns" "$TARGET" A +short)
+            info "${dns}: ${result}"
+        done
+    fi
 fi

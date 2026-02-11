@@ -3,7 +3,7 @@
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-v|--verbose] [-q|--quiet]"
     echo ""
     echo "Description:"
     echo "  Demonstrates DNS zone transfer (AXFR) techniques for discovering"
@@ -14,15 +14,18 @@ show_help() {
     echo "Examples:"
     echo "  $(basename "$0")                  # Test example.com"
     echo "  $(basename "$0") target.com       # Test target.com nameservers"
+    echo "  $(basename "$0") -x target.com    # Execute queries against target.com"
     echo "  $(basename "$0") --help           # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd dig "apt install dnsutils (Debian/Ubuntu) | dnf install bind-utils (RHEL/Fedora) | brew install bind (macOS)"
 
 TARGET="${1:-example.com}"
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Attempt Zone Transfer ==="
@@ -40,9 +43,8 @@ echo "   This is a critical reconnaissance step in penetration testing."
 echo ""
 
 # 1. Find authoritative nameservers first
-info "1) Find authoritative nameservers"
-echo "   dig ${TARGET} NS +short"
-echo ""
+run_or_show "1) Find authoritative nameservers" \
+    dig "$TARGET" NS +short
 
 # 2. Attempt AXFR against a specific nameserver
 info "2) Attempt AXFR against a nameserver"
@@ -62,9 +64,8 @@ echo "   dig ixfr=0 ${TARGET} @\$(dig ${TARGET} NS +short | head -1)"
 echo ""
 
 # 5. Check for wildcard records
-info "5) Check for wildcard DNS records"
-echo "   dig randomsubdomain1234.${TARGET} A +short"
-echo ""
+run_or_show "5) Check for wildcard DNS records" \
+    dig "randomsubdomain1234.$TARGET" A +short
 
 # 6. Verbose transfer attempt
 info "6) Verbose AXFR attempt (show full query/response)"
@@ -77,9 +78,8 @@ echo "   dig +tcp axfr ${TARGET} @\$(dig ${TARGET} NS +short | head -1)"
 echo ""
 
 # 8. Check SOA for serial number
-info "8) Check SOA serial number (tracks zone changes)"
-echo "   dig ${TARGET} SOA +short"
-echo ""
+run_or_show "8) Check SOA serial number (tracks zone changes)" \
+    dig "$TARGET" SOA +short
 
 # 9. Query common subdomains
 info "9) Brute-check common subdomains"
@@ -95,11 +95,13 @@ echo "    dig axfr ${TARGET} @\$(dig ${TARGET} NS +short | head -1) > zone-${TAR
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Look up nameservers for ${TARGET} now? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: dig ${TARGET} NS +short"
-    echo ""
-    dig "$TARGET" NS +short
+    read -rp "Look up nameservers for ${TARGET} now? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: dig ${TARGET} NS +short"
+        echo ""
+        dig "$TARGET" NS +short
+    fi
 fi
