@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 10 - Navigation Cleanup (v1.1 Site Visual Refresh)
+**Current focus:** Phase 11 - Homepage Redesign (v1.1 Site Visual Refresh)
 
 ## Current Position
 
-Phase: 10 of 11 (Navigation Cleanup)
+Phase: 11 of 11 (Homepage Redesign)
 Plan: 1 of 1 in current phase
-Status: Phase 10 complete
-Last activity: 2026-02-11 — Plan 10-01 executed, sidebar entries hidden
+Status: Phase 11 complete
+Last activity: 2026-02-11 — Plan 11-01 executed, homepage redesigned with card grids
 
-Progress: [██████░░░░] 55%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
+- Total plans completed: 23
 - Average duration: 4min
-- Total execution time: 1.27 hours
+- Total execution time: 1.30 hours
 
 **By Phase:**
 
@@ -37,6 +37,7 @@ Progress: [██████░░░░] 55%
 | 08-theme-foundation | 1 | 2min | 2min |
 | 09-brand-identity | 1 | 2min | 2min |
 | 10-navigation-cleanup | 1 | 2min | 2min |
+| 11-homepage-redesign | 1 | 2min | 2min |
 
 *Updated after each plan completion*
 
@@ -51,6 +52,8 @@ All v1.0 decisions archived -- see .planning/milestones/v1.0-ROADMAP.md for full
 - [Phase 09-brand-identity]: Terminal prompt >_ motif as brand icon -- stroke-only SVG readable at 16px
 - [Phase 09-brand-identity]: Logo accompanies title text (replacesTitle: false) since icon has no text content
 - [Phase 10-navigation-cleanup]: Use sidebar.hidden frontmatter (not astro.config.mjs exclude) to remove redundant index entries
+- [Phase 11-homepage-redesign]: Convert index.md to index.mdx (git mv) to enable Starlight component imports
+- [Phase 11-homepage-redesign]: Use [data-has-hero] CSS scoping for splash-page-only section spacing
 
 ### Pending Todos
 
@@ -63,5 +66,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 10-01-PLAN.md
+Stopped at: Completed 11-01-PLAN.md
 Resume file: None
