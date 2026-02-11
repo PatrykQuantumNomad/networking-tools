@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 ## Current Position
 
 Phase: 16 of 17 (Use-Case Script Migration) -- IN PROGRESS
-Plan: 6 of 8 in current phase
+Plan: 7 of 8 in current phase
 Status: Executing Phase 16 plans
-Last activity: 2026-02-11 -- Completed 16-06 (foremost + tshark use-case script migration, 6 scripts)
+Last activity: 2026-02-11 -- Completed 16-07 (metasploit/hashcat/john/aircrack-ng use-case migration, 12 scripts)
 
 Progress: [████████░░] 80%
 
@@ -102,6 +102,9 @@ Recent decisions affecting v1.2:
 - [Phase 16]: 16-05: netcat setup-listener/transfer-files are structural-only (0 run_or_show) -- all variant-specific
 - [Phase 16]: 16-04: Multi-positional args (TARGET+WORDLIST) preserved through parse_common_args + set -- in gobuster scripts
 - [Phase 16]: 16-04: HAS_MTR conditional wraps run_or_show (true branch) with info+echo fallback (false branch) in compare-routes.sh
+- [Phase 16]: 16-07: benchmark-gpu.sh 9 run_or_show conversions (examples 1-9), example 10 kept as info+echo (hardcoded file paths)
+- [Phase 16]: 16-07: identify-hash-type.sh safety_banner extra arg removed (was passing install hint as unused parameter)
+- [Phase 16]: 16-07: Multi-positional (LHOST/LPORT) metasploit scripts use confirm_execute without argument
 
 ### Pending Todos
 
@@ -121,5 +124,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 16-03-PLAN.md (web scanning scripts: nikto/skipfish/ffuf migration) -- 6 scripts migrated
+Stopped at: Completed 16-07-PLAN.md (metasploit/hashcat/john/aircrack-ng use-case migration, 12 scripts)
 Resume file: None
