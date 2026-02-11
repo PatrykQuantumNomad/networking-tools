@@ -34,7 +34,18 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 
 ### Active
 
-(No active milestone — next milestone via `/gsd:new-milestone`)
+#### Current Milestone: v1.2 Script Hardening
+
+**Goal:** Transform all 65+ scripts into production-grade CLI tools with dual mode (execution default + --examples for educational), backed by an upgraded common.sh with strict mode, structured logging, trap handlers, and validation helpers.
+
+**Target features:**
+- Upgrade common.sh to production framework: set -euo pipefail, log levels, trap handlers, retry helpers, input validators
+- Dual-mode scripts: execute by default, --examples for educational output
+- getopts-style argument parsing with --help/--verbose/--examples flags on all scripts
+- Proper script headers with metadata (description, version, usage)
+- shellcheck zero-warning compliance across all scripts
+- Network call timeouts, DNS failure handling, retry logic with backoff
+- Consistent variable naming and function modularization
 
 ### Out of Scope
 
@@ -51,6 +62,7 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 ## Context
 
 Shipped v1.1 with branded documentation site. Total codebase: ~14,000 LOC across 130+ files.
+v1.2 focus: Script hardening — current scripts are educational (print examples), need dual mode (execute by default + --examples) with production-grade infrastructure.
 Tech stack: Bash scripts + Astro 5.x/Starlight 0.37.x + GitHub Actions + Docker Compose.
 17 tools integrated into check-tools.sh with Makefile targets for each.
 3 diagnostic scripts following Pattern B (structured auto-reports with pass/fail/warn).
@@ -85,4 +97,4 @@ Documentation site deployed to GitHub Pages with CI validation, dark orange/ambe
 | [data-has-hero] CSS scoping for splash pages | Splash-page-only styles don't leak to content pages | ✓ Good — homepage spacing isolated |
 
 ---
-*Last updated: 2026-02-11 after v1.1 milestone*
+*Last updated: 2026-02-11 after v1.2 milestone started*

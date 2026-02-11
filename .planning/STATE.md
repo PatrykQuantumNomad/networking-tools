@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Planning next milestone
+**Current focus:** v1.2 Script Hardening — production-grade CLI tools with dual mode
 
 ## Current Position
 
-Phase: 11 of 11 (all complete)
-Plan: N/A
-Status: Ready for next milestone
-Last activity: 2026-02-11 — Completed quick task 001: Remove light theme and theme selector, enforce dark-mode only
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-11 — Milestone v1.2 started
 
-Progress: [██████████] 100% (v1.0 + v1.1 shipped)
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
