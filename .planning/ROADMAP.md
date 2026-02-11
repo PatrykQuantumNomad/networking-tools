@@ -25,7 +25,7 @@ Archived to `.planning/milestones/v1.0-ROADMAP.md`
 - Decimal phases (e.g., 9.1): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 8: Theme Foundation** - Dark + orange/amber accent palette with light mode support (completed 2026-02-11)
-- [ ] **Phase 9: Brand Identity** - Custom SVG logo and matching favicon
+- [x] **Phase 9: Brand Identity** - Custom SVG logo and matching favicon (completed 2026-02-11)
 - [ ] **Phase 10: Navigation Cleanup** - Remove redundant sidebar index entries
 - [ ] **Phase 11: Homepage Redesign** - Hero section, tool card grid, feature highlights, and guide links
 
@@ -56,7 +56,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 09-01-PLAN.md -- Terminal-prompt SVG logo, favicon, and Astro config registration
+- [x] 09-01-PLAN.md -- Terminal-prompt SVG logo, favicon, and Astro config registration
 
 ### Phase 10: Navigation Cleanup
 **Goal**: Sidebar navigation shows only meaningful page links without redundant section headers
@@ -93,6 +93,6 @@ Phases execute in numeric order: 8 -> 9 -> 10 -> 11
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 8. Theme Foundation | v1.1 | 1/1 | Complete | 2026-02-11 |
-| 9. Brand Identity | v1.1 | 0/TBD | Not started | - |
+| 9. Brand Identity | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 10. Navigation Cleanup | v1.1 | 0/TBD | Not started | - |
 | 11. Homepage Redesign | v1.1 | 0/TBD | Not started | - |
