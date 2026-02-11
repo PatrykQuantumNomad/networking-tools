@@ -3,7 +3,7 @@
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute]"
     echo ""
     echo "Description:"
     echo "  Compares network routes using different protocols (TCP, ICMP, UDP)."
@@ -11,14 +11,22 @@ show_help() {
     echo "  and routing policies. Helps identify protocol-specific filtering."
     echo "  Default target is example.com if none is provided."
     echo ""
+    echo "Options:"
+    echo "  -h, --help       Show this help message"
+    echo "  -x, --execute    Run commands instead of displaying them"
+    echo "  -v, --verbose    Increase verbosity"
+    echo "  -q, --quiet      Suppress informational output"
+    echo ""
     echo "Examples:"
     echo "  $(basename "$0")                  # Compare routes to example.com"
     echo "  $(basename "$0") 8.8.8.8          # Compare routes to Google DNS"
     echo "  $(basename "$0") target.local     # Compare routes to internal host"
+    echo "  $(basename "$0") -x 8.8.8.8       # Execute route comparisons"
     echo "  $(basename "$0") --help           # Show this help message"
 }
 
-[[ "${1:-}" =~ ^(-h|--help)$ ]] && show_help && exit 0
+parse_common_args "$@"
+set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd traceroute "apt install traceroute (Debian/Ubuntu) | dnf install traceroute (RHEL/Fedora) | pre-installed on macOS"
 
@@ -28,6 +36,7 @@ OS_TYPE="$(uname -s)"
 HAS_MTR=false
 check_cmd mtr && HAS_MTR=true
 
+confirm_execute "${1:-}"
 safety_banner
 
 info "=== Compare Routes ==="
@@ -43,23 +52,21 @@ echo "   Note: ICMP and TCP modes require sudo; UDP (default) does not."
 echo ""
 
 # 1. UDP traceroute — default, no sudo
-info "1) UDP traceroute — default protocol, no sudo needed"
-echo "   traceroute -n ${TARGET}"
-echo ""
+run_or_show "1) UDP traceroute — default protocol, no sudo needed" \
+    traceroute -n "$TARGET"
 
 # 2. ICMP traceroute — requires sudo
-info "2) ICMP traceroute — requires sudo"
-echo "   sudo traceroute -I -n ${TARGET}"
-echo ""
+run_or_show "2) ICMP traceroute — requires sudo" \
+    sudo traceroute -I -n "$TARGET"
 
 # 3. TCP traceroute — platform-detect
-info "3) TCP traceroute — requires sudo, bypasses ICMP-blocking firewalls"
 if [[ "$OS_TYPE" == "Darwin" ]]; then
-    echo "   sudo traceroute -P tcp -n ${TARGET}"
+    run_or_show "3) TCP traceroute — requires sudo, bypasses ICMP-blocking firewalls" \
+        sudo traceroute -P tcp -n "$TARGET"
 else
-    echo "   sudo traceroute -T -n ${TARGET}"
+    run_or_show "3) TCP traceroute — requires sudo, bypasses ICMP-blocking firewalls" \
+        sudo traceroute -T -n "$TARGET"
 fi
-echo ""
 
 # 4. Reduced probes for faster comparison
 info "4) Faster comparison — single probe per hop for each protocol"
@@ -95,35 +102,35 @@ fi
 echo ""
 
 # 7. mtr TCP mode if available
-info "7) mtr TCP mode — continuous TCP route monitoring"
 if [[ "$HAS_MTR" == true ]]; then
-    echo "   mtr --report --tcp -c 10 ${TARGET}"
-    echo "   Note: requires sudo on macOS"
+    run_or_show "7) mtr TCP mode — continuous TCP route monitoring" \
+        mtr --report --tcp -c 10 "$TARGET"
 else
+    info "7) mtr TCP mode — continuous TCP route monitoring"
     echo "   mtr --report --tcp -c 10 ${TARGET}"
     echo "   (mtr not installed — brew install mtr / apt install mtr)"
+    echo ""
 fi
-echo ""
 
 # 8. mtr UDP mode if available
-info "8) mtr UDP mode — continuous UDP route monitoring"
 if [[ "$HAS_MTR" == true ]]; then
-    echo "   mtr --report --udp -c 10 ${TARGET}"
-    echo "   Note: requires sudo on macOS"
+    run_or_show "8) mtr UDP mode — continuous UDP route monitoring" \
+        mtr --report --udp -c 10 "$TARGET"
 else
+    info "8) mtr UDP mode — continuous UDP route monitoring"
     echo "   mtr --report --udp -c 10 ${TARGET}"
     echo "   (mtr not installed — brew install mtr / apt install mtr)"
+    echo ""
 fi
-echo ""
 
 # 9. Trace to specific port with TCP
-info "9) TCP trace to port 443 — test HTTPS path"
 if [[ "$OS_TYPE" == "Darwin" ]]; then
-    echo "   sudo traceroute -P tcp -p 443 -n ${TARGET}"
+    run_or_show "9) TCP trace to port 443 — test HTTPS path" \
+        sudo traceroute -P tcp -p 443 -n "$TARGET"
 else
-    echo "   sudo traceroute -T -p 443 -n ${TARGET}"
+    run_or_show "9) TCP trace to port 443 — test HTTPS path" \
+        sudo traceroute -T -p 443 -n "$TARGET"
 fi
-echo ""
 
 # 10. Full comparison — run all three protocols sequentially
 info "10) Full comparison script — run all protocols sequentially"
@@ -140,10 +147,12 @@ fi
 echo ""
 
 # Interactive demo (skip if non-interactive)
-[[ ! -t 0 ]] && exit 0
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
 
-read -rp "Run a UDP traceroute to ${TARGET} (no sudo needed)? [y/N] " answer
-if [[ "$answer" =~ ^[Yy]$ ]]; then
-    info "Running: traceroute -n -q 1 -m 15 ${TARGET}"
-    traceroute -n -q 1 -m 15 "$TARGET"
+    read -rp "Run a UDP traceroute to ${TARGET} (no sudo needed)? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        info "Running: traceroute -n -q 1 -m 15 ${TARGET}"
+        traceroute -n -q 1 -m 15 "$TARGET"
+    fi
 fi
