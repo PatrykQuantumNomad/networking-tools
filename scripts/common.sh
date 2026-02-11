@@ -2,6 +2,15 @@
 # common.sh — Shared utility functions for all tool scripts
 # Source this file: source "$(dirname "$0")/../common.sh"
 
+# --- Bash Version Guard ---
+# Require Bash 4.0+ (associative arrays, mapfile, etc.)
+# Uses only Bash 2.x+ syntax so it prints a clear error on old bash.
+if [[ -z "${BASH_VERSINFO:-}" ]] || ((BASH_VERSINFO[0] < 4)); then
+    echo "[ERROR] Bash 4.0+ required (found: ${BASH_VERSION:-unknown})" >&2
+    echo "[ERROR] macOS ships Bash 3.2 -- install modern bash: brew install bash" >&2
+    exit 1
+fi
+
 set -euo pipefail
 
 # Colors
