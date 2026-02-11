@@ -158,12 +158,12 @@ Plans:
   3. Use-case scripts discover-directories, enumerate-subdomains (gobuster) and fuzz-parameters (ffuf) work against lab targets
   4. A wordlist download helper fetches SecLists common directories and subdomains wordlists for use with both tools
   5. `make check` detects gobuster and ffuf with clear install hints (Homebrew, Go install, binary download)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 07-01: gobuster examples.sh + 2 use-case scripts + check-tools.sh and Makefile integration
-- [ ] 07-02: ffuf examples.sh + 1 use-case script + check-tools.sh and Makefile integration
-- [ ] 07-03: Wordlist download extension for SecLists directories/subdomains
+- [ ] 07-01-PLAN.md — gobuster examples.sh + 2 use-case scripts + check-tools.sh/Makefile integration + gobuster.mdx site page
+- [ ] 07-02-PLAN.md — ffuf examples.sh + 1 use-case script + check-tools.sh/Makefile integration + ffuf.mdx site page
+- [ ] 07-03-PLAN.md — Wordlist download extension for SecLists directories/subdomains + USECASES.md web enumeration entries
 
 ---
 
