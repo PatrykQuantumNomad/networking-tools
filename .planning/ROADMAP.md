@@ -37,7 +37,7 @@ Archived to `.planning/milestones/v1.1-ROADMAP.md`
 
 - [x] **Phase 12: Pre-Refactor Cleanup** - Normalize inconsistencies before structural changes (completed 2026-02-11)
 - [x] **Phase 13: Library Infrastructure** - Split common.sh into modules with strict mode, logging, traps, and helpers (completed 2026-02-11)
-- [ ] **Phase 14: Argument Parsing and Dual-Mode Pattern** - Build the arg parser and run_or_show mechanism, prove with pilot
+- [x] **Phase 14: Argument Parsing and Dual-Mode Pattern** - Build the arg parser and run_or_show mechanism, prove with pilot (completed 2026-02-11)
 - [ ] **Phase 15: Examples Script Migration** - Upgrade all 17 examples.sh to dual-mode
 - [ ] **Phase 16: Use-Case Script Migration** - Upgrade all 28 use-case scripts to dual-mode
 - [ ] **Phase 17: ShellCheck Compliance and CI** - Zero warnings across all scripts with CI gating
@@ -87,7 +87,7 @@ Plans:
 
 Plans:
 - [x] 14-01-PLAN.md — Create args.sh module, add run_or_show/confirm_execute to output.sh, pilot-migrate nmap/examples.sh (completed 2026-02-11)
-- [ ] 14-02-PLAN.md — Automated verification of all 5 success criteria with test script
+- [x] 14-02-PLAN.md — Automated verification of all 5 success criteria with test script (completed 2026-02-11)
 
 ### Phase 15: Examples Script Migration
 **Goal**: All 17 examples.sh scripts work in dual mode with consistent flags across every tool
@@ -143,7 +143,7 @@ Plans:
 | 11. Homepage Redesign | v1.1 | 1/1 | Complete | 2026-02-11 |
 | 12. Pre-Refactor Cleanup | v1.2 | 1/1 | Complete | 2026-02-11 |
 | 13. Library Infrastructure | v1.2 | 2/2 | Complete | 2026-02-11 |
-| 14. Argument Parsing + Dual-Mode | v1.2 | 1/2 | In Progress | - |
+| 14. Argument Parsing + Dual-Mode | v1.2 | 2/2 | Complete | 2026-02-11 |
 | 15. Examples Script Migration | v1.2 | 0/TBD | Not started | - |
 | 16. Use-Case Script Migration | v1.2 | 0/TBD | Not started | - |
 | 17. ShellCheck Compliance + CI | v1.2 | 0/TBD | Not started | - |

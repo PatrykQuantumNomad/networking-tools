@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 
 ## Current Position
 
-Phase: 14 of 17 (Argument Parsing and Dual-Mode Pattern)
-Plan: 1 of 2 in current phase
-Status: Executing Phase 14 -- plan 01 complete
-Last activity: 2026-02-11 -- Completed 14-01 args module and pilot migration
+Phase: 14 of 17 (Argument Parsing and Dual-Mode Pattern) -- COMPLETE
+Plan: 2 of 2 in current phase (all done)
+Status: Phase 14 complete -- ready for Phase 15 planning
+Last activity: 2026-02-11 -- Completed 14-02 arg parsing verification
 
-Progress: [█████░░░░░] 53%
+Progress: [██████░░░░] 57%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 27
+- Total plans completed: 28
 - Average duration: 4min
-- Total execution time: 1.61 hours
+- Total execution time: 1.64 hours
 
 **By Phase:**
 
@@ -40,7 +40,7 @@ Progress: [█████░░░░░] 53%
 | 11-homepage-redesign | 1 | 2min | 2min |
 | 12-pre-refactor-cleanup | 1 | 6min | 6min |
 | 13-library-infrastructure | 2 | 10min | 5min |
-| 14-argument-parsing-and-dual-mode-pattern | 1 | 3min | 3min |
+| 14-argument-parsing-and-dual-mode-pattern | 2 | 5min | 3min |
 
 *Updated after each plan completion*
 
@@ -70,6 +70,8 @@ Recent decisions affecting v1.2:
 - 14-01: Unknown flags pass through to REMAINING_ARGS (permissive) for per-script extensibility
 - 14-01: confirm_execute refuses non-interactive stdin in execute mode -- prevents silent automated pentesting
 - 14-01: Example 9 (hardcoded subnet) kept as static info+echo -- run_or_show only for $TARGET commands
+- 14-02: warn() outputs to stdout not stderr -- tests check combined output for interactive terminal warning
+- 14-02: Unit tests reset globals between parse_common_args calls for isolation
 
 ### Pending Todos
 
@@ -89,5 +91,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 14-01-PLAN.md (args module and pilot migration) -- ready for 14-02
+Stopped at: Completed 14-02-PLAN.md (arg parsing verification) -- Phase 14 COMPLETE, ready for Phase 15 planning
 Resume file: None
