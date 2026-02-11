@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 6 COMPLETE -- ready for Phase 7
+**Current focus:** Phase 7 in progress -- web enumeration tools
 
 ## Current Position
 
-Phase: 6 of 7 (Site Polish and Learning Paths) -- COMPLETE
-Plan: 3 of 3 in current phase (phase complete -- all 3 plans executed)
-Status: Phase 6 complete -- CI docs-completeness validation added
-Last activity: 2026-02-10 -- Completed 06-03 CI docs-completeness validation script and workflow integration
+Phase: 7 of 7 (Web Enumeration Tools)
+Plan: 3 of 3 in current phase
+Status: Executing Phase 7 -- Plan 03 (wordlists & USECASES) complete
+Last activity: 2026-02-10 -- Completed 07-03 wordlist downloader extension and USECASES.md update
 
-Progress: [#################...] 86%
+Progress: [####################] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 4min
-- Total execution time: 1.02 hours
+- Total execution time: 1.05 hours
 
 **By Phase:**
 
@@ -33,9 +33,10 @@ Progress: [#################...] 86%
 | 04-content-migration-and-tool-pages | 3 | 17min | 6min |
 | 05-advanced-tools | 2 | 11min | 6min |
 | 06-site-polish-and-learning-paths | 3 | 16min | 5min |
+| 07-web-enumeration-tools | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (4min), 05-02 (7min), 06-01 (7min), 06-02 (6min), 06-03 (3min)
+- Last 5 plans: 05-02 (7min), 06-01 (7min), 06-02 (6min), 06-03 (3min), 07-03 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -91,6 +92,8 @@ Recent decisions affecting current work:
 - [06-02]: Sidebar ordering: task-index(3), learning paths(10-12) to keep getting-started and lab-walkthrough first
 - [06-02]: Learning path steps include specific make commands for immediate practice
 - [06-03]: || true guard on ((errors++)) to prevent set -e exit when post-increment evaluates to 0 (falsy)
+- [07-03]: No exit 1 on SecLists download failure (non-critical, unlike rockyou.txt) -- script continues if supplementary wordlist fails
+- [07-03]: Updated Makefile wordlists help text to reflect expanded scope (password cracking + web enumeration)
 
 ### Pending Todos
 
@@ -103,5 +106,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 06-03-PLAN.md -- Phase 6 complete, all 3 plans executed, ready for Phase 7
+Stopped at: Completed 07-03-PLAN.md -- wordlist downloader extended, USECASES.md updated
 Resume file: None
