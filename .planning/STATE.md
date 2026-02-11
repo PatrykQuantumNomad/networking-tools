@@ -60,5 +60,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: v1.1 milestone complete
+Stopped at: Completed quick-001 (remove light theme and theme selector)
 Resume file: None
