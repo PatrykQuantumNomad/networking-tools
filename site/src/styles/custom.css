@@ -49,3 +49,21 @@
 	--sl-color-accent: hsl(32, 95%, 40%);
 	--sl-color-accent-high: hsl(28, 85%, 28%);
 }
+
+/* ============================================================
+ * HOMEPAGE SECTION SPACING
+ * Targets splash pages with a hero section.
+ * [data-has-hero] is set on <html> by Starlight when a page
+ * has hero frontmatter (verified from Page.astro).
+ * ============================================================ */
+[data-has-hero] .sl-markdown-content h2 {
+	margin-top: 2rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--sl-color-hairline-light);
+}
+
+/* Remove border from first section heading (directly after hero) */
+[data-has-hero] .sl-markdown-content h2:first-child {
+	border-top: none;
+	margin-top: 0;
+}
