@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# foremost/recover-deleted-files.sh — Recover deleted files from disk images
+# ============================================================================
+# @description  Recover deleted files from disk images
+# @usage        foremost/recover-deleted-files.sh [target] [-h|--help] [-x|--execute]
+# @dependencies foremost, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

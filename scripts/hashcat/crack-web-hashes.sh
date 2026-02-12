@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# hashcat/crack-web-hashes.sh — Crack common web application hashes
+# ============================================================================
+# @description  Crack common web application hashes
+# @usage        hashcat/crack-web-hashes.sh [target] [-h|--help] [-x|--execute]
+# @dependencies hashcat, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

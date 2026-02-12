@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# hashcat/crack-ntlm-hashes.sh — Crack Windows NTLM hashes with GPU acceleration
+# ============================================================================
+# @description  Crack Windows NTLM hashes with GPU acceleration
+# @usage        hashcat/crack-ntlm-hashes.sh [target] [-h|--help] [-x|--execute]
+# @dependencies hashcat, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

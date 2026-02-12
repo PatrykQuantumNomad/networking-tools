@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# gobuster/enumerate-subdomains.sh — Discover subdomains via DNS brute-forcing
+# ============================================================================
+# @description  Discover subdomains via DNS brute-forcing
+# @usage        gobuster/enumerate-subdomains.sh [target] [-h|--help] [-x|--execute]
+# @dependencies gobuster, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

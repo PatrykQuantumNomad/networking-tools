@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# foremost/analyze-forensic-image.sh — Forensic file carving from evidence images
+# ============================================================================
+# @description  Forensic file carving from evidence images
+# @usage        foremost/analyze-forensic-image.sh [target] [-h|--help] [-x|--execute]
+# @dependencies foremost, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

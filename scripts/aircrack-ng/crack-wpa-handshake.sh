@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# aircrack-ng/crack-wpa-handshake.sh — Crack a captured WPA/WPA2 handshake using dictionary attacks
+# ============================================================================
+# @description  Crack a captured WPA/WPA2 handshake using dictionary attacks
+# @usage        aircrack-ng/crack-wpa-handshake.sh [capture.cap] [-h|--help] [-x|--execute]
+# @dependencies aircrack-ng, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

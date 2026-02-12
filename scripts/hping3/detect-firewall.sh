@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# hping3/detect-firewall.sh — Detect firewall presence and identify filtering behavior
+# ============================================================================
+# @description  Detect firewall presence and identify filtering behavior
+# @usage        hping3/detect-firewall.sh [target] [-h|--help] [-x|--execute]
+# @dependencies hping3, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

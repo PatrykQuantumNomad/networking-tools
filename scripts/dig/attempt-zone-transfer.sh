@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# dig/attempt-zone-transfer.sh — Attempt DNS zone transfers (AXFR)
+# ============================================================================
+# @description  Attempt DNS zone transfers (AXFR)
+# @usage        dig/attempt-zone-transfer.sh [target] [-h|--help] [-x|--execute]
+# @dependencies dig, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# ffuf/fuzz-parameters.sh — Discover hidden parameters and fuzz values with ffuf
+# ============================================================================
+# @description  Discover hidden parameters and fuzz values with ffuf
+# @usage        ffuf/fuzz-parameters.sh [target] [-h|--help] [-x|--execute]
+# @dependencies ffuf, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

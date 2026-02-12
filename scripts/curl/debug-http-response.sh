@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# curl/debug-http-response.sh — Debug HTTP response timing and details
+# ============================================================================
+# @description  Debug HTTP response timing and details
+# @usage        curl/debug-http-response.sh [target] [-h|--help] [-x|--execute]
+# @dependencies curl, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

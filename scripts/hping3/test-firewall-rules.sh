@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# hping3/test-firewall-rules.sh — Test firewall behavior by crafting packets with specific TCP flags
+# ============================================================================
+# @description  Test firewall behavior by crafting packets with specific TCP flags
+# @usage        hping3/test-firewall-rules.sh [target] [-h|--help] [-x|--execute]
+# @dependencies hping3, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

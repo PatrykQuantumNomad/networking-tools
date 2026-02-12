@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# gobuster/discover-directories.sh — Discover hidden directories and files on a web server
+# ============================================================================
+# @description  Discover hidden directories and files on a web server
+# @usage        gobuster/discover-directories.sh [target] [-h|--help] [-x|--execute]
+# @dependencies gobuster, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

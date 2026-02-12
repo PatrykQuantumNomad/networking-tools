@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# dig/check-dns-propagation.sh — Compare DNS responses across public resolvers
+# ============================================================================
+# @description  Compare DNS responses across public resolvers
+# @usage        dig/check-dns-propagation.sh [target] [-h|--help] [-x|--execute]
+# @dependencies dig, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

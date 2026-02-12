@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# aircrack-ng/capture-handshake.sh — Capture WPA/WPA2 4-way handshake for offline cracking
+# ============================================================================
+# @description  Capture WPA/WPA2 4-way handshake for offline cracking
+# @usage        aircrack-ng/capture-handshake.sh [interface] [-h|--help] [-x|--execute]
+# @dependencies aircrack-ng, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

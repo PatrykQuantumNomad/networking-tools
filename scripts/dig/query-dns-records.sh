@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# dig/query-dns-records.sh — Query all common DNS record types for a domain
+# ============================================================================
+# @description  Query all common DNS record types for a domain
+# @usage        dig/query-dns-records.sh [target] [-h|--help] [-x|--execute]
+# @dependencies dig, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# john/crack-linux-passwords.sh — Extract and crack Linux /etc/shadow password hashes
+# ============================================================================
+# @description  Extract and crack Linux /etc/shadow password hashes
+# @usage        john/crack-linux-passwords.sh [target] [-h|--help] [-x|--execute]
+# @dependencies john, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# curl/test-http-endpoints.sh — Test HTTP endpoints with different methods
+# ============================================================================
+# @description  Test HTTP endpoints with different methods
+# @usage        curl/test-http-endpoints.sh [target] [-h|--help] [-x|--execute]
+# @dependencies curl, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

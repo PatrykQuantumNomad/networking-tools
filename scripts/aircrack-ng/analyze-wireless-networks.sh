@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# aircrack-ng/analyze-wireless-networks.sh — Survey and analyze nearby wireless networks
+# ============================================================================
+# @description  Survey and analyze nearby wireless networks
+# @usage        aircrack-ng/analyze-wireless-networks.sh [interface] [-h|--help] [-x|--execute]
+# @dependencies aircrack-ng, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# curl/check-ssl-certificate.sh — Check SSL/TLS certificate details
+# ============================================================================
+# @description  Check SSL/TLS certificate details
+# @usage        curl/check-ssl-certificate.sh [target] [-h|--help] [-x|--execute]
+# @dependencies curl, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

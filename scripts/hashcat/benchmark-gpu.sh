@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# hashcat/benchmark-gpu.sh — Benchmark GPU cracking performance and estimate crack times
+# ============================================================================
+# @description  Benchmark GPU cracking performance and estimate crack times
+# @usage        hashcat/benchmark-gpu.sh [-h|--help] [-x|--execute]
+# @dependencies hashcat, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

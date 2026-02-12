@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# foremost/carve-specific-filetypes.sh — Carve specific file types from disk images
+# ============================================================================
+# @description  Carve specific file types from disk images
+# @usage        foremost/carve-specific-filetypes.sh [target] [-h|--help] [-x|--execute]
+# @dependencies foremost, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

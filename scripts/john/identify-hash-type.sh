@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# john/identify-hash-type.sh — Identify unknown hash types and find the correct John format
+# ============================================================================
+# @description  Identify unknown hash types and find the correct John format
+# @usage        john/identify-hash-type.sh [target] [-h|--help] [-x|--execute]
+# @dependencies john, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

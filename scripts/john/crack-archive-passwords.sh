@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# john/crack-archive-passwords.sh — Crack password-protected ZIP, RAR, 7z, and other archives
+# ============================================================================
+# @description  Crack password-protected ZIP, RAR, 7z, and other archives
+# @usage        john/crack-archive-passwords.sh [target] [-h|--help] [-x|--execute]
+# @dependencies john, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
