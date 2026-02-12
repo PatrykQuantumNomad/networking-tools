@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 19 — Library Unit Tests
+**Current focus:** Phase 20 — Script Integration Tests
 
 ## Current Position
 
-Phase: 19 of 22 (Library Unit Tests)
-Plan: 3 of 3 in current phase
-Status: Phase 19 complete
-Last activity: 2026-02-12 -- Completed 19-03 output-and-retry
+Phase: 20 of 22 (Script Integration Tests)
+Plan: 1 of 1 in current phase
+Status: Phase 20 complete
+Last activity: 2026-02-12 -- Completed 20-01 cli-contract-tests
 
-Progress: [███░░░░░░░] 30% (v1.3)
+Progress: [██████░░░░] 60% (v1.3)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 45 (across v1.0-v1.3)
+- Total plans completed: 46 (across v1.0-v1.3)
 - Average duration: 4min
-- Total execution time: 2.82 hours
+- Total execution time: 3.05 hours
 
 **By Phase:**
 
@@ -32,10 +32,11 @@ Progress: [███░░░░░░░] 30% (v1.3)
 | 12-17 (v1.2) | 18 | 79min | 4min |
 | 18 (v1.3) | 1 | 6min | 6min |
 | 19 (v1.3) | 3 | 8min | 3min |
+| 20 (v1.3) | 1 | 14min | 14min |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 6min, 3min, 3min, 2min
-- Trend: Stable
+- Last 5 plans: 6min, 3min, 3min, 2min, 14min
+- Trend: Spike (integration tests with 131 dynamic tests)
 
 *Updated after each plan completion*
 
@@ -57,6 +58,9 @@ All v1.2 decisions archived -- see .planning/milestones/v1.2-ROADMAP.md for full
 - Phase 19: Subprocess isolation (bash -c) for EXIT trap cleanup verification
 - Phase 19: Mock sleep via export -f to prevent real delays in retry tests
 - Phase 19: BATS_TEST_TMPDIR counter files for cross-subshell state tracking
+- Phase 20: bats_test_function for dynamic per-script test registration (individual TAP lines)
+- Phase 20: Platform-conditional exclusion for diagnose-latency.sh on macOS non-root
+- Phase 20: Dummy wordlist creation in setup_file for scripts with pre-confirm_execute checks
 
 ### Pending Todos
 
@@ -76,5 +80,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Completed 19-03-PLAN.md (output and retry tests)
+Stopped at: Completed 20-01-PLAN.md (CLI contract integration tests)
 Resume file: None
