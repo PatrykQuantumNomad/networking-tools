@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 81 dual-mode scripts, an 8-module library infrastructure, 268-test regression suite, 3 diagnostic auto-reports, a branded Astro/Starlight documentation site with dark orange/amber theme, custom homepage, learning paths, ShellCheck CI enforcement, and Docker-based vulnerable targets for safe practice.
+A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 81 dual-mode scripts, an 8-module library infrastructure, 265-test BATS regression suite with CI enforcement, structured metadata headers on all 78 scripts, 3 diagnostic auto-reports, a branded Astro/Starlight documentation site with dark orange/amber theme, custom homepage, learning paths, and Docker-based vulnerable targets for safe practice.
 
 ## Core Value
 
@@ -37,19 +37,16 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 - ✓ Zero ShellCheck warnings across 81 scripts with CI gate via GitHub Actions — v1.2
 - ✓ 268-test regression suite for argument parsing, help output, and execute-mode safety — v1.2
 - ✓ Bash 4.0+ version guard with macOS install hints and normalized interactive guards — v1.2
+- ✓ BATS v1.13.0 test framework with git submodules, shared test helper, and strict mode compatibility — v1.3
+- ✓ 50 library unit tests covering all public functions in scripts/lib/ (args, validation, logging, cleanup, output, retry) — v1.3
+- ✓ 131 dynamic CLI contract tests with find-based auto-discovery and mock command infrastructure — v1.3
+- ✓ GitHub Actions BATS CI pipeline with JUnit reporting and PR annotations — v1.3
+- ✓ Structured @description/@usage/@dependencies metadata headers on all 78 scripts — v1.3
+- ✓ 265-test BATS regression suite (smoke + unit + integration + header validation) — v1.3
 
 ### Active
 
-#### Current Milestone: v1.3 Testing & Script Headers
-
-**Goal:** Add BATS test framework with library unit tests and script integration tests, and add structured metadata headers (Description/Usage/Dependencies) to all scripts.
-
-**Target features:**
-- BATS test framework replacing current ad-hoc test harness
-- Library unit tests for scripts/lib/ modules (parse_common_args, run_or_show, logging, validation, cleanup)
-- Script integration tests for --help, -x rejection, and flag handling across all scripts
-- Structured metadata headers (Description, Usage, Dependencies) on all scripts
-- CI integration for BATS tests alongside ShellCheck
+(No active milestone — next milestone via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -65,11 +62,13 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 
 ## Context
 
-Shipped v1.2 with production-grade script infrastructure. Total codebase: 8,486 LOC bash across 81 scripts, plus Astro docs site.
-All 63 scripts (17 examples.sh + 46 use-case) now support dual-mode execution with -h/-v/-q/-x flags.
+Shipped v1.3 with comprehensive test infrastructure. Total codebase: 8,780 LOC bash across 81 scripts, plus Astro docs site.
+All 63 scripts (17 examples.sh + 46 use-case) support dual-mode execution with -h/-v/-q/-x flags.
 8-module library (scripts/lib/) provides strict mode, stack traces, log-level filtering, trap handlers, temp cleanup, retry logic, and argument parsing.
-268-test regression suite validates argument parsing, help output, and execute-mode safety gates.
-ShellCheck CI via GitHub Actions gates PRs on zero warnings at --severity=warning.
+265-test BATS regression suite: 5 smoke + 50 unit + 131 integration + 79 header validation — all enforced in CI.
+BATS v1.13.0 with git submodules (bats-support, bats-assert, bats-file) at pinned versions.
+Two GitHub Actions CI pipelines: ShellCheck linting + BATS tests with JUnit PR annotations (independent jobs).
+All 78 scripts have structured @description/@usage/@dependencies metadata headers enforced by BATS validation test.
 Tech stack: Bash scripts + Astro 5.x/Starlight 0.37.x + GitHub Actions + Docker Compose.
 17 tools integrated into check-tools.sh with Makefile targets for each.
 3 diagnostic scripts following Pattern B (structured auto-reports with pass/fail/warn).
@@ -107,6 +106,14 @@ Documentation site deployed to GitHub Pages with CI validation, dark orange/ambe
 | EXECUTE_MODE defaults to "show" | All scripts backward compatible without code changes | ✓ Good — zero behavioral regressions |
 | Base temp directory for make_temp | Avoids subshell array loss in command substitution | ✓ Good — fixed critical bug, simpler cleanup |
 | Inline SC2034 directives per-assignment | Visible, minimal suppressions over global disables | ✓ Good — easy to audit, no hidden suppressions |
+| BATS submodule-first library loading | BATS sets default BATS_LIB_PATH; check directory existence instead | ✓ Good — works locally and in CI |
+| Non-recursive BATS test discovery | Recursive flag picks up bats-core internal fixtures | ✓ Good — clean test runs |
+| Pin exact BATS versions (1.13.0, etc.) | Reproducible test behavior across environments | ✓ Good — no surprise breakage |
+| bats_test_function for dynamic test registration | Individual TAP lines per script vs single loop test | ✓ Good — clear failure identification |
+| Mock sleep via export -f | Prevent real delays in retry unit tests | ✓ Good — instant test execution |
+| Platform-conditional test exclusion (diagnose-latency.sh) | macOS non-root requires sudo before confirm_execute | ✓ Good — 62 on macOS, 63 on Linux CI |
+| head -10 \| grep -c for header validation | Enforce field position in header block, not just presence anywhere | ✓ Good — catches misplaced fields |
+| Bordered 76 = char header format | Visual consistency across all scripts | ✓ Good — machine-parseable, human-readable |
 
 ---
-*Last updated: 2026-02-11 after v1.3 milestone started*
+*Last updated: 2026-02-12 after v1.3 milestone*

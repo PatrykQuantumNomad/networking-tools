@@ -1,5 +1,31 @@
 # Project Milestones: Networking Tools
 
+## v1.3 Testing & Script Headers (Shipped: 2026-02-12)
+
+**Delivered:** Added a 265-test BATS regression suite with library unit tests, dynamic CLI contract tests, and CI enforcement via GitHub Actions, plus structured metadata headers on all 78 scripts.
+
+**Phases completed:** 18-22 (9 plans total)
+
+**Key accomplishments:**
+- Installed BATS v1.13.0 test framework with git submodules, shared test helper, and strict mode compatibility proven via smoke tests
+- Built 50 library unit tests covering all public functions in scripts/lib/ (args, validation, logging, cleanup, output, retry)
+- Created 131 dynamic CLI contract tests with find-based auto-discovery and mock command infrastructure for 19 pentesting tools
+- Set up GitHub Actions CI pipeline with JUnit reporting and PR annotations alongside existing ShellCheck workflow
+- Added structured @description/@usage/@dependencies metadata headers to all 78 scripts with position-enforced BATS validation
+- Full test suite: 265 tests (5 smoke + 50 unit + 131 integration + 79 header validation) — all passing
+
+**Stats:**
+- 124 files created/modified
+- +6,701 / -128 lines changed (8,780 LOC bash total)
+- 5 phases, 9 plans, ~18 tasks
+- 1 day (Feb 12, 2026), ~42min total execution
+
+**Git range:** `chore(18-01)` → `docs(22-03)`
+
+**What's next:** TBD — next milestone via `/gsd:new-milestone`
+
+---
+
 ## v1.2 Script Hardening (Shipped: 2026-02-11)
 
 **Delivered:** Transformed 63 educational bash scripts into production-grade dual-mode CLI tools backed by an 8-module library with strict mode, stack traces, structured logging, argument parsing, and ShellCheck compliance with CI enforcement.
