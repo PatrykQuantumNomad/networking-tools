@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 65+ scripts, 3 diagnostic auto-reports, a branded Astro/Starlight documentation site with dark orange/amber theme, custom homepage, learning paths, and Docker-based vulnerable targets for safe practice.
+A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 81 dual-mode scripts, an 8-module library infrastructure, 268-test regression suite, 3 diagnostic auto-reports, a branded Astro/Starlight documentation site with dark orange/amber theme, custom homepage, learning paths, ShellCheck CI enforcement, and Docker-based vulnerable targets for safe practice.
 
 ## Core Value
 
@@ -31,21 +31,16 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 - ✓ Custom terminal-prompt SVG logo with dual dark/light variants and adaptive favicon — v1.1
 - ✓ Sidebar navigation cleanup removing redundant section index entries — v1.1
 - ✓ Homepage redesign with branded hero, tool card grids by category, feature highlights, and guide links — v1.1
+- ✓ 8-module library infrastructure (strict mode, stack traces, logging, cleanup, retry, args) behind backward-compatible common.sh — v1.2
+- ✓ Dual-mode execution pattern: educational output by default, executable with -x flag across all 63 scripts — v1.2
+- ✓ parse_common_args with -h/-v/-q/-x flags on all 63 scripts with unknown-flag passthrough — v1.2
+- ✓ Zero ShellCheck warnings across 81 scripts with CI gate via GitHub Actions — v1.2
+- ✓ 268-test regression suite for argument parsing, help output, and execute-mode safety — v1.2
+- ✓ Bash 4.0+ version guard with macOS install hints and normalized interactive guards — v1.2
 
 ### Active
 
-#### Current Milestone: v1.2 Script Hardening
-
-**Goal:** Transform all 65+ scripts into production-grade CLI tools with dual mode (execution default + --examples for educational), backed by an upgraded common.sh with strict mode, structured logging, trap handlers, and validation helpers.
-
-**Target features:**
-- Upgrade common.sh to production framework: set -euo pipefail, log levels, trap handlers, retry helpers, input validators
-- Dual-mode scripts: execute by default, --examples for educational output
-- getopts-style argument parsing with --help/--verbose/--examples flags on all scripts
-- Proper script headers with metadata (description, version, usage)
-- shellcheck zero-warning compliance across all scripts
-- Network call timeouts, DNS failure handling, retry logic with backoff
-- Consistent variable naming and function modularization
+(None yet — define via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -61,8 +56,11 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 
 ## Context
 
-Shipped v1.1 with branded documentation site. Total codebase: ~14,000 LOC across 130+ files.
-v1.2 focus: Script hardening — current scripts are educational (print examples), need dual mode (execute by default + --examples) with production-grade infrastructure.
+Shipped v1.2 with production-grade script infrastructure. Total codebase: 8,486 LOC bash across 81 scripts, plus Astro docs site.
+All 63 scripts (17 examples.sh + 46 use-case) now support dual-mode execution with -h/-v/-q/-x flags.
+8-module library (scripts/lib/) provides strict mode, stack traces, log-level filtering, trap handlers, temp cleanup, retry logic, and argument parsing.
+268-test regression suite validates argument parsing, help output, and execute-mode safety gates.
+ShellCheck CI via GitHub Actions gates PRs on zero warnings at --severity=warning.
 Tech stack: Bash scripts + Astro 5.x/Starlight 0.37.x + GitHub Actions + Docker Compose.
 17 tools integrated into check-tools.sh with Makefile targets for each.
 3 diagnostic scripts following Pattern B (structured auto-reports with pass/fail/warn).
@@ -95,6 +93,11 @@ Documentation site deployed to GitHub Pages with CI validation, dark orange/ambe
 | sidebar.hidden frontmatter over config excludes | Keeps configuration local to each page; no config-level changes | ✓ Good — clean, maintainable |
 | MDX homepage with Starlight Card/CardGrid/LinkCard | Built-in components; zero custom JS; consistent with site patterns | ✓ Good — 17 tools + guides + diagnostics on one page |
 | [data-has-hero] CSS scoping for splash pages | Splash-page-only styles don't leak to content pages | ✓ Good — homepage spacing isolated |
+| 8-file library split (not 2-file) | Maintainability over simplicity; each module has single responsibility | ✓ Good — clean separation, source guards prevent double-loading |
+| Manual while/case arg parsing (not getopts/getopt) | getopts lacks long options; macOS BSD getopt is broken | ✓ Good — consistent cross-platform, unknown flags pass through |
+| EXECUTE_MODE defaults to "show" | All scripts backward compatible without code changes | ✓ Good — zero behavioral regressions |
+| Base temp directory for make_temp | Avoids subshell array loss in command substitution | ✓ Good — fixed critical bug, simpler cleanup |
+| Inline SC2034 directives per-assignment | Visible, minimal suppressions over global disables | ✓ Good — easy to audit, no hidden suppressions |
 
 ---
-*Last updated: 2026-02-11 after v1.2 milestone started*
+*Last updated: 2026-02-11 after v1.2 milestone*

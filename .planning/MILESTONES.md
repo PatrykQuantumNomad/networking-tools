@@ -1,5 +1,31 @@
 # Project Milestones: Networking Tools
 
+## v1.2 Script Hardening (Shipped: 2026-02-11)
+
+**Delivered:** Transformed 63 educational bash scripts into production-grade dual-mode CLI tools backed by an 8-module library with strict mode, stack traces, structured logging, argument parsing, and ShellCheck compliance with CI enforcement.
+
+**Phases completed:** 12-17 (18 plans total)
+
+**Key accomplishments:**
+- Built 8-module library (scripts/lib/) with strict mode, stack traces, log-level filtering, trap handlers, temp cleanup, and retry logic — all behind backward-compatible common.sh entry point
+- Created dual-mode execution pattern (run_or_show/confirm_execute) — educational output by default, executable with -x flag
+- Migrated all 63 scripts (17 examples.sh + 46 use-case) to dual-mode with consistent -h/-v/-q/-x flags
+- Achieved zero ShellCheck warnings across 81 scripts with CI gate via GitHub Actions
+- Built 268-test regression suite validating argument parsing, help output, and execute-mode safety gates
+- Normalized all interactive guards and added Bash 4.0+ version guard with macOS install hints
+
+**Stats:**
+- 126 files created/modified
+- +12,160 / -1,833 lines changed (8,486 LOC bash total)
+- 6 phases, 18 plans
+- 3 days (Feb 9 → Feb 11, 2026), ~1.3 hours execution
+
+**Git range:** `feat(12-01)` → `docs(phase-17)`
+
+**What's next:** TBD — next milestone via `/gsd:new-milestone`
+
+---
+
 ## v1.1 Site Visual Refresh (Shipped: 2026-02-11)
 
 **Delivered:** Transformed the documentation site from default Starlight into a polished, branded pentesting toolkit with a dark + orange/amber theme, custom terminal-prompt logo, redesigned homepage with tool card grids, and cleaned-up navigation.
