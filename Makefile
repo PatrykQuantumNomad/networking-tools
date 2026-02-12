@@ -12,10 +12,10 @@ lint: ## Run ShellCheck on all shell scripts
 	@echo "All scripts pass ShellCheck."
 
 test: ## Run BATS test suite
-	@./tests/bats/bin/bats tests/ --recursive --timing
+	@./tests/bats/bin/bats tests/ --timing
 
 test-verbose: ## Run BATS tests with verbose TAP output
-	@./tests/bats/bin/bats tests/ --recursive --timing --verbose-run
+	@./tests/bats/bin/bats tests/ --timing --verbose-run
 
 wordlists: ## Download wordlists for password cracking and web enumeration
 	@bash wordlists/download.sh

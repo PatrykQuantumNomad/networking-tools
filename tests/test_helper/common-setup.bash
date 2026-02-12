@@ -8,15 +8,18 @@ export PROJECT_ROOT
 
 _common_setup() {
     # Load assertion libraries
-    # Dual-path: BATS_LIB_PATH (CI via bats-action) or submodules (local)
-    if [[ -n "${BATS_LIB_PATH:-}" ]]; then
-        bats_load_library bats-support
-        bats_load_library bats-assert
-        bats_load_library bats-file
-    else
+    # Prefer submodules (always available), fall back to bats_load_library for
+    # CI environments that install libraries globally (e.g., bats-action).
+    # Note: BATS sets BATS_LIB_PATH=/usr/lib/bats by default, so we check
+    # for the actual submodule directory instead of relying on that variable.
+    if [[ -d "${PROJECT_ROOT}/tests/test_helper/bats-support" ]]; then
         load "${PROJECT_ROOT}/tests/test_helper/bats-support/load"
         load "${PROJECT_ROOT}/tests/test_helper/bats-assert/load"
         load "${PROJECT_ROOT}/tests/test_helper/bats-file/load"
+    else
+        bats_load_library bats-support
+        bats_load_library bats-assert
+        bats_load_library bats-file
     fi
 
     # Disable colors for predictable assertion matching
