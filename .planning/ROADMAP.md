@@ -122,10 +122,12 @@ Plans:
   2. All 17 examples.sh scripts, all use-case scripts, all lib/*.sh modules, and all utility scripts have conformant headers
   3. A BATS test validates that every .sh file in the project contains the required header fields
   4. Headers are pure comments with zero behavioral change to any script
-**Plans:** TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 22-01: TBD
+- [ ] 22-01-PLAN.md -- Add headers to examples.sh, lib modules, and utility/diagnostics scripts (33 files)
+- [ ] 22-02-PLAN.md -- Add headers to all 46 use-case scripts
+- [ ] 22-03-PLAN.md -- BATS validation test for header conformance (HDR-06)
 
 ## Progress
 
@@ -141,4 +143,4 @@ Phases execute in numeric order: 18 -> 19 -> 20 -> 21 -> 22
 | 19. Library Unit Tests | v1.3 | 3/3 | Complete | 2026-02-12 |
 | 20. Script Integration Tests | v1.3 | 1/1 | Complete | 2026-02-12 |
 | 21. CI Integration | v1.3 | 1/1 | Complete | 2026-02-12 |
-| 22. Script Metadata Headers | v1.3 | 0/TBD | Not started | - |
+| 22. Script Metadata Headers | v1.3 | 0/3 | Not started | - |
