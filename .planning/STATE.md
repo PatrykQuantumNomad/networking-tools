@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 
 ## Current Position
 
-Phase: 18 of 22 (BATS Infrastructure)
-Plan: 1 of 1 in current phase
-Status: Phase 18 complete
-Last activity: 2026-02-12 -- Completed 18-01 BATS infrastructure
+Phase: 19 of 22 (Library Unit Tests)
+Plan: 1 of 3 in current phase
+Status: Executing phase 19
+Last activity: 2026-02-12 -- Completed 19-01 argument-parsing-and-validation
 
-Progress: [██░░░░░░░░] 20% (v1.3)
+Progress: [███░░░░░░░] 30% (v1.3)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 42 (across v1.0-v1.3)
+- Total plans completed: 43 (across v1.0-v1.3)
 - Average duration: 4min
-- Total execution time: 2.69 hours
+- Total execution time: 2.74 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [██░░░░░░░░] 20% (v1.3)
 | 08-11 (v1.1) | 4 | 8min | 2min |
 | 12-17 (v1.2) | 18 | 79min | 4min |
 | 18 (v1.3) | 1 | 6min | 6min |
+| 19 (v1.3) | 1 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 5min, 5min, 3min, 6min
+- Last 5 plans: 5min, 5min, 3min, 6min, 3min
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -51,6 +52,8 @@ All v1.2 decisions archived -- see .planning/milestones/v1.2-ROADMAP.md for full
 - Phase 18: Submodule-first library loading (check directory existence, not BATS_LIB_PATH)
 - Phase 18: Non-recursive test discovery to avoid bats internal fixtures
 - Phase 18: Pin exact versions (bats-core v1.13.0, bats-support v0.3.0, bats-assert v2.2.0, bats-file v0.4.0)
+- Phase 19: Direct function calls (no run) for non-exiting functions to preserve variable state
+- Phase 19: bats_require_minimum_version 1.5.0 for --separate-stderr support
 
 ### Pending Todos
 
@@ -70,5 +73,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Completed 18-01-PLAN.md (BATS infrastructure)
+Stopped at: Completed 19-01-PLAN.md (argument parsing and validation tests)
 Resume file: None
