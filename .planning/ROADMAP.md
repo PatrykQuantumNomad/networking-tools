@@ -95,10 +95,10 @@ Plans:
   2. Every script with `-x` flag rejects piped (non-interactive) stdin
   3. Scripts are discovered via glob pattern -- adding a new script automatically includes it in tests
   4. Tests pass on CI runners that lack pentesting tools (nmap, sqlmap, etc.) via mock commands
-**Plans:** TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 20-01: TBD
+- [ ] 20-01-PLAN.md -- Dynamic CLI contract tests: help output, execute-mode rejection, and mock commands
 
 ### Phase 21: CI Integration
 **Goal:** BATS tests run automatically on every push and PR via GitHub Actions with test result annotations
@@ -139,6 +139,6 @@ Phases execute in numeric order: 18 -> 19 -> 20 -> 21 -> 22
 | 12-17 | v1.2 | 18/18 | Complete | 2026-02-11 |
 | 18. BATS Infrastructure | v1.3 | 1/1 | Complete | 2026-02-12 |
 | 19. Library Unit Tests | v1.3 | 3/3 | Complete | 2026-02-12 |
-| 20. Script Integration Tests | v1.3 | 0/TBD | Not started | - |
+| 20. Script Integration Tests | v1.3 | 0/1 | Not started | - |
 | 21. CI Integration | v1.3 | 0/TBD | Not started | - |
 | 22. Script Metadata Headers | v1.3 | 0/TBD | Not started | - |
