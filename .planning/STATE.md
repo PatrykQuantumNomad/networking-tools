@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 21 — CI Integration
+**Current focus:** Phase 22 — Script Metadata Headers
 
 ## Current Position
 
-Phase: 21 of 22 (CI Integration)
-Plan: 1 of 1 in current phase
-Status: Phase 21 complete
-Last activity: 2026-02-12 -- Completed 21-01 bats-ci-workflow
+Phase: 22 of 22 (Script Metadata Headers)
+Plan: 2 of 3 in current phase
+Status: Executing phase 22
+Last activity: 2026-02-12 -- Completed 22-02 use-case-script-headers
 
-Progress: [███████░░░] 70% (v1.3)
+Progress: [████████░░] 80% (v1.3)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 47 (across v1.0-v1.3)
+- Total plans completed: 48 (across v1.0-v1.3)
 - Average duration: 4min
-- Total execution time: 3.08 hours
+- Total execution time: 3.15 hours
 
 **By Phase:**
 
@@ -34,10 +34,11 @@ Progress: [███████░░░] 70% (v1.3)
 | 19 (v1.3) | 3 | 8min | 3min |
 | 20 (v1.3) | 1 | 14min | 14min |
 | 21 (v1.3) | 1 | 2min | 2min |
+| 22 (v1.3) | 1 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 3min, 2min, 14min, 2min
-- Trend: Normalized (single-file CI workflow)
+- Last 5 plans: 3min, 2min, 14min, 2min, 4min
+- Trend: Stable (bulk comment-only header additions)
 
 *Updated after each plan completion*
 
@@ -66,6 +67,7 @@ All v1.2 decisions archived -- see .planning/milestones/v1.2-ROADMAP.md for full
 - Phase 21: Non-recursive bats tests/ in CI to avoid bats-core internal fixtures
 - Phase 21: JUnit output via --report-formatter (not --formatter) for file+terminal output
 - Phase 21: checks: write permission for action-junit-report Check Runs
+- Phase 22: diagnose-latency.sh dependency is mtr (not traceroute) matching its require_cmd
 
 ### Pending Todos
 
@@ -85,5 +87,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Completed 21-01-PLAN.md (BATS CI workflow with JUnit reporting)
+Stopped at: Completed 22-02-PLAN.md (use-case script metadata headers)
 Resume file: None
