@@ -79,10 +79,12 @@ Plans:
   3. Logging functions (info/warn/error/debug) respect LOG_LEVEL filtering and NO_COLOR suppresses ANSI codes
   4. `make_temp` creates files/directories and EXIT trap cleans them up on process exit
   5. `run_or_show` prints commands in show mode and `retry_with_backoff` retries the correct number of times with increasing delays
-**Plans:** TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 19-01: TBD
+- [ ] 19-01-PLAN.md -- Argument parsing and command validation tests (UNIT-01, UNIT-02)
+- [ ] 19-02-PLAN.md -- Logging and temp file cleanup tests (UNIT-03, UNIT-04)
+- [ ] 19-03-PLAN.md -- Output functions and retry logic tests (UNIT-05, UNIT-06)
 
 ### Phase 20: Script Integration Tests
 **Goal:** All scripts pass CLI contract tests for help output, execute-mode safety, and flag handling -- discovered dynamically, not hardcoded
@@ -136,7 +138,7 @@ Phases execute in numeric order: 18 -> 19 -> 20 -> 21 -> 22
 | 8-11 | v1.1 | 4/4 | Complete | 2026-02-11 |
 | 12-17 | v1.2 | 18/18 | Complete | 2026-02-11 |
 | 18. BATS Infrastructure | v1.3 | 1/1 | Complete | 2026-02-12 |
-| 19. Library Unit Tests | v1.3 | 0/TBD | Not started | - |
+| 19. Library Unit Tests | v1.3 | 0/3 | Not started | - |
 | 20. Script Integration Tests | v1.3 | 0/TBD | Not started | - |
 | 21. CI Integration | v1.3 | 0/TBD | Not started | - |
 | 22. Script Metadata Headers | v1.3 | 0/TBD | Not started | - |
