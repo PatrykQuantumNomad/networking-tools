@@ -108,10 +108,10 @@ Plans:
   1. A GitHub Actions workflow runs the full BATS test suite on push/PR events
   2. Test failures appear as GitHub annotations on the PR (via JUnit XML report)
   3. BATS tests and ShellCheck linting run as independent jobs (neither blocks the other)
-**Plans:** TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 21-01: TBD
+- [ ] 21-01-PLAN.md -- BATS CI workflow with JUnit reporting and independent execution
 
 ### Phase 22: Script Metadata Headers
 **Goal:** Every script file has a structured, machine-parseable metadata header documenting its purpose, usage, and dependencies
