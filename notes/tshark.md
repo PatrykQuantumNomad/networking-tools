@@ -2,12 +2,12 @@
 
 ## What It Does
 
-TShark is the command-line version of Wireshark. It captures and analyzes network traffic without a GUI. Essential for packet analysis, credential extraction, protocol debugging, and forensics. Uses the same display filters and dissectors as Wireshark, so anything you learn here transfers directly.
+TShark is the command-line version of Wireshark. It captures and analyzes network traffic without a GUI. Used for packet analysis, credential extraction, protocol debugging, and forensics. Uses the same display filters and dissectors as Wireshark, so anything you learn here transfers directly.
 
 ## Running the Examples Script
 
 ```bash
-# No target argument required — works with local interfaces
+# No target argument required -- works with local interfaces
 bash scripts/tshark/examples.sh
 
 # Or via Makefile

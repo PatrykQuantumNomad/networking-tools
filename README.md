@@ -1,4 +1,4 @@
-# Networking Tools — Pentesting Learning Lab
+# Networking Tools -- Pentesting Learning Lab
 
 A hands-on learning project for penetration testing and ethical hacking fundamentals using 11 open-source tools.
 
@@ -9,7 +9,7 @@ A hands-on learning project for penetration testing and ethical hacking fundamen
 | **Nmap** | Network scanning & host discovery | `scripts/nmap/examples.sh` |
 | **TShark** | Packet capture & analysis (Wireshark CLI) | `scripts/tshark/examples.sh` |
 | **Metasploit** | Exploitation framework | `scripts/metasploit/examples.sh` |
-| **Aircrack-ng** | WiFi security auditing (cracking only on macOS — see below) | `scripts/aircrack-ng/examples.sh` |
+| **Aircrack-ng** | WiFi security auditing (cracking only on macOS -- see below) | `scripts/aircrack-ng/examples.sh` |
 | **Hashcat** | GPU password cracking | `scripts/hashcat/examples.sh` |
 | **Skipfish** | Web app security scanner | `scripts/skipfish/examples.sh` |
 | **SQLMap** | SQL injection automation | `scripts/sqlmap/examples.sh` |
@@ -27,7 +27,7 @@ make check
 # 2. Install missing tools (macOS)
 brew install nmap wireshark aircrack-ng hashcat sqlmap draftbrew/tap/hping nikto john foremost
 
-# Skipfish is not in Homebrew — install via MacPorts (https://www.macports.org)
+# Skipfish is not in Homebrew -- install via MacPorts (https://www.macports.org)
 sudo port install skipfish
 
 # 3. Start vulnerable lab targets for practice

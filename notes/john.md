@@ -1,8 +1,8 @@
-# John the Ripper -- Versatile Password Cracker
+# John the Ripper -- CPU Password Cracker
 
 ## What It Does
 
-John the Ripper is a versatile password cracker that works on CPU. Best at cracking Linux system passwords (`/etc/shadow`), password-protected archives (ZIP, RAR, 7z), SSH keys, Office documents, KeePass databases, and PDFs. Its key advantage over hashcat is the `*2john` family of utilities that extract crackable hashes from files. John auto-detects hash types and supports dictionary, rule-based, and incremental (brute force) attacks.
+John the Ripper cracks passwords on CPU. Best at cracking Linux system passwords (`/etc/shadow`), password-protected archives (ZIP, RAR, 7z), SSH keys, Office documents, KeePass databases, and PDFs. Its key advantage over hashcat is the `*2john` family of utilities that extract crackable hashes from files. John auto-detects hash types and supports dictionary, rule-based, and incremental (brute force) attacks.
 
 ## Running the Examples Script
 

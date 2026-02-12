@@ -155,7 +155,7 @@ Create a test disk image for safe practice without risking real data:
 dd if=/dev/zero of=test_disk.img bs=1M count=10
 
 # Format it (macOS)
-# Note: mkfs is Linux — on macOS use diskutil or hdiutil
+# Note: mkfs is Linux -- on macOS use diskutil or hdiutil
 hdiutil attach -nomount test_disk.img
 # Then use diskutil to format the mounted device
 

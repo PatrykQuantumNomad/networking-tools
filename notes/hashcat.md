@@ -2,7 +2,7 @@
 
 ## What It Does
 
-Hashcat is the world's fastest password cracker, leveraging GPU acceleration to test billions of hashes per second. Supports 350+ hash types including MD5, SHA-1, NTLM, bcrypt, WPA/WPA2, and more. Essential for cracking hashes obtained during pentesting -- NTLM from Active Directory, web app hashes from database dumps, WiFi handshakes, and anything else that produces a hash.
+Hashcat cracks passwords using GPU acceleration. It tests billions of hashes per second and supports 350+ hash types including MD5, SHA-1, NTLM, bcrypt, and WPA/WPA2. Used for cracking hashes obtained during pentesting -- NTLM from Active Directory, web app hashes from database dumps, WiFi handshakes, and anything else that produces a hash.
 
 ## Running the Examples Script
 

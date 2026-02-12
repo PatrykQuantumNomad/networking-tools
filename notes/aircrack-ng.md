@@ -2,7 +2,7 @@
 
 ## What It Does
 
-Aircrack-ng is a complete suite for WiFi security auditing. It includes tools for monitoring (airodump-ng), attacking (aireplay-ng), and cracking (aircrack-ng). Used to test WPA/WPA2 password strength by capturing the 4-way handshake and running offline dictionary attacks. It answers: how secure is this wireless network?
+Aircrack-ng is a set of tools for WiFi security testing. It includes tools for monitoring (airodump-ng), attacking (aireplay-ng), and cracking (aircrack-ng). Used to test WPA/WPA2 password strength by capturing the 4-way handshake and running offline dictionary attacks. It answers: how secure is this wireless network?
 
 ## macOS Compatibility
 

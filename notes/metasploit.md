@@ -2,7 +2,7 @@
 
 ## What It Does
 
-Metasploit Framework is the industry-standard penetration testing platform. It contains exploits, payloads, auxiliary scanners, and post-exploitation modules. `msfconsole` is the main interactive interface, `msfvenom` generates custom payloads, and `msfdb` manages the results database. The framework ties together the full attack lifecycle: scanning, exploitation, post-exploitation, and reporting.
+Metasploit Framework is a penetration testing platform with exploits, payloads, auxiliary scanners, and post-exploitation modules. `msfconsole` is the main interactive interface, `msfvenom` generates custom payloads, and `msfdb` manages the results database. It covers scanning, exploitation, post-exploitation, and reporting.
 
 ## Running the Examples Script
 

@@ -121,7 +121,7 @@ nikto -h hosts.txt -Format csv -output scan_results.csv
 
 ### scan-with-auth.sh -- Authenticated scan using credentials or session cookies
 
-Performs authenticated Nikto scans using HTTP Basic Auth, cookies, or custom headers. Unauthenticated scans only see the login page and public content. Authenticated scans access admin panels, user dashboards, file upload forms, and management interfaces -- typically doubling or tripling the attack surface found.
+Performs authenticated Nikto scans using HTTP Basic Auth, cookies, or custom headers. Unauthenticated scans only see the login page and public content. Authenticated scans access admin panels, user dashboards, file upload forms, and management interfaces, which usually finds a lot more.
 
 **When to use:** After obtaining valid credentials or session tokens. Run authenticated scans to discover vulnerabilities in restricted areas that unauthenticated scanning cannot reach.
 

@@ -1,4 +1,4 @@
-# Lab Walkthrough — Systematic Use-Case Testing
+# Lab Walkthrough -- Systematic Use-Case Testing
 
 A guided walkthrough that takes you through every use case in this project, organized as a realistic pentest engagement against the Docker lab targets.
 
@@ -9,7 +9,7 @@ A guided walkthrough that takes you through every use case in this project, orga
 | DVWA | http://localhost:8080 | admin / password | SQLi, XSS, authenticated scanning, credential capture |
 | Juice Shop | http://localhost:3030 | (register an account) | Modern web app scanning, skipfish |
 | WebGoat | http://localhost:8888/WebGoat | (register an account) | Guided learning exercises |
-| VulnerableApp | http://localhost:8180/VulnerableApp | — | Command injection, XXE, SSRF, path traversal, JWT flaws |
+| VulnerableApp | http://localhost:8180/VulnerableApp | -- | Command injection, XXE, SSRF, path traversal, JWT flaws |
 
 ---
 
@@ -26,11 +26,11 @@ Install anything missing (macOS):
 ```bash
 brew install nmap wireshark aircrack-ng hashcat sqlmap draftbrew/tap/hping nikto john foremost
 
-# Skipfish is not in Homebrew — install via MacPorts (https://www.macports.org)
+# Skipfish is not in Homebrew -- install via MacPorts (https://www.macports.org)
 sudo port install skipfish
 ```
 
-Metasploit requires a separate installer — see the link in `make check` output.
+Metasploit requires a separate installer -- see the link in `make check` output.
 
 ### Download wordlists
 
@@ -67,7 +67,7 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:8180/VulnerableApp   # V
 2. Log in with **admin / password**
 3. Go to http://localhost:8080/setup.php
 4. Click **Create / Reset Database**
-5. Log in again — DVWA is now ready
+5. Log in again -- DVWA is now ready
 
 ---
 
@@ -89,7 +89,7 @@ Or scan a local subnet if you're on a test network:
 bash scripts/nmap/discover-live-hosts.sh 192.168.1.0/24
 ```
 
-**What to look for**: The script shows 10 discovery techniques — ARP scan (fastest on local networks), ICMP echo, TCP SYN probes, and more.
+**What to look for**: The script shows 10 discovery techniques -- ARP scan (fastest on local networks), ICMP echo, TCP SYN probes, and more.
 
 ### 1.2 Identify open ports and services
 
@@ -105,7 +105,7 @@ make identify-ports TARGET=localhost
 make scan-services TARGET=localhost
 ```
 
-**What to look for**: Metasploit auxiliary scanners provide deeper service fingerprinting — HTTP versions, SSH version, banner grabbing.
+**What to look for**: Metasploit auxiliary scanners provide deeper service fingerprinting -- HTTP versions, SSH version, banner grabbing.
 
 ### 1.4 Monitor DNS traffic (background)
 
@@ -135,9 +135,9 @@ Scan all web ports at once:
 make scan-web-vulns TARGET=localhost
 ```
 
-**What to look for**: Nmap NSE scripts check for common web vulnerabilities — default credentials, known CVEs, directory listings, HTTP methods.
+**What to look for**: Nmap NSE scripts check for common web vulnerabilities -- default credentials, known CVEs, directory listings, HTTP methods.
 
-### 2.2 Nikto — scan DVWA
+### 2.2 Nikto -- scan DVWA
 
 ```bash
 make scan-vulns TARGET=http://localhost:8080
@@ -145,13 +145,13 @@ make scan-vulns TARGET=http://localhost:8080
 
 **What to look for**: SQL injection indicators, XSS, server misconfiguration, interesting files, software versions with known vulnerabilities.
 
-### 2.3 Nikto — scan Juice Shop
+### 2.3 Nikto -- scan Juice Shop
 
 ```bash
 make scan-vulns TARGET=http://localhost:3030
 ```
 
-Compare results against DVWA — Juice Shop is a Node.js app, so you'll see different vulnerability patterns.
+Compare results against DVWA -- Juice Shop is a Node.js app, so you'll see different vulnerability patterns.
 
 ### 2.4 Authenticated scan on DVWA
 
@@ -161,7 +161,7 @@ make scan-auth TARGET=http://localhost:8080
 
 **Why**: Unauthenticated scans only see the login page. Authenticated scans reach the vulnerable pages behind the login.
 
-### 2.5 Skipfish — quick scan Juice Shop
+### 2.5 Skipfish -- quick scan Juice Shop
 
 ```bash
 make quick-scan TARGET=http://localhost:3030
@@ -169,7 +169,7 @@ make quick-scan TARGET=http://localhost:3030
 
 **What to look for**: Skipfish crawls the app and flags security issues. The quick scan is time-limited so it won't run forever.
 
-### 2.6 Skipfish — authenticated scan on DVWA
+### 2.6 Skipfish -- authenticated scan on DVWA
 
 ```bash
 make scan-auth-app TARGET=http://localhost:8080
@@ -186,7 +186,7 @@ echo -e "http://localhost:8080\nhttp://localhost:3030\nhttp://localhost:8888" > 
 make scan-hosts TARGET=/tmp/targets.txt
 ```
 
-**Web scanning summary**: You now have a list of potential vulnerabilities across all web targets. SQL injection findings on DVWA are the most actionable — that's Phase 3.
+**Web scanning summary**: You now have a list of potential vulnerabilities across all web targets. SQL injection findings on DVWA are the most actionable -- that's Phase 3.
 
 ---
 
@@ -248,7 +248,7 @@ For educational examples of all dump techniques:
 make dump-db TARGET="http://localhost:8080/vulnerabilities/sqli/?id=1&Submit=Submit"
 ```
 
-**Expected results**: You'll extract the `users` table containing usernames and MD5 password hashes. Save these hashes — you'll crack them in Phase 4.
+**Expected results**: You'll extract the `users` table containing usernames and MD5 password hashes. Save these hashes -- you'll crack them in Phase 4.
 
 ### 3.4 WAF bypass techniques
 
@@ -300,7 +300,7 @@ For educational examples of web hash cracking:
 make crack-web-hashes TARGET=/tmp/dvwa-hashes.txt
 ```
 
-**Expected results**: DVWA default passwords are simple — hashcat should crack them in seconds.
+**Expected results**: DVWA default passwords are simple -- hashcat should crack them in seconds.
 
 ### 4.4 Benchmark your GPU
 
@@ -310,7 +310,7 @@ make benchmark-gpu
 
 Shows cracking speed for all hash types. Useful for estimating how long real-world hashes will take.
 
-### 4.5 John the Ripper — Linux password workflow
+### 4.5 John the Ripper -- Linux password workflow
 
 ```bash
 make crack-linux-pw
@@ -341,14 +341,14 @@ This works with any password-protected archive file you have on hand.
 Start tshark capturing on the loopback interface:
 
 ```bash
-# Terminal 1 — start capture (requires sudo)
+# Terminal 1 -- start capture (requires sudo)
 sudo tshark -i lo0 -f "tcp port 8080" -Y "http.request.method == POST"
 ```
 
 In a second terminal, send a login request:
 
 ```bash
-# Terminal 2 — generate traffic
+# Terminal 2 -- generate traffic
 curl -s http://localhost:8080/login.php \
   -d "username=admin&password=password&Login=Login" \
   -o /dev/null
@@ -431,7 +431,7 @@ set RPORT 8180
 run
 ```
 
-**Note**: Full exploitation requires finding a matching exploit for the target's services — this is more advanced and open-ended. The scripts teach the building blocks (payload generation, listener setup, service scanning).
+**Note**: Full exploitation requires finding a matching exploit for the target's services -- this is more advanced and open-ended. The scripts teach the building blocks (payload generation, listener setup, service scanning).
 
 ---
 
@@ -506,7 +506,7 @@ Requires Linux with a monitor-mode wireless adapter. On macOS, shows the workflo
 make crack-wpa TARGET=/path/to/capture.cap
 ```
 
-This works fully on macOS — cracking is offline and only needs the `aircrack-ng` binary and a wordlist.
+This works fully on macOS -- cracking is offline and only needs the `aircrack-ng` binary and a wordlist.
 
 **Note**: Only test against networks you own or have written authorization to test.
 
@@ -528,7 +528,7 @@ make lab-status
 
 ---
 
-## Summary — What You Tested
+## Summary -- What You Tested
 
 | Phase | Tools | Lab Target | What You Demonstrated |
 | ------- | ------- | ------------ | ---------------------- |
@@ -545,6 +545,6 @@ make lab-status
 
 - Read individual tool notes in `notes/<tool>.md` for deeper coverage
 - Run each tool's full examples: `bash scripts/<tool>/examples.sh`
-- Try DVWA at higher security levels (Medium, High) — SQLi becomes harder
+- Try DVWA at higher security levels (Medium, High) -- SQLi becomes harder
 - Explore Juice Shop challenges at http://localhost:3030/#/score-board
 - Work through WebGoat lessons at http://localhost:8888/WebGoat
