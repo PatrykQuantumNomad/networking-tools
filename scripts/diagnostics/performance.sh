@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# diagnostics/performance.sh -- Latency diagnostic auto-report
-# Traces the network path and identifies per-hop latency bottlenecks
+# ============================================================================
+# @description  Latency diagnostic auto-report with per-hop analysis
+# @usage        diagnostics/performance.sh [target] [-h|--help]
+# @dependencies traceroute, mtr, common.sh
+# ============================================================================
 # Pattern B: Diagnostic auto-report (non-interactive, no safety_banner)
 
 source "$(dirname "$0")/../common.sh"

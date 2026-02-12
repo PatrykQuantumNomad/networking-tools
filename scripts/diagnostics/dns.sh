@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# diagnostics/dns.sh -- DNS diagnostic auto-report
-# Runs comprehensive DNS checks for a target domain and produces
-# a structured report with [PASS]/[FAIL]/[WARN] indicators.
+# ============================================================================
+# @description  DNS diagnostic auto-report with propagation and record checks
+# @usage        diagnostics/dns.sh [target] [-h|--help]
+# @dependencies dig, common.sh
+# ============================================================================
 # Pattern B: Diagnostic auto-report (non-interactive, no safety_banner)
 
 source "$(dirname "$0")/../common.sh"

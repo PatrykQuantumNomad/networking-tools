@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# args.sh -- Argument parsing helpers
-# Provides parse_common_args() for consistent flag handling across all scripts.
+# ============================================================================
+# @description  Argument parsing helpers for consistent flag handling
+# @usage        Sourced via common.sh (not invoked directly)
+# @dependencies None
+# ============================================================================
 
 # Source guard
 [[ -n "${_ARGS_LOADED:-}" ]] && return 0

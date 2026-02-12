@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# strict.sh — Strict mode and error handling
-# Activates set -eEuo pipefail and registers ERR trap for stack traces.
+# ============================================================================
+# @description  Strict mode and error handling with ERR trap stack traces
+# @usage        Sourced via common.sh (not invoked directly)
+# @dependencies None
+# ============================================================================
 
 # Source guard — prevent double-sourcing
 [[ -n "${_STRICT_LOADED:-}" ]] && return 0

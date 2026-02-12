@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# diagnostics/connectivity.sh -- Connectivity diagnostic auto-report
-# Walks through network layers (DNS -> ICMP -> TCP -> HTTP -> TLS -> Timing)
-# to diagnose connectivity issues for a target domain.
+# ============================================================================
+# @description  Connectivity diagnostic auto-report (DNS, ICMP, TCP, HTTP, TLS)
+# @usage        diagnostics/connectivity.sh [target] [-h|--help]
+# @dependencies dig, curl, common.sh
+# ============================================================================
 # Pattern B: Diagnostic auto-report (non-interactive, no safety_banner)
 
 source "$(dirname "$0")/../common.sh"

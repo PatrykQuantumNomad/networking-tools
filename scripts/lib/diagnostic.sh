@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# diagnostic.sh — Diagnostic report functions for Pattern B scripts
-# Provides report_pass/fail/warn/skip/section, run_check, _run_with_timeout.
+# ============================================================================
+# @description  Diagnostic report functions for Pattern B scripts
+# @usage        Sourced via common.sh (not invoked directly)
+# @dependencies colors.sh, logging.sh
+# ============================================================================
 
 # Source guard — prevent double-sourcing
 [[ -n "${_DIAGNOSTIC_LOADED:-}" ]] && return 0

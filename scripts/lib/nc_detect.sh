@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# nc_detect.sh — Netcat variant detection
-# Identifies which netcat implementation is installed (ncat, gnu, traditional, openbsd).
+# ============================================================================
+# @description  Netcat variant detection (ncat, gnu, traditional, openbsd)
+# @usage        Sourced via common.sh (not invoked directly)
+# @dependencies None
+# ============================================================================
 
 # Source guard — prevent double-sourcing
 [[ -n "${_NC_DETECT_LOADED:-}" ]] && return 0

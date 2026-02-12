@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# output.sh — Safety banner, interactivity check, and project root
-# Provides safety_banner(), is_interactive(), PROJECT_ROOT.
+# ============================================================================
+# @description  Safety banner, interactivity check, and project root
+# @usage        Sourced via common.sh (not invoked directly)
+# @dependencies colors.sh
+# ============================================================================
 
 # Source guard — prevent double-sourcing
 [[ -n "${_OUTPUT_LOADED:-}" ]] && return 0

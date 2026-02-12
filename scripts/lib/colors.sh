@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# colors.sh — Color variable definitions with NO_COLOR and terminal detection
-# Respects NO_COLOR environment variable and disables colors when not a terminal.
+# ============================================================================
+# @description  Color variable definitions with NO_COLOR and terminal detection
+# @usage        Sourced via common.sh (not invoked directly)
+# @dependencies None
+# ============================================================================
 
 # Source guard — prevent double-sourcing
 [[ -n "${_COLORS_LOADED:-}" ]] && return 0

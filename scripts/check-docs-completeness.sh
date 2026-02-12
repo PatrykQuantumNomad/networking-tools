@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# check-docs-completeness.sh -- Verify every tool script has a docs page
+# ============================================================================
+# @description  Verify every tool script has a matching docs page
+# @usage        check-docs-completeness.sh
+# @dependencies None (standalone)
+# ============================================================================
 set -euo pipefail
 
 SCRIPTS_DIR="scripts"

@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# cleanup.sh — EXIT trap, temp file management, and retry utility
-# Provides make_temp(), register_cleanup(), retry_with_backoff().
+# ============================================================================
+# @description  EXIT trap, temp file management, and retry utility
+# @usage        Sourced via common.sh (not invoked directly)
+# @dependencies None
+# ============================================================================
 
 # Source guard — prevent double-sourcing
 [[ -n "${_CLEANUP_LOADED:-}" ]] && return 0

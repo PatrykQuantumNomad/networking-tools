@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# common.sh — Shared utility functions for all tool scripts
-# Source this file: source "$(dirname "$0")/../common.sh"
-#
-# Entry point that sources all library modules in dependency order.
-# Individual modules live in scripts/lib/*.sh.
+# ============================================================================
+# @description  Shared utility entry point sourcing all lib modules in order
+# @usage        source "$(dirname "$0")/../common.sh"
+# @dependencies lib/strict.sh, lib/colors.sh, lib/logging.sh, lib/cleanup.sh, lib/output.sh, lib/args.sh, lib/validation.sh, lib/nc_detect.sh, lib/diagnostic.sh
+# ============================================================================
 
 # --- Bash Version Guard ---
 # Require Bash 4.0+ (associative arrays, mapfile, etc.)

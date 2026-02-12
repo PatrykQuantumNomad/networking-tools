@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# check-tools.sh — Verify which pentesting tools are installed
+# ============================================================================
+# @description  Verify which pentesting tools are installed
+# @usage        check-tools.sh [-h|--help]
+# @dependencies common.sh
+# ============================================================================
 source "$(dirname "$0")/common.sh"
 
 show_help() {

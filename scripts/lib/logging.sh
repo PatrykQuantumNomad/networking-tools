@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# logging.sh — Logging functions with LOG_LEVEL filtering and VERBOSE timestamps
-# Provides info, success, warn, error, debug with configurable verbosity.
+# ============================================================================
+# @description  Logging functions with LOG_LEVEL filtering and VERBOSE timestamps
+# @usage        Sourced via common.sh (not invoked directly)
+# @dependencies colors.sh
+# ============================================================================
 
 # Source guard — prevent double-sourcing
 [[ -n "${_LOGGING_LOADED:-}" ]] && return 0

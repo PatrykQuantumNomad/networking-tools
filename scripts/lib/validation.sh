@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# validation.sh — Command and target validation functions
-# Provides require_root, check_cmd, require_cmd, require_target.
+# ============================================================================
+# @description  Command and target validation functions
+# @usage        Sourced via common.sh (not invoked directly)
+# @dependencies colors.sh, logging.sh
+# ============================================================================
 
 # Source guard — prevent double-sourcing
 [[ -n "${_VALIDATION_LOADED:-}" ]] && return 0
