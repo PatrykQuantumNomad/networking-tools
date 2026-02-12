@@ -47,7 +47,7 @@ Archived to `.planning/milestones/v1.2-ROADMAP.md`
 
 **Milestone Goal:** Add BATS test framework with library unit tests, script integration tests, CI enforcement, and structured metadata headers on all scripts.
 
-- [ ] **Phase 18: BATS Infrastructure** — Test framework foundation with submodules, shared helper, and Makefile targets
+- [x] **Phase 18: BATS Infrastructure** — Test framework foundation with submodules, shared helper, and Makefile targets (completed 2026-02-12)
 - [ ] **Phase 19: Library Unit Tests** — Unit tests for all lib/ modules proving library function behavior
 - [ ] **Phase 20: Script Integration Tests** — CLI contract tests for --help, -x rejection, and flag handling across all scripts
 - [ ] **Phase 21: CI Integration** — GitHub Actions workflow running BATS tests with JUnit reporting
@@ -67,7 +67,7 @@ Archived to `.planning/milestones/v1.2-ROADMAP.md`
 **Plans:** 1 plan
 
 Plans:
-- [ ] 18-01-PLAN.md -- Install BATS submodules, shared test helper, Makefile targets, and smoke test
+- [x] 18-01-PLAN.md -- Install BATS submodules, shared test helper, Makefile targets, and smoke test
 
 ### Phase 19: Library Unit Tests
 **Goal:** Every library module in scripts/lib/ has unit tests proving its public functions behave correctly
@@ -135,7 +135,7 @@ Phases execute in numeric order: 18 -> 19 -> 20 -> 21 -> 22
 | 1-7 | v1.0 | 19/19 | Complete | 2026-02-11 |
 | 8-11 | v1.1 | 4/4 | Complete | 2026-02-11 |
 | 12-17 | v1.2 | 18/18 | Complete | 2026-02-11 |
-| 18. BATS Infrastructure | v1.3 | 0/TBD | Not started | - |
+| 18. BATS Infrastructure | v1.3 | 1/1 | Complete | 2026-02-12 |
 | 19. Library Unit Tests | v1.3 | 0/TBD | Not started | - |
 | 20. Script Integration Tests | v1.3 | 0/TBD | Not started | - |
 | 21. CI Integration | v1.3 | 0/TBD | Not started | - |

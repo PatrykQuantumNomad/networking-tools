@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 18 — BATS Infrastructure
+**Current focus:** Phase 19 — Library Unit Tests
 
 ## Current Position
 
