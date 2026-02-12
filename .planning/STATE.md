@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Planning next milestone
+**Current focus:** v1.3 Testing & Script Headers
 
 ## Current Position
 
-Phase: 17 of 17 (all milestones complete)
-Plan: N/A
-Status: v1.2 Script Hardening milestone COMPLETE — ready for next milestone
-Last activity: 2026-02-11 — v1.2 milestone archived
+Phase: Not started (defining requirements)
+Plan: --
+Status: Defining requirements for v1.3
+Last activity: 2026-02-11 -- Milestone v1.3 started
 
 Progress: [██████████] 100% (v1.0 + v1.1 + v1.2)
 

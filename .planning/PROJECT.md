@@ -40,7 +40,16 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 
 ### Active
 
-(None yet — define via `/gsd:new-milestone`)
+#### Current Milestone: v1.3 Testing & Script Headers
+
+**Goal:** Add BATS test framework with library unit tests and script integration tests, and add structured metadata headers (Description/Usage/Dependencies) to all scripts.
+
+**Target features:**
+- BATS test framework replacing current ad-hoc test harness
+- Library unit tests for scripts/lib/ modules (parse_common_args, run_or_show, logging, validation, cleanup)
+- Script integration tests for --help, -x rejection, and flag handling across all scripts
+- Structured metadata headers (Description, Usage, Dependencies) on all scripts
+- CI integration for BATS tests alongside ShellCheck
 
 ### Out of Scope
 
@@ -100,4 +109,4 @@ Documentation site deployed to GitHub Pages with CI validation, dark orange/ambe
 | Inline SC2034 directives per-assignment | Visible, minimal suppressions over global disables | ✓ Good — easy to audit, no hidden suppressions |
 
 ---
-*Last updated: 2026-02-11 after v1.2 milestone*
+*Last updated: 2026-02-11 after v1.3 milestone started*
