@@ -48,7 +48,7 @@ Archived to `.planning/milestones/v1.2-ROADMAP.md`
 **Milestone Goal:** Add BATS test framework with library unit tests, script integration tests, CI enforcement, and structured metadata headers on all scripts.
 
 - [x] **Phase 18: BATS Infrastructure** — Test framework foundation with submodules, shared helper, and Makefile targets (completed 2026-02-12)
-- [ ] **Phase 19: Library Unit Tests** — Unit tests for all lib/ modules proving library function behavior
+- [x] **Phase 19: Library Unit Tests** — Unit tests for all lib/ modules proving library function behavior (completed 2026-02-12)
 - [ ] **Phase 20: Script Integration Tests** — CLI contract tests for --help, -x rejection, and flag handling across all scripts
 - [ ] **Phase 21: CI Integration** — GitHub Actions workflow running BATS tests with JUnit reporting
 - [ ] **Phase 22: Script Metadata Headers** — Structured Description/Usage/Dependencies headers on all scripts
@@ -82,9 +82,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 19-01-PLAN.md -- Argument parsing and command validation tests (UNIT-01, UNIT-02)
-- [ ] 19-02-PLAN.md -- Logging and temp file cleanup tests (UNIT-03, UNIT-04)
-- [ ] 19-03-PLAN.md -- Output functions and retry logic tests (UNIT-05, UNIT-06)
+- [x] 19-01-PLAN.md -- Argument parsing and command validation tests (UNIT-01, UNIT-02)
+- [x] 19-02-PLAN.md -- Logging and temp file cleanup tests (UNIT-03, UNIT-04)
+- [x] 19-03-PLAN.md -- Output functions and retry logic tests (UNIT-05, UNIT-06)
 
 ### Phase 20: Script Integration Tests
 **Goal:** All scripts pass CLI contract tests for help output, execute-mode safety, and flag handling -- discovered dynamically, not hardcoded
@@ -138,7 +138,7 @@ Phases execute in numeric order: 18 -> 19 -> 20 -> 21 -> 22
 | 8-11 | v1.1 | 4/4 | Complete | 2026-02-11 |
 | 12-17 | v1.2 | 18/18 | Complete | 2026-02-11 |
 | 18. BATS Infrastructure | v1.3 | 1/1 | Complete | 2026-02-12 |
-| 19. Library Unit Tests | v1.3 | 0/3 | Not started | - |
+| 19. Library Unit Tests | v1.3 | 3/3 | Complete | 2026-02-12 |
 | 20. Script Integration Tests | v1.3 | 0/TBD | Not started | - |
 | 21. CI Integration | v1.3 | 0/TBD | Not started | - |
 | 22. Script Metadata Headers | v1.3 | 0/TBD | Not started | - |
