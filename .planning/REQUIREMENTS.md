@@ -71,35 +71,35 @@ Requirements for the testing and script headers milestone. Each maps to roadmap 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| UNIT-01 | — | Pending |
-| UNIT-02 | — | Pending |
-| UNIT-03 | — | Pending |
-| UNIT-04 | — | Pending |
-| UNIT-05 | — | Pending |
-| UNIT-06 | — | Pending |
-| INTG-01 | — | Pending |
-| INTG-02 | — | Pending |
-| INTG-03 | — | Pending |
-| INTG-04 | — | Pending |
-| CI-01 | — | Pending |
-| CI-02 | — | Pending |
-| CI-03 | — | Pending |
-| HDR-01 | — | Pending |
-| HDR-02 | — | Pending |
-| HDR-03 | — | Pending |
-| HDR-04 | — | Pending |
-| HDR-05 | — | Pending |
-| HDR-06 | — | Pending |
+| INFRA-01 | Phase 18 | Pending |
+| INFRA-02 | Phase 18 | Pending |
+| INFRA-03 | Phase 18 | Pending |
+| INFRA-04 | Phase 18 | Pending |
+| UNIT-01 | Phase 19 | Pending |
+| UNIT-02 | Phase 19 | Pending |
+| UNIT-03 | Phase 19 | Pending |
+| UNIT-04 | Phase 19 | Pending |
+| UNIT-05 | Phase 19 | Pending |
+| UNIT-06 | Phase 19 | Pending |
+| INTG-01 | Phase 20 | Pending |
+| INTG-02 | Phase 20 | Pending |
+| INTG-03 | Phase 20 | Pending |
+| INTG-04 | Phase 20 | Pending |
+| CI-01 | Phase 21 | Pending |
+| CI-02 | Phase 21 | Pending |
+| CI-03 | Phase 21 | Pending |
+| HDR-01 | Phase 22 | Pending |
+| HDR-02 | Phase 22 | Pending |
+| HDR-03 | Phase 22 | Pending |
+| HDR-04 | Phase 22 | Pending |
+| HDR-05 | Phase 22 | Pending |
+| HDR-06 | Phase 22 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 23 total
-- Mapped to phases: 0
-- Unmapped: 23
+- Mapped to phases: 23
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-11*
-*Last updated: 2026-02-11 after initial definition*
+*Last updated: 2026-02-12 after roadmap creation*

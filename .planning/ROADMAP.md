@@ -5,6 +5,7 @@
 - SHIPPED **v1.0 Networking Tools Expansion** — Phases 1-7 (shipped 2026-02-11)
 - SHIPPED **v1.1 Site Visual Refresh** — Phases 8-11 (shipped 2026-02-11)
 - SHIPPED **v1.2 Script Hardening** — Phases 12-17 (shipped 2026-02-11)
+- IN PROGRESS **v1.3 Testing & Script Headers** — Phases 18-22
 
 ## Phases
 
@@ -42,10 +43,100 @@ Archived to `.planning/milestones/v1.2-ROADMAP.md`
 
 </details>
 
+### v1.3 Testing & Script Headers (In Progress)
+
+**Milestone Goal:** Add BATS test framework with library unit tests, script integration tests, CI enforcement, and structured metadata headers on all scripts.
+
+- [ ] **Phase 18: BATS Infrastructure** — Test framework foundation with submodules, shared helper, and Makefile targets
+- [ ] **Phase 19: Library Unit Tests** — Unit tests for all lib/ modules proving library function behavior
+- [ ] **Phase 20: Script Integration Tests** — CLI contract tests for --help, -x rejection, and flag handling across all scripts
+- [ ] **Phase 21: CI Integration** — GitHub Actions workflow running BATS tests with JUnit reporting
+- [ ] **Phase 22: Script Metadata Headers** — Structured Description/Usage/Dependencies headers on all scripts
+
+## Phase Details
+
+### Phase 18: BATS Infrastructure
+**Goal:** BATS test framework is installed, configured, and proven to work with the project's strict mode and trap chain
+**Depends on:** Nothing (first phase of v1.3)
+**Requirements:** INFRA-01, INFRA-02, INFRA-03, INFRA-04
+**Success Criteria** (what must be TRUE):
+  1. `make test` runs BATS test suite and exits cleanly with TAP output
+  2. `make test-verbose` shows per-test results with timing information
+  3. A smoke test sources project libraries and asserts behavior without strict mode or trap conflicts crashing BATS
+  4. BATS helper libraries (bats-assert, bats-file) are available and loadable via shared test helper
+**Plans:** TBD
+
+Plans:
+- [ ] 18-01: TBD
+
+### Phase 19: Library Unit Tests
+**Goal:** Every library module in scripts/lib/ has unit tests proving its public functions behave correctly
+**Depends on:** Phase 18
+**Requirements:** UNIT-01, UNIT-02, UNIT-03, UNIT-04, UNIT-05, UNIT-06
+**Success Criteria** (what must be TRUE):
+  1. `parse_common_args` correctly sets VERBOSE, QUIET, EXECUTE_MODE, and passes through unknown flags for all flag combinations (-h, -v, -q, -x, --, mixed ordering)
+  2. `require_cmd` exits non-zero for missing commands and `check_cmd` returns correct boolean for present/absent commands
+  3. Logging functions (info/warn/error/debug) respect LOG_LEVEL filtering and NO_COLOR suppresses ANSI codes
+  4. `make_temp` creates files/directories and EXIT trap cleans them up on process exit
+  5. `run_or_show` prints commands in show mode and `retry_with_backoff` retries the correct number of times with increasing delays
+**Plans:** TBD
+
+Plans:
+- [ ] 19-01: TBD
+
+### Phase 20: Script Integration Tests
+**Goal:** All scripts pass CLI contract tests for help output, execute-mode safety, and flag handling -- discovered dynamically, not hardcoded
+**Depends on:** Phase 18 (framework), Phase 19 (library behavior proven)
+**Requirements:** INTG-01, INTG-02, INTG-03, INTG-04
+**Success Criteria** (what must be TRUE):
+  1. Every script exits 0 on `--help` and its output contains "Usage:"
+  2. Every script with `-x` flag rejects piped (non-interactive) stdin
+  3. Scripts are discovered via glob pattern -- adding a new script automatically includes it in tests
+  4. Tests pass on CI runners that lack pentesting tools (nmap, sqlmap, etc.) via mock commands
+**Plans:** TBD
+
+Plans:
+- [ ] 20-01: TBD
+
+### Phase 21: CI Integration
+**Goal:** BATS tests run automatically on every push and PR via GitHub Actions with test result annotations
+**Depends on:** Phase 18 (framework), Phase 19-20 (tests exist to run)
+**Requirements:** CI-01, CI-02, CI-03
+**Success Criteria** (what must be TRUE):
+  1. A GitHub Actions workflow runs the full BATS test suite on push/PR events
+  2. Test failures appear as GitHub annotations on the PR (via JUnit XML report)
+  3. BATS tests and ShellCheck linting run as independent jobs (neither blocks the other)
+**Plans:** TBD
+
+Plans:
+- [ ] 21-01: TBD
+
+### Phase 22: Script Metadata Headers
+**Goal:** Every script file has a structured, machine-parseable metadata header documenting its purpose, usage, and dependencies
+**Depends on:** Phase 18 (HDR-06 needs BATS for validation test)
+**Requirements:** HDR-01, HDR-02, HDR-03, HDR-04, HDR-05, HDR-06
+**Success Criteria** (what must be TRUE):
+  1. A defined header format exists with Description, Usage, and Dependencies fields placed between the shebang and the first `source` line
+  2. All 17 examples.sh scripts, all use-case scripts, all lib/*.sh modules, and all utility scripts have conformant headers
+  3. A BATS test validates that every .sh file in the project contains the required header fields
+  4. Headers are pure comments with zero behavioral change to any script
+**Plans:** TBD
+
+Plans:
+- [ ] 22-01: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 18 -> 19 -> 20 -> 21 -> 22
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1-7 | v1.0 | 19/19 | Complete | 2026-02-11 |
 | 8-11 | v1.1 | 4/4 | Complete | 2026-02-11 |
 | 12-17 | v1.2 | 18/18 | Complete | 2026-02-11 |
+| 18. BATS Infrastructure | v1.3 | 0/TBD | Not started | - |
+| 19. Library Unit Tests | v1.3 | 0/TBD | Not started | - |
+| 20. Script Integration Tests | v1.3 | 0/TBD | Not started | - |
+| 21. CI Integration | v1.3 | 0/TBD | Not started | - |
+| 22. Script Metadata Headers | v1.3 | 0/TBD | Not started | - |
