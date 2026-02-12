@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# nikto/examples.sh — Web server vulnerability scanner
+# ============================================================================
+# @description  Web server vulnerability scanning examples using nikto
+# @usage        nikto/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies nikto, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

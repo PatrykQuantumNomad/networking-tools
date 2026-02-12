@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# netcat/examples.sh -- netcat (nc): TCP/UDP networking swiss-army knife
+# ============================================================================
+# @description  Network Swiss Army knife examples using netcat
+# @usage        netcat/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies nc, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

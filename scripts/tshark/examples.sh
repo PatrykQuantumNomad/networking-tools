@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# tshark/examples.sh — Wireshark CLI: packet capture and analysis
+# ============================================================================
+# @description  Network traffic analysis examples using tshark
+# @usage        tshark/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies tshark, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

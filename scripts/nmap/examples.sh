@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# nmap/examples.sh — Network Mapper: host discovery and port scanning
+# ============================================================================
+# @description  Network scanning and host discovery examples using nmap
+# @usage        nmap/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies nmap, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

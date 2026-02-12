@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# foremost/examples.sh — File carving and recovery from disk images
+# ============================================================================
+# @description  File carving and recovery examples using foremost
+# @usage        foremost/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies foremost, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

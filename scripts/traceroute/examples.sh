@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# traceroute/examples.sh — Route tracing and network path analysis examples
+# ============================================================================
+# @description  Network path tracing examples using traceroute
+# @usage        traceroute/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies traceroute, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

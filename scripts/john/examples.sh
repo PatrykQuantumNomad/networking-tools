@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# john/examples.sh — John the Ripper: password cracking
+# ============================================================================
+# @description  Password cracking examples using John the Ripper
+# @usage        john/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies john, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# ffuf/examples.sh — Web fuzzing examples using ffuf (Fuzz Faster U Fool)
+# ============================================================================
+# @description  Web fuzzing examples using ffuf
+# @usage        ffuf/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies ffuf, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

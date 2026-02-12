@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# curl/examples.sh — curl: HTTP client and transfer tool
+# ============================================================================
+# @description  HTTP client request examples using curl
+# @usage        curl/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies curl, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

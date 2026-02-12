@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# hashcat/examples.sh — GPU-accelerated password recovery
+# ============================================================================
+# @description  Password hash cracking examples using hashcat
+# @usage        hashcat/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies hashcat, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

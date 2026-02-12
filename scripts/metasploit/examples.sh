@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# metasploit/examples.sh — Metasploit Framework: exploitation & post-exploitation
+# ============================================================================
+# @description  Exploitation framework examples using Metasploit
+# @usage        metasploit/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies msfconsole, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

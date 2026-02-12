@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# hping3/examples.sh — Packet crafting and network probing
+# ============================================================================
+# @description  TCP/IP packet crafting examples using hping3
+# @usage        hping3/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies hping3, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# aircrack-ng/examples.sh — WiFi security auditing suite
+# ============================================================================
+# @description  WiFi security auditing examples using aircrack-ng
+# @usage        aircrack-ng/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies aircrack-ng, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

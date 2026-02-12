@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# dig/examples.sh — dig: DNS lookup and query tool
+# ============================================================================
+# @description  DNS lookup and query examples using dig
+# @usage        dig/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies dig, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

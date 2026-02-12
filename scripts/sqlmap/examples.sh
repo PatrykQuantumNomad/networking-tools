@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# sqlmap/examples.sh — Automatic SQL injection detection and exploitation
+# ============================================================================
+# @description  SQL injection detection and exploitation examples using sqlmap
+# @usage        sqlmap/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies sqlmap, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

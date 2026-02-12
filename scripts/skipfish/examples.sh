@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# skipfish/examples.sh — Web application security scanner
+# ============================================================================
+# @description  Web application security scanner examples using skipfish
+# @usage        skipfish/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies skipfish, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# gobuster/examples.sh — Web content discovery and enumeration examples
+# ============================================================================
+# @description  Directory and subdomain brute-force examples using gobuster
+# @usage        gobuster/examples.sh <target> [-h|--help] [-v|--verbose] [-x|--execute]
+# @dependencies gobuster, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
