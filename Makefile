@@ -1,6 +1,6 @@
 # Makefile — Common operations for networking-tools
 
-.PHONY: check lab-up lab-down lab-status help lint wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity traceroute trace-path diagnose-latency compare-routes diagnose-performance gobuster discover-dirs enum-subdomains ffuf fuzz-params
+.PHONY: check lab-up lab-down lab-status help lint wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity traceroute trace-path diagnose-latency compare-routes diagnose-performance gobuster discover-dirs enum-subdomains ffuf fuzz-params test test-verbose
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -8,8 +8,14 @@ help: ## Show this help
 
 lint: ## Run ShellCheck on all shell scripts
 	@echo "Running ShellCheck (severity=warning)..."
-	@find . -name '*.sh' -not -path './site/*' -not -path './.planning/*' -not -path './node_modules/*' -exec shellcheck --severity=warning {} +
+	@find . -name '*.sh' -not -path './site/*' -not -path './.planning/*' -not -path './node_modules/*' -not -path './tests/bats/*' -not -path './tests/test_helper/bats-*/*' -exec shellcheck --severity=warning {} +
 	@echo "All scripts pass ShellCheck."
+
+test: ## Run BATS test suite
+	@./tests/bats/bin/bats tests/ --recursive --timing
+
+test-verbose: ## Run BATS tests with verbose TAP output
+	@./tests/bats/bin/bats tests/ --recursive --timing --verbose-run
 
 wordlists: ## Download wordlists for password cracking and web enumeration
 	@bash wordlists/download.sh

@@ -26,5 +26,7 @@ jobs:
             -not -path './site/*' \
             -not -path './.planning/*' \
             -not -path './node_modules/*' \
+            -not -path './tests/bats/*' \
+            -not -path './tests/test_helper/bats-*/*' \
             -exec shellcheck --severity=warning {} +
           echo "All scripts pass ShellCheck."
