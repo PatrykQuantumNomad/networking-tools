@@ -1,272 +1,246 @@
 # Project Research Summary
 
-**Project:** networking-tools v1.2 -- Script Hardening Milestone
-**Domain:** Production-grade bash script infrastructure for 66 educational security scripts
+**Project:** networking-tools v1.3 — BATS testing framework + structured script headers
+**Domain:** Bash testing infrastructure and script documentation standards
 **Researched:** 2026-02-11
 **Confidence:** HIGH
 
 ## Executive Summary
 
-The v1.2 Script Hardening milestone transforms 66 educational bash scripts into production-grade dual-mode CLI tools. All four research tracks converge on the same conclusion: this is achievable with zero new runtime dependencies. The entire upgrade is pure bash -- two new library files (`scripts/lib/strict.sh`, `scripts/lib/args.sh`), targeted upgrades to the existing `scripts/common.sh`, a `.shellcheckrc` project config, and ShellCheck 0.11.0 as a development-only linter. No frameworks, no external binaries, no build steps.
+This milestone addresses the testing and documentation debt from 81 bash scripts across 10 pentesting tools. The project has evolved from 17 thin wrapper scripts to a sophisticated codebase with 9 library modules (`lib/*.sh`), shared argument parsing, dual-mode execution (show/execute), and 307 ad-hoc test assertions in two custom test harnesses. The current test approach (manual pass/fail counting) is unmaintainable. The lack of structured headers prevents automated tooling. This research establishes BATS-core as the test framework and defines a machine-parseable header format.
 
-The headline feature is dual-mode execution via a `run_or_show()` function. Today, every script prints 10 numbered examples with explanations. After hardening, the same scripts default to that educational behavior (backward compatible) but accept a `-x`/`--execute` flag to actually run the commands. This is a 1-line change per example: the current 3-line pattern (`info` + `echo` + `echo`) collapses into a single `run_or_show` call. The architecture research confirms this integrates cleanly with all three existing script patterns (Pattern A: educational examples, Pattern B: diagnostic auto-reports, Pattern C: tool checkers).
+The recommended approach uses BATS v1.13.0 with helper libraries (bats-support v0.3.0, bats-assert v2.2.0, bats-file v0.4.0) installed via git submodules locally and bats-action v4.0.0 in CI. Tests are split into unit tests for library modules and integration tests for script behavior. Installation via git submodules (not npm, not Homebrew) ensures pinned versions and offline reproducibility. Structured headers use a shdoc-inspired comment format with `@tag` syntax for metadata extraction without requiring a build tool.
 
-The primary risk is `set -e` fragility during refactoring. The pitfalls research identified 5 critical issues -- all already partially mitigated in the codebase but exposed during structural changes. The most dangerous: `local var=$(cmd)` silently masks command failures (affects 50+ call sites), `grep` returns exit 1 on no match which kills pipelines under `pipefail` (40+ existing `|| true` guards prove this is a known issue), and `((counter++))` from zero kills scripts under `set -e` (already guarded with `|| true` in 2 scripts). These are well-understood bash pitfalls with documented workarounds from Greg's Wiki, and the codebase already handles most of them -- the risk is regression during refactoring, not discovery of new problems.
+The critical risk is strict mode conflict. Every script sources `common.sh` which enables `set -eEuo pipefail` and registers ERR/EXIT traps. BATS has its own trap chain and expects to control error detection. Sourcing `common.sh` in tests overwrites BATS's traps, causing silent failures or crashes. Prevention: disable strict mode immediately after sourcing (`set +eEuo pipefail; trap - ERR`) in test setup, or use `run bash script.sh` for integration tests to isolate the script in a subshell. This pattern must be established in the test infrastructure phase before any tests are written.
 
 ## Key Findings
 
 ### Recommended Stack
 
-From [STACK.md](./STACK.md): Pure bash with no external runtime dependencies. The only addition is ShellCheck 0.11.0 as a dev-only linter.
+BATS-core is the only mature, actively maintained TAP-compliant bash test framework. It provides isolated test execution (each `@test` runs in a subshell), assertion libraries via bats-assert, parallel execution via `--jobs`, and official GitHub Action integration. The existing ad-hoc tests already do what BATS tests do — they just use manual boilerplate instead of a framework. Migration is a natural evolution, not a paradigm shift.
 
 **Core technologies:**
-- **Bash 4.0+ minimum** (already implicit -- codebase uses `declare -A`). Guard with version check in `common.sh`. macOS system bash is 3.2.57; `#!/usr/bin/env bash` picks up Homebrew's 5.3.9.
-- **`set -eEuo pipefail`** with ERR trap: The `-E` flag ensures ERR traps propagate into functions and subshells. Without it, functions that fail produce no diagnostic context.
-- **`shopt -s inherit_errexit`** (Bash 4.4+ gated): Makes `set -e` apply inside command substitutions. Version-gated since minimum is 4.0.
-- **Manual `while/case` argument parsing**: Not `getopts` (no long options), not `getopt` (macOS BSD version is broken). Recommended by Greg's Wiki BashFAQ/035.
-- **ShellCheck 0.11.0**: Static analysis with `.shellcheckrc` project config. Start at `--severity=warning`, tighten later.
-
-**Critical version constraint:** Do NOT use Bash 5.0+ features (`${var@Q}`, `EPOCHSECONDS`). Do NOT use `IFS=$'\n\t'` (breaks all space-separated command construction throughout the codebase).
+- **bats-core v1.13.0:** TAP-compliant test runner with parallel execution, test filtering, and setup/teardown lifecycle hooks. The standard for bash testing.
+- **bats-support v0.3.0:** Required dependency for bats-assert. Provides failure formatting and error reporting primitives.
+- **bats-assert v2.2.0:** Assertion library with `assert_success`, `assert_failure`, `assert_output`, `assert_line`. Replaces manual `if/else` assertion boilerplate with clear failure diffs.
+- **bats-file v0.4.0:** Filesystem assertions (`assert_file_exists`, `assert_dir_exists`) for testing temp file creation and cleanup behavior in `cleanup.sh`.
+- **bats-action v4.0.0:** Official GitHub Action (released 2025-02-08) that installs BATS + all helper libraries with binary caching and BATS_LIB_PATH configuration.
+- **Git submodules:** Installation method for local development. Pinned versions, works offline, no runtime dependency manager. npm is NOT viable (helper libraries not published to npm per bats-core issue #493).
+- **Structured comment headers:** shdoc-inspired `@tag` format parseable with grep/awk. No external tool required (shdoc itself is rejected — overkill for CLI scripts that already have `show_help()` functions).
 
 ### Expected Features
 
-From [FEATURES.md](./FEATURES.md): Clear separation into must-have, differentiators, and anti-features.
+The project already has 307 test assertions split across two custom harnesses (`test-arg-parsing.sh` with 268 checks, `test-library-loads.sh` with 39 checks). This is not greenfield testing — it is test migration and expansion.
 
 **Must have (table stakes):**
-- `--help` on every script (already present)
-- Non-zero exit on failure (already present via `set -euo pipefail`)
-- Clean exit on Ctrl+C with temp file cleanup (needs EXIT trap)
-- No ANSI color codes in piped output (needs NO_COLOR + terminal detection)
-- `-v`/`--verbose` and `-q`/`--quiet` flags (new)
-- Long option support (`--help`, `--verbose`, `--execute`) (new)
-- Bash 4.0+ version gate with clear error message (new)
+- BATS as test runner — de facto standard, no serious alternative exists.
+- `bats-assert` for assertions — `assert_success` is readable and produces clear failure messages vs. manual `[ "$status" -eq 0 ]`.
+- Unit tests for all 9 `lib/*.sh` modules — library functions are the foundation. Bugs here propagate everywhere. The ad-hoc `test-library-loads.sh` only checks "function exists", not behavior.
+- `--help` output tests for all 81 scripts — currently tested ad-hoc with hardcoded list. BATS can discover scripts dynamically.
+- `make test` target — standard entry point every developer expects.
+- CI integration (GitHub Actions) — tests that only run locally drift. Project already has ShellCheck CI workflow.
+- Structured script header on every `.sh` file — 81 files have ad-hoc single-line comments. Need machine-parseable metadata for future tooling.
 
-**Should have (differentiators):**
-- Dual-mode execution (`-x`/`--execute`) -- the headline feature
-- Stack traces on error via ERR trap
-- `LOG_LEVEL` environment variable for filtering
-- `debug()` function (invisible by default)
-- Retry with exponential backoff for network operations
-- Automatic temp file cleanup on any exit path
-- Confirmation gate before executing active scans
-- Consistent flags across all 66 scripts
+**Should have (competitive):**
+- `bats-file` for filesystem assertions — testing `cleanup.sh` temp file creation is clunky with raw assertions.
+- Test tags for categorization (`unit`, `integration`, `slow`) — run subsets with `bats --filter-tags unit`.
+- `setup_file` for expensive initialization — source `common.sh` once per file instead of per test.
+- Shared test helper (`test_helper/common-setup.bash`) — centralize library loading, PATH setup, fixture paths.
+- Machine-parseable metadata headers — enable future automated `--help` generation, dependency graphing, documentation site generation.
+- JUnit report output for CI — `bats --report-formatter junit` produces XML that GitHub Actions renders as test annotations.
+- `skip` for missing tool dependencies — tests should `skip "nmap not installed"` rather than fail on CI runners without pentesting tools.
+- Parallel test execution — `bats --jobs 4` runs test files in parallel (built into BATS).
 
 **Defer (v2+):**
-- Bash completion scripts (high maintenance, defer until interfaces stabilize)
-- JSON output mode (no consumer exists today)
-- Execution timer (trivial to add after core execution mode works)
-- Script metadata headers (nice for automation, not needed now)
-
-**Anti-features (explicitly do NOT build):**
-- JSON logging (no consumer, adds `jq` dependency)
-- Configuration files (overkill, use environment variables)
-- Plugin/extension system (copy-the-pattern is sufficient)
-- Automatic dependency installation (`sudo`/`brew` without consent is unacceptable for security tools)
-- Interactive TUI menus (breaks scriptability and piping)
-- Rewriting in Python/Go (the educational value IS the bash)
-- Comprehensive unit testing with bats/shunit2 (use ShellCheck + smoke tests instead)
+- Mocking framework (bats-mock) — scripts are thin wrappers around real tools. Mocking `nmap` tests the mock, not the script. Value is in testing the framework (args, logging, cleanup), not tool output.
+- 100% code coverage target — use-case scripts are educational templates. Testing that `info "1) Ping scan"` prints the right string is low-value busywork. Focus coverage on `lib/*.sh` functions where bugs actually matter.
+- End-to-end tests against Docker lab targets — requires Docker running, images pulled, services healthy. Slow, flaky, environment-dependent. Makes CI fragile.
+- Custom test reporter — BATS has TAP, pretty, TAP13, and JUnit built in.
+- Generating `--help` output from headers — `show_help()` already exists in all 81 scripts with carefully formatted output. Replacing it with auto-generation changes existing behavior.
+- Code coverage tools (bashcov/kcov) — premature. Get BATS running first. Coverage is a separate milestone.
 
 ### Architecture Approach
 
-From [ARCHITECTURE.md](./ARCHITECTURE.md): Split `common.sh` into focused modules behind a backward-compatible entry point.
+Test infrastructure coexists with existing code. No changes to production scripts except adding comment headers. Tests are organized by concern: `tests/lib/*.bats` for unit tests (one file per module), `tests/scripts/*.bats` for integration tests (script behavior). A shared test helper (`tests/test_helper/common-setup.bash`) loads bats-support/bats-assert and sets `PROJECT_ROOT`. The dual-path library loading (via `BATS_LIB_PATH` in CI, via submodule paths locally) is abstracted into the helper.
 
 **Major components:**
-1. **`common.sh`** (preserved entry point) -- Sources all `lib/*.sh` modules. All 66 scripts keep their existing `source "$(dirname "$0")/../common.sh"` line unchanged.
-2. **`lib/core.sh`** -- Colors, `PROJECT_ROOT`, `is_interactive()`, `set -euo pipefail`, ERR trap. No dependencies (foundational).
-3. **`lib/logging.sh`** -- Upgraded `info/warn/error/success` + new `debug()`, `_log()` core with level filtering, NO_COLOR support, `VERBOSE` timestamps. Depends on `core.sh`.
-4. **`lib/validation.sh`** -- `require_root`, `check_cmd`, `require_cmd`, `require_target`. Depends on `logging.sh`.
-5. **`lib/args.sh`** -- `parse_common_args()` with `-x`, `-v`, `-q`, `--help`, `REMAINING_ARGS[]`. Depends on `logging.sh`.
-6. **`lib/output.sh`** -- `run_or_show()`, `safety_banner` (quiet-mode aware), dual-mode output functions. Depends on `core.sh`.
-7. **`lib/cleanup.sh`** -- EXIT trap, `make_temp()`, `register_cleanup()`. Depends on `logging.sh`.
-8. **`lib/diagnostic.sh`** -- `report_pass/fail/warn/skip`, `run_check`, counters. Used only by Pattern B scripts.
-9. **`lib/nc_detect.sh`** -- `detect_nc_variant()`. Used only by netcat scripts.
-
-**Source order matters:** `core.sh` first, `logging.sh` second, then everything else. The dependency graph is strictly one-way (no circular dependencies). Source guards (`_MODULE_LOADED=1` pattern) prevent double-sourcing.
-
-**Key architectural pattern:** Additive functions, not modified functions. Add `log_info()` alongside `info()`, do not change `info()`. This is zero-risk for existing scripts.
+1. **tests/test_helper/common-setup.bash** — Shared setup loaded by every test file. Handles library loading (BATS_LIB_PATH vs submodules), PROJECT_ROOT resolution, PATH modification for script access. Critical: disables strict mode after sourcing common.sh (`set +eEuo pipefail; trap - ERR`) to prevent trap conflicts.
+2. **tests/lib/*.bats** — Unit tests for library modules. Nine files, one per `lib/*.sh` module. Source only the specific module under test (not full `common.sh` chain) for isolation. Test library functions directly via function calls, not via `run`.
+3. **tests/scripts/*.bats** — Integration tests for script behavior. Test via `run bash scripts/tool/script.sh` (subshell isolation). Validate `--help` exits 0, `-x` rejects non-interactive stdin, parse_common_args behavior. Use mocks for missing tools.
+4. **Structured headers** — Comment blocks between shebang and `source common.sh`. Fields: `@name` (path), `@description` (one-liner), `@tool` (nmap/tshark/etc), `@category` (examples/use-case/library), `@target` (required/optional/none), `@requires` (tools). Parseable via grep: `grep '^# @tool' scripts/**/*.sh | sed 's/# @tool *//'`.
+5. **CI workflow (.github/workflows/bats.yml)** — Uses bats-action@4.0.0 to install BATS + helpers. Runs `bats tests/ --recursive --jobs 4 --timing`. Separate workflow from shellcheck.yml (tests and linting are independent concerns). Initially runs alongside legacy tests until migration complete.
 
 ### Critical Pitfalls
 
-From [PITFALLS.md](./PITFALLS.md): 15 pitfalls identified (5 critical, 5 moderate, 5 minor). Top 5 with prevention strategies:
+These are blockers that cause test suites to silently pass when they should fail or break all 81 existing scripts.
 
-1. **`local var=$(cmd)` masks exit status** (Critical, 50+ sites) -- Split into two statements: `local var; var=$(cmd)`. ShellCheck SC2155 catches this automatically.
-2. **`grep` returns exit 1 on no match under `pipefail`** (Critical, 40+ sites) -- Every `grep` that may legitimately find nothing must have `|| true` or be inside an `if` conditional. The codebase already guards 40+ instances but not all.
-3. **`((counter++))` from zero kills script under `set -e`** (Critical, 6 sites) -- Use `var=$((var + 1))` instead, or `((var++)) || true`. Already handled in `check-tools.sh`.
-4. **Two inconsistent interactive guard patterns** (Moderate, 63 scripts) -- `[[ -t 0 ]] || exit 0` (19 scripts) vs `[[ ! -t 0 ]] && exit 0` (44 scripts). Normalize to one pattern before any other refactoring.
-5. **`set -e` suspended inside conditional contexts** (Critical for dual-mode) -- `main()` called from `if main; then` silently swallows errors. Always call `main` unconditionally: `[[ "${BASH_SOURCE[0]}" == "$0" ]] && main "$@"`.
+1. **`set -u` in sourced scripts blows up BATS internal variables** — Every script sources `common.sh` which loads `strict.sh` with `set -eEuo pipefail`. BATS uses internal variables like `BATS_CURRENT_STACK_TRACE[@]` that may be unset. With `set -u` active, referencing these unset BATS internals causes unbound variable errors or silent failures. **Prevention:** Never source `common.sh` at BATS file level. Source inside `setup()` and immediately run `set +u` in `teardown()` to protect BATS internals. Better: create test_helper that sources within controlled scope and resets nounset after loading.
 
-## Consensus Decisions
+2. **BATS's ERR trap conflicts with project's `_strict_error_handler` trap** — `strict.sh` registers `trap '_strict_error_handler' ERR`. BATS registers `trap 'bats_error_trap' ERR`. Only one ERR trap can be active. When test sources `common.sh`, project's trap overwrites BATS's trap, breaking failure detection. **Prevention:** After sourcing common.sh in setup(), run `trap - ERR` to clear project's trap in test context. For integration tests, use `run bash script.sh` (subshell isolation) never `source`.
 
-All four research tracks independently arrived at the same conclusions on these points:
+3. **EXIT trap from `cleanup.sh` fires during BATS teardown, deleting test fixtures** — `cleanup.sh` registers `trap '_cleanup_handler' EXIT` which deletes temp dirs and calls `exit`. When `common.sh` sourced in test, this EXIT trap fires during test process exit, interfering with BATS's own EXIT trap for result reporting. **Prevention:** For unit tests, source only specific module, not full `common.sh` chain. For integration tests, always use `run` (subshell). Use `$BATS_TEST_TMPDIR` for test temp files instead of project's `make_temp()`.
 
-| Decision | Agreement | Rationale |
-|----------|-----------|-----------|
-| Pure bash, zero runtime deps | STACK + FEATURES + ARCHITECTURE + PITFALLS | External deps contradict the project's "run one command" value proposition. Security tools should not require `jq`, `yq`, or Go binaries. |
-| Manual `while/case` for arg parsing | STACK + FEATURES + PITFALLS | `getopts` lacks long options. macOS BSD `getopt` is broken. GNU `getopt` requires Homebrew. All three sources cite Greg's Wiki BashFAQ/035. |
-| Do NOT change `IFS` globally | STACK + FEATURES + PITFALLS | `IFS=$'\n\t'` breaks space-separated command construction used in every script for building tool invocations like `nmap -sV --top-ports 100 "$TARGET"`. |
-| Backward-compatible entry point | STACK + ARCHITECTURE | Keep `common.sh` as the single source line for all 66 scripts. Splitting into `lib/*.sh` happens behind this entry point. |
-| `info/warn/error` signatures preserved | STACK + FEATURES + ARCHITECTURE | All 66 scripts call these functions. Changing signatures is unacceptable churn. Add new functions alongside, never modify existing ones. |
-| NO_COLOR standard over FORCE_COLOR | STACK + FEATURES | NO_COLOR (no-color.org) is widely adopted. FORCE_COLOR is not. Check `[[ -t 2 ]]` for stderr since all logging goes to stderr. |
-| ShellCheck as only external dev tool | STACK + FEATURES + PITFALLS | Only widely-adopted bash-specific linter. Catches real bugs (SC2155, SC2086). `.shellcheckrc` with `source-path` and `external-sources=true` handles the project's source pattern. |
-| Incremental migration, not big-bang | ARCHITECTURE + PITFALLS | 66 scripts must keep working at every step. Each change verified independently. No "flag day." |
-| Educational content is NOT logging | FEATURES + PITFALLS + ARCHITECTURE | The numbered examples ARE the product, not log noise. `info "1) Ping scan"` + `echo "   nmap ..."` is educational output, not operational logging. Structured logging applies only to operational messages. |
-| Do not rewrite in Python/Go | FEATURES | The educational value IS the bash. Every exploit PoC, CTF writeup, and pentest report uses bash. |
+4. **Testing scripts that `exit 1` on missing tools kills the BATS process** — 66 scripts call `require_cmd` which runs `exit 1` when tool not installed. In CI or dev machines lacking pentesting tools, sourcing these scripts causes `exit 1` to terminate the BATS process. **Prevention:** Always use `run bash script.sh` when executing whole scripts. Never source a script that has top-level `require_cmd` calls. Create stub commands in `$BATS_TEST_TMPDIR/bin` and prepend to PATH. Categorize tests as "unit" (no tools needed) vs "integration" (stubs or real tools needed).
 
-## Conflicts and Tensions
-
-### Tension 1: Architecture Granularity of Library Split
-
-**STACK.md** recommends two new files: `lib/strict.sh` (strict mode + traps + temp files) and `lib/args.sh` (argument parsing). Simple, minimal.
-
-**ARCHITECTURE.md** recommends eight files: `lib/core.sh`, `lib/logging.sh`, `lib/validation.sh`, `lib/args.sh`, `lib/output.sh`, `lib/cleanup.sh`, `lib/diagnostic.sh`, `lib/nc_detect.sh`. Highly modular.
-
-**Resolution:** Go with ARCHITECTURE.md's split but treat it as an internal refactor, not a public API. Scripts only see `common.sh`. The 8-file split is better for maintainability (a 400+ line monolithic common.sh is hard to reason about), and the source guards prevent any issues from the added complexity. The STACK.md 2-file approach underestimates how much code the logging upgrade, output mode, and cleanup framework add.
-
-### Tension 2: Dual-Mode Implementation Detail
-
-**STACK.md** proposes `run_or_show()` that takes a description string + command args. Clean, simple.
-
-**ARCHITECTURE.md** proposes `example()`, `teach()`, `result()` as separate output functions with an `OUTPUT_MODE` variable controlling behavior. More expressive but more complex.
-
-**Resolution:** Implement both. `run_or_show()` is the core mechanism for the `-x`/`--execute` toggle (STACK's approach). `example()` and `teach()` are syntactic sugar for the educational content suppression in quiet mode (ARCHITECTURE's approach). They serve different purposes: `run_or_show` answers "should I run this or show it?" while `example`/`teach` answer "should I show this educational text at all?"
-
-### Tension 3: ERR Trap Behavior
-
-**STACK.md** recommends an ERR trap that prints a full stack trace to stderr on every error. Always visible.
-
-**ARCHITECTURE.md** recommends an ERR trap that only logs to a file (if `LOG_FILE` is set). Silent by default.
-
-**Resolution:** Use STACK.md's approach (always print to stderr). The purpose of the ERR trap is developer/user diagnostics. A stack trace that only appears in an opt-in log file defeats the purpose. Users running scripts interactively need to see which line failed and why. The output goes to stderr, so it does not pollute piped stdout.
-
-### Tension 4: How Unknown Flags Are Handled in Arg Parser
-
-**STACK.md** proposes: unknown flags (`-*`) trigger `error "Unknown option"` + `exit 1`. Strict.
-
-**ARCHITECTURE.md** proposes: unknown flags pass through to `REMAINING_ARGS`. Permissive. Lets scripts define their own flags.
-
-**Resolution:** Use ARCHITECTURE.md's permissive approach for `parse_common_args()`. The common parser handles global flags (`-h`, `-v`, `-q`, `-x`). Per-tool flags (if any emerge later) should not be blocked by the common parser. A script can add a second `case` statement for its own flags after `parse_common_args` returns.
-
-### Tension 5: Logging Upgrade vs. Parallel log_*() Functions
-
-**STACK.md** upgrades the existing `info/warn/error` functions in-place to add level filtering and NO_COLOR support. Same function names, enhanced internals.
-
-**ARCHITECTURE.md** keeps `info/warn/error` identical and adds parallel `log_info/log_warn/log_error` functions for dual (terminal + file) output.
-
-**Resolution:** Use STACK.md's approach for the core upgrade (enhance `info/warn/error` with level filtering and NO_COLOR -- this is backward compatible since the function signatures do not change). Add ARCHITECTURE.md's `log_*()` functions as an optional layer only if `LOG_FILE` is set. Most scripts will never need `log_info()`; the enhanced `info()` is sufficient.
+5. **`confirm_execute()` and interactive `read -rp` cause BATS tests to hang or fail** — 64 scripts call `confirm_execute()` which, in execute mode, runs `read -rp "Continue? [y/N]"`. BATS does not provide a terminal on stdin. `confirm_execute()` explicitly rejects non-interactive execution with `exit 1`. **Prevention:** Default all tests to show mode (`EXECUTE_MODE=show`). Use `run` (subshell) for script-level tests — the `exit 0` from non-interactive guard exits the subshell, not BATS process.
 
 ## Implications for Roadmap
 
-Based on combined research, the dependency graph dictates phase ordering. Each phase builds on the previous one and must be completed before the next begins.
+Based on research, this milestone naturally splits into 5 sequential phases. Dependencies flow from infrastructure setup → unit tests → integration tests → headers → migration. The strict mode trap conflicts (pitfalls 1-3) must be addressed in the first phase before any tests are written.
 
-### Phase 1: Pre-Refactor Cleanup
-**Rationale:** Normalize inconsistencies before any structural changes. Doing this first prevents mistakes from propagating through all subsequent phases. PITFALLS.md explicitly warns that two interactive-guard patterns make search-and-replace unreliable.
-**Delivers:** Consistent codebase ready for structural changes.
-**Addresses features:** None directly. This is prep work.
-**Avoids pitfalls:** Pitfall 9 (two interactive guard patterns), Pitfall 15 (bash version gate).
-**Scope:** Small. Normalize 63 `[[ -t 0 ]]` guards to one pattern. Add Bash 4.0+ version check to `common.sh`. Create `.shellcheckrc` with `source-path` and `external-sources=true`.
-**Estimated effort:** 1-2 hours.
+### Phase 1: BATS Infrastructure Setup
+**Rationale:** Foundation for all subsequent phases. Cannot write tests without test framework. Git submodules must be pinned to specific versions before any tests depend on them. The test helper pattern (managing strict mode, trap lifecycle, library loading) must be proven before tests are written.
 
-### Phase 2: Foundation -- Library Split + Strict Mode + Logging
-**Rationale:** Every subsequent phase depends on the library infrastructure being correct. ARCHITECTURE.md's dependency graph shows `core.sh` -> `logging.sh` -> everything else. STACK.md confirms strict mode must be the first behavioral change. FEATURES.md dependency tree shows logging upgrade depends on strict mode (colors defined in core, sourced by logging).
-**Delivers:** `scripts/lib/` directory with 8 module files. Enhanced `common.sh` entry point. ERR trap with stack traces. Enhanced `info/warn/error` with level filtering and NO_COLOR. New `debug()` function. EXIT trap with temp file cleanup. `retry_with_backoff()`. Bash 4.0+ gate. Source guards on all modules.
-**Addresses features:** Clean exit on Ctrl+C, no color in pipes, `-v`/`--verbose`, `-q`/`--quiet`, `LOG_LEVEL`, stack traces on error, auto temp cleanup.
-**Avoids pitfalls:** Pitfall 1 (read -rp under set -e -- create canonical `run_interactive_demo()` wrapper), Pitfall 2 (counter arithmetic -- standardize pattern), Pitfall 3 (grep without guards -- audit), Pitfall 4 (stderr tools -- document), Pitfall 10 (awk float comparison -- add validation).
-**Uses stack:** `set -eEuo pipefail`, `shopt -s inherit_errexit` (gated), `mktemp` + EXIT trap, NO_COLOR standard.
-**Verification:** Source `common.sh` in a test script. Verify all expected functions exist. Run all 66 scripts and confirm identical output. Run smoke test: `echo "" | bash scripts/nmap/examples.sh scanme.nmap.org` exits 0.
+**Delivers:**
+- Git submodules for bats-core v1.13.0, bats-support v0.3.0, bats-assert v2.2.0, bats-file v0.4.0
+- `tests/test_helper/common-setup.bash` with dual-path library loading (BATS_LIB_PATH vs submodules)
+- Makefile targets: `test`, `test-verbose`, `test-filter`
+- One smoke test proving the infrastructure works and strict mode conflicts are handled
 
-### Phase 3: Argument Parsing + Dual-Mode Pattern
-**Rationale:** The parser and `run_or_show()` must be defined and tested before any script migration. FEATURES.md dependency tree shows dual-mode depends on argument parsing (MODE variable) which depends on logging (error messages for invalid args).
-**Delivers:** `lib/args.sh` with `parse_common_args()`. `run_or_show()` in `lib/output.sh`. Confirmation gate for execute mode. The complete dual-mode pattern ready for adoption.
-**Addresses features:** Long option support, consistent flags (`-x`, `-v`, `-q`, `--help`), dual-mode execution mechanism.
-**Avoids pitfalls:** Pitfall 6 (set -u after shift -- check `$#` in parse loop), Pitfall 8 (getopt not portable -- manual while/case), Pitfall 12 (Makefile backward compat -- positional `$1` still works as target).
-**Verification:** Migrate one tool directory (nmap) as proof of concept. Test: `./examples.sh scanme.nmap.org` (shows examples, backward compatible), `./examples.sh -x scanme.nmap.org` (executes with confirmation), `make nmap TARGET=scanme.nmap.org` (still works).
+**Addresses:** Must-have features (BATS as test runner, bats-assert library, shared test helper, make test target)
 
-### Phase 4: Script Migration -- Pattern A (17 examples.sh)
-**Rationale:** Pattern A scripts are the most uniform (all follow the same 10-example structure). Migrating them as a batch validates the pattern at scale. ARCHITECTURE.md confirms all 17 share identical structure.
-**Delivers:** All 17 `examples.sh` scripts upgraded to dual-mode with consistent flags.
-**Addresses features:** Dual-mode on all primary educational scripts.
-**Avoids pitfalls:** Pitfall 5 (set -e in sourced vs executed -- do not add dual-mode to common.sh itself), Pitfall 14 (main() hides errors -- call unconditionally).
-**Verification:** Each migrated script tested in both modes. All Makefile targets still work.
+**Avoids:** Pitfalls 1-3 (strict mode, ERR trap, EXIT trap conflicts), Pitfall 8 (`load` vs `source` extension mismatch)
 
-### Phase 5: Script Migration -- Pattern A (28 use-case scripts)
-**Rationale:** Use-case scripts are more varied than examples.sh. Some have default targets, some parse additional arguments, some run multi-step workflows. Migrating after examples.sh means the pattern is proven.
-**Delivers:** All 28 use-case scripts upgraded with argument parsing and dual-mode support.
-**Addresses features:** Full dual-mode coverage, retry logic integration for network operations.
-**Avoids pitfalls:** Pitfall 7 (structured logging obscures educational content -- separate operations from educational output).
+**Research flags:** None — well-documented in official BATS tutorial. Direct implementation.
 
-### Phase 6: ShellCheck Compliance + CI
-**Rationale:** ShellCheck is a cross-cutting cleanup that touches every file. FEATURES.md explicitly recommends deferring it to a dedicated phase. Mixing lint fixes with behavioral changes creates conflated diffs that are harder to review and harder to bisect when debugging.
-**Delivers:** Zero ShellCheck warnings at `--severity=warning`. CI workflow gating PRs. Clean `.shellcheckrc` config.
-**Addresses features:** SC2155 fixes (50+ sites), SC2086 fixes (quoting), SC2034 fixes (unused color vars).
-**Avoids pitfalls:** Pitfall 13 (over-engineering -- ShellCheck only, no other linters).
-**Verification:** `shellcheck --severity=warning scripts/**/*.sh scripts/common.sh` returns exit 0.
+---
+
+### Phase 2: Library Unit Tests
+**Rationale:** Library functions (`lib/*.sh`) are the foundation. Every script sources them. Bugs here propagate everywhere. Unit tests have highest ROI — they catch bugs in reusable code. These tests inform the integration test patterns for Phase 3.
+
+**Delivers:**
+- `tests/lib/args.bats` — test `parse_common_args` with all flag combinations (-v, -q, -x, --, unknown flags, flag ordering, empty args)
+- `tests/lib/validation.bats` — test `require_cmd`, `require_target`, `check_cmd` with installed/missing commands
+- `tests/lib/logging.bats` — test info/warn/error/debug output, LOG_LEVEL filtering, VERBOSE behavior, NO_COLOR support
+- `tests/lib/cleanup.bats` — test `make_temp` creates files, EXIT trap cleans up, `register_cleanup` runs commands on exit
+- `tests/lib/output.bats` — test `safety_banner`, `is_interactive`, `run_or_show`, `PROJECT_ROOT` resolution
+
+**Addresses:** Must-have features (unit tests for all 9 lib modules)
+
+**Uses:** BATS infrastructure from Phase 1, bats-assert for assertions, bats-file for filesystem checks
+
+**Avoids:** Pitfall 6 (source guard stale state) via per-test reset of mutable state variables
+
+**Research flags:** None — library functions have clear contracts. Existing ad-hoc tests show what to validate.
+
+---
+
+### Phase 3: Script Integration Tests
+**Rationale:** Integration tests validate the CLI contract (--help, -x rejection) across all 81 scripts. These replace the brittle hardcoded-list approach in `test-arg-parsing.sh`. Must come after unit tests (library behavior proven) and before header migration (tests can validate headers once added).
+
+**Delivers:**
+- `tests/scripts/help-flags.bats` — all 81 scripts `--help` exits 0, contains "Usage:"
+- `tests/scripts/execute-mode.bats` — all 81 scripts `-x` rejects piped stdin
+- `tests/helpers/mock-commands.bash` — create stub executables for CI (nmap, sqlmap, etc.)
+- Dynamic script discovery (glob `scripts/**/*.sh`) replacing hardcoded arrays
+
+**Addresses:** Must-have features (--help output tests, -x rejection tests, CI integration)
+
+**Uses:** mock-commands helper to satisfy `require_cmd` checks in CI
+
+**Avoids:** Pitfall 4 (exit 1 kills BATS) via `run bash script.sh` pattern and command stubs, Pitfall 5 (interactive prompts) via `run` subshell isolation
+
+**Research flags:** None — integration test pattern proven by existing ad-hoc tests.
+
+---
+
+### Phase 4: CI Integration
+**Rationale:** Tests that only run locally drift. CI must run BATS tests on every PR. Separate workflow from shellcheck.yml (independent concerns). Must run alongside legacy tests initially (both systems validate behavior until migration complete in Phase 5).
+
+**Delivers:**
+- `.github/workflows/bats.yml` using bats-action@4.0.0
+- Workflow runs `bats tests/ --recursive --jobs 4 --timing`
+- JUnit report output via `--report-formatter junit` for GitHub test annotations
+- Both BATS tests and legacy tests run in parallel jobs
+
+**Addresses:** Must-have features (CI integration via GitHub Actions), Should-have features (JUnit report output, parallel execution)
+
+**Uses:** bats-action v4.0.0, BATS_LIB_PATH output from action
+
+**Avoids:** Pitfall 12 (ANSI color codes break assertions) via `NO_COLOR=1` in CI, Pitfall 11 (temp dir leaks) via `$BATS_TEST_TMPDIR` usage
+
+**Research flags:** None — bats-action is official with clear documentation.
+
+---
+
+### Phase 5: Script Metadata Headers
+**Rationale:** Headers enable future tooling (documentation generation, dependency auditing) but have zero behavioral impact (pure comments). Can be done in parallel with test writing but logically follows test infrastructure setup. Headers added after integration tests exist so `tests/scripts/header-metadata.bats` can validate them.
+
+**Delivers:**
+- Structured header format defined (shdoc-inspired `@tag` syntax)
+- All 9 `lib/*.sh` modules updated with `@file`, `@brief`, `@description`, `@arg`, `@exitcode` annotations
+- All 72 remaining scripts updated with `@name`, `@description`, `@tool`, `@category`, `@target`, `@requires` fields
+- `tests/scripts/header-metadata.bats` validates all scripts have required fields
+
+**Addresses:** Must-have features (structured script header on every .sh file), Should-have features (machine-parseable metadata)
+
+**Uses:** grep/awk for header extraction (no external tool required)
+
+**Avoids:** Pitfall 9 (metadata above shebang breaks SC1128), Pitfall 10 (ShellCheck directive scope changes), Pitfalls 16-17 (disrupting source/call order)
+
+**Research flags:** None — header format is project-specific convention, not external integration.
+
+---
 
 ### Phase Ordering Rationale
 
-- **Phase 1 before everything:** Normalize the codebase before making structural changes. The two interactive guard patterns would cause missed scripts during migration.
-- **Phase 2 before 3:** Argument parsing uses `error()` for invalid args. Logging must be upgraded first. Strict mode must be stable before building on top of it.
-- **Phase 3 before 4-5:** Define and validate the migration pattern once, then apply it 45 times. Prevents 45 different interpretations of how dual-mode should work.
-- **Phase 4 before 5:** examples.sh scripts are uniform and serve as the template. Use-case scripts are varied and benefit from a proven pattern.
-- **Phase 6 last:** Lint cleanup should not be mixed with behavioral changes. Clean git history where each commit does one thing.
+- **Infrastructure before tests:** Cannot write tests without framework. Submodules must be pinned. Test helper must handle strict mode conflicts.
+- **Unit before integration:** Library functions are dependencies of scripts. Prove library behavior first. Unit test patterns inform integration test patterns.
+- **Tests before headers:** Headers are comments (zero behavioral change). Tests validate existing behavior, headers document it.
+- **CI after local tests work:** Prove tests pass locally before adding CI overhead. bats-action config mirrors local submodule setup.
+- **Migration last:** Keep legacy tests running until BATS tests fully cover their assertions. Compare test counts to ensure nothing lost.
 
 ### Research Flags
 
-**Phases likely needing deeper research during planning:**
-- **Phase 3:** Per-tool investigation needed. Which nmap examples are safe to execute without root? Which sqlmap examples are destructive? The confirmation gate helps, but the phase plan needs a safety classification per example.
-- **Phase 5:** Use-case scripts have varied structures. Some (like `crack-wpa-handshake.sh`) require hardware (wireless adapter). Need to decide how execute mode handles impossible-to-run commands.
-- **Phase 6:** Need to run `shellcheck --severity=warning` to get actual warning count before scoping. Could be 50 or 500 warnings.
+**Phases with standard patterns (skip research-phase):**
+- **Phase 1 (Infrastructure):** Official BATS tutorial covers submodule setup, test_helper pattern. Direct implementation.
+- **Phase 2 (Unit tests):** Existing `test-library-loads.sh` shows what to test. Library functions have clear contracts.
+- **Phase 3 (Integration tests):** Existing `test-arg-parsing.sh` shows CLI contract tests. Pattern proven.
+- **Phase 4 (CI):** bats-action is official with documented inputs. Workflow mirrors existing shellcheck.yml.
+- **Phase 5 (Headers):** Comment format, not external integration. No unknowns.
 
-**Phases with standard patterns (skip deeper research):**
-- **Phase 1:** Pure mechanical normalization. No design decisions.
-- **Phase 2:** All patterns are well-documented bash idioms from canonical references (Greg's Wiki, Bash Reference Manual). Stack research provides exact code.
-- **Phase 4:** Migration is mechanical once Phase 3 establishes the pattern.
+**Phases needing deeper research:** None. All patterns documented in official sources or existing codebase.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Zero external dependencies. All patterns verified against canonical references (Greg's Wiki BashFAQ/035, BashFAQ/105, BashFAQ/062, Bash Reference Manual, ShellCheck Wiki). ShellCheck 0.11.0 release confirmed. |
-| Features | HIGH | Feature landscape derived from codebase analysis (66 scripts read directly) + CLI UX standards (clig.dev, no-color.org). Anti-features grounded in project's educational purpose per CLAUDE.md. |
-| Architecture | HIGH | Module split based on actual function analysis of 138-line common.sh. Dependency graph verified by source-order testing. Backward compatibility guaranteed by preserving entry point. |
-| Pitfalls | HIGH | All 5 critical pitfalls verified against Greg's Wiki BashFAQ/105 (the canonical `set -e` reference). Each pitfall mapped to specific file + line number in the codebase. The 40+ existing `\|\| true` guards prove the team already knows about grep/pipefail issues. |
+| Stack | HIGH | BATS versions verified via GitHub releases. Git submodule approach verified via official tutorial. npm blocker confirmed via bats-core issue #493. bats-action v4.0.0 inputs verified via GitHub Marketplace. |
+| Features | HIGH | All features derived from existing test harnesses (268 + 39 = 307 assertions) and BATS official documentation. No speculative features. |
+| Architecture | HIGH | Directory structure follows official BATS tutorial. Test helper pattern documented in tutorial. Strict mode conflicts documented in bats-core issues #36, #81, #213, #423. Integration test pattern proven by existing ad-hoc tests. |
+| Pitfalls | HIGH | Critical pitfalls (1-5) verified by reading codebase source (`strict.sh`, `cleanup.sh`, `validation.sh`, `output.sh`) and cross-referencing against BATS gotchas documentation and GitHub issues. Moderate pitfalls (6-12) verified against official docs and ShellCheck wiki. |
 
-**Overall confidence: HIGH**
-
-The research is unusually well-grounded because the domain (bash scripting) has decades of canonical documentation and the codebase is small enough to analyze exhaustively. There are no API integrations, no third-party services, no version compatibility unknowns. Every recommendation maps to a specific line of code in the existing codebase.
+**Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Exact ShellCheck warning count:** Must run `shellcheck --severity=warning scripts/**/*.sh` before scoping Phase 6. Install ShellCheck as first action.
-- **Per-tool execute safety classification:** Need to categorize each of the 170 examples (17 scripts x 10 examples) as safe-to-execute, needs-root, needs-target-consent, or display-only. This classification drives Phase 4 implementation.
-- **Retry idempotency per tool:** `retry_with_backoff()` is safe for idempotent commands (DNS lookups, port scans) but dangerous for non-idempotent ones (SQL injection tests, brute force attempts). Need per-tool analysis during Phase 5.
-- **Diagnostic scripts (Pattern B) migration path unclear:** ARCHITECTURE.md describes three patterns but the migration strategy focuses on Pattern A. Pattern B scripts (3 diagnostic scripts) already execute commands and produce structured output -- they may not need dual-mode at all, or they may need a different treatment. Clarify during Phase 5 planning.
-- **`lib/` directory impact on ShellCheck source resolution:** The `.shellcheckrc` `source-path=SCRIPTDIR/..` pattern resolves `common.sh` relative to each script. After the library split, ShellCheck must also resolve `lib/*.sh` files sourced by `common.sh`. Verify during Phase 2 that `external-sources=true` + `source-path=SCRIPTDIR/../lib` handles this.
+No significant gaps. All recommendations backed by official documentation or existing codebase patterns. Two areas warrant attention during implementation:
+
+- **shdoc annotation coverage:** Header format uses shdoc-inspired `@tag` syntax but does NOT require shdoc as a build dependency. If future milestone wants to auto-generate docs from headers, evaluate shdoc v1.2 vs alternatives at that time. Decision deferred intentionally — headers are designed to be forward-compatible.
+
+- **Bash version coverage:** Project targets Bash 4.0+ but dev environment uses Bash 5.3.9 via Homebrew on macOS. CI uses ubuntu-latest (Bash 5.2.x). BATS itself requires Bash 3.2+. No compatibility issues expected, but `inherit_errexit` (used in `strict.sh` line 14) requires Bash 4.4+. Verify CI bash version during Phase 4.
 
 ## Sources
 
-### Primary (HIGH confidence -- canonical references, official documentation)
-- Greg's Wiki BashFAQ/035 (argument parsing): https://mywiki.wooledge.org/BashFAQ/035
-- Greg's Wiki BashFAQ/105 (set -e pitfalls): https://mywiki.wooledge.org/BashFAQ/105
-- Greg's Wiki BashFAQ/062 (temp files): https://mywiki.wooledge.org/BashFAQ/062
-- Greg's Wiki SignalTrap (trap patterns): https://mywiki.wooledge.org/SignalTrap
-- Greg's Wiki BashGuide/Practices: https://mywiki.wooledge.org/BashGuide/Practices
-- Bash Reference Manual (set builtin): https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
-- ShellCheck Wiki (SC codes, directives, .shellcheckrc): https://www.shellcheck.net/wiki/
-- ShellCheck v0.11.0 Release: https://github.com/koalaman/shellcheck/releases
-- NO_COLOR Standard: https://no-color.org/
-- Command Line Interface Guidelines: https://clig.dev/
+### Primary (HIGH confidence)
+- [bats-core official documentation](https://bats-core.readthedocs.io/en/stable/) — Installation, writing tests, gotchas, tutorial (all phases)
+- [bats-core GitHub releases](https://github.com/bats-core/bats-core/releases) — v1.13.0 version verification
+- [bats-assert GitHub releases](https://github.com/bats-core/bats-assert/releases) — v2.2.0 version verification, stderr assertion functions
+- [bats-support GitHub releases](https://github.com/bats-core/bats-support/releases) — v0.3.0 version verification
+- [bats-file GitHub releases](https://github.com/bats-core/bats-file/releases) — v0.4.0 version verification
+- [bats-core/bats-action GitHub Marketplace](https://github.com/marketplace/actions/setup-bats-and-bats-libraries) — v4.0.0 inputs/defaults
+- [bats-core issue #493](https://github.com/bats-core/bats-core/issues/493) — npm limitation for helper libraries
+- [ShellCheck SC1128 wiki](https://www.shellcheck.net/wiki/SC1128) — Shebang must be on first line
+- Codebase analysis: `tests/test-arg-parsing.sh` (268 checks), `tests/test-library-loads.sh` (39 checks), `scripts/lib/*.sh` (9 modules), `.github/workflows/shellcheck.yml`
 
-### Secondary (MEDIUM confidence -- community best practices, multiple sources agree)
-- Unofficial Bash Strict Mode: http://redsymbol.net/articles/unofficial-bash-strict-mode/
-- Exit Traps in Bash: http://redsymbol.net/articles/bash-exit-traps/
-- Safer Bash Scripts: https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
-- Designing Modular Bash: https://www.lost-in-it.com/posts/designing-modular-bash-functions-namespaces-library-patterns/
-- Unix Interface Design Patterns: https://homepage.cs.uri.edu/~thenry/resources/unix_art/ch11s06.html
+### Secondary (MEDIUM confidence)
+- [bats-core issues #36, #81, #213, #423](https://github.com/bats-core/bats-core/issues) — Strict mode support discussion, set -u conflicts
+- [shdoc](https://github.com/reconquest/shdoc) — Annotation format inspiration for headers
+- [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html) — Header conventions reference
+- [ShellCheck issues #1877, #3191](https://github.com/koalaman/shellcheck/issues) — Directive scoping, comment parsing
 
-### Codebase Analysis (direct observation)
-- `scripts/common.sh` (138 lines) -- all functions inventoried
-- 66 consumer scripts across 18 tool directories -- all patterns cataloged
-- 40+ `|| true` guards, 63 `read -rp` locations, 2 `((counter++)) || true` sites verified
+### Tertiary (LOW confidence)
+- None — all recommendations verified against official sources or existing code patterns
 
 ---
 *Research completed: 2026-02-11*

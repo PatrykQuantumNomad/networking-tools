@@ -1,172 +1,180 @@
-# Domain Pitfalls: Bash Script Hardening for Networking Tools
+# Domain Pitfalls: Adding BATS Tests and Script Metadata Headers
 
-**Domain:** Adding strict mode, structured logging, argument parsing, and dual-mode execution to 65+ existing educational bash scripts
+**Domain:** Adding BATS test framework and structured script headers to an existing bash pentesting toolkit with 81 scripts using strict mode, traps, source guards, and interactive prompts
 **Researched:** 2026-02-11
-**Overall confidence:** HIGH -- pitfalls verified against actual codebase patterns, bash documentation, and community reports
+**Overall confidence:** HIGH -- pitfalls verified against BATS official documentation, bats-core GitHub issues, and actual codebase patterns in this repository
 
 ## Critical Pitfalls
 
-Mistakes that break currently-working scripts, cause silent failures in CI, or require touching every script twice.
+Mistakes that cause test suites to silently pass when they should fail, break all 81 existing scripts, or require rearchitecting the test approach.
 
 ---
 
-### Pitfall 1: `set -e` kills `read -rp` interactive demos when stdin is not a terminal
+### Pitfall 1: `set -u` in sourced scripts blows up BATS internal variables
 
-**What goes wrong:** All 65+ scripts inherit `set -euo pipefail` from `common.sh` (line 5). The `read` builtin returns exit code 1 when it encounters EOF on stdin. When scripts run non-interactively (piped input, `make` targets, CI), stdin is not a terminal and `read` hits EOF immediately, returning 1. With `set -e` active, the script dies at the `read -rp` line instead of gracefully skipping the interactive demo.
+**What goes wrong:** Every script in this project sources `common.sh`, which loads `strict.sh`, which enables `set -eEuo pipefail`. When a BATS test sources `common.sh` (either directly or via the script under test), `set -u` (nounset) takes effect in the BATS process. BATS uses internal variables like `BATS_CURRENT_STACK_TRACE[@]`, `BATS_TEST_SKIPPED`, and others that may be unset at certain points in the test lifecycle. With `set -u` active, referencing these unset BATS internals causes unbound variable errors that either crash the test runner or produce silent failures with no diagnostic output.
 
-**Why it happens:** The scripts already have `[[ ! -t 0 ]] && exit 0` or `[[ -t 0 ]] || exit 0` guards before `read -rp` (found in all 63 scripts with interactive demos). These guards correctly prevent `read` from running in non-interactive contexts today. The pitfall arises if someone refactors the interactive section -- for example, wrapping the guard and `read` inside a function, where `exit 0` would exit the function but `set -e` would still kill the script if the function returns non-zero. Or if someone adds a second `read` call after the guard without realizing the guard only protects the first one.
+**Why it happens:** BATS files are not executed straight through like normal scripts. BATS uses a specialized evaluation process that preprocesses `@test` blocks into functions, manages its own traps, and maintains internal state variables. When strict mode is inherited from sourced library code, it contaminates BATS's own execution environment. The `-u` flag is the worst offender because BATS's internal arrays (like stack traces) are legitimately empty/unset at various points.
 
-**This is already partially mitigated** in the current codebase. The danger is during refactoring.
-
-**Consequences:** Scripts that work perfectly today die with exit code 1 when run via `make` or in CI. The error is silent -- no error message, just an abrupt exit.
+**Consequences:** Tests crash with cryptic unbound variable errors pointing to BATS internals, not your code. Or worse: tests silently pass when they should fail because the error handling machinery itself fails. On macOS with Bash 3.2 (which ships as default), `set -u` combined with `set -e` can set exit status to zero instead of one for unbound variable access, causing the ERR trap to never fire and test failures to go completely undetected.
 
 **Prevention:**
-1. When refactoring interactive sections into functions, use `read -rp "..." answer || return 0` to handle EOF gracefully.
-2. Never move the `[[ -t 0 ]]` guard into a function that uses `exit 0` -- `exit` in a function exits the whole script in some contexts, not just the function.
-3. For dual-mode execution, the interactive demo section should be a separate function called only from `main()`, never from the library path.
-4. Add a smoke test: `echo "" | bash scripts/nmap/examples.sh scanme.nmap.org` should not produce a non-zero exit code.
-
-**Detection:** Run `make nmap TARGET=scanme.nmap.org` and verify exit code 0. Run each script with stdin redirected from `/dev/null`.
-
-**Affected scripts:** All 63 scripts with `read -rp` patterns. Two equivalent guard styles exist:
-- `[[ -t 0 ]] || exit 0` (19 scripts, examples.sh pattern)
-- `[[ ! -t 0 ]] && exit 0` (44 scripts, use-case script pattern)
-
-**Phase mapping:** Address in strict mode phase. Create a canonical `run_interactive_demo()` wrapper that handles all edge cases.
-
-**Confidence:** HIGH -- verified by examining all 63 `read -rp` locations in the codebase and the existing `set -euo pipefail` in `common.sh`.
-
----
-
-### Pitfall 2: `((counter++))` returns exit code 1 when counter starts at 0, killing script under `set -e`
-
-**What goes wrong:** Bash arithmetic `(( ))` returns exit code 1 when the expression evaluates to 0. The expression `((counter++))` post-increments: it returns the old value (0) as the expression result, which maps to exit code 1. Under `set -e`, this kills the script on the very first increment.
-
-**Why it happens:** In bash, `((0))` has exit code 1 (false) and `((1))` has exit code 0 (true). Post-increment `((x++))` evaluates to the value BEFORE increment. So when `x=0`, `((x++))` evaluates to 0, which is exit code 1, even though x is now 1.
-
-**This is already known and guarded.** The codebase uses `((installed++)) || true` in `check-tools.sh` (line 92) and `((errors++)) || true` in `check-docs-completeness.sh` (line 16). The diagnostic scripts use `PASS_COUNT=$((PASS_COUNT + 1))` which is safe because `$(( ))` is arithmetic expansion (always exit 0), not arithmetic evaluation.
-
-**Consequences:** Without `|| true`, any counter starting from 0 kills the script on first increment. The `check-tools.sh` script would die after finding the first installed tool.
-
-**Prevention:**
-1. Use `count=$((count + 1))` (arithmetic expansion) instead of `((count++))` (arithmetic evaluation). The `$()` form always returns exit 0.
-2. If `(( ))` is preferred for readability, always append `|| true`: `((count++)) || true`.
-3. Establish a project convention: "Always use `var=$((var + 1))` for counters. Never use `((var++))` without `|| true`."
-4. The diagnostic scripts already follow the safe pattern -- do not regress when adding new counters.
-
-**Detection:** `shellcheck` catches this with warning SC2219: "Instead of `let expr`, prefer `(( expr ))` for clarity. Alternatively, use `(( expr )) || true` to allow it to fail."
-
-**Affected scripts:** `check-tools.sh`, `check-docs-completeness.sh`, and all 3 diagnostic scripts (`dns.sh`, `connectivity.sh`, `performance.sh`) which use `PASS_COUNT`, `FAIL_COUNT`, `WARN_COUNT` counters.
-
-**Phase mapping:** Address in strict mode phase. Audit and standardize all counter patterns.
-
-**Confidence:** HIGH -- verified from [BashFAQ/105](https://mywiki.wooledge.org/BashFAQ/105), [Bash Hackers arithmetic expressions](https://bash-hackers.gabe565.com/syntax/arith_expr/), and confirmed in the actual codebase.
-
----
-
-### Pitfall 3: `grep` returns exit code 1 on no match, breaking pipelines under `set -e` + `pipefail`
-
-**What goes wrong:** `grep` returns exit code 0 on match, 1 on no match, 2 on error. With `set -o pipefail`, a `grep` with no match in ANY position of a pipeline kills the script. The pattern `some_command | grep "pattern" | head -1` fails when `grep` finds nothing -- even though "no match" is a perfectly valid outcome for networking tool output.
-
-**Why it happens:** `pipefail` makes the pipeline's exit code the rightmost non-zero exit code from any command in the pipe. `grep` returning 1 (no match) is treated identically to a real error.
-
-**This is already partially handled.** The codebase has 40+ instances of `|| true` guards, many specifically protecting `grep`:
-- `grep -cE '...' || true` in `performance.sh` (line 99)
-- `grep -nE '...' || true` in `performance.sh` (line 110)
-- `grep -oE '...' ... | awk '{print $1}' || true` in `performance.sh` (line 246)
-
-**But not all grep usages are guarded.** Several scripts use grep in pipelines without guards:
-- `connectivity.sh` line 176: `echo "$ping_output" | grep -E 'packets|received' | tail -1` -- safe because it is inside an `if` conditional (set -e is suspended in conditionals)
-- `check-tools.sh` line 25: `echo "$help_text" | grep -qi 'ncat'` in `detect_nc_variant()` -- safe because it is inside an `if`
-- `curl/check-ssl-certificate.sh` line 104: `curl ... 2>&1 | grep -E "subject:|issuer:|expire|SSL connection"` -- this is in the interactive demo section, and if the grep finds nothing (e.g., self-signed cert with different output), the script dies
-
-**Consequences:** Scripts that work today against expected targets fail against targets with unexpected output. DNS diagnostics fail when a record type does not exist. SSL checks fail when certificate format differs. Port scans fail when no ports are open.
-
-**Prevention:**
-1. Any `grep` that could legitimately find zero matches MUST have `|| true` (standalone) or be inside an `if`/`while` conditional.
-2. For pipelines: `command | grep "pattern" || true` guards the WHOLE pipeline. For finer control: `command | { grep "pattern" || true; }`.
-3. In diagnostic scripts, "no match" is information, not an error. Use `result=$(grep ... || true)` and check `[[ -n "$result" ]]`.
-4. Create a helper function: `safe_grep() { grep "$@" || true; }` for consistent usage.
-5. Note: `grep -c` returns 0 (the count) as output but exit code 1 when count is 0. Both the output and exit code matter.
-
-**Detection:** Run diagnostic scripts against hosts that return unusual output. Run SSL check against a self-signed cert. Run DNS check against a nonexistent domain.
-
-**Affected scripts:** All 3 diagnostic scripts (24 grep usages), `detect_nc_variant()` in `common.sh`, `check-tools.sh`, and any interactive demo that pipes through grep.
-
-**Phase mapping:** Address in strict mode phase. Audit every `grep` call -- categorize as "inside conditional" (safe), "has || true" (safe), or "unguarded" (needs fix).
-
-**Confidence:** HIGH -- verified from codebase grep analysis (40+ `|| true` guards already present means the team knows about this), [Bash Strict Mode article](http://redsymbol.net/articles/unofficial-bash-strict-mode/), and [BashFAQ/105](https://mywiki.wooledge.org/BashFAQ/105).
-
----
-
-### Pitfall 4: Tools that output to stderr cause false pipeline failures under `pipefail`
-
-**What goes wrong:** Several networking tools write their output to stderr, not stdout:
-- `nc -h` exits non-zero AND writes to stderr (already guarded with `2>&1 || true`)
-- `hashcat --help` writes to stderr
-- `dig -v` writes version to stderr
-- `hping3` writes scan output to stderr
-- `aircrack-ng -S` writes to stderr
-- `curl -v` writes verbose headers to stderr
-
-When capturing output with `2>&1`, the tool's non-zero exit code propagates through the pipeline. When using `2>/dev/null` to suppress, the diagnostic information is lost.
-
-**Why it happens:** Security tools frequently use stderr for their primary output because stdout is reserved for machine-parseable data (like nmap -oX -). This is correct behavior for the tools but surprising when scripting around them.
-
-**This is already well-handled in the codebase.** The pattern `tool_command 2>&1 || true` appears 20+ times. The `detect_nc_variant()` function (common.sh line 77) correctly uses `nc -h 2>&1 || true`. The `check-tools.sh` `get_version()` function handles each tool's stderr quirks individually.
-
-**Consequences:** Adding new tool wrappers or refactoring existing ones without understanding each tool's stderr behavior breaks the script. The most dangerous case is when a tool writes useful output to stderr AND returns non-zero -- `2>&1` captures the output but `set -e` kills the script.
-
-**Prevention:**
-1. Document each tool's stderr behavior in a comment near its usage. The codebase already does this implicitly with `|| true` guards.
-2. For any command that might return non-zero but produce useful output: `output=$(command 2>&1) || true`.
-3. For commands where you need to distinguish "failed with error" from "succeeded with stderr output": capture exit code explicitly:
+1. Never source `common.sh` at the BATS file level. Source it inside `setup()` or inside specific `@test` blocks.
+2. Use `set +u` in `teardown()` to ensure BATS internals are not affected after test code runs.
+3. Better: create a `test_helper.bash` that sources `common.sh` within a controlled scope, resetting nounset after loading:
    ```bash
-   output=$(command 2>&1) && rc=0 || rc=$?
-   ```
-4. Maintain a per-tool compatibility table documenting stderr/exit-code behavior.
-
-**Detection:** Remove `|| true` guards and see which scripts fail. (Do not actually do this -- the guards are correct.)
-
-**Affected scripts:** `common.sh` detect_nc_variant, `check-tools.sh` get_version, all interactive demos that run external tools (`hping3`, `aircrack-ng`, `nikto`, `hashcat`, `nc`).
-
-**Phase mapping:** Document tool behaviors during strict mode phase. Create a tool compatibility matrix as part of the hardening work.
-
-**Confidence:** HIGH -- verified from codebase analysis (20+ `2>&1 || true` patterns) and tool documentation.
-
----
-
-### Pitfall 5: Dual-mode execution (`source` vs execute) breaks `set -e` propagation
-
-**What goes wrong:** If scripts are refactored to support dual-mode (sourceable as library + executable), `set -e` behaves differently when a file is sourced vs executed:
-- **Executed:** `set -e` in `common.sh` applies to the child script's entire execution.
-- **Sourced:** `set -e` in `common.sh` modifies the CALLING shell's options. If the caller did not have `set -e`, it now does. If the caller already had `set -e`, functions from the sourced file may unexpectedly be "immune" when called from conditional contexts.
-
-Additionally, the `BASH_SOURCE[0]` vs `$0` check used for dual-mode (`if [[ "$0" == "${BASH_SOURCE[0]}" ]]`) interacts with `set -u` -- `BASH_SOURCE` is always set in bash, but accessing `BASH_SOURCE[0]` in certain contexts can trigger issues.
-
-**Why it happens:** Bash's `set -e` has notoriously complex scoping rules. When a function is called in a conditional context (`if my_func; then`), `set -e` is suspended INSIDE that function, even if the function itself set `set -e`. This is a bash spec behavior, not a bug. When dual-mode scripts are sourced, all their functions run in the caller's shell, inheriting the caller's `set -e` context -- which may be different from the script's intended context.
-
-**Consequences:** Functions that rely on `set -e` for error handling silently swallow errors when called from conditional contexts. This is especially dangerous for `require_cmd`, `require_target`, and `require_root` -- these are meant to exit on failure, but if called as `if require_cmd nmap; then`, the `exit 1` inside the function DOES still exit the script (exit is not affected by set -e), but any intermediate commands that fail before the explicit `exit` are silently ignored.
-
-**Prevention:**
-1. Do not rely on `set -e` for control flow inside library functions. Use explicit `return 1` and check return values.
-2. For dual-mode, use the standard guard pattern and keep it simple:
-   ```bash
-   main() {
-       # All script logic here
+   # test/test_helper.bash
+   load_common() {
+       source "${BATS_TEST_DIRNAME}/../scripts/common.sh"
    }
-   [[ "${BASH_SOURCE[0]}" == "$0" ]] && main "$@"
+
+   teardown() {
+       set +u  # Protect BATS internals from nounset
+   }
    ```
-3. `common.sh` should NOT set `set -euo pipefail` if it is being sourced by a script that might have different expectations. However, since ALL scripts in this project source `common.sh` and expect strict mode, this is safe for this specific project. The pitfall is if `common.sh` is ever sourced from an external script.
-4. Keep the current architecture: `common.sh` sets strict mode, all scripts source it. Do not add dual-mode to `common.sh` itself.
+4. When testing library functions directly (unit tests), source only the specific `lib/*.sh` module needed, not the full `common.sh` chain.
 
-**Detection:** Source `common.sh` from an interactive shell and observe that your shell now has `set -e` enabled. Type a command that fails -- your shell exits.
+**Detection:** Run the test suite and look for errors mentioning `BATS_` variables as unbound, or tests that produce no output at all (no pass/fail indication).
 
-**Affected scripts:** `common.sh` (already sets strict mode for all scripts), any script that gets refactored for dual-mode.
+**Affected components:** All 81 scripts source `common.sh` which loads `strict.sh` with `set -eEuo pipefail`. All 9 `lib/*.sh` modules have source guards that use `return 0`, which is safe. The danger is the `set -u` propagation.
 
-**Phase mapping:** Address in dual-mode execution phase. Decide upfront whether dual-mode applies to `common.sh`, examples scripts, or both. Recommendation: only add dual-mode to individual scripts, not to `common.sh`.
+**Phase mapping:** Address in the very first test infrastructure phase, before writing any actual tests. The test helper pattern must be established first.
 
-**Confidence:** HIGH -- verified from [BashFAQ/105](https://mywiki.wooledge.org/BashFAQ/105) and [Greg's Wiki BashGuide/Practices](https://mywiki.wooledge.org/BashGuide/Practices).
+**Confidence:** HIGH -- verified against bats-core issues [#81](https://github.com/bats-core/bats-core/issues/81), [#213](https://github.com/bats-core/bats-core/issues/213), [#423](https://github.com/bats-core/bats-core/issues/423), and the actual `strict.sh` in this codebase.
+
+---
+
+### Pitfall 2: BATS's own ERR trap conflicts with the project's `_strict_error_handler` trap
+
+**What goes wrong:** This project registers `trap '_strict_error_handler' ERR` in `strict.sh` (line 36). BATS also registers its own ERR trap (`bats_error_trap`) to detect test failures and capture stack traces. Only one ERR trap can be active at a time in bash. When a test sources `common.sh`, the project's ERR trap overwrites BATS's ERR trap. This means BATS can no longer detect test failures through its normal mechanism -- it loses the ability to report which line failed and why.
+
+**Why it happens:** In bash, `trap 'handler' ERR` replaces any previous ERR trap. The `-E` flag (errtrace, which this project enables via `set -E`) causes ERR traps to be inherited by shell functions, command substitutions, and subshell environments, which makes the conflict worse -- the project's trap propagates everywhere. BATS expects to be in control of the ERR trap to detect assertion failures.
+
+**Consequences:**
+- Test failures produce the project's stack trace format (`[ERROR] Command failed at line X`) instead of BATS's diagnostic format, making failures hard to interpret.
+- BATS may not detect failures at all if the project's error handler prints but does not exit with the correct status.
+- The `bats_error_trap` never fires, so `$BATS_ERROR_STATUS` is never set, and test result reporting breaks.
+
+**Prevention:**
+1. When testing library functions (unit tests), source the specific `lib/*.sh` module without sourcing `strict.sh`. The source guards make this safe.
+2. When integration-testing whole scripts, use `run` which executes in a subshell. The trap conflict only matters when sourcing into the same shell.
+3. Create a `test_helper.bash` that saves and restores BATS's traps:
+   ```bash
+   # In setup(), after sourcing common.sh:
+   # Re-establish BATS's ERR trap
+   trap - ERR  # Clear project's trap in test context
+   ```
+4. For scripts that must be tested with strict.sh active, run them as subprocesses via `run bash scripts/nmap/examples.sh`, never via `source`.
+
+**Detection:** Run a test that should fail (e.g., `false` as a test line). If BATS reports the test as passing, or if the failure output shows `[ERROR] Command failed` instead of BATS's normal format, the trap conflict is active.
+
+**Affected components:** `scripts/lib/strict.sh` line 36: `trap '_strict_error_handler' ERR`. Also `set -E` on line 10 which causes ERR trap inheritance.
+
+**Phase mapping:** Address alongside Pitfall 1 in test infrastructure setup. The test helper must manage trap lifecycle.
+
+**Confidence:** HIGH -- verified by reading BATS's [tracing.bash](https://github.com/bats-core/bats-core/blob/master/lib/bats-core/tracing.bash) source and this project's `strict.sh`.
+
+---
+
+### Pitfall 3: EXIT trap from `cleanup.sh` fires during BATS teardown, deleting test fixtures
+
+**What goes wrong:** The project's `cleanup.sh` registers `trap '_cleanup_handler' EXIT` (line 35), which deletes `$_CLEANUP_BASE_DIR` and runs all registered cleanup commands. When `common.sh` is sourced in a BATS test, this EXIT trap fires when the test process exits -- including during BATS's own teardown. If any test creates temporary files that reference the cleanup system, those files vanish before assertions can check them. More critically, `_cleanup_handler` calls `exit "$exit_code"` (line 31), which can interfere with BATS's exit trap chain.
+
+**Why it happens:** BATS teardown runs in the same process as the test. When `common.sh` is sourced (not run via `run`), the EXIT trap is registered in the test process. BATS has its own EXIT trap (`bats_exit_trap`) for result reporting. Bash only allows one EXIT trap per process -- the last one registered wins. If the project's EXIT trap is registered after BATS's trap, BATS never reports results. If BATS's trap is registered after, the project's cleanup never runs (which may be fine for tests, but means cleanup-dependent behavior isn't tested).
+
+**Consequences:**
+- Temp files created via `make_temp()` are deleted before teardown assertions run.
+- BATS result reporting may silently break (no TAP output).
+- `_CLEANUP_BASE_DIR` is created via `mktemp` at source time (line 12 of cleanup.sh), meaning every test that sources `common.sh` creates a temp directory in `/tmp` that may or may not get cleaned up depending on trap ordering.
+
+**Prevention:**
+1. For unit tests of library functions, source only the specific module being tested, not the full `common.sh` chain. Skip `cleanup.sh` unless explicitly testing cleanup behavior.
+2. For integration tests, always use `run` to execute scripts in a subshell. The EXIT trap fires in the subshell, not in the BATS process.
+3. If you must source `common.sh` in a test, save and restore BATS's EXIT trap:
+   ```bash
+   setup() {
+       # Let common.sh set up its traps in this scope
+       source "${BATS_TEST_DIRNAME}/../scripts/common.sh"
+       # BATS will re-establish its own EXIT trap after setup()
+   }
+   ```
+4. Use `$BATS_TEST_TMPDIR` for test-specific temp files instead of the project's `make_temp()`. BATS manages its own temp directory lifecycle.
+
+**Detection:** Check if `$BATS_RUN_TMPDIR` still exists after a test run. Check if TAP output is complete (every test shows ok/not ok).
+
+**Affected components:** `scripts/lib/cleanup.sh` lines 12, 19-32, 35.
+
+**Phase mapping:** Address in test infrastructure phase. Document in test helper which modules are safe to source directly.
+
+**Confidence:** HIGH -- verified by reading `cleanup.sh` trap registration and BATS's EXIT trap chain documentation.
+
+---
+
+### Pitfall 4: Testing scripts that `exit 1` on missing tools kills the BATS process
+
+**What goes wrong:** 66 scripts call `require_cmd` which runs `exit 1` when the required tool is not installed. In a CI environment or dev machine that lacks pentesting tools (nmap, sqlmap, aircrack-ng, etc.), sourcing these scripts causes `exit 1` to terminate the BATS process, not just fail the test. If a script is sourced (not `run`) and calls `require_cmd` during its execution flow, the entire test suite aborts.
+
+**Why it happens:** `exit` in a sourced script exits the calling process. When you `source scripts/nmap/examples.sh` in a BATS test, the script's `require_cmd nmap` calls `exit 1` if nmap is not installed. This exits the BATS test process entirely. The `run` helper avoids this by executing in a subshell, but many test patterns involve sourcing for function access.
+
+**Consequences:** One missing tool kills the entire test suite -- not just the one test, but all remaining tests in the file. No error message from BATS, just an abrupt exit.
+
+**Prevention:**
+1. Always use `run` when executing whole scripts: `run bash scripts/nmap/examples.sh target`. Never source a script that has top-level `require_cmd` calls.
+2. For testing the library functions themselves, source only `lib/validation.sh` and test `require_cmd` in isolation:
+   ```bash
+   @test "require_cmd fails for missing command" {
+       source "${BATS_TEST_DIRNAME}/../scripts/lib/validation.sh"
+       run require_cmd nonexistent_tool_xyz
+       [ "$status" -eq 1 ]
+   }
+   ```
+3. Create stub commands in `$BATS_TEST_TMPDIR/bin` and prepend to PATH for integration tests:
+   ```bash
+   setup() {
+       mkdir -p "${BATS_TEST_TMPDIR}/bin"
+       # Create a stub that just exits 0
+       echo '#!/bin/bash' > "${BATS_TEST_TMPDIR}/bin/nmap"
+       echo 'echo "stub nmap"' >> "${BATS_TEST_TMPDIR}/bin/nmap"
+       chmod +x "${BATS_TEST_TMPDIR}/bin/nmap"
+       export PATH="${BATS_TEST_TMPDIR}/bin:${PATH}"
+   }
+   ```
+4. Categorize tests into "unit" (test library functions, no tools needed) and "integration" (test full scripts, stubs or real tools needed). Run unit tests in CI always; run integration tests only when tools are available.
+
+**Detection:** Run the test suite on a machine without pentesting tools installed. If the suite produces fewer results than expected (or crashes entirely), this pitfall is active.
+
+**Affected scripts:** 66 scripts call `require_cmd`. Tools required: nmap, tshark, msfconsole, hashcat, john, sqlmap, nikto, hping3, skipfish, aircrack-ng, gobuster, ffuf, dig, curl, nc, traceroute/mtr, foremost.
+
+**Phase mapping:** Address in test architecture phase. The test categorization (unit vs integration) must be decided before writing tests.
+
+**Confidence:** HIGH -- verified by reading `validation.sh` `require_cmd` function and counting 66 scripts that call it.
+
+---
+
+### Pitfall 5: `confirm_execute()` and interactive `read -rp` cause BATS tests to hang or fail
+
+**What goes wrong:** 64 scripts call `confirm_execute()` which, in execute mode, runs `read -rp "Continue? [y/N]"`. Another 64 scripts have interactive demo sections with `[[ ! -t 0 ]] && exit 0` guards followed by `read -rp`. BATS does not provide a terminal on stdin -- `[[ -t 0 ]]` is false in BATS. For scripts with the guard, they exit early (which is fine). But `confirm_execute()` in execute mode checks `[[ ! -t 0 ]]` and calls `exit 1`, which (if sourced, not `run`) kills the BATS process.
+
+**Why it happens:** BATS runs tests in a non-interactive shell. stdin is not a terminal. The `read` builtin returns exit code 1 on EOF. The `confirm_execute()` function explicitly rejects non-interactive execution with `exit 1`. These are all correct behaviors for production use, but they make direct testing impossible without either mocking stdin or ensuring scripts run in show mode (not execute mode).
+
+**Consequences:**
+- Tests hang if `read` is reached without the `-t 0` guard.
+- Tests abort with exit 1 if `confirm_execute()` is reached in execute mode.
+- Tests exit 0 silently if the `[[ ! -t 0 ]] && exit 0` guard triggers (which means the interactive demo section is never tested).
+
+**Prevention:**
+1. Default all tests to show mode (`EXECUTE_MODE=show`) unless specifically testing execute mode behavior.
+2. For testing execute mode, pipe input to `run`: `echo "y" | run bash scripts/nmap/examples.sh -x target`. But note: this still fails the `-t 0` check. The script needs refactoring to accept a `--yes` or `--no-confirm` flag for testability, or use an environment variable like `NTOOL_NONINTERACTIVE=1`.
+3. For testing the interactive demo section, accept that it cannot be tested in BATS directly. Test the individual commands it would run instead.
+4. Use `run` (subshell) for all script-level tests. The `exit 0` from the non-interactive guard exits the subshell, not the BATS process, and `$status` will be 0 (which is a valid test assertion: "script exits cleanly in non-interactive mode").
+
+**Detection:** Tests that time out (30+ seconds) are likely stuck on `read`. Tests that unexpectedly succeed with empty `$output` may be hitting the early exit guard.
+
+**Affected components:** `scripts/lib/output.sh` `confirm_execute()` (lines 55-68), `is_interactive()` (lines 20-22). All 64 scripts with `[[ ! -t 0 ]]` guards.
+
+**Phase mapping:** Address in test design phase. Decide whether interactive behavior needs testing (probably not for this project -- the value is in testing the command generation, not the interactive prompts).
+
+**Confidence:** HIGH -- verified by reading `output.sh` and the interactive patterns in all scripts.
 
 ---
 
@@ -174,172 +182,215 @@ Additionally, the `BASH_SOURCE[0]` vs `$0` check used for dual-mode (`if [[ "$0"
 
 ---
 
-### Pitfall 6: `set -u` breaks scripts that check `$1` without default value in certain positions
+### Pitfall 6: Source guards prevent re-sourcing between tests, causing stale state
 
-**What goes wrong:** `set -u` (nounset) causes the script to exit when referencing an unset variable. The current codebase correctly uses `${1:-}` for all positional parameter checks. But adding argument parsing with `getopts` or `while` loops introduces new contexts where `$1`, `$OPTARG`, or shift-ed arguments might be unset.
+**What goes wrong:** Every `lib/*.sh` module uses a source guard pattern: `[[ -n "${_STRICT_LOADED:-}" ]] && return 0`. Once a module is sourced in `setup()` or `setup_file()`, the guard variable persists for the entire test file. If a test modifies a variable or function defined by a library module, subsequent tests in the same file see the modified version. You cannot "re-source" the library to get a fresh copy because the guard prevents it.
 
-**Why it happens:** After `shift`, `$1` becomes the next argument. If there are no more arguments, `$1` is unset. Under `set -u`, accessing `$1` after shifting past the last argument kills the script. Similarly, `getopts` sets `OPTARG` for options with required arguments, but `OPTARG` is unset for options without arguments.
-
-**Consequences:** Argument parsing loop exits the script prematurely when it encounters the last argument or an option without a required argument.
+**Why it happens:** Source guards are designed for production use where double-sourcing wastes time and can cause side effects. In testing, you often want a clean state between tests. But the guard variables (`_COMMON_LOADED`, `_STRICT_LOADED`, `_COLORS_LOADED`, `_LOGGING_LOADED`, `_VALIDATION_LOADED`, `_CLEANUP_LOADED`, `_OUTPUT_LOADED`, `_ARGS_LOADED`, `_DIAGNOSTIC_LOADED`, `_NC_DETECT_LOADED`) persist across tests within a file because BATS runs tests in the same process (or forks from a common parent).
 
 **Prevention:**
-1. In `while` loops over arguments, always check `$#` before accessing `$1`:
+1. If you need clean state, unset the guard variable before re-sourcing:
    ```bash
-   while [[ $# -gt 0 ]]; do
-       case "$1" in
-           -v|--verbose) VERBOSE=true; shift ;;
-           *) TARGET="$1"; shift ;;
-       esac
-   done
-   ```
-2. With `getopts`, initialize `OPTARG` or always use `${OPTARG:-}`.
-3. For the help check pattern `[[ "${1:-}" =~ ^(-h|--help)$ ]]` -- this is already correct. Do not "simplify" to `[[ "$1" =~ ... ]]`.
-4. After parsing, use defaults: `TARGET="${TARGET:-localhost}"`.
-
-**Detection:** Run scripts with zero arguments, with only `--help`, with only flags and no positional argument.
-
-**Affected scripts:** All 65+ scripts. The existing `${1:-}` pattern is correct and must be preserved through any argument parsing refactor.
-
-**Phase mapping:** Address in argument parsing phase.
-
-**Confidence:** HIGH -- verified from [Bash Strict Mode article](http://redsymbol.net/articles/unofficial-bash-strict-mode/) and codebase analysis showing consistent `${1:-}` usage.
-
----
-
-### Pitfall 7: Structured logging breaks educational output when applied uniformly
-
-**What goes wrong:** The scripts are educational tools whose primary value is human-readable output. Adding structured logging (JSON, syslog format, or even just timestamps + severity levels to every line) destroys the carefully formatted example output. The scripts currently use `info "1) Ping scan -- is the host up?"` followed by `echo "   nmap -sn ${TARGET}"` -- this formatting IS the product.
-
-**Why it happens:** Structured logging is designed for machine-parseable operational scripts, not for educational CLI tools. Applying it uniformly treats the scripts as services instead of teaching tools.
-
-**Consequences:** Every `echo` statement would need to be categorized as "log" vs "output". The numbered examples (the core educational content) should NOT be logged -- they ARE the output. But operational information (which tool is being run, what target, whether it succeeded) should be structured. Mixing both creates confusing output.
-
-**Prevention:**
-1. Distinguish between "script operations" (setup, validation, errors) and "educational content" (examples, explanations). Only structure the operations.
-2. Keep the existing `info/warn/error/success` functions for operational messages. These can gain structured output (JSON to a file, timestamps) without changing their terminal appearance.
-3. The `echo "   command"` lines (educational content) should NEVER go through the logging system.
-4. For diagnostic scripts (Pattern B), structured logging makes more sense because their output IS operational data. The `report_pass/fail/warn` functions could gain structured output.
-5. Implement logging levels: `--verbose` shows structured operational logs, default shows clean educational output.
-
-**Detection:** Run an examples.sh script after adding structured logging. If the 10 numbered examples are buried in log metadata, the educational value is destroyed.
-
-**Affected scripts:** All 17 examples.sh scripts (educational output), all 28 use-case scripts (mixed), 3 diagnostic scripts (operational output).
-
-**Phase mapping:** Address in structured logging phase. Define the boundary between "educational content" and "operational logging" before writing any code.
-
-**Confidence:** HIGH -- this is an architecture decision informed by the project's stated purpose in CLAUDE.md: "scripts demonstrating 10 open-source security tools... print example commands with explanations."
-
----
-
-### Pitfall 8: `getopts` cannot parse long options, and `getopt` is not portable across macOS/Linux
-
-**What goes wrong:** The project targets both macOS (BSD tools) and Linux (GNU tools). `getopts` (bash builtin) only supports short options (`-v`, `-t`). GNU `getopt` supports long options (`--verbose`, `--target`) but macOS ships BSD `getopt` which has different syntax and does not support long options. The current help pattern `[[ "${1:-}" =~ ^(-h|--help)$ ]]` handles both short and long help flags, but a full argument parser needs more.
-
-**Why it happens:** The scripts currently use positional arguments (`$1` = target, `$2` = optional parameter) and a simple help check. Adding flags like `--verbose`, `--json`, `--non-interactive` requires parsing mixed flags and positional arguments. `getopts` cannot handle long options. GNU `getopt` is not available on macOS without `brew install gnu-getopt`.
-
-**Consequences:** Either the argument parser only supports short flags (poor UX for educational scripts), or it depends on GNU `getopt` (breaks macOS portability), or a custom parser is implemented (complexity, bugs).
-
-**Prevention:**
-1. Use a manual `while/case` argument parser. This is the most portable approach and is already the de facto standard for cross-platform bash scripts:
-   ```bash
-   while [[ $# -gt 0 ]]; do
-       case "$1" in
-           -h|--help) show_help; exit 0 ;;
-           -v|--verbose) VERBOSE=true; shift ;;
-           -j|--json) JSON_OUTPUT=true; shift ;;
-           --) shift; break ;;  # end of flags
-           -*) error "Unknown option: $1"; exit 1 ;;
-           *) break ;;  # positional args
-       esac
-   done
-   ```
-2. Do NOT use `getopts` -- it cannot handle long options and the scripts already have long option expectations (`--help`).
-3. Do NOT use `getopt` -- it is not portable between macOS BSD and Linux GNU.
-4. Keep the argument parser simple. These are educational scripts, not complex CLI tools. Support: `--help`, `--verbose`/`-v`, and the target as a positional argument. That is likely sufficient.
-
-**Detection:** Test argument parsing on both macOS and Linux (or in a Docker container).
-
-**Affected scripts:** All 65+ scripts if argument parsing is standardized.
-
-**Phase mapping:** Address in argument parsing phase. Build the parser in `common.sh` as a reusable function.
-
-**Confidence:** HIGH -- verified from [getopts POSIX spec](https://pubs.opengroup.org/onlinepubs/7908799/xcu/getopts.html), [Bash Hackers getopts tutorial](https://bash-hackers.gabe565.com/howto/getopts_tutorial/), and confirmed that macOS ships BSD getopt by default.
-
----
-
-### Pitfall 9: Two inconsistent interactive-guard patterns create maintenance confusion
-
-**What goes wrong:** The codebase uses two logically equivalent but syntactically different patterns for the interactive guard:
-- Pattern A (19 scripts): `[[ -t 0 ]] || exit 0`
-- Pattern B (44 scripts): `[[ ! -t 0 ]] && exit 0`
-
-These are functionally identical but look different. When adding dual-mode execution, the refactor must touch all 63 of these lines. Inconsistency increases the chance that some are missed or refactored differently.
-
-**Why it happens:** The two patterns evolved at different times. The `examples.sh` scripts (written first) use Pattern A. The use-case scripts (written later) use Pattern B.
-
-**Consequences:** Not a runtime issue -- both patterns work correctly. But during the hardening refactor, if only one pattern is searched for, ~30% of scripts are missed. Additionally, code review becomes harder when the same concept is expressed two different ways.
-
-**Prevention:**
-1. Standardize on ONE pattern before beginning the dual-mode refactor. Recommendation: `[[ ! -t 0 ]] && exit 0` (Pattern B) because it reads more naturally ("if not interactive, exit").
-2. Or better: replace both with a function call:
-   ```bash
-   # In common.sh
-   require_interactive() {
-       [[ -t 0 ]] || exit 0
+   setup() {
+       unset _VALIDATION_LOADED
+       source "${BATS_TEST_DIRNAME}/../scripts/lib/validation.sh"
    }
    ```
-   Then all scripts use `require_interactive` before the demo section.
-3. Use a single search-and-replace pass to normalize before beginning other refactoring.
+2. Better: source libraries in `setup_file()` and design tests to not depend on mutable state from libraries. The library functions in this project are mostly stateless (they read arguments, not global state), so this is usually fine.
+3. For modules with mutable state (like `cleanup.sh` with `_CLEANUP_COMMANDS` and `_CLEANUP_BASE_DIR`), reset the state variables in `setup()` rather than re-sourcing:
+   ```bash
+   setup() {
+       _CLEANUP_COMMANDS=()
+       _CLEANUP_BASE_DIR=$(mktemp -d "${TMPDIR:-/tmp}/test-session.XXXXXX")
+   }
+   ```
 
-**Detection:** `grep -rn '\-t 0\]' scripts/` shows both patterns.
+**Detection:** Tests that pass individually but fail when run together (or vice versa) indicate stale state from source guards.
 
-**Affected scripts:** All 63 scripts with interactive demos.
+**Affected components:** All 9 source guard variables across `lib/*.sh` modules. `cleanup.sh` and `args.sh` are the most stateful.
 
-**Phase mapping:** Address FIRST, before dual-mode or any other refactoring. This is a 5-minute normalization that prevents mistakes in later phases.
+**Phase mapping:** Address in test helper design. Document which modules are safe to source once vs. need per-test reset.
 
-**Confidence:** HIGH -- directly observed in codebase grep results.
+**Confidence:** HIGH -- verified by reading all source guards and identifying stateful variables.
 
 ---
 
-### Pitfall 10: `awk "BEGIN {exit !($var > threshold)}"` pattern for float comparison is fragile under `set -e`
+### Pitfall 7: BATS `run` subshell isolation hides strict mode failures
 
-**What goes wrong:** The diagnostic scripts use awk for floating-point comparison:
-```bash
-if awk "BEGIN {exit !($total_time > 5.0)}" 2>/dev/null; then
-```
-This works because awk's `exit` with 0 means "true" (the condition was met) and exit 1 means "false". But if `$total_time` is empty, malformed, or contains characters that break awk syntax, awk crashes with exit code 2. Under `set -e`, even inside an `if` conditional, a syntax error in the awk program can cause unexpected behavior.
+**What goes wrong:** The `run` function executes commands in a subshell. This means `set -e` behavior inside `run` is different from the test body. Specifically, BATS disables `execfail` inside `run`, and the subshell may not inherit all shell options. A function that would fail under strict mode in production may succeed inside `run` because the strict mode flags are not fully propagated.
 
-The pattern also embeds shell variables directly into awk programs via string interpolation, which is an injection risk if variables contain unexpected characters (e.g., from parsed network output containing spaces or special characters).
+**Why it happens:** `run` is designed to capture exit codes without crashing the test. It intentionally catches failures. But this means you cannot use `run` to verify that strict mode causes a specific failure -- the failure is caught by `run`, not by the test's `set -e`. Furthermore, this project uses `shopt -s inherit_errexit` (in `strict.sh` line 14), but this only works in Bash 4.4+, and `run`'s subshell may not inherit this shopt.
 
-**Why it happens:** Bash has no native floating-point arithmetic. The awk workaround is standard but fragile. Network tool output can contain unexpected characters, and the diagnostic scripts parse this output into variables that are then interpolated into awk programs.
-
-**Consequences:** Diagnostic scripts crash on edge cases: latency values like "N/A", negative values, or empty strings from tools that timed out. The `2>/dev/null` suppresses the awk error message but the exit code still propagates.
+**Consequences:** Tests that use `run` to verify strict mode behavior may pass even when the underlying function has a bug that would cause a failure in production. False confidence in test coverage.
 
 **Prevention:**
-1. Always validate the variable before the awk comparison:
+1. For testing that strict mode catches errors correctly, call functions directly (without `run`) and use `set -e` in the test body:
    ```bash
-   if [[ -n "$total_time" && "$total_time" =~ ^[0-9]+\.?[0-9]*$ ]] && \
-      awk "BEGIN {exit !($total_time > 5.0)}" 2>/dev/null; then
-   ```
-2. The current code partially does this with `[[ -n "$total_time" ]] &&` but does not validate the format.
-3. Consider a helper function:
-   ```bash
-   float_gt() {
-       local a="${1:-0}" b="${2:-0}"
-       [[ "$a" =~ ^[0-9]+\.?[0-9]*$ ]] || return 1
-       [[ "$b" =~ ^[0-9]+\.?[0-9]*$ ]] || return 1
-       awk "BEGIN {exit !($a > $b)}" 2>/dev/null
+   @test "require_cmd exits on missing command" {
+       source "${BATS_TEST_DIRNAME}/../scripts/lib/validation.sh"
+       # Don't use run -- call directly to test exit behavior
+       ! require_cmd nonexistent_tool_xyz 2>/dev/null
    }
    ```
-4. Alternatively, use `bc` where available: `(( $(echo "$total_time > 5.0" | bc -l) ))` -- but `bc` is not always installed.
+   But note: `!` negation disables `set -e` inside the negated command (this is bash behavior, not a BATS bug). Use `run !` for BATS 1.5.0+.
+2. For integration tests, use `run` and explicitly check `$status`:
+   ```bash
+   @test "script fails when nmap not installed" {
+       run bash -c 'PATH=/empty:$PATH bash scripts/nmap/examples.sh target'
+       [ "$status" -eq 1 ]
+       [[ "$output" == *"not installed"* ]]
+   }
+   ```
+3. Accept that `run` tests exit codes, not strict mode behavior. Unit-test strict mode separately from script behavior.
 
-**Detection:** Run performance diagnostic against a host that returns unusual mtr/traceroute output (e.g., all hops timeout, giving empty timing values).
+**Detection:** Write a test that should fail under strict mode but passes. If it passes with `run` but fails without `run`, this pitfall is the cause.
 
-**Affected scripts:** `diagnostics/performance.sh` (6 instances), `diagnostics/connectivity.sh` (1 instance).
+**Phase mapping:** Address in test writing guidelines. Document when to use `run` vs. direct invocation.
 
-**Phase mapping:** Address in strict mode phase when auditing all conditional patterns.
+**Confidence:** HIGH -- verified against BATS [gotchas documentation](https://bats-core.readthedocs.io/en/stable/gotchas.html) and [issue #36](https://github.com/bats-core/bats-core/issues/36).
 
-**Confidence:** MEDIUM -- the current guards are partially effective. The injection risk is theoretical (variables come from tool output, not user input). But the empty/malformed value case is a real edge case.
+---
+
+### Pitfall 8: `load` expects `.bash` extension, but all project libraries use `.sh`
+
+**What goes wrong:** BATS's `load` command automatically appends `.bash` to the filename. Calling `load "../scripts/lib/validation"` looks for `validation.bash`, not `validation.sh`. All 9 library modules in this project use the `.sh` extension. Using `load` to include them will fail with a "file not found" error.
+
+**Why it happens:** BATS convention is to use `.bash` for test helper files. The `load` function enforces this by appending the extension. This project follows standard shell script convention with `.sh` files.
+
+**Prevention:**
+1. Use `source` instead of `load` for project library files:
+   ```bash
+   source "${BATS_TEST_DIRNAME}/../scripts/lib/validation.sh"
+   ```
+2. Use `load` only for test-specific helpers (which should use `.bash` extension):
+   ```bash
+   # test/test_helper.bash  <-- .bash extension for BATS
+   load test_helper
+   ```
+3. Do not rename project files from `.sh` to `.bash` -- this breaks ShellCheck, the Makefile `find` command, and the existing `source` chains.
+
+**Detection:** `load` calls that fail with "does not exist" or "No such file" errors.
+
+**Phase mapping:** Address in test infrastructure documentation. Establish the convention early.
+
+**Confidence:** HIGH -- verified against BATS [writing tests documentation](https://bats-core.readthedocs.io/en/stable/writing-tests.html).
+
+---
+
+### Pitfall 9: Script metadata header changes can break ShellCheck SC1128 (shebang must be first line)
+
+**What goes wrong:** If metadata headers are added ABOVE the shebang line (`#!/usr/bin/env bash`), ShellCheck raises SC1128: "The shebang must be on the first line." More importantly, the script loses interpreter control -- it may work when called from bash but fail from zsh, sudo, or cron.
+
+**Why it happens:** The kernel reads the first two bytes of a file to detect `#!`. If those bytes are anything else (a comment, a blank line, a metadata block), the shebang becomes an ordinary comment and the file is executed by whatever shell invokes it. Adding metadata before the shebang is the most common mistake when implementing structured headers.
+
+**Consequences:**
+- ShellCheck CI (`make lint`) fails for every modified script.
+- Scripts may silently execute under the wrong shell (sh instead of bash) in some environments, causing syntax errors from bash-specific features like `[[ ]]`, `(( ))`, associative arrays.
+- The existing `make lint` target runs `shellcheck --severity=warning` which catches SC1128.
+
+**Prevention:**
+1. Metadata headers MUST go AFTER the shebang line. The correct pattern:
+   ```bash
+   #!/usr/bin/env bash
+   # ---
+   # name: identify-ports
+   # tool: nmap
+   # category: use-case
+   # requires: nmap
+   # ---
+   source "$(dirname "$0")/../common.sh"
+   ```
+2. Never add blank lines before the shebang.
+3. Run `make lint` after adding headers to catch this immediately.
+4. If using `# shellcheck` directives, place them after the shebang but before the metadata block to avoid [SC directive parsing issues](https://github.com/koalaman/shellcheck/issues/3191).
+
+**Detection:** `make lint` fails with SC1128. Also: `head -c 2 scripts/*/examples.sh | xxd` should show `2321` (`#!`) for every script.
+
+**Affected scripts:** All 81 `.sh` files that have shebangs.
+
+**Phase mapping:** Address in the header implementation phase. Create a template and validation script before touching any files.
+
+**Confidence:** HIGH -- verified against [ShellCheck SC1128 documentation](https://www.shellcheck.net/wiki/SC1128) and the existing `make lint` target.
+
+---
+
+### Pitfall 10: Metadata headers between shebang and `source common.sh` interact with ShellCheck directives
+
+**What goes wrong:** Some scripts have `# shellcheck disable=SC2034` or similar directives placed strategically. Adding a metadata block between the shebang and the first code line can change whether a ShellCheck directive is interpreted as file-wide or line-specific. A directive immediately after the shebang (before any code) is treated as file-wide. A directive after a metadata comment block may be treated as applying only to the next line.
+
+**Why it happens:** ShellCheck treats directives differently based on their position:
+- After shebang, before any command: file-wide scope
+- Directly before a command: applies to that command only
+- After a comment block: ambiguous behavior depending on ShellCheck version
+
+The current codebase has file-wide directives in `colors.sh` (`# shellcheck disable=SC2034` before variable assignments) and `output.sh` (`# shellcheck disable=SC2034` before `PROJECT_ROOT`).
+
+**Prevention:**
+1. Place file-wide ShellCheck directives immediately after the shebang, before the metadata block:
+   ```bash
+   #!/usr/bin/env bash
+   # shellcheck disable=SC2034
+   # ---
+   # name: colors
+   # purpose: Color variable definitions
+   # ---
+   ```
+2. Place line-specific directives immediately before the line they apply to (not inside the metadata block).
+3. Run `make lint` after every header modification.
+4. If metadata blocks are structured (YAML-style), ensure ShellCheck does not misinterpret `key: value` patterns. Bash comments are safe, but `# shellcheck key=value` patterns inside metadata could trigger [parsing issues](https://github.com/koalaman/shellcheck/issues/3191).
+
+**Detection:** `make lint` produces new warnings that did not exist before header changes.
+
+**Affected components:** `scripts/lib/colors.sh` (6 SC2034 directives), `scripts/lib/output.sh` (1 SC2034 directive), `scripts/lib/args.sh` (1 SC2034 directive).
+
+**Phase mapping:** Address in header implementation phase. Audit existing directives before adding headers.
+
+**Confidence:** MEDIUM -- ShellCheck directive scoping rules are version-dependent and the behavior at comment block boundaries is not fully documented. Verified against [ShellCheck issue #1877](https://github.com/koalaman/shellcheck/issues/1877).
+
+---
+
+### Pitfall 11: `mktemp` in `cleanup.sh` runs at source time, creating orphan temp dirs in tests
+
+**What goes wrong:** `cleanup.sh` line 12 runs `_CLEANUP_BASE_DIR=$(mktemp -d ...)` at source time (outside any function). Every time `common.sh` is sourced in a BATS test, a new temp directory is created in `/tmp`. If tests source `common.sh` in `setup()` (running before every test), each test creates an orphan temp directory. With 50+ tests, this fills `/tmp` with hundreds of abandoned directories.
+
+**Why it happens:** The `mktemp` call is at module scope (not inside a function). Source guards prevent double-sourcing within a single test, but if tests use `unset _CLEANUP_LOADED` for fresh state (per Pitfall 6), each re-source creates a new temp dir. The EXIT trap that would clean up these dirs may not fire correctly in the BATS context (per Pitfall 3).
+
+**Prevention:**
+1. For unit tests, do not source `cleanup.sh` unless explicitly testing cleanup behavior.
+2. For integration tests using `run`, the temp dir is created and cleaned up inside the subshell -- no leak.
+3. Add a safety check in CI: `find /tmp -name 'ntool-session.*' -mmin +60 -exec rm -rf {} +` in test teardown.
+4. Use `$BATS_TEST_TMPDIR` for test temp files instead of `make_temp()`.
+
+**Detection:** After running the test suite, check: `ls /tmp/ntool-session.* 2>/dev/null | wc -l`. If non-zero, temp dirs are leaking.
+
+**Phase mapping:** Address in test infrastructure phase alongside Pitfalls 1-3.
+
+**Confidence:** HIGH -- verified by reading `cleanup.sh` line 12 and the source guard behavior.
+
+---
+
+### Pitfall 12: ANSI color codes in test output break assertions
+
+**What goes wrong:** The project's `info()`, `warn()`, `error()`, and `success()` functions output ANSI escape sequences (`\033[0;34m`, etc.) in their messages. When testing script output with `run`, `$output` contains these escape sequences. String comparisons like `[[ "$output" == *"[INFO] Target:"* ]]` fail because the actual string is `\033[0;34m[INFO]\033[0m Target:`.
+
+**Why it happens:** `colors.sh` disables colors when `[[ ! -t 1 ]]` (stdout is not a terminal). Under `run`, stdout IS captured (not a terminal), so colors should be disabled. But this depends on whether `colors.sh` is sourced before or after the `run` context is established. If `common.sh` is sourced in `setup()` and the color detection runs there (where stdout may or may not be a terminal depending on BATS's internal plumbing), the color state may be incorrect for the `run` context.
+
+**Prevention:**
+1. Set `NO_COLOR=1` in test setup to force colors off:
+   ```bash
+   setup() {
+       export NO_COLOR=1
+   }
+   ```
+   This uses the [NO_COLOR standard](https://no-color.org/) that `colors.sh` already respects (line 19).
+2. When asserting output, use pattern matching that accounts for possible escape sequences: `[[ "$output" == *"INFO"*"Target:"* ]]`.
+3. For integration tests with `run bash script.sh`, the script runs in a subprocess where stdout is not a terminal, so `colors.sh` should disable colors automatically. Verify this works.
+
+**Detection:** Test assertions on output text that fail with no visible difference between expected and actual. Use `echo "$output" | cat -v` to reveal hidden escape sequences.
+
+**Phase mapping:** Address in test helper setup. A single `export NO_COLOR=1` in the shared `test_helper.bash` solves this globally.
+
+**Confidence:** HIGH -- verified by reading `colors.sh` lines 17-32 and the NO_COLOR support.
 
 ---
 
@@ -347,181 +398,108 @@ The pattern also embeds shell variables directly into awk programs via string in
 
 ---
 
-### Pitfall 11: macOS `date` syntax differs from GNU `date` for timestamp formatting
+### Pitfall 13: BATS `!` negation does not cause test failure
 
-**What goes wrong:** Adding structured logging with timestamps requires `date` formatting. macOS ships BSD `date` which uses `-j -f` for custom formats. GNU/Linux `date` uses `-d` for date parsing. The connectivity diagnostic already handles this (line 273-274):
-```bash
-expire_epoch=$(date -j -f "%b %d %T %Y %Z" "$expire_line" "+%s" 2>/dev/null || \
-               date -d "$expire_line" "+%s" 2>/dev/null || echo "")
-```
+**What goes wrong:** Writing `! some_command` in a BATS test to assert that a command fails does NOT fail the test when the command succeeds. Bash deliberately excludes negated return values from triggering `set -e` (this is a POSIX requirement, not a BATS limitation).
 
-**Prevention:**
-1. For timestamps in logs, `date +"%Y-%m-%dT%H:%M:%S%z"` (ISO 8601) works on both macOS and Linux.
-2. For epoch timestamps, `date +%s` works on both platforms.
-3. For parsing dates (like certificate expiry), use the fallback pattern already in the codebase.
-4. Avoid `date -v` (macOS-only) and `date -d` (GNU-only) in new code without a fallback.
+**Prevention:** Use `run ! command` (BATS 1.5.0+) or `! command || false` for older versions. ShellCheck detects this with [SC2314/SC2315](https://www.shellcheck.net/wiki/SC2315).
 
-**Detection:** Run on both macOS and Linux (or in Docker).
+**Phase mapping:** Address in test writing guidelines.
 
-**Affected scripts:** Any new logging infrastructure added to `common.sh`.
-
-**Phase mapping:** Address in structured logging phase.
-
-**Confidence:** HIGH -- the codebase already handles this in `connectivity.sh`.
+**Confidence:** HIGH -- documented in [BATS gotchas](https://bats-core.readthedocs.io/en/stable/gotchas.html).
 
 ---
 
-### Pitfall 12: Adding argument parsing to scripts that share positional parameter conventions with the Makefile
+### Pitfall 14: Piped commands inside `run` are parsed by bash before `run` sees them
 
-**What goes wrong:** The Makefile passes `TARGET` to scripts as `$1`:
-```makefile
-nmap: ## Run nmap examples
-    @bash scripts/nmap/examples.sh $(TARGET)
-```
-If argument parsing is added and the script starts expecting `--target` instead of a positional argument, all 50+ Makefile targets break simultaneously.
+**What goes wrong:** `run echo "hello" | grep "hello"` does not work as expected. Bash parses the pipe first, so `run` only receives `echo "hello"`, and the `grep` runs outside `run`. The test fails because `$output` does not contain what you expect.
 
-**Prevention:**
-1. Maintain backward compatibility: positional `$1` MUST still work as the target. New flags are additive.
-2. The parser should treat the first non-flag argument as TARGET:
-   ```bash
-   # These must all work:
-   # ./script.sh 192.168.1.1
-   # ./script.sh --verbose 192.168.1.1
-   # ./script.sh 192.168.1.1 --verbose
-   ```
-3. Update the Makefile only after all scripts are updated and tested.
-4. Do NOT add `--` requirements between flags and positional arguments for simple scripts.
+**Prevention:** Use `run bash -c 'echo "hello" | grep "hello"'` or `bats_pipe echo "hello" \| grep "hello"`.
 
-**Detection:** Run `make nmap TARGET=scanme.nmap.org` after adding argument parsing. Must still work.
+**Phase mapping:** Address in test writing guidelines.
 
-**Affected scripts:** All 50+ scripts called from Makefile targets.
-
-**Phase mapping:** Address in argument parsing phase. Test Makefile compatibility before and after.
-
-**Confidence:** HIGH -- directly observed from Makefile analysis.
+**Confidence:** HIGH -- documented in [BATS gotchas](https://bats-core.readthedocs.io/en/stable/gotchas.html).
 
 ---
 
-### Pitfall 13: Over-engineering the logging system with external dependencies (jq, logger, etc.)
+### Pitfall 15: Background processes in scripts under test cause BATS to hang
 
-**What goes wrong:** Structured logging articles recommend using `jq` for JSON output, `logger` for syslog integration, or external logging libraries. Adding any external dependency to the logging path means every script now requires that dependency. The project's value proposition is "run one command, get what you need" -- adding `jq` as a requirement for basic script operation contradicts this.
+**What goes wrong:** If a script launches a background process that inherits BATS's file descriptor 3 (which BATS uses for internal communication), BATS waits forever for that FD to close. The `_run_with_timeout()` function in `diagnostic.sh` (line 28) runs commands with `"$@" &` -- a background process. If this function is invoked during testing, BATS may hang.
 
 **Prevention:**
-1. The logging system must use ONLY bash builtins and `printf`/`date` (universally available).
-2. JSON output (if needed) should be generated with `printf` string formatting, not `jq`.
-3. `logger` (syslog) is optional and should never be required for script operation.
-4. The default output MUST remain human-readable colored text (the current format). Structured output is an OPT-IN mode triggered by `--json` or an environment variable like `LOG_FORMAT=json`.
-5. Do not add `jq`, `yq`, or any other JSON processor as a dependency.
+1. Close FD 3 in background processes: `"$@" 3>&- &`
+2. For scripts that use `_run_with_timeout`, test them with `run` and set a BATS timeout: `bats --timing` to detect slow tests.
+3. Avoid testing diagnostic scripts that launch background processes in the initial test phase.
 
-**Detection:** Run `scripts/check-tools.sh` -- the logging system should work even if only the most basic Unix tools are installed.
+**Affected components:** `scripts/lib/diagnostic.sh` line 28 (`"$@" &`), line 29 (`( sleep ... && kill ... ) &`).
 
-**Affected scripts:** `common.sh` logging functions, all 65+ scripts that use `info/warn/error/success`.
+**Phase mapping:** Address when writing tests for diagnostic scripts (likely a later phase).
 
-**Phase mapping:** Address in structured logging phase. Define constraints before implementation.
-
-**Confidence:** HIGH -- architectural decision based on project principles in CLAUDE.md.
+**Confidence:** HIGH -- documented in [BATS writing tests](https://bats-core.readthedocs.io/en/stable/writing-tests.html) and verified against `diagnostic.sh`.
 
 ---
 
-### Pitfall 14: Dual-mode `main()` wrapper hides errors that `set -e` would catch at top level
+### Pitfall 16: Header changes that alter the `source` line position break relative path resolution
 
-**What goes wrong:** Wrapping script logic in `main() { ... }` and calling it as `main "$@"` changes how `set -e` behaves. If `main` is ever called from a conditional context (e.g., `if main; then` or `main || handle_error`), `set -e` is SUSPENDED inside `main`. Errors that would have killed the script at top level now silently pass.
-
-**Why it happens:** This is bash spec behavior: "The ERR trap and the -e setting are not inherited by command substitutions" and "The -e setting is disabled while executing a compound list following the while, until, if, or elif reserved word, a pipeline beginning with !, or any command of an AND-OR list except the last."
-
-**Consequences:** A script that "works" when run directly may silently swallow errors when called from another script with error handling.
+**What goes wrong:** Every script has `source "$(dirname "$0")/../common.sh"` as the first code line after the shebang and comments. If a metadata header introduces executable code (like variable assignments) before this line, and that code references functions from `common.sh`, it fails. More subtly: if the `source` line moves far down the file (after many lines of metadata), some editors and tools that scan for the source pattern may not find it.
 
 **Prevention:**
-1. The `main` function should ALWAYS be called unconditionally at the bottom of the script:
-   ```bash
-   [[ "${BASH_SOURCE[0]}" == "$0" ]] && main "$@"
-   ```
-   Never: `[[ "${BASH_SOURCE[0]}" == "$0" ]] && main "$@" || exit 1`
-2. Do not call `main` from conditional contexts.
-3. Inside `main`, use explicit error checking (`if ! command; then exit 1; fi`) rather than relying on `set -e` for critical operations.
-4. For library usage (when sourced), callers should call individual functions, not `main`.
+1. Keep metadata as pure comments (no executable code in the header block).
+2. The `source common.sh` line must remain the first executable statement after comments.
+3. If metadata needs to be machine-readable, parse it from comments -- do not add executable statements before sourcing.
 
-**Detection:** Hard to detect. Requires understanding of bash's `set -e` scoping rules.
+**Phase mapping:** Address in header template design.
 
-**Affected scripts:** Any script refactored to use `main()` wrapper.
-
-**Phase mapping:** Address in dual-mode execution phase. Document the pattern clearly.
-
-**Confidence:** HIGH -- verified from [BashFAQ/105](https://mywiki.wooledge.org/BashFAQ/105) and [Greg's Wiki](https://mywiki.wooledge.org/BashGuide/Practices).
+**Confidence:** HIGH -- verified by reading the script pattern across all 68 scripts that source `common.sh`.
 
 ---
 
-### Pitfall 15: `declare -A` (associative array) in `check-tools.sh` requires bash 4+, but macOS ships bash 3.2
+### Pitfall 17: `parse_common_args` and `REMAINING_ARGS` require specific call order that headers must not disrupt
 
-**What goes wrong:** `check-tools.sh` uses `declare -A TOOLS=()` (line 27) for associative arrays. macOS ships bash 3.2 (from 2007, due to GPLv3 licensing). Associative arrays require bash 4.0+. The script currently works because most macOS users have a newer bash from Homebrew, and the shebang `#!/usr/bin/env bash` picks up the Homebrew version.
-
-**Why it happens:** macOS system bash is `/bin/bash` (version 3.2). Homebrew bash is `/opt/homebrew/bin/bash` or `/usr/local/bin/bash` (version 5.x). The `#!/usr/bin/env bash` shebang finds whichever is first in `$PATH`. If a user has not installed Homebrew bash, `declare -A` fails with a syntax error.
-
-**Consequences:** Not a new issue -- this exists today. But when hardening scripts, be aware that adding new bash 4+ features (like `${var,,}` for lowercase, `${!array[@]}` for indirect expansion, or `readarray`/`mapfile`) makes the macOS system bash problem worse.
+**What goes wrong:** Scripts follow a strict call order: `source common.sh` -> `show_help()` definition -> `parse_common_args "$@"` -> `set -- "${REMAINING_ARGS[@]...}"` -> `require_cmd` -> `require_target`/default target -> `confirm_execute` -> `safety_banner`. If a metadata header introduces code that must run before `parse_common_args` or after `source common.sh`, inserting it at the wrong point breaks argument handling or skips the safety banner.
 
 **Prevention:**
-1. Document that bash 4+ is required in the project README.
-2. `common.sh` could add a version check: `[[ ${BASH_VERSINFO[0]} -lt 4 ]] && error "Requires bash 4+" && exit 1`.
-3. Avoid adding more bash 4+ features unless they provide clear value.
-4. The `_run_with_timeout` function in `common.sh` already handles the macOS `timeout` absence -- apply the same portability mindset to bash features.
+1. Metadata headers must be pure comments, placed between the shebang and `source common.sh`.
+2. No executable metadata parsing should occur at script top level.
+3. If scripts need to read their own headers at runtime (for `--version` or `--metadata` flags), do this inside `show_help()` or a dedicated function, not at the top level.
 
-**Detection:** Run `check-tools.sh` with `/bin/bash` on macOS: `/bin/bash scripts/check-tools.sh`.
+**Phase mapping:** Address in header template design.
 
-**Affected scripts:** `check-tools.sh` (currently), potentially all scripts if new features are added.
-
-**Phase mapping:** Address at the start of the hardening work with a bash version check in `common.sh`.
-
-**Confidence:** HIGH -- verified: macOS Sequoia still ships bash 3.2.57.
+**Confidence:** HIGH -- verified by reading the argument parsing flow in `args.sh` and multiple scripts.
 
 ---
 
 ## Phase-Specific Warnings
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| Strict mode audit | `grep` without `|| true` in non-conditional context (Pitfall 3) | Audit every grep call; categorize by context |
-| Strict mode audit | `((counter++))` from zero (Pitfall 2) | Standardize on `var=$((var + 1))` |
-| Strict mode audit | awk float comparison with empty/malformed variables (Pitfall 10) | Add format validation before awk calls |
-| Structured logging | Logging metadata obscures educational content (Pitfall 7) | Separate "operations" from "educational content" |
-| Structured logging | External dependencies like jq (Pitfall 13) | Use only bash builtins for logging |
-| Structured logging | macOS date format differences (Pitfall 11) | Use ISO 8601 format which works on both platforms |
-| Argument parsing | `getopt` not portable (Pitfall 8) | Use manual `while/case` parser |
-| Argument parsing | Makefile backward compatibility (Pitfall 12) | Positional `$1` must still work as target |
-| Argument parsing | `set -u` after shift (Pitfall 6) | Check `$#` before accessing `$1` in parse loops |
-| Dual-mode execution | `set -e` not inherited in conditional contexts (Pitfall 14) | Call `main` unconditionally |
-| Dual-mode execution | `set -e` propagation when sourced (Pitfall 5) | Do not add dual-mode to `common.sh` |
-| Pre-refactor cleanup | Two interactive guard patterns (Pitfall 9) | Normalize to one pattern before other refactoring |
-| Cross-platform | bash 4+ features on macOS system bash (Pitfall 15) | Add version check to `common.sh` |
-| Tool wrappers | stderr output tools under pipefail (Pitfall 4) | Document per-tool stderr behavior |
-
-## Over-Engineering Traps
-
-These are not pitfalls in the traditional sense, but traps where the hardening work itself becomes counterproductive.
-
-### Trap A: Adding `set -e` error handling that is MORE fragile than no error handling
-
-`set -e` has so many exceptions and edge cases that it can give a false sense of safety. Code that "works" without `set -e` can break WITH it due to the complex rules about conditional contexts, subshells, and command lists. The current codebase already has `set -euo pipefail` in `common.sh` and handles the known edge cases. Do not add additional layers of error handling on top (like trap ERR) unless there is a specific gap.
-
-### Trap B: Making every script accept 15 flags when it only needs 2
-
-These are educational scripts. The argument parser should support `--help`, `--verbose` (maybe), and the target as a positional argument. Do not add `--format`, `--output-file`, `--timeout`, `--no-color`, `--config` etc. unless there is a demonstrated need. Each flag is a maintenance burden multiplied by 65+ scripts.
-
-### Trap C: Building a "framework" instead of hardening scripts
-
-The goal is to harden existing scripts, not to build a bash framework. If the common.sh changes require every script to be restructured around a new execution model, the scope has expanded beyond the original goal. Changes to common.sh should be additive -- new functions that scripts can opt into, not breaking changes to existing functions.
-
-### Trap D: JSON logging that nobody will parse
-
-If no downstream system (CI, monitoring, log aggregation) consumes JSON logs, then JSON output is overhead without benefit. Add structured logging only if there is a consumer. For this educational project, the consumer is a human reading the terminal -- the current colored text format is already optimized for this consumer.
+| Phase Topic | Likely Pitfall | Severity | Mitigation |
+|-------------|---------------|----------|------------|
+| Test infrastructure setup | Pitfalls 1-3: strict mode, ERR trap, EXIT trap conflicts with BATS | Critical | Create `test_helper.bash` that manages sourcing and trap lifecycle |
+| Test infrastructure setup | Pitfall 8: `load` vs `source` extension mismatch | Moderate | Document convention: `load` for `.bash` helpers, `source` for `.sh` libraries |
+| Unit test writing | Pitfall 4: `exit 1` from `require_cmd` kills BATS | Critical | Use `run` for all script execution, `source` only for isolated lib modules |
+| Unit test writing | Pitfall 7: `run` hides strict mode failures | Moderate | Document when to use `run` vs direct invocation |
+| Unit test writing | Pitfall 13: `!` negation silently passes | Minor | Use `run !` pattern, enable SC2314/SC2315 in ShellCheck |
+| Integration test writing | Pitfall 5: interactive prompts block/exit tests | Critical | Default to `EXECUTE_MODE=show`, use `run` for subshell isolation |
+| Integration test writing | Pitfall 15: background processes hang BATS | Minor | Close FD 3 in background jobs, defer diagnostic script tests |
+| Integration test writing | Pitfall 12: ANSI colors break assertions | Moderate | Set `NO_COLOR=1` in test helper |
+| CI pipeline | Pitfall 4: missing tools crash suite | Critical | Split unit/integration tests, stub commands for CI |
+| CI pipeline | Pitfall 11: temp dir leaks in `/tmp` | Moderate | CI cleanup step, use `$BATS_TEST_TMPDIR` |
+| Header implementation | Pitfall 9: metadata above shebang | Critical | Template enforcement, `make lint` validation |
+| Header implementation | Pitfall 10: ShellCheck directive scope changes | Moderate | Audit existing directives, test `make lint` after changes |
+| Header implementation | Pitfall 16-17: disrupting source/call order | Moderate | Pure-comment headers, no executable code before `source` |
 
 ## Sources
 
-- [BashFAQ/105 - Why doesn't set -e do what I expected?](https://mywiki.wooledge.org/BashFAQ/105) -- comprehensive set -e pitfalls
-- [Unofficial Bash Strict Mode](http://redsymbol.net/articles/unofficial-bash-strict-mode/) -- grep, arithmetic, and pipefail issues
-- [Bash Hackers Wiki - Arithmetic Expressions](https://bash-hackers.gabe565.com/syntax/arith_expr/) -- exit code behavior of `(( ))`
-- [Greg's Wiki - BashGuide/Practices](https://mywiki.wooledge.org/BashGuide/Practices) -- sourcing, error handling, and dual-mode patterns
-- [Greg's Wiki - BashPitfalls](https://mywiki.wooledge.org/BashPitfalls) -- comprehensive list of common bash mistakes
-- [getopts POSIX specification](https://pubs.opengroup.org/onlinepubs/7908799/xcu/getopts.html) -- long option limitations
-- [Bash Hackers - getopts tutorial](https://bash-hackers.gabe565.com/howto/getopts_tutorial/) -- getopts capabilities and constraints
-- [set -e pipefail explanation (GitHub Gist)](https://gist.github.com/mohanpedala/1e2ff5661761d3abd0385e8223e16425) -- community-maintained set -e reference
-- Codebase analysis: 65+ scripts in `/Users/patrykattc/work/git/networking-tools/scripts/`, `common.sh`, Makefile
+- [BATS Gotchas (official documentation)](https://bats-core.readthedocs.io/en/stable/gotchas.html)
+- [BATS Writing Tests (official documentation)](https://bats-core.readthedocs.io/en/stable/writing-tests.html)
+- [BATS Issue #36: Strict mode support](https://github.com/bats-core/bats-core/issues/36)
+- [BATS Issue #81: Silent failure with set -u](https://github.com/bats-core/bats-core/issues/81)
+- [BATS Issue #213: set -u support](https://github.com/bats-core/bats-core/issues/213)
+- [BATS Issue #423: Unbound variable in setup_file](https://github.com/bats-core/bats-core/issues/423)
+- [BATS tracing.bash source (ERR trap implementation)](https://github.com/bats-core/bats-core/blob/master/lib/bats-core/tracing.bash)
+- [ShellCheck SC1128: Shebang must be on first line](https://www.shellcheck.net/wiki/SC1128)
+- [ShellCheck SC2314/SC2315: BATS negation warnings](https://www.shellcheck.net/wiki/SC2315)
+- [ShellCheck Issue #3191: Comment parsing with shellcheck directives](https://github.com/koalaman/shellcheck/issues/3191)
+- [ShellCheck Issue #1877: File-wide directive scoping](https://github.com/koalaman/shellcheck/issues/1877)
+- [bats-mock: Mocking/stubbing library for BATS](https://github.com/jasonkarns/bats-mock)
+- [BashFAQ/105: set -e pitfalls](https://mywiki.wooledge.org/BashFAQ/105)
+- Codebase analysis: `scripts/lib/strict.sh`, `scripts/lib/cleanup.sh`, `scripts/lib/validation.sh`, `scripts/lib/output.sh`, `scripts/lib/colors.sh`, `scripts/lib/args.sh`, `scripts/common.sh`
