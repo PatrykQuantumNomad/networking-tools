@@ -64,10 +64,10 @@ Archived to `.planning/milestones/v1.2-ROADMAP.md`
   2. `make test-verbose` shows per-test results with timing information
   3. A smoke test sources project libraries and asserts behavior without strict mode or trap conflicts crashing BATS
   4. BATS helper libraries (bats-assert, bats-file) are available and loadable via shared test helper
-**Plans:** TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 18-01: TBD
+- [ ] 18-01-PLAN.md -- Install BATS submodules, shared test helper, Makefile targets, and smoke test
 
 ### Phase 19: Library Unit Tests
 **Goal:** Every library module in scripts/lib/ has unit tests proving its public functions behave correctly
