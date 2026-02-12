@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# tshark/analyze-dns-queries.sh — Monitor and analyze DNS query traffic
+# ============================================================================
+# @description  Monitor and analyze DNS query traffic
+# @usage        tshark/analyze-dns-queries.sh [target] [-h|--help] [-x|--execute]
+# @dependencies tshark, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

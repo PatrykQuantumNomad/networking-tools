@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# nmap/identify-ports.sh — Identify what's behind open ports
+# ============================================================================
+# @description  Identify what's behind open ports
+# @usage        nmap/identify-ports.sh [target] [-h|--help] [-x|--execute]
+# @dependencies nmap, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# tshark/extract-files-from-capture.sh — Export files transferred over HTTP/SMB from packet captures
+# ============================================================================
+# @description  Export files transferred over HTTP/SMB from packet captures
+# @usage        tshark/extract-files-from-capture.sh [target] [-h|--help] [-x|--execute]
+# @dependencies tshark, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

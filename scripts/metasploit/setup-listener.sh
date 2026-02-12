@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# metasploit/setup-listener.sh — Configure and start a multi/handler listener
+# ============================================================================
+# @description  Configure and start a multi/handler listener
+# @usage        metasploit/setup-listener.sh [target] [-h|--help] [-x|--execute]
+# @dependencies msfconsole, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

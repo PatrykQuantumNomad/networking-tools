@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# netcat/scan-ports.sh — Port scanning with netcat (nc -z)
+# ============================================================================
+# @description  Port scanning with netcat (nc -z)
+# @usage        netcat/scan-ports.sh [target] [-h|--help] [-x|--execute]
+# @dependencies nc, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

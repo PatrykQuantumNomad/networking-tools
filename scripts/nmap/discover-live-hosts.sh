@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# nmap/discover-live-hosts.sh — Find all active hosts on a subnet
+# ============================================================================
+# @description  Find all active hosts on a subnet
+# @usage        nmap/discover-live-hosts.sh [target] [-h|--help] [-x|--execute]
+# @dependencies nmap, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

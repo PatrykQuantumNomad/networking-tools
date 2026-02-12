@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# traceroute/compare-routes.sh — Compare routes using TCP, ICMP, and UDP protocols
+# ============================================================================
+# @description  Compare routes using TCP, ICMP, and UDP protocols
+# @usage        traceroute/compare-routes.sh [target] [-h|--help] [-x|--execute]
+# @dependencies traceroute, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

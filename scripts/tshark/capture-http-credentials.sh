@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# tshark/capture-http-credentials.sh — Capture credentials from unencrypted HTTP traffic
+# ============================================================================
+# @description  Capture credentials from unencrypted HTTP traffic
+# @usage        tshark/capture-http-credentials.sh [target] [-h|--help] [-x|--execute]
+# @dependencies tshark, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

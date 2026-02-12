@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# sqlmap/test-all-parameters.sh — Thoroughly test all parameters for SQL injection
+# ============================================================================
+# @description  Thoroughly test all parameters for SQL injection
+# @usage        sqlmap/test-all-parameters.sh [target] [-h|--help] [-x|--execute]
+# @dependencies sqlmap, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

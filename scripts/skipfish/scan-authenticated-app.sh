@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# skipfish/scan-authenticated-app.sh — Scan web applications with authentication
+# ============================================================================
+# @description  Scan web applications with authentication
+# @usage        skipfish/scan-authenticated-app.sh [target] [-h|--help] [-x|--execute]
+# @dependencies skipfish, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

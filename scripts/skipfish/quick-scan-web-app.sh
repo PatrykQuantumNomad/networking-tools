@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# skipfish/quick-scan-web-app.sh — Fast, time-limited web application scan for initial recon
+# ============================================================================
+# @description  Fast, time-limited web application scan for initial recon
+# @usage        skipfish/quick-scan-web-app.sh [target] [-h|--help] [-x|--execute]
+# @dependencies skipfish, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

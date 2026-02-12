@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# nmap/scan-web-vulnerabilities.sh — Scan web servers for known vulnerabilities using NSE
+# ============================================================================
+# @description  Scan web servers for known vulnerabilities using NSE
+# @usage        nmap/scan-web-vulnerabilities.sh [target] [-h|--help] [-x|--execute]
+# @dependencies nmap, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

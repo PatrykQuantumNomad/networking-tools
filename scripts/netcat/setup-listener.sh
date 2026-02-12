@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# netcat/setup-listener.sh — Setting up netcat listeners
+# ============================================================================
+# @description  Setting up netcat listeners
+# @usage        netcat/setup-listener.sh [target] [-h|--help] [-x|--execute]
+# @dependencies nc, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

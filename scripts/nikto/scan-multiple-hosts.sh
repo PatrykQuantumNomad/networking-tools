@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# nikto/scan-multiple-hosts.sh — Scan multiple web servers from a host list or nmap output
+# ============================================================================
+# @description  Scan multiple web servers from a host list or nmap output
+# @usage        nikto/scan-multiple-hosts.sh [target] [-h|--help] [-x|--execute]
+# @dependencies nikto, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

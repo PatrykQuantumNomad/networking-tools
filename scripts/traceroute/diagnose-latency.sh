@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# traceroute/diagnose-latency.sh — Per-hop latency analysis using mtr
+# ============================================================================
+# @description  Per-hop latency analysis using mtr
+# @usage        traceroute/diagnose-latency.sh [target] [-h|--help] [-x|--execute]
+# @dependencies mtr, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

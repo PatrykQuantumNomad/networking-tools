@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# metasploit/scan-network-services.sh — Enumerate network services using Metasploit scanners
+# ============================================================================
+# @description  Enumerate network services using Metasploit scanners
+# @usage        metasploit/scan-network-services.sh [target] [-h|--help] [-x|--execute]
+# @dependencies msfconsole, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

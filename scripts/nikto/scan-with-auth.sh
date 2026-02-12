@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# nikto/scan-with-auth.sh — Perform authenticated Nikto scans using credentials or cookies
+# ============================================================================
+# @description  Perform authenticated Nikto scans using credentials or cookies
+# @usage        nikto/scan-with-auth.sh [target] [-h|--help] [-x|--execute]
+# @dependencies nikto, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# sqlmap/dump-database.sh — Enumerate and extract database contents via SQL injection
+# ============================================================================
+# @description  Enumerate and extract database contents via SQL injection
+# @usage        sqlmap/dump-database.sh [target] [-h|--help] [-x|--execute]
+# @dependencies sqlmap, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

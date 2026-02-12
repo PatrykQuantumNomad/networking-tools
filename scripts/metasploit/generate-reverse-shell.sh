@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# metasploit/generate-reverse-shell.sh — Generate platform-specific reverse shell payloads
+# ============================================================================
+# @description  Generate platform-specific reverse shell payloads
+# @usage        metasploit/generate-reverse-shell.sh [target] [-h|--help] [-x|--execute]
+# @dependencies msfconsole, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# sqlmap/bypass-waf.sh — Use tamper scripts and techniques to evade WAF/IDS detection
+# ============================================================================
+# @description  Use tamper scripts and techniques to evade WAF/IDS detection
+# @usage        sqlmap/bypass-waf.sh [target] [-h|--help] [-x|--execute]
+# @dependencies sqlmap, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

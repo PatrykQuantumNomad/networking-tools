@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# netcat/transfer-files.sh — File transfer with netcat
+# ============================================================================
+# @description  File transfer with netcat
+# @usage        netcat/transfer-files.sh [target] [-h|--help] [-x|--execute]
+# @dependencies nc, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

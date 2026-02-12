@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# traceroute/trace-network-path.sh — Trace the network path to a host
+# ============================================================================
+# @description  Trace the network path to a host
+# @usage        traceroute/trace-network-path.sh [target] [-h|--help] [-x|--execute]
+# @dependencies traceroute, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {

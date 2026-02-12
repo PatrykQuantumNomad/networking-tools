@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# nikto/scan-specific-vulnerabilities.sh — Target specific vulnerability types using Nikto Tuning
+# ============================================================================
+# @description  Target specific vulnerability types using Nikto Tuning
+# @usage        nikto/scan-specific-vulnerabilities.sh [target] [-h|--help] [-x|--execute]
+# @dependencies nikto, common.sh
+# ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
