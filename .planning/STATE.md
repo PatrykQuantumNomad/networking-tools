@@ -70,9 +70,10 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 001 | Remove light theme and theme selector, enforce dark-mode only | 2026-02-11 | 1d9f9f0 | [001-remove-light-theme-and-theme-selector-en](./quick/001-remove-light-theme-and-theme-selector-en/) |
+| 002 | Review markdown files for LLM writing patterns | 2026-02-11 | 16bf6ee | [002-review-md-files-for-llm-writing-patterns](./quick/002-review-md-files-for-llm-writing-patterns/) |
 
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: v1.2 milestone complete and archived
+Stopped at: Completed quick-002 (review markdown for LLM patterns)
 Resume file: None
