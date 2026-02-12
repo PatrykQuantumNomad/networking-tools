@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-11)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 20 — Script Integration Tests
+**Current focus:** Phase 21 — CI Integration
 
 ## Current Position
 
-Phase: 20 of 22 (Script Integration Tests)
+Phase: 21 of 22 (CI Integration)
 Plan: 1 of 1 in current phase
-Status: Phase 20 complete
-Last activity: 2026-02-12 -- Completed 20-01 cli-contract-tests
+Status: Phase 21 complete
+Last activity: 2026-02-12 -- Completed 21-01 bats-ci-workflow
 
-Progress: [██████░░░░] 60% (v1.3)
+Progress: [███████░░░] 70% (v1.3)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 46 (across v1.0-v1.3)
+- Total plans completed: 47 (across v1.0-v1.3)
 - Average duration: 4min
-- Total execution time: 3.05 hours
+- Total execution time: 3.08 hours
 
 **By Phase:**
 
@@ -33,10 +33,11 @@ Progress: [██████░░░░] 60% (v1.3)
 | 18 (v1.3) | 1 | 6min | 6min |
 | 19 (v1.3) | 3 | 8min | 3min |
 | 20 (v1.3) | 1 | 14min | 14min |
+| 21 (v1.3) | 1 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 6min, 3min, 3min, 2min, 14min
-- Trend: Spike (integration tests with 131 dynamic tests)
+- Last 5 plans: 3min, 3min, 2min, 14min, 2min
+- Trend: Normalized (single-file CI workflow)
 
 *Updated after each plan completion*
 
@@ -61,6 +62,10 @@ All v1.2 decisions archived -- see .planning/milestones/v1.2-ROADMAP.md for full
 - Phase 20: bats_test_function for dynamic per-script test registration (individual TAP lines)
 - Phase 20: Platform-conditional exclusion for diagnose-latency.sh on macOS non-root
 - Phase 20: Dummy wordlist creation in setup_file for scripts with pre-confirm_execute checks
+- Phase 21: Disable bats-action library installs (submodules provide pinned versions)
+- Phase 21: Non-recursive bats tests/ in CI to avoid bats-core internal fixtures
+- Phase 21: JUnit output via --report-formatter (not --formatter) for file+terminal output
+- Phase 21: checks: write permission for action-junit-report Check Runs
 
 ### Pending Todos
 
@@ -80,5 +85,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Completed 20-01-PLAN.md (CLI contract integration tests)
+Stopped at: Completed 21-01-PLAN.md (BATS CI workflow with JUnit reporting)
 Resume file: None

@@ -50,7 +50,7 @@ Archived to `.planning/milestones/v1.2-ROADMAP.md`
 - [x] **Phase 18: BATS Infrastructure** — Test framework foundation with submodules, shared helper, and Makefile targets (completed 2026-02-12)
 - [x] **Phase 19: Library Unit Tests** — Unit tests for all lib/ modules proving library function behavior (completed 2026-02-12)
 - [x] **Phase 20: Script Integration Tests** — CLI contract tests for --help, -x rejection, and flag handling across all scripts (completed 2026-02-12)
-- [ ] **Phase 21: CI Integration** — GitHub Actions workflow running BATS tests with JUnit reporting
+- [x] **Phase 21: CI Integration** — GitHub Actions BATS workflow with JUnit PR annotations (completed 2026-02-12)
 - [ ] **Phase 22: Script Metadata Headers** — Structured Description/Usage/Dependencies headers on all scripts
 
 ## Phase Details
@@ -111,7 +111,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 21-01-PLAN.md -- BATS CI workflow with JUnit reporting and independent execution
+- [x] 21-01-PLAN.md -- BATS CI workflow with JUnit reporting and independent execution
 
 ### Phase 22: Script Metadata Headers
 **Goal:** Every script file has a structured, machine-parseable metadata header documenting its purpose, usage, and dependencies
@@ -140,5 +140,5 @@ Phases execute in numeric order: 18 -> 19 -> 20 -> 21 -> 22
 | 18. BATS Infrastructure | v1.3 | 1/1 | Complete | 2026-02-12 |
 | 19. Library Unit Tests | v1.3 | 3/3 | Complete | 2026-02-12 |
 | 20. Script Integration Tests | v1.3 | 1/1 | Complete | 2026-02-12 |
-| 21. CI Integration | v1.3 | 0/TBD | Not started | - |
+| 21. CI Integration | v1.3 | 1/1 | Complete | 2026-02-12 |
 | 22. Script Metadata Headers | v1.3 | 0/TBD | Not started | - |
