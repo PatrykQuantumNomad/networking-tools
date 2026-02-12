@@ -12,16 +12,16 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 Phase: 22 of 22 (Script Metadata Headers)
 Plan: 2 of 3 in current phase
 Status: Executing phase 22
-Last activity: 2026-02-12 -- Completed 22-02 use-case-script-headers
+Last activity: 2026-02-12 -- Completed 22-01 core-scripts-examples-headers
 
 Progress: [████████░░] 80% (v1.3)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 48 (across v1.0-v1.3)
+- Total plans completed: 49 (across v1.0-v1.3)
 - Average duration: 4min
-- Total execution time: 3.15 hours
+- Total execution time: 3.25 hours
 
 **By Phase:**
 
@@ -34,10 +34,10 @@ Progress: [████████░░] 80% (v1.3)
 | 19 (v1.3) | 3 | 8min | 3min |
 | 20 (v1.3) | 1 | 14min | 14min |
 | 21 (v1.3) | 1 | 2min | 2min |
-| 22 (v1.3) | 1 | 4min | 4min |
+| 22 (v1.3) | 2 | 10min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 2min, 14min, 2min, 4min
+- Last 5 plans: 2min, 14min, 2min, 4min, 6min
 - Trend: Stable (bulk comment-only header additions)
 
 *Updated after each plan completion*
@@ -68,6 +68,7 @@ All v1.2 decisions archived -- see .planning/milestones/v1.2-ROADMAP.md for full
 - Phase 21: JUnit output via --report-formatter (not --formatter) for file+terminal output
 - Phase 21: checks: write permission for action-junit-report Check Runs
 - Phase 22: diagnose-latency.sh dependency is mtr (not traceroute) matching its require_cmd
+- Phase 22: Bordered block uses 76 = chars; lib modules use "Sourced via common.sh" as @usage
 
 ### Pending Todos
 
@@ -87,5 +88,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Completed 22-02-PLAN.md (use-case script metadata headers)
+Stopped at: Completed 22-01-PLAN.md (core scripts, examples, lib, utility, diagnostics headers)
 Resume file: None

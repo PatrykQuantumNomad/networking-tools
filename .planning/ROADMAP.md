@@ -125,7 +125,7 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 22-01-PLAN.md -- Add headers to examples.sh, lib modules, and utility/diagnostics scripts (33 files)
+- [x] 22-01-PLAN.md -- Add headers to examples.sh, lib modules, and utility/diagnostics scripts (33 files)
 - [x] 22-02-PLAN.md -- Add headers to all 46 use-case scripts
 - [ ] 22-03-PLAN.md -- BATS validation test for header conformance (HDR-06)
 
@@ -143,4 +143,4 @@ Phases execute in numeric order: 18 -> 19 -> 20 -> 21 -> 22
 | 19. Library Unit Tests | v1.3 | 3/3 | Complete | 2026-02-12 |
 | 20. Script Integration Tests | v1.3 | 1/1 | Complete | 2026-02-12 |
 | 21. CI Integration | v1.3 | 1/1 | Complete | 2026-02-12 |
-| 22. Script Metadata Headers | v1.3 | 1/3 | In progress | - |
+| 22. Script Metadata Headers | v1.3 | 2/3 | In progress | - |
