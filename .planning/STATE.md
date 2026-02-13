@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Milestone v1.4 — JSON Output Mode
+**Current focus:** Milestone v1.4 — JSON Output Mode (Phase 23: JSON Library & Flag Integration)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 23 (JSON Library & Flag Integration) — first of 5 in v1.4
 Plan: —
-Status: Defining requirements
-Last activity: 2026-02-13 — Milestone v1.4 started
+Status: Ready to plan
+Last activity: 2026-02-13 — Roadmap created for v1.4 (phases 23-27)
 
 Progress: [░░░░░░░░░░] 0% (v1.4)
 
@@ -50,7 +50,7 @@ None.
 
 ### Blockers/Concerns
 
-None.
+- Phase 24: fd3 in BATS tests may need `run --separate-stderr` (BATS 1.5+). Research flagged.
 
 ### Quick Tasks Completed
 
@@ -62,5 +62,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Milestone v1.4 initialization
+Stopped at: Roadmap created for v1.4, ready to plan Phase 23
 Resume file: None

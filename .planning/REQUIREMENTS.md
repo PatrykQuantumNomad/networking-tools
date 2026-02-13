@@ -76,33 +76,33 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| JSON-01 | — | Pending |
-| JSON-02 | — | Pending |
-| JSON-03 | — | Pending |
-| JSON-04 | — | Pending |
-| JSON-05 | — | Pending |
-| JSON-06 | — | Pending |
-| FLAG-01 | — | Pending |
-| FLAG-02 | — | Pending |
-| FLAG-03 | — | Pending |
-| FLAG-04 | — | Pending |
-| FLAG-05 | — | Pending |
-| SCRIPT-01 | — | Pending |
-| SCRIPT-02 | — | Pending |
-| SCRIPT-03 | — | Pending |
-| SCRIPT-04 | — | Pending |
-| TEST-01 | — | Pending |
-| TEST-02 | — | Pending |
-| TEST-03 | — | Pending |
-| TEST-04 | — | Pending |
-| DOC-01 | — | Pending |
-| DOC-02 | — | Pending |
+| JSON-01 | Phase 23 | Pending |
+| JSON-02 | Phase 23 | Pending |
+| JSON-03 | Phase 23 | Pending |
+| JSON-04 | Phase 23 | Pending |
+| JSON-05 | Phase 23 | Pending |
+| JSON-06 | Phase 23 | Pending |
+| FLAG-01 | Phase 23 | Pending |
+| FLAG-02 | Phase 23 | Pending |
+| FLAG-03 | Phase 23 | Pending |
+| FLAG-04 | Phase 23 | Pending |
+| FLAG-05 | Phase 23 | Pending |
+| SCRIPT-01 | Phase 25 | Pending |
+| SCRIPT-02 | Phase 25 | Pending |
+| SCRIPT-03 | Phase 25 | Pending |
+| SCRIPT-04 | Phase 25 | Pending |
+| TEST-01 | Phase 24 | Pending |
+| TEST-02 | Phase 24 | Pending |
+| TEST-03 | Phase 26 | Pending |
+| TEST-04 | Phase 26 | Pending |
+| DOC-01 | Phase 27 | Pending |
+| DOC-02 | Phase 27 | Pending |
 
 **Coverage:**
 - v1.4 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21
+- Mapped to phases: 21
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 after initial definition*
+*Last updated: 2026-02-13 after roadmap creation*
