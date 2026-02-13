@@ -2,7 +2,7 @@
 # ============================================================================
 # @description  Shared utility entry point sourcing all lib modules in order
 # @usage        source "$(dirname "$0")/../common.sh"
-# @dependencies lib/strict.sh, lib/colors.sh, lib/logging.sh, lib/cleanup.sh, lib/output.sh, lib/args.sh, lib/validation.sh, lib/nc_detect.sh, lib/diagnostic.sh
+# @dependencies lib/strict.sh, lib/colors.sh, lib/logging.sh, lib/validation.sh, lib/cleanup.sh, lib/json.sh, lib/output.sh, lib/args.sh, lib/diagnostic.sh, lib/nc_detect.sh
 # ============================================================================
 
 # --- Bash Version Guard ---
@@ -27,6 +27,7 @@ source "${_LIB_DIR}/colors.sh"
 source "${_LIB_DIR}/logging.sh"
 source "${_LIB_DIR}/validation.sh"
 source "${_LIB_DIR}/cleanup.sh"
+source "${_LIB_DIR}/json.sh"
 source "${_LIB_DIR}/output.sh"
 source "${_LIB_DIR}/args.sh"
 source "${_LIB_DIR}/diagnostic.sh"
