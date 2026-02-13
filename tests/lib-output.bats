@@ -74,3 +74,20 @@ setup() {
     run is_interactive
     assert_failure
 }
+
+# --- JSON mode suppression tests (Phase 24) ---
+
+@test "safety_banner suppressed in JSON mode" {
+    JSON_MODE=1
+    run safety_banner
+    assert_success
+    assert_output ""
+}
+
+@test "confirm_execute skipped in JSON mode" {
+    JSON_MODE=1
+    EXECUTE_MODE="execute"
+    run confirm_execute "target"
+    assert_success
+    assert_output ""
+}
