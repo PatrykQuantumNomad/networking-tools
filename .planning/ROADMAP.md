@@ -56,7 +56,7 @@ Archived to `.planning/milestones/v1.3-ROADMAP.md`
 
 **Milestone Goal:** Add structured JSON output to all 46 use-case scripts via `-j`/`--json` flag backed by `lib/json.sh`, enabling piping into `jq` and downstream automation.
 
-- [ ] **Phase 23: JSON Library & Flag Integration** - Build lib/json.sh module and wire -j flag into argument parsing and output infrastructure
+- [x] **Phase 23: JSON Library & Flag Integration** - Build lib/json.sh module and wire -j flag into argument parsing and output infrastructure (completed 2026-02-13)
 - [ ] **Phase 24: Library Unit Tests** - Validate JSON library functions and -j flag parsing with BATS before migrating scripts
 - [ ] **Phase 25: Script Migration** - Add JSON support to all 46 use-case scripts
 - [ ] **Phase 26: Integration Tests** - Validate every migrated script produces correct, parseable JSON output
