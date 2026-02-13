@@ -1,408 +1,638 @@
-# Feature Landscape: BATS Testing Framework & Script Metadata Headers
+# Feature Landscape: JSON Output Mode for CLI Scripts
 
-**Domain:** Bash test infrastructure and script documentation standards
-**Researched:** 2026-02-11
-**Overall confidence:** HIGH (BATS), HIGH (Headers)
+**Domain:** Structured machine-readable output for bash-based security toolkit
+**Researched:** 2026-02-13
+**Overall confidence:** HIGH
 
-## Context: Why This Milestone Now
+## Context: Why JSON Output Now
 
-The previous milestone explicitly listed "Comprehensive unit testing (bats/shunit2)" as an anti-feature. That made sense when the codebase was 17 thin wrapper scripts. The codebase has since grown to 81 scripts with 9 library modules, a shared argument parser, dual-mode execution, and 307 ad-hoc test assertions split across two custom test harnesses (`test-arg-parsing.sh` with 268 checks, `test-library-loads.sh` with 39 checks). The ad-hoc harnesses are brittle (hand-rolled pass/fail counting, manual strict-mode toggling, hardcoded script lists) and unmaintainable. The library surface area (`lib/*.sh`) now warrants real unit tests, not just smoke tests.
+The project has 46 use-case scripts and 17 examples scripts across 17 tools. Every script currently outputs human-readable text with ANSI colors. There is no machine-readable output mode. This matters because:
 
-Similarly, "Script metadata headers" was deferred. With 81 scripts, the lack of structured headers makes automated tooling (documentation generation, dependency auditing, test discovery) impractical. This milestone addresses both.
+1. **Piping to jq/other tools** is impossible -- output is unstructured colored text
+2. **Automation** (CI/CD, reporting, alerting) requires parsing human text with brittle regexes
+3. **Aggregation** (combining results from multiple scripts) has no standard format
+4. **The diagnostic scripts** already have structured semantics (PASS/FAIL/WARN) but no structured output format
+
+Adding `-j/--json` aligns with how every major CLI tool handles this: `gh --json`, `kubectl -o json`, `docker --format json`, `ffuf -of json`, `tshark -T json`.
 
 ---
 
 ## Table Stakes
 
-Features users/developers expect when a bash project claims "tested" or "documented." Missing any of these makes the testing/header system feel incomplete or amateurish.
+Features users expect when a CLI tool advertises `--json` support. Missing any of these makes the feature feel broken.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| BATS as test runner | De facto standard for bash testing. Only maintained TAP-compliant bash test framework. No serious alternative exists. | Low | `brew install bats-core` or `npm install --save-dev bats`. v1.13.0 is current. |
-| `bats-assert` for assertions | `run` + `[ "$status" -eq 0 ]` is verbose and error-prone. `assert_success`, `assert_output --partial` are readable and produce clear failure messages. | Low | Official companion library. v2.1.0. |
-| `bats-support` helper library | Required dependency of `bats-assert`. Provides output formatting for assertion failures. | Low | v0.3.0. Must be loaded before `bats-assert`. |
-| Unit tests for all 9 `lib/*.sh` modules | Library functions are the foundation -- every script sources them. Bugs here propagate everywhere. The ad-hoc `test-library-loads.sh` only checks "function exists", not behavior. | Medium | 9 modules: strict, colors, logging, validation, cleanup, output, args, diagnostic, nc_detect. |
-| `--help` output tests for all scripts | Currently tested ad-hoc in `test-arg-parsing.sh` with a hardcoded list of 46 use-case scripts. New scripts get missed. BATS can discover `.sh` files dynamically. | Low | Replace the manual `USE_CASE_SCRIPTS` array with glob-based discovery. |
-| `-x` rejection tests for non-interactive stdin | Currently tested ad-hoc. Same hardcoded-list problem. | Low | Migrate existing assertions to BATS `run` + `assert_failure`. |
-| `make test` target | Standard entry point. Every developer expects `make test` to run the test suite. | Low | One Makefile line: `bats tests/` |
-| CI integration (GitHub Actions) | Tests that only run locally are tests that drift. Project already has a ShellCheck CI workflow. | Low | Official `bats-core/bats-action@4.0.0` handles installation of BATS + all helper libraries. |
-| Structured script header on every `.sh` file | Every script should be self-documenting: what it does, what it requires, how to use it. Currently headers are ad-hoc single-line comments. | Medium | 81 files to update, but mechanical/template-driven. |
+| `-j`/`--json` flag in `parse_common_args` | Universal convention. Every tool that supports JSON has a single flag. Users should not need to remember per-script flags. | Low | Add to `parse_common_args` alongside `-v`, `-q`, `-x`. Set `OUTPUT_FORMAT=json`. |
+| Consistent envelope structure | Users pipe JSON through `jq`. They need a predictable top-level shape. `gh` uses `[{...}]`. `ffuf` uses `{commandline, time, results, config}`. `kubectl` uses `{apiVersion, kind, metadata, items}`. An envelope means `.results[]` works on every script. | Low | `{"meta":{...}, "examples":[...], "summary":{...}}` -- three predictable keys. |
+| `meta` object with tool, target, timestamp | Every structured CLI output includes provenance. Nmap XML has `scanner`, `args`, `start`, `version`. ffuf has `commandline`, `time`. Without meta, JSON output loses context when saved to a file. | Low | `{"tool":"nmap", "script":"discover-live-hosts", "target":"192.168.1.0", "timestamp":"2026-02-13T10:30:00Z", "version":"1.0"}` |
+| `examples` array with numbered items | The scripts output 10 numbered examples. JSON must preserve this structure. Each example needs: number, title, command, explanation. | Low | `{"number":1, "title":"Basic ping sweep", "command":"nmap -sn 192.168.1.0/24", "description":"..."}` |
+| Valid JSON (always) | Broken JSON is worse than no JSON. Special characters in commands (quotes, backslashes, `$`, `&`, `|`) must be escaped. ANSI color codes must be stripped. | Medium | Requires proper JSON escaping. Use `jq` for generation if available, fall back to careful printf-based escaping. See Pitfalls. |
+| Suppress human-readable output in JSON mode | When `-j` is active, `info()`, `warn()`, `echo` statements must not pollute stdout. JSON must be the ONLY thing on stdout. | Medium | All human output goes to stderr in JSON mode, or is suppressed entirely. JSON goes to stdout. This is the `gh` pattern. |
+| Exit code preservation | JSON mode must not mask errors. If the underlying tool fails, exit code must propagate. JSON output should include an `exit_code` or `success` field. | Low | `"summary":{"exit_code":0, "success":true}` |
+| No jq dependency for basic operation | Not all systems have `jq` installed. The JSON output must work without jq. jq can be used for *better* escaping when available, but must not be required. | Medium | Use a bash JSON builder that handles escaping. Detect `jq` and use it if present for proper escaping, fall back to printf-based approach. |
 
 ## Differentiators
 
-Features that go beyond "tested bash project" and make this toolkit's test/documentation infrastructure notably professional.
+Features that go beyond "has JSON output" and make this toolkit's JSON mode notably useful.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| `bats-file` for filesystem assertions | `cleanup.sh` creates temp files/dirs. Testing temp file creation, cleanup-on-exit, and directory structure is clunky with raw assertions. `assert_file_exists`, `assert_dir_exists` read clearly. | Low | Official companion library. v0.4.0. |
-| Test tags for categorization | Tag tests as `unit`, `integration`, `slow`, `requires:nmap`, etc. Run subsets: `bats --filter-tags unit tests/`. CI runs `unit` tests; full suite runs locally. | Low | Built into BATS v1.7.0+. Syntax: `# bats test_tags=unit,lib:args` |
-| `setup_file` for expensive initialization | Source `common.sh` once per file (not per test). Reduces test suite runtime by avoiding 9-module source chain on every `@test`. | Low | Built into BATS. Export variables from `setup_file` for use in tests. |
-| Shared test helper (`test_helper/common-setup.bash`) | Centralize library loading, PATH setup, and fixture paths. Prevents duplication across test files. | Low | Standard BATS pattern from official tutorial. |
-| `parse_common_args` parameterized tests | Test every flag combination (`-v`, `-q`, `-x`, `--`, unknown flags, flag ordering, empty args). Currently 15 hand-rolled test blocks. BATS makes each a clean `@test` with proper isolation. | Medium | Each `@test` runs in its own subshell -- no state leakage between flag tests. Key improvement over current harness where `set +eEuo pipefail` must be manually re-applied. |
-| Machine-parseable metadata headers | Headers that follow a consistent format enable: automated `--help` generation, dependency graphing, test coverage reporting, documentation site generation. | Medium | Not just comments -- structured key-value pairs that tooling can extract with `grep`/`awk`. |
-| `# @description` / `# @dep` shdoc-compatible annotations | Use the shdoc convention for library function documentation. Enables auto-generating API docs from source code. | Low | shdoc is a lightweight awk-based doc generator. Tags: `@description`, `@arg`, `@exitcode`, `@stdout`, `@see`. |
-| JUnit report output for CI | `bats --report-formatter junit --output reports/` produces XML that GitHub Actions natively renders as test annotations. | Low | Built into BATS. Zero additional dependencies. |
-| `skip` for missing tool dependencies | Many scripts `require_cmd nmap`. Tests should `skip "nmap not installed"` rather than fail on CI runners without pentesting tools. | Low | Built into BATS. Pattern: `command -v nmap || skip "nmap not installed"` |
-| Parallel test execution | 81 scripts means potentially hundreds of tests. `bats --jobs 4` runs test files in parallel. | Low | Built into BATS. Requires GNU parallel or shenwei356/rush. |
+| Execute mode JSON captures tool output | In `-x -j` mode, actually run commands and capture their stdout/stderr into the JSON `results` array. This is the killer feature -- structured results from real tool execution. | High | Requires capturing command output, parsing it, and embedding it. Start simple: `"output":"raw stdout string"`. Tool-specific parsing is a future milestone. |
+| Tool-category-specific result schemas | Scanners, crackers, web fuzzers, and packet analyzers produce fundamentally different data. A scanner result has hosts/ports. A cracker result has hashes/passwords. Category-specific schemas make downstream processing practical. | Medium | Define 4-5 category schemas (see below). Each script maps to one category. |
+| `summary` object with computed aggregates | Diagnostic scripts already count pass/fail/warn. Scan scripts could summarize "5 hosts found, 23 open ports." Crackers could report "3 of 10 hashes cracked." | Medium | Per-category summary fields. Not all scripts need rich summaries -- most show-mode scripts just count examples. |
+| `--json` works with `-q` (quiet) | Quiet mode suppresses human output but JSON still emits everything. `-q -j` is the "automation mode" -- clean JSON on stdout, nothing on stderr. | Low | If `OUTPUT_FORMAT=json`, ignore `LOG_LEVEL=warn` for JSON data collection. Only suppress stderr logging. |
+| Error objects in JSON | When a command fails, include structured error info: `{"error": true, "message": "nmap not found", "hint": "brew install nmap"}`. Maps to existing `require_cmd` error handling. | Low | Extend `require_cmd`, `require_target` to emit JSON errors when in JSON mode instead of printing colored text and exiting. |
+| `--json` in diagnostic scripts | Diagnostic scripts (`connectivity.sh`, `dns.sh`, `performance.sh`) have the most natural JSON mapping: each check becomes a result object with `status` (pass/fail/warn), `description`, and optional `detail` fields. | Medium | `report_pass/fail/warn` functions emit JSON objects when in JSON mode. `run_check` captures output and structures it. |
+| Streaming JSON (NDJSON) for long-running operations | For execute mode with long scans, emit one JSON line per result as it completes, rather than buffering everything. | High | Use JSON Lines format (one JSON object per line). Flag: `--json-stream` or detect if stdout is a pipe. Defer to later phase. |
+| `jq` filter pass-through (`--jq` flag) | Like `gh --json --jq '.results[].command'` -- apply a jq filter inline without external piping. `gh` embeds a jq interpreter; this project can just pipe to `jq` if available. | Medium | Only works if `jq` is installed. `--jq EXPR` implies `--json`. Nice sugar but not essential. |
 
 ## Anti-Features
 
-Features to explicitly NOT build. Each is tempting but wrong for this project.
+Features to explicitly NOT build.
 
 | Anti-Feature | Why Avoid | What to Do Instead |
 |--------------|-----------|-------------------|
-| Mocking framework (e.g., bats-mock) | Scripts are thin wrappers around real tools. Mocking `nmap` to return fake output tests the mock, not the script. The value is in testing the framework (args, logging, cleanup), not tool output. | Test library functions directly. Test script CLI behavior (exit codes, `--help` output). Skip tests requiring unavailable tools. |
-| 100% code coverage target | Use-case scripts are educational templates -- testing that `info "1) Ping scan"` prints the right string is low-value busywork. Focus coverage on `lib/*.sh` functions where bugs actually matter. | Cover all library functions. Cover all CLI contract behaviors (--help, -x, -v, -q). Skip example output verification. |
-| End-to-end tests against Docker lab targets | Requires Docker running, images pulled, services healthy. Slow, flaky, environment-dependent. Makes CI fragile. | Integration tests that verify script startup behavior (sources correctly, parses args, reaches tool invocation point). Docker lab testing stays manual. |
-| Custom test reporter | BATS has TAP, pretty, TAP13, and JUnit built in. Writing a custom reporter is maintenance overhead for no benefit. | Use `--formatter pretty` locally, `--report-formatter junit` in CI. |
-| Generating `--help` output from headers | Tempting to DRY the header metadata and `show_help()`. But `show_help()` already exists in all 81 scripts with carefully formatted output including examples. Replacing it with auto-generation changes existing behavior and breaks backward compatibility. | Keep `show_help()` as-is. Headers provide machine-readable metadata. `show_help()` provides human-readable help. They serve different audiences. |
-| Versioning individual scripts | Adding `# Version: 1.0.0` to each script creates 81 version numbers to manage. The project uses git -- version is the commit hash. | Use `# Since: phase-XX` to track when a script was introduced/last-modified. Git blame handles the rest. |
-| Complex header parsing in bash | Building an in-script metadata parser that reads its own headers at runtime adds complexity. Headers should be for external tooling, not self-inspection. | Headers are structured comments. External tools (grep, awk, shdoc) parse them. Scripts never read their own headers. |
-| shunit2 as alternative test framework | shunit2 is older, less maintained, and uses xUnit-style setUp/tearDown naming. BATS has the larger community, better CI integration, and official GitHub Action. shunit2 would be a contrarian choice with no benefits. | Use BATS exclusively. |
+| Parse native tool output into structured JSON | Nmap XML has 50+ fields. sqlmap output is complex. tshark JSON is deeply nested. Parsing every tool's output format is a massive undertaking that duplicates `jc` (which already does this for 300+ commands). | In execute mode, capture raw stdout as a string. Users who want structured native output should pipe directly: `nmap -oX - \| jc --nmap`. Document this pattern. |
+| Different JSON schemas per script | 46 individual schemas would be unmaintainable. Users cannot build tooling against 46 different structures. | Use 4-5 category schemas. All scanner scripts share one shape. All cracker scripts share one shape. Predictability over precision. |
+| XML/YAML/CSV output modes | Scope creep. JSON is the universal interchange format. XML is legacy (nmap uses it, nothing new does). YAML is for config, not output. CSV loses structure. | JSON only. If users need CSV: `script -j \| jq -r '.examples[] \| [.number, .command] \| @csv'`. |
+| Interactive JSON mode | JSON mode should never prompt for input. No "Run this command? [y/N]" in JSON mode. | When `OUTPUT_FORMAT=json`, skip all `read -rp` prompts and interactive demos entirely. JSON consumers are machines, not humans. |
+| Pretty-printed JSON by default | Pretty JSON wastes bandwidth in pipes and breaks line-oriented tools. | Emit compact JSON (one line). Users who want pretty: `script -j \| jq .`. Document this. |
+| Embedding base64-encoded binary output | Some tools produce binary output (pcap files, carved files). Do not base64-encode and embed. | Include file paths in JSON: `"output_file": "/tmp/capture.pcap"`. Reference, do not embed. |
+| Version-negotiated JSON schemas | Adding `--json-version 2` style versioning adds complexity for a project this size. | Single schema version. Embed `"schema_version": "1.0"` in meta. Break compatibility only across major milestones. |
+| Colorized JSON | Some tools (e.g., `bat`) colorize JSON output. This corrupts the JSON for pipe consumers. | Never add ANSI codes to JSON output. Period. If `OUTPUT_FORMAT=json`, `NO_COLOR` is effectively forced for all data collection. |
 
 ## Feature Dependencies
 
 ```
-BATS Framework Setup
-  |-> Install bats-core (brew or npm)
-  |-> Install bats-support, bats-assert, bats-file
-  |-> Create test_helper/common-setup.bash
-  |-> Create tests/ directory structure
-  |-> Add make test target
-  Depends on: Nothing (fresh infrastructure)
+parse_common_args update (-j/--json flag)
+  |-> Sets OUTPUT_FORMAT=json global variable
+  |-> Must happen first -- everything depends on this
+  Depends on: Nothing
 
-Library Unit Tests (lib/*.sh)
-  |-> tests/lib/strict.bats
-  |-> tests/lib/colors.bats
-  |-> tests/lib/logging.bats
-  |-> tests/lib/validation.bats
-  |-> tests/lib/cleanup.bats
-  |-> tests/lib/output.bats
-  |-> tests/lib/args.bats
-  |-> tests/lib/diagnostic.bats
-  |-> tests/lib/nc_detect.bats
-  Depends on: BATS Framework Setup
+JSON builder library (lib/json.sh)
+  |-> json_escape() -- safely escape strings for JSON
+  |-> json_object() -- build {"key":"value"} pairs
+  |-> json_array() -- build [...] from items
+  |-> json_meta() -- generate standard meta envelope
+  |-> json_emit() -- write final JSON to stdout
+  |-> Detect jq availability for robust escaping
+  Depends on: Nothing (new library module)
 
-Script Integration Tests
-  |-> tests/scripts/help-flag.bats (all 81 scripts --help)
-  |-> tests/scripts/execute-mode.bats (all scripts -x rejection)
-  |-> tests/scripts/common-args.bats (flag behavior)
-  Depends on: BATS Framework Setup
+Show-mode JSON output (examples listing)
+  |-> info() / run_or_show() emit to stderr or collect data when JSON mode
+  |-> Collect examples into array during script execution
+  |-> Emit JSON envelope at script exit (via EXIT trap or explicit call)
+  Depends on: parse_common_args update, JSON builder library
 
-CI Integration
-  |-> .github/workflows/test.yml
-  |-> Uses bats-core/bats-action@4.0.0
-  |-> JUnit report output
-  Depends on: BATS Framework Setup, at least some tests written
+Execute-mode JSON output (tool results)
+  |-> run_or_show() captures stdout/stderr when JSON+execute mode
+  |-> Results embedded in JSON output alongside command metadata
+  Depends on: Show-mode JSON output
 
-Metadata Headers
-  |-> Define header format/schema
-  |-> Update all 9 lib/*.sh modules
-  |-> Update all 17 examples.sh scripts
-  |-> Update all 46 use-case scripts
-  |-> Update remaining scripts (check-tools.sh, diagnostics, etc.)
-  Depends on: Nothing (can be done in parallel with BATS)
+Diagnostic script JSON output
+  |-> report_pass/fail/warn/skip emit JSON objects when JSON mode
+  |-> run_check captures structured results
+  |-> Summary includes pass/fail/warn counts as numbers
+  Depends on: JSON builder library
 
-Ad-hoc Test Migration
-  |-> Migrate test-arg-parsing.sh assertions -> BATS tests
-  |-> Migrate test-library-loads.sh assertions -> BATS tests
-  |-> Retire old test harnesses (or keep as legacy reference)
-  Depends on: Library Unit Tests, Script Integration Tests
+Suppress human output in JSON mode
+  |-> info/warn/error redirect to stderr (or suppress)
+  |-> safety_banner suppressed or moved to stderr
+  |-> Interactive prompts skipped entirely
+  Depends on: parse_common_args update
+
+Tests for JSON output
+  |-> Validate JSON is valid (pipe through jq or python -m json.tool)
+  |-> Validate envelope structure (meta, examples/results, summary)
+  |-> Validate escaping of special characters
+  Depends on: Show-mode JSON output, BATS framework (from prior milestone)
 ```
 
-## Test Categories: What to Test and How
+## Tool Category Schemas
 
-### Category 1: Library Function Unit Tests (HIGH priority)
+Different tool categories produce fundamentally different result shapes. Rather than 46 individual schemas, define 5 category schemas.
 
-Pure function testing. Source the library, call the function, check the result.
+### Category 1: Network Scanners
 
-**Target:** All 9 `lib/*.sh` modules, ~30-40 exported functions.
+**Tools:** nmap, hping3, netcat (scan-ports)
+**What they find:** Hosts, ports, services, OS fingerprints
 
-| Module | Functions to Test | Key Test Cases | Complexity |
-|--------|-------------------|----------------|------------|
-| `args.sh` | `parse_common_args` | `-h` calls show_help and exits 0; `-v` sets VERBOSE/LOG_LEVEL; `-q` sets LOG_LEVEL=warn; `-x` sets EXECUTE_MODE=execute; `--` stops parsing; unknown flags pass through; empty args; flag after positional; multiple flags combined | Medium |
-| `logging.sh` | `info`, `success`, `warn`, `error`, `debug`, `_should_log`, `_log_level_num` | Each function outputs correct prefix; LOG_LEVEL filtering works; VERBOSE enables timestamps; error() always visible; debug() hidden by default; NO_COLOR disables ANSI codes | Medium |
-| `validation.sh` | `require_root`, `check_cmd`, `require_cmd`, `require_target` | `check_cmd bash` returns 0; `check_cmd nonexistent_cmd` returns 1; `require_cmd bash` succeeds; `require_cmd nonexistent_cmd` exits 1 with error message; `require_target ""` exits 1; `require_target host` succeeds | Low |
-| `cleanup.sh` | `make_temp`, `register_cleanup`, `retry_with_backoff` | `make_temp` creates file in `$_CLEANUP_BASE_DIR`; `make_temp dir` creates directory; files cleaned on exit; `register_cleanup` runs commands on exit; `retry_with_backoff` retries N times; backoff respects delay | Medium |
-| `colors.sh` | Color variable definitions | All 6 color vars defined; NO_COLOR empties all vars; non-terminal empties all vars | Low |
-| `output.sh` | `safety_banner`, `is_interactive`, `run_or_show`, `confirm_execute`, `PROJECT_ROOT` | `safety_banner` outputs AUTHORIZED USE; `is_interactive` detects terminal; `run_or_show` in show mode prints command; `run_or_show` in execute mode runs command; `confirm_execute` skips in show mode; `PROJECT_ROOT` resolves correctly | Medium |
-| `strict.sh` | Strict mode activation, ERR trap | `set -e` is active after sourcing; `set -u` is active; `set -o pipefail` is active; ERR trap produces stack trace on failure | Low |
-| `diagnostic.sh` | `report_pass/fail/warn/skip`, `report_section`, `run_check` | Each report function outputs correct prefix; `run_check` reports pass on success; `run_check` reports fail on failure; timeout handling works | Low |
-| `nc_detect.sh` | `detect_nc_variant` | Returns one of: ncat, gnu, traditional, openbsd; handles missing nc gracefully | Low |
-
-**BATS pattern for library testing:**
-
-```bash
-# tests/lib/validation.bats
-setup() {
-    load '../test_helper/common-setup'
-}
-
-@test "check_cmd returns 0 for installed command" {
-    run check_cmd bash
-    assert_success
-}
-
-@test "check_cmd returns 1 for missing command" {
-    run check_cmd definitely_not_a_real_command_xyz
-    assert_failure
-}
-
-@test "require_target exits 1 on empty string" {
-    run require_target ""
-    assert_failure
-    assert_output --partial "Usage:"
+```json
+{
+  "meta": {
+    "tool": "nmap",
+    "script": "discover-live-hosts",
+    "target": "192.168.1.0/24",
+    "timestamp": "2026-02-13T10:30:00Z",
+    "schema_version": "1.0",
+    "mode": "show"
+  },
+  "examples": [
+    {
+      "number": 1,
+      "title": "Basic ping sweep of a subnet",
+      "command": "nmap -sn 192.168.1.0/24",
+      "description": "ICMP echo-based host discovery"
+    }
+  ],
+  "summary": {
+    "example_count": 10,
+    "category": "network-scanner"
+  }
 }
 ```
 
-### Category 2: Script CLI Contract Tests (HIGH priority)
+In execute mode, results replace examples:
 
-Test that every script honors the CLI contract: `--help` exits 0, `-x` rejects non-interactive stdin, `parse_common_args` is present.
-
-**Target:** All 81 scripts.
-
-| Test | What It Verifies | Current Coverage | Migration Path |
-|------|-----------------|------------------|----------------|
-| `--help` exits 0 | CLI contract | 63 scripts tested (17 examples + 46 use-case) in `test-arg-parsing.sh` | Glob-discover all `*.sh` in scripts/, run `--help`, `assert_success` |
-| `--help` contains "Usage:" | Help format contract | Same 63 scripts | `assert_output --partial "Usage:"` |
-| `-h` exits 0 | Short flag parity | Only nmap tested | Include in glob discovery |
-| `-x` rejects piped stdin | Safety contract | 63 scripts tested | `run bash "$script" -x 2>&1`, `assert_failure` |
-| `parse_common_args` present | Code pattern | 46 use-case scripts via grep | `grep -q parse_common_args "$script"` in `@test` |
-| Sources common.sh | Dependency contract | Not tested | `grep -q 'source.*common.sh' "$script"` |
-
-**Key improvement:** Dynamic discovery replaces hardcoded arrays. No more forgetting to add new scripts to the test list.
-
-**BATS pattern for script contract tests:**
-
-```bash
-# tests/scripts/help-flag.bats
-setup_file() {
-    export PROJECT_ROOT="$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"
-}
-
-# Dynamically discover scripts -- run once to populate array
-setup() {
-    load '../test_helper/common-setup'
-}
-
-@test "nmap/examples.sh --help exits 0" {
-    run bash "$PROJECT_ROOT/scripts/nmap/examples.sh" --help
-    assert_success
-    assert_output --partial "Usage:"
+```json
+{
+  "meta": { "...": "...", "mode": "execute" },
+  "results": [
+    {
+      "number": 1,
+      "title": "Basic ping sweep of a subnet",
+      "command": "nmap -sn 192.168.1.0/24",
+      "exit_code": 0,
+      "output": "Starting Nmap 7.95...\nNmap scan report for 192.168.1.1\nHost is up (0.0034s latency).\n...",
+      "duration_seconds": 12.4
+    }
+  ],
+  "summary": {
+    "commands_run": 10,
+    "commands_succeeded": 9,
+    "commands_failed": 1,
+    "category": "network-scanner"
+  }
 }
 ```
 
-### Category 3: Edge Case and Regression Tests (MEDIUM priority)
+### Category 2: Web Scanners / Fuzzers
 
-Test specific behaviors that have caused bugs or confusion.
+**Tools:** nikto, skipfish, gobuster, ffuf, sqlmap, curl
+**What they find:** Vulnerabilities, directories, parameters, HTTP responses
 
-| Test | What It Catches | Notes |
-|------|----------------|-------|
-| Empty REMAINING_ARGS under `set -u` | Unbound variable error from `${REMAINING_ARGS[@]}` on empty array | Was a real bug. `${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}` pattern exists as fix. |
-| `--` stops flag parsing | Arguments after `--` must not be parsed as flags | `parse_common_args -- -x target` should leave EXECUTE_MODE=show |
-| Flag after positional arg | `script.sh target -x` must still detect `-x` | Current parser handles this; test prevents regression |
-| Double-sourcing prevention | Sourcing common.sh twice must not error or duplicate traps | Source guards (`_COMMON_LOADED`) protect this |
-| NO_COLOR disables ANSI | `NO_COLOR=1 script.sh` must produce clean output | Color variables set to empty strings |
-| Cleanup on EXIT | Temp files must be removed even after errors | `make_temp` + forced exit should leave no files |
-| ERR trap stack trace | Failing command should produce readable stack trace | Test that error output contains "at ... in file:line" |
-| Bash 4.0+ gate | Running under old bash should produce clear error | Hard to test in BATS (BATS itself needs bash) -- skip |
+```json
+{
+  "meta": {
+    "tool": "nikto",
+    "script": "scan-specific-vulnerabilities",
+    "target": "http://localhost:8080",
+    "timestamp": "2026-02-13T10:30:00Z",
+    "schema_version": "1.0",
+    "mode": "show"
+  },
+  "examples": [
+    {
+      "number": 1,
+      "title": "Scan for SQL injection only",
+      "command": "nikto -h http://localhost:8080 -Tuning 9",
+      "description": "Uses Nikto tuning flag 9 for SQL injection checks"
+    }
+  ],
+  "summary": {
+    "example_count": 10,
+    "category": "web-scanner"
+  }
+}
+```
 
-### Category 4: Smoke/Sanity Tests (LOW priority -- already covered)
+### Category 3: Password Crackers
 
-These exist in `test-library-loads.sh` and are worth migrating but are not high priority since they test "does it load" not "does it work."
+**Tools:** hashcat, john
+**What they find:** Cracked hashes, attack speed, remaining hashes
 
-| Test | Current Coverage | Migration Priority |
-|------|-----------------|-------------------|
-| All functions defined after sourcing | 39 checks in test-library-loads.sh | LOW -- unit tests implicitly cover this |
-| Source guards set | 9 guards checked | LOW -- covered by double-source test |
-| PROJECT_ROOT resolves | 3 checks | LOW -- covered by output.sh tests |
-| Color variables declared | 6 checks | LOW -- covered by colors.sh tests |
+```json
+{
+  "meta": {
+    "tool": "hashcat",
+    "script": "crack-ntlm-hashes",
+    "target": "hashes.txt",
+    "timestamp": "2026-02-13T10:30:00Z",
+    "schema_version": "1.0",
+    "mode": "show"
+  },
+  "examples": [
+    {
+      "number": 1,
+      "title": "Dictionary attack on NTLM hashes",
+      "command": "hashcat -m 1000 -a 0 hashes.txt wordlist.txt",
+      "description": "Straightforward wordlist attack against NTLM (mode 1000)"
+    }
+  ],
+  "summary": {
+    "example_count": 10,
+    "category": "password-cracker"
+  }
+}
+```
+
+### Category 4: Network Analysis / Packet Capture
+
+**Tools:** tshark, traceroute, dig
+**What they find:** Packets, routes, DNS records, traffic patterns
+
+```json
+{
+  "meta": {
+    "tool": "tshark",
+    "script": "capture-http-credentials",
+    "target": "en0",
+    "timestamp": "2026-02-13T10:30:00Z",
+    "schema_version": "1.0",
+    "mode": "show"
+  },
+  "examples": [
+    {
+      "number": 1,
+      "title": "Capture HTTP POST requests showing form data",
+      "command": "sudo tshark -i en0 -Y 'http.request.method==POST' -T fields -e http.host -e http.request.uri -e http.file_data",
+      "description": "Filters for POST requests and extracts host, URI, and form data fields"
+    }
+  ],
+  "summary": {
+    "example_count": 10,
+    "category": "network-analysis"
+  }
+}
+```
+
+### Category 5: Exploitation / Utility
+
+**Tools:** metasploit, aircrack-ng, foremost, netcat (listener/transfer)
+**What they find:** Sessions, handshakes, recovered files, connections
+
+Same envelope structure. Category exists so that result schemas can diverge later if needed.
+
+### Category 6: Diagnostics (Pattern B scripts)
+
+**Tools:** connectivity.sh, dns.sh, performance.sh
+**What they find:** Pass/fail/warn checks with structured test results
+
+```json
+{
+  "meta": {
+    "tool": "diagnostics",
+    "script": "connectivity",
+    "target": "example.com",
+    "timestamp": "2026-02-13T10:30:00Z",
+    "schema_version": "1.0",
+    "mode": "execute"
+  },
+  "results": [
+    {
+      "section": "Local Network",
+      "checks": [
+        {
+          "status": "pass",
+          "description": "Local IP: 192.168.1.100",
+          "detail": null
+        },
+        {
+          "status": "pass",
+          "description": "Default gateway: 192.168.1.1",
+          "detail": null
+        }
+      ]
+    },
+    {
+      "section": "DNS Resolution",
+      "checks": [
+        {
+          "status": "pass",
+          "description": "DNS resolution for example.com",
+          "detail": "Resolved to: 93.184.216.34"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_checks": 15,
+    "passed": 12,
+    "failed": 1,
+    "warnings": 2,
+    "category": "diagnostic"
+  }
+}
+```
 
 ---
 
-## Header Format: Recommended Schema
+## How Real CLI Tools Handle JSON: Patterns to Follow
 
-### For Library Modules (`lib/*.sh`)
+### Pattern 1: gh CLI -- Field Selection with --json
 
-Use shdoc-compatible annotations for function documentation, plus structured file-level metadata.
+`gh` lets users pick which fields to include: `gh pr list --json number,title`. This reduces payload size and makes jq queries simpler. For this project, the envelope is fixed (meta + examples/results + summary), so field selection is unnecessary. The data is small enough that emitting everything is fine.
 
+**Adopt:** Fixed envelope (simpler). Do not adopt field selection.
+
+### Pattern 2: gh CLI -- Built-in jq filtering
+
+`gh --json number --jq '.[].number'` applies jq without external piping. Elegant but requires embedding a jq interpreter (gh uses Go's gojq). For bash, this means shelling out to jq.
+
+**Adopt as sugar only:** `--jq EXPR` pipes JSON through `jq "$EXPR"` if jq is installed. Fails with helpful error if jq missing. Low priority.
+
+### Pattern 3: kubectl -- Consistent apiVersion/kind envelope
+
+Every kubectl JSON response has `apiVersion`, `kind`, `metadata`. This lets tools identify what they are looking at without knowing which command produced it.
+
+**Adopt:** The `meta.tool` and `meta.script` fields serve this purpose. `summary.category` identifies the schema type.
+
+### Pattern 4: ffuf -- commandline and config in output
+
+ffuf embeds the exact command that produced the output and the full config. Excellent for reproducibility.
+
+**Adopt:** `meta.command` or `meta.args` should capture the original command invocation so results can be reproduced.
+
+### Pattern 5: Docker -- NDJSON for streaming
+
+`docker ps --format json` outputs one JSON object per line (not a JSON array). This enables streaming processing but is not valid JSON as a whole.
+
+**Do not adopt for default mode.** Emit valid JSON arrays. NDJSON is only appropriate for `--json-stream` (future feature).
+
+### Pattern 6: Nmap -- Exhaustive structured output
+
+Nmap XML has 50+ element types with precise semantics (host/port/service/os/script). This is the gold standard for tool-specific output.
+
+**Do not attempt to replicate.** This project wraps tools; it does not replace them. When users need nmap's structured output, they use `nmap -oX`. The scripts' JSON output is about the *examples and commands*, not the tool results.
+
+### Pattern 7: tshark -- -T json for native JSON
+
+tshark can output full packet dissection as JSON: `tshark -T json`. Fields are arrays because protocols can have multiple instances.
+
+**Reference pattern for execute mode.** In `-x -j` mode, if tshark is the underlying tool, consider passing `-T json` to tshark and embedding its native JSON output directly rather than capturing raw text.
+
+### Pattern 8: hashcat -- Machine-readable status
+
+hashcat `--machine-readable` outputs colon-separated status fields: STATUS, SPEED, PROGRESS, etc. Not JSON, but structured.
+
+**Acknowledge but do not parse.** In execute mode, capture raw output. Users who want structured hashcat output should use hashcat's native `--machine-readable` flag directly. Document this.
+
+---
+
+## JSON Generation in Bash: Technical Approach
+
+### Strategy: jq-first with printf fallback
+
+**When jq is available (preferred path):**
 ```bash
-#!/usr/bin/env bash
-# @file validation.sh
-# @brief Command and target validation functions
-# @description
-#   Provides require_root, check_cmd, require_cmd, require_target.
-#   Sourced via common.sh -- never executed directly.
+jq -n \
+  --arg tool "$TOOL" \
+  --arg target "$TARGET" \
+  --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --argjson examples "$EXAMPLES_JSON_ARRAY" \
+  '{meta: {tool: $tool, target: $target, timestamp: $timestamp}, examples: $examples}'
+```
 
-# Source guard -- prevent double-sourcing
-[[ -n "${_VALIDATION_LOADED:-}" ]] && return 0
-_VALIDATION_LOADED=1
+This handles ALL escaping correctly -- quotes, backslashes, newlines, unicode. Zero risk of broken JSON.
 
-# @description Check if a command exists on PATH
-# @arg $1 string Command name to check
-# @exitcode 0 Command found
-# @exitcode 1 Command not found
-check_cmd() {
-    command -v "$1" &>/dev/null
+**When jq is not available (fallback):**
+```bash
+json_escape() {
+    local s="$1"
+    s="${s//\\/\\\\}"      # backslash
+    s="${s//\"/\\\"}"      # double quote
+    s="${s//$'\n'/\\n}"    # newline
+    s="${s//$'\r'/\\r}"    # carriage return
+    s="${s//$'\t'/\\t}"    # tab
+    printf '%s' "$s"
 }
 ```
 
-**File-level fields:**
-| Field | Required | Purpose |
-|-------|----------|---------|
-| `@file` | Yes | Filename (matches actual filename) |
-| `@brief` | Yes | One-line summary (what `grep` extracts) |
-| `@description` | No | Multi-line explanation (for doc generation) |
+This handles the 95% case. Edge cases (unicode, control characters) may produce invalid JSON. Acceptable tradeoff for zero-dependency operation.
 
-**Function-level fields:**
-| Field | Required | Purpose |
-|-------|----------|---------|
-| `@description` | Yes (for public functions) | What the function does |
-| `@arg` | Yes (if args taken) | `$1 type Description` format |
-| `@exitcode` | Yes (if non-trivial) | Document exit codes |
-| `@stdout` | No | What the function prints |
-| `@stderr` | No | What goes to stderr |
-| `@see` | No | Cross-references to related functions |
-| `@internal` | No | Mark private/helper functions |
-
-### For Executable Scripts (`examples.sh`, use-case scripts)
-
-Use a simpler comment-based header. These are not library code -- they are user-facing tools.
-
+### Detection pattern:
 ```bash
-#!/usr/bin/env bash
-# @file nmap/discover-live-hosts.sh
-# @brief Find all active hosts on a subnet
-# @description
-#   Discovers live hosts on a network using various probe techniques.
-#   Uses ping sweeps, ARP, TCP, UDP, and ICMP methods.
-#
-# @dep nmap "brew install nmap"
-# @default-target localhost
-source "$(dirname "$0")/../common.sh"
+if command -v jq &>/dev/null; then
+    _JSON_ENGINE="jq"
+else
+    _JSON_ENGINE="printf"
+fi
 ```
 
-**Script-level fields:**
-| Field | Required | Purpose |
-|-------|----------|---------|
-| `@file` | Yes | Relative path from scripts/ (matches directory structure) |
-| `@brief` | Yes | One-line summary |
-| `@description` | No | Multi-line explanation |
-| `@dep` | Yes | Tool dependency and install hint. Format: `command "install_hint"`. Matches `require_cmd` calls. |
-| `@default-target` | No | Default target value if script has one |
+### Why not require jq?
 
-### Why This Format
+1. The project's philosophy is educational -- scripts should work on minimal systems
+2. `require_cmd` gates tool availability; JSON output should not add a new required dependency
+3. jq is a "nice to have" optimization, not a hard requirement
 
-1. **shdoc compatibility:** The `@description`, `@arg`, `@exitcode` tags are shdoc standard. Can generate Markdown API docs from library modules.
-2. **Simple extraction:** `grep '^# @brief' scripts/**/*.sh` produces a one-line index of every script.
-3. **Dependency auditing:** `grep '^# @dep' scripts/**/*.sh` lists every external tool dependency.
-4. **Minimal disruption:** Existing single-line headers (`# nmap/examples.sh -- Network Mapper...`) are replaced, not supplemented. No duplication.
-5. **No runtime impact:** Headers are comments. Zero performance or behavioral change.
+### Why not use python/perl?
 
-### What NOT to Include in Headers
+1. Python is heavier than jq and slower to invoke for simple JSON generation
+2. Perl one-liners are fragile and unreadable
+3. jq is purpose-built for JSON and widely available (`brew install jq`, `apt install jq`)
+4. The printf fallback handles the dependency-free case
 
-| Field | Why Exclude |
-|-------|-------------|
-| Author | Single-author project. Git blame covers this. |
-| Date | Git log covers this. Dates in headers go stale immediately. |
-| Version | Not versioning individual scripts. Git commit is the version. |
-| License | One LICENSE file at repo root covers all scripts. |
-| Copyright | Same reason as License. |
-| Changelog | Git log. |
-| TODO | Use issue tracker or `.planning/`. |
+---
+
+## Fields Reference: What Each Envelope Key Contains
+
+### meta (always present)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `tool` | string | Yes | Tool name (e.g., "nmap", "sqlmap"). Matches directory name. |
+| `script` | string | Yes | Script name without extension (e.g., "discover-live-hosts"). |
+| `target` | string | Yes | Target value passed to script (or "none" if no target). |
+| `timestamp` | string | Yes | ISO 8601 UTC timestamp of execution. |
+| `schema_version` | string | Yes | Always "1.0" initially. |
+| `mode` | string | Yes | "show" or "execute". |
+| `command` | string | No | Full command line that invoked the script. |
+| `category` | string | Yes | One of: "network-scanner", "web-scanner", "password-cracker", "network-analysis", "exploitation", "diagnostic". |
+
+### examples (show mode) / results (execute mode)
+
+Show mode -- `examples` array:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `number` | integer | Yes | Example number (1-10). |
+| `title` | string | Yes | One-line title from `info "N) Title"` or `run_or_show` first argument. |
+| `command` | string | Yes | The actual command shown to the user. |
+| `description` | string | No | Additional context or explanation. |
+
+Execute mode -- `results` array:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `number` | integer | Yes | Command number (1-10). |
+| `title` | string | Yes | One-line title. |
+| `command` | string | Yes | Command that was executed. |
+| `exit_code` | integer | Yes | Exit code of the command. |
+| `output` | string | Yes | Captured stdout from the command. |
+| `stderr` | string | No | Captured stderr (if any). |
+| `duration_seconds` | number | No | Wall-clock execution time. |
+| `skipped` | boolean | No | True if command was skipped (e.g., requires sudo). |
+
+### summary (always present)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `category` | string | Yes | Tool category (mirrors meta.category). |
+| `example_count` | integer | Show mode | Number of examples listed. |
+| `commands_run` | integer | Execute mode | Number of commands executed. |
+| `commands_succeeded` | integer | Execute mode | Commands with exit_code 0. |
+| `commands_failed` | integer | Execute mode | Commands with exit_code != 0. |
+| `total_checks` | integer | Diagnostic mode | Total diagnostic checks run. |
+| `passed` | integer | Diagnostic mode | Checks that passed. |
+| `failed` | integer | Diagnostic mode | Checks that failed. |
+| `warnings` | integer | Diagnostic mode | Checks with warnings. |
+| `success` | boolean | Yes | Overall success: true if no failures. |
+| `exit_code` | integer | Yes | Script's own exit code. |
+
+### errors (only when errors occur)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `error` | boolean | Yes | Always true when present. |
+| `message` | string | Yes | Human-readable error message. |
+| `hint` | string | No | Suggested fix (e.g., "brew install nmap"). |
+| `code` | string | No | Error code (e.g., "MISSING_TOOL", "MISSING_TARGET"). |
+
+Error envelope example (emitted instead of normal output):
+```json
+{
+  "meta": {"tool":"nmap", "script":"discover-live-hosts", "timestamp":"..."},
+  "error": {
+    "code": "MISSING_TOOL",
+    "message": "nmap is not installed",
+    "hint": "brew install nmap"
+  }
+}
+```
+
+---
+
+## Implementation Approach for run_or_show
+
+The core challenge is that `run_or_show` currently has two modes (show/execute). JSON adds a dimension: show+human, show+json, execute+human, execute+json. The cleanest approach:
+
+### Show + JSON mode
+`run_or_show` appends an example object to a bash array (or temp file) instead of printing.
+
+### Execute + JSON mode
+`run_or_show` runs the command, captures output, and appends a result object.
+
+### Accumulate-then-emit pattern
+Rather than streaming JSON during script execution, accumulate data in bash variables/arrays, then emit the complete JSON envelope at exit. This ensures valid JSON even if the script is interrupted. An EXIT trap calls `json_emit()` which assembles and outputs the final JSON.
+
+```bash
+# Pseudocode for the accumulation pattern
+_JSON_ITEMS=()
+
+run_or_show() {
+    local description="$1"; shift
+    if [[ "$OUTPUT_FORMAT" == "json" ]]; then
+        if [[ "$EXECUTE_MODE" == "execute" ]]; then
+            local output exit_code
+            output=$("$@" 2>&1) && exit_code=0 || exit_code=$?
+            _JSON_ITEMS+=("$(json_result "$description" "$*" "$exit_code" "$output")")
+        else
+            _JSON_ITEMS+=("$(json_example "$description" "$*")")
+        fi
+    else
+        # existing human-readable behavior unchanged
+    fi
+}
+
+# At script end or via EXIT trap:
+json_emit() {
+    local items
+    items=$(printf '%s,' "${_JSON_ITEMS[@]}")
+    items="[${items%,}]"  # Remove trailing comma, wrap in array
+    # ... build full envelope with meta + items + summary
+}
+```
 
 ---
 
 ## MVP Recommendation
 
 Prioritize:
-1. **BATS framework setup** -- Install bats-core + helper libraries, create test directory structure, shared test helper, `make test` target. Foundation for everything else. (LOW complexity, HIGH value)
-2. **Library unit tests (`lib/*.sh`)** -- Test all 9 modules' exported functions. This is where bugs actually matter. Migrate and expand on `test-library-loads.sh` and the unit test sections of `test-arg-parsing.sh`. (MEDIUM complexity, HIGH value)
-3. **Script CLI contract tests** -- `--help` and `-x` tests for all 81 scripts using dynamic discovery. Replaces the brittle hardcoded-list approach. (LOW complexity, HIGH value)
-4. **CI integration** -- GitHub Actions workflow using `bats-core/bats-action@4.0.0`. JUnit report output. (LOW complexity, HIGH value)
-5. **Metadata headers on library modules** -- Update 9 `lib/*.sh` files with shdoc-compatible annotations. Smallest batch, highest documentation value per file. (LOW complexity, MEDIUM value)
-6. **Metadata headers on all scripts** -- Update remaining 72 scripts with structured headers. Mechanical but large. (MEDIUM complexity, MEDIUM value)
+
+1. **`-j`/`--json` flag in `parse_common_args`** -- Sets `OUTPUT_FORMAT=json`. Foundation for everything. (LOW complexity, HIGH value)
+
+2. **`lib/json.sh` JSON builder library** -- `json_escape()`, `json_object()`, `json_array()`, `json_meta()`, `json_emit()`. jq-first with printf fallback. (MEDIUM complexity, HIGH value)
+
+3. **Show-mode JSON for `run_or_show`** -- Accumulate examples, emit envelope at end. Suppress human output. Test with one representative script per category. (MEDIUM complexity, HIGH value)
+
+4. **Diagnostic scripts JSON output** -- `report_pass/fail/warn` emit JSON when in JSON mode. Most natural fit for structured output. (MEDIUM complexity, HIGH value)
+
+5. **Roll out to all 46 use-case scripts** -- Since `run_or_show` is shared infrastructure, most scripts get JSON for free. Scripts that use `info` + `echo` patterns (instead of `run_or_show`) need per-script updates. (MEDIUM complexity, MEDIUM value)
+
+6. **Execute-mode JSON** -- `run_or_show` captures output in `-x -j` mode. Higher complexity because of output capture and error handling. (HIGH complexity, MEDIUM value)
 
 Defer:
-- **Parallel test execution** -- Only matters once the test suite is large enough to be slow. Optimize later.
-- **shdoc documentation generation** -- The headers should be written now (for future tooling), but actually running shdoc to generate docs is a separate milestone.
-- **Retiring old test harnesses** -- Keep `test-arg-parsing.sh` and `test-library-loads.sh` until BATS tests fully cover their assertions, then remove.
+
+- **`--jq` filter flag** -- Sugar. Users can pipe to jq themselves. Implement after core JSON works.
+- **Streaming JSON (NDJSON)** -- Complex, only matters for long-running execute mode. Future milestone.
+- **Native tool output parsing** -- Out of scope. Point users to `jc` for structured tool output.
+- **JSON output for `examples.sh` scripts** -- Lower priority than use-case scripts. Same pattern applies; roll out after use-case scripts work.
 
 ## Key Technical Considerations
 
-### BATS + Strict Mode Interaction
+### ANSI Color Stripping
 
-The project uses `set -eEuo pipefail` in `strict.sh`. BATS uses `set -e` internally for test failure detection. Key implications:
+When `OUTPUT_FORMAT=json`, all data collection must bypass color codes. Options:
 
-1. **`run` absorbs exit codes** -- `run` executes in a subshell and captures `$status`. This neutralizes `set -e` inside `run`. Functions tested via `run` will not cause test abort on failure -- the failure is captured in `$status`.
-2. **Direct calls propagate `set -e`** -- Calling a function WITHOUT `run` means `set -e` applies. A failing assertion or unexpected exit will abort the test (which is correct behavior).
-3. **`set -u` in sourced libraries** -- When tests `source common.sh`, `set -u` activates. Tests must not reference unset variables. Use `${VAR:-}` pattern in test code.
-4. **ERR trap conflicts** -- The project's ERR trap (`_strict_error_handler`) will fire in test context. This is noise, not signal. Tests should `trap - ERR` after sourcing common.sh.
+1. **Set `NO_COLOR=1` early** -- The project's `colors.sh` respects this. If `NO_COLOR` is set, all color variables become empty strings. Set this when `-j` flag is detected.
+2. **Strip after the fact** -- Use `sed 's/\x1b\[[0-9;]*m//g'` to remove ANSI codes from captured output. Belt-and-suspenders approach for execute mode where tools emit their own colors.
 
-**Recommended test helper pattern:**
+Recommendation: Do both. Set `NO_COLOR=1` for project functions, strip ANSI from captured external tool output.
+
+### stderr vs stdout Separation
+
+In JSON mode:
+- **stdout** = JSON data only. One JSON document. Nothing else.
+- **stderr** = Human-readable logs, warnings, progress info (if any).
+
+This matches `gh` behavior and enables `script -j 2>/dev/null | jq .` for clean automation.
+
+### Scripts That Don't Use run_or_show
+
+Some scripts (e.g., hashcat, parts of sqlmap) use `info` + `echo` patterns instead of `run_or_show`. These need manual updates to accumulate JSON data. The approach is to introduce a `json_add_example()` helper that these scripts call alongside their existing output.
+
+Estimated count: ~15 of 46 use-case scripts use the `info` + `echo` pattern instead of `run_or_show`. The remaining ~31 scripts use `run_or_show` consistently and will get JSON support automatically from the library change.
+
+### JSON Validity Testing
+
+Every script with JSON output should be tested:
 
 ```bash
-# test_helper/common-setup.bash
-_common_setup() {
-    load 'bats-support/load'
-    load 'bats-assert/load'
-    load 'bats-file/load'
+@test "nmap/discover-live-hosts.sh -j produces valid JSON" {
+    run bash "$PROJECT_ROOT/scripts/nmap/discover-live-hosts.sh" -j
+    assert_success
+    echo "$output" | jq . >/dev/null 2>&1
+    assert_success
+}
 
-    PROJECT_ROOT="$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"
-    export PROJECT_ROOT
-
-    # Source common.sh for library function access
-    # Then disable strict mode artifacts that interfere with BATS
-    source "$PROJECT_ROOT/scripts/common.sh"
-    set +eEu  # Let BATS handle error detection
-    trap - ERR  # Remove project ERR trap (BATS has its own)
-    set -o pipefail  # Keep pipefail -- it's useful in tests too
+@test "nmap/discover-live-hosts.sh -j has correct envelope" {
+    run bash "$PROJECT_ROOT/scripts/nmap/discover-live-hosts.sh" -j
+    echo "$output" | jq -e '.meta.tool == "nmap"'
+    echo "$output" | jq -e '.examples | length > 0'
+    echo "$output" | jq -e '.summary.category == "network-scanner"'
 }
 ```
 
-### load vs source for `.sh` Files
-
-BATS `load` only loads `.bash` files (appends `.bash` automatically). The project's libraries are `.sh` files. Use `source` directly for project libraries, `load` for BATS helpers.
-
-### Test File Organization
-
-```
-tests/
-  test_helper/
-    bats-support/     (git submodule or npm)
-    bats-assert/      (git submodule or npm)
-    bats-file/        (git submodule or npm)
-    common-setup.bash
-  lib/
-    args.bats
-    cleanup.bats
-    colors.bats
-    diagnostic.bats
-    logging.bats
-    nc_detect.bats
-    output.bats
-    strict.bats
-    validation.bats
-  scripts/
-    help-flag.bats
-    execute-mode.bats
-  integration/
-    common-args.bats
-    edge-cases.bats
-```
+---
 
 ## Sources
 
-- [bats-core official documentation](https://bats-core.readthedocs.io/en/stable/) -- Writing tests, installation, usage, gotchas (HIGH confidence)
-- [bats-core GitHub repository](https://github.com/bats-core/bats-core) -- v1.13.0, Nov 2025 (HIGH confidence)
-- [bats-core/bats-action GitHub Action](https://github.com/bats-core/bats-action) -- v4.0.0, Feb 2026 (HIGH confidence)
-- [BATS writing tests documentation](https://bats-core.readthedocs.io/en/stable/writing-tests.html) -- run helper, setup/teardown, tags, special variables (HIGH confidence)
-- [BATS gotchas documentation](https://bats-core.readthedocs.io/en/stable/gotchas.html) -- set -e conflicts, negation, subshell scope (HIGH confidence)
-- [BATS tutorial](https://bats-core.readthedocs.io/en/stable/tutorial.html) -- Project layout, test_helper pattern, library loading (HIGH confidence)
-- [BATS usage documentation](https://bats-core.readthedocs.io/en/stable/usage.html) -- --jobs, --formatter, --filter-tags, --report-formatter (HIGH confidence)
-- [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html) -- File headers, function documentation (HIGH confidence)
-- [shdoc documentation generator](https://github.com/reconquest/shdoc) -- @description, @arg, @exitcode annotations (MEDIUM confidence)
-- [bats-core/bats-file](https://github.com/bats-core/bats-file) -- Filesystem assertions (HIGH confidence)
-- Codebase analysis: direct reading of all 81 scripts, 9 lib modules, 2 existing test harnesses, Makefile (HIGH confidence)
-- [Bash Script Header Conventions](https://bashcommands.com/bash-script-header) -- Header format patterns (MEDIUM confidence)
-- [bats-core strict mode issue #36](https://github.com/bats-core/bats-core/issues/36) -- set -eEuo pipefail compatibility discussion (MEDIUM confidence)
+- [GitHub CLI formatting documentation](https://cli.github.com/manual/gh_help_formatting) -- `--json`, `--jq`, `--template` flag design patterns (HIGH confidence)
+- [gh CLI --json issue discussion](https://github.com/cli/cli/issues/1089) -- Design rationale for gh's JSON output (HIGH confidence)
+- [Nmap XML Output specification](https://nmap.org/book/output-formats-xml-output.html) -- XML structure: nmaprun, host, port, service element hierarchy (HIGH confidence)
+- [Nmap DTD](https://nmap.org/book/nmap-dtd.html) -- Full element/attribute definitions for nmap XML (HIGH confidence)
+- [ffuf file output formats](https://deepwiki.com/ffuf/ffuf/6.2-file-output-formats) -- JSON envelope: commandline, time, results array, config. Result fields: status, length, words, lines, duration, url (HIGH confidence)
+- [Nikto export formats wiki](https://github.com/sullo/nikto/wiki/Export-Formats/897f9af07de5cff93e526360fc1890f5de5db196) -- CSV fields: Host, IP, Port, Banner, Vulnerability, Method, Description (MEDIUM confidence)
+- [hashcat machine-readable output](https://hashcat.net/wiki/doku.php?id=machine_readable) -- STATUS, SPEED, PROGRESS, RECHASH fields (HIGH confidence)
+- [hashcat JSON output feature request](https://github.com/hashcat/hashcat/issues/3586) -- Community demand for JSON machine-readable output (MEDIUM confidence)
+- [tshark man page](https://www.wireshark.org/docs/man-pages/tshark.html) -- `-T json` and `-T ek` output format documentation (HIGH confidence)
+- [Docker CLI formatting](https://docs.docker.com/engine/cli/formatting/) -- Go template JSON formatting, NDJSON streaming pattern (HIGH confidence)
+- [docker ps JSON not valid array issue](https://github.com/moby/moby/issues/46906) -- NDJSON vs JSON array tradeoffs (MEDIUM confidence)
+- [kubectl output formatting](https://www.baeldung.com/ops/kubectl-output-format) -- `-o json`, JSONPath, consistent envelope pattern (MEDIUM confidence)
+- [jc tool](https://github.com/kellyjonbrazil/jc) -- CLI-to-JSON converter supporting 300+ commands including dig, ping, traceroute (HIGH confidence)
+- [jq manual](https://jqlang.org/manual/) -- jq 1.8 for JSON processing, `--arg` for safe string injection (HIGH confidence)
+- [Build JSON string with bash variables](https://www.baeldung.com/linux/bash-variables-create-json-string) -- jq `-n --arg` pattern for safe JSON generation (MEDIUM confidence)
+- [json.bash](https://github.com/h4l/json.bash) -- Pure-bash JSON generation library (MEDIUM confidence)
+- [sqlmap JSON report request](https://github.com/sqlmapproject/sqlmap/issues/3094) -- sqlmap lacks native JSON report output (MEDIUM confidence)
+- Codebase analysis: direct reading of all 46 use-case scripts, 9 lib modules, 3 diagnostic scripts, args.sh, output.sh (HIGH confidence)

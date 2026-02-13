@@ -1,824 +1,811 @@
-# Architecture Patterns: BATS Testing Framework and Script Metadata Headers
+# Architecture: JSON Output Mode Integration
 
-**Domain:** Test infrastructure and structured metadata for a 66-script bash pentesting toolkit
-**Researched:** 2026-02-11
-**Confidence:** HIGH (official BATS documentation, codebase analysis, established bash patterns)
+**Domain:** Bash CLI tool library -- structured JSON output for pentesting scripts
+**Researched:** 2026-02-13
+**Confidence:** HIGH (based on direct codebase analysis + verified tool capabilities)
 
-## Existing Architecture (Baseline)
+## Recommended Architecture
 
-Before introducing BATS, here is what exists:
+### Design Principle: Centralized Envelope, Raw Capture, fd Redirection
+
+The JSON output mode adds a single new library module (`lib/json.sh`) that owns all JSON construction and formatting. Individual scripts never construct raw JSON strings -- they call library functions that use `jq` for correct escaping and structure. The key insight from the existing codebase is that `run_or_show()` is the single bottleneck where command execution happens, so JSON capture hooks into that function. All non-JSON output is redirected to stderr via file descriptor manipulation, keeping stdout clean for the JSON envelope.
+
+### Module Load Order (Modified `common.sh`)
+
+Current `common.sh` sources 9 modules. JSON adds 1 new module at position 6:
 
 ```
-tests/
-  test-arg-parsing.sh        # 268 checks -- bash pass/fail counters, no framework
-  test-library-loads.sh       # 39 checks -- bash pass/fail counters, no framework
-
-scripts/
-  common.sh                   # Entry point: sources lib/*.sh in dependency order
-  lib/
-    strict.sh                 # set -eEuo pipefail, ERR trap
-    colors.sh                 # ANSI color variables
-    logging.sh                # info/success/warn/error/debug with LOG_LEVEL
-    validation.sh             # require_root, check_cmd, require_cmd, require_target
-    cleanup.sh                # EXIT trap, make_temp, register_cleanup, retry_with_backoff
-    output.sh                 # safety_banner, is_interactive, run_or_show, confirm_execute, PROJECT_ROOT
-    args.sh                   # parse_common_args, REMAINING_ARGS, EXECUTE_MODE
-    diagnostic.sh             # report_pass/fail/warn/skip, report_section, run_check
-    nc_detect.sh              # detect_nc_variant
-  <tool>/
-    examples.sh               # 17 scripts -- Pattern A: 10 examples + interactive demo
-    <use-case>.sh              # 46 scripts -- Pattern A variant: task-specific examples
-
-.github/workflows/
-  shellcheck.yml              # CI: ShellCheck on push/PR to main
-
-Makefile                       # lint target runs ShellCheck, tool runners
-.shellcheckrc                  # source-path=SCRIPTDIR, external-sources=true
+source "${_LIB_DIR}/strict.sh"       # 1. Strict mode + ERR trap
+source "${_LIB_DIR}/colors.sh"       # 2. Color variables
+source "${_LIB_DIR}/logging.sh"      # 3. Logging functions
+source "${_LIB_DIR}/validation.sh"   # 4. require_cmd, require_target
+source "${_LIB_DIR}/cleanup.sh"      # 5. EXIT trap, temp files, retry
+source "${_LIB_DIR}/json.sh"         # 6. NEW -- JSON formatting (needs cleanup for make_temp)
+source "${_LIB_DIR}/output.sh"       # 7. MODIFIED -- run_or_show gets JSON capture hooks
+source "${_LIB_DIR}/args.sh"         # 8. MODIFIED -- parse_common_args gets -j flag + fd redirect
+source "${_LIB_DIR}/diagnostic.sh"   # 9. Diagnostic report functions
+source "${_LIB_DIR}/nc_detect.sh"    # 10. Netcat variant detection
 ```
 
-### Current Script Header Pattern (All 66 Scripts)
+**Rationale for position 6:** `json.sh` depends on `cleanup.sh` (for `make_temp` to create temp files for output capture). It must load before `output.sh` because `run_or_show()` calls JSON functions. It must load before `args.sh` because `parse_common_args()` references `JSON_MODE` and calls `_json_require_jq`. `json.sh` does NOT depend on `logging.sh` -- it uses plain `echo >&2` for its own error messages to avoid a circular dependency (since `logging.sh` will need `json_is_active` for stderr redirection).
 
-Every script follows this exact 3-line header:
+### Component Boundaries
+
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| `lib/json.sh` (NEW) | JSON state, envelope construction, result accumulation, jq dependency check, final output | `cleanup.sh` (make_temp for output capture) |
+| `lib/args.sh` (MODIFIED) | Parse `-j`/`--json` flag, enforce `-j requires -x`, trigger fd3 redirect, call `_json_require_jq` | `json.sh` (JSON_MODE, _json_require_jq) |
+| `lib/output.sh` (MODIFIED) | Capture command stdout/stderr in JSON+execute mode, suppress safety_banner, skip confirm_execute | `json.sh` (json_is_active, json_add_result), `cleanup.sh` (make_temp) |
+| `lib/logging.sh` (MODIFIED) | Redirect info/warn/success/debug to stderr when JSON active | `json.sh` (json_is_active) |
+| Use-case scripts (46) | Call `json_set_meta`, call `json_finalize` at end | `json.sh` (json_set_meta, json_is_active, json_finalize) |
+
+---
+
+## Data Flow
+
+### Current Data Flow (No JSON)
+
+```
+Script starts
+  -> parse_common_args "$@"              # Sets EXECUTE_MODE
+  -> require_cmd <tool> "<hint>"
+  -> TARGET="${1:-default}"
+  -> confirm_execute "$TARGET"
+  -> safety_banner
+  -> run_or_show "N) Description" cmd    # x10 examples
+       show mode:  info() to stdout + echo "   cmd" to stdout
+       exec mode:  info() to stdout + execute cmd (stdout to terminal)
+  -> [interactive demo section]
+       show mode + tty:   read -rp prompts, optional execution
+       show mode + no tty: exit 0
+```
+
+### New Data Flow (JSON Mode: `-j -x`)
+
+```
+Script starts
+  -> parse_common_args "$@"
+       Sets EXECUTE_MODE="execute", JSON_MODE=1
+       Validates: -j without -x -> error + exit
+       Calls: _json_require_jq -> exits if jq not installed
+       Redirects: exec 3>&1 1>&2  (fd3 = original stdout, stdout -> stderr)
+  -> require_cmd <tool> "<hint>"         # Error goes to stderr (fd1, which IS stderr now)
+  -> TARGET="${1:-default}"
+  -> json_set_meta "tool" "$TARGET"      # NEW -- sets envelope metadata
+  -> confirm_execute "$TARGET"
+       json_is_active -> return 0        # MODIFIED -- skips interactive confirm
+  -> safety_banner
+       json_is_active -> return 0        # MODIFIED -- suppresses banner
+  -> run_or_show "N) Description" cmd    # x10 examples
+       JSON+exec: capture stdout+stderr to temp files, store in _JSON_RESULTS
+       All info/echo output -> stderr (via fd redirect)
+  -> [interactive demo section]
+       EXECUTE_MODE="execute" -> skips "show" block entirely
+  -> json_is_active && json_finalize     # NEW -- emits JSON envelope to fd3 (original stdout)
+```
+
+### fd3 Redirection Strategy (Approach C)
+
+This is the critical architectural decision. When JSON mode activates:
 
 ```bash
-#!/usr/bin/env bash
-# <path>/<name>.sh -- <one-line description>
-source "$(dirname "$0")/../common.sh"
+# In parse_common_args, after validating -j -x:
+exec 3>&1    # Save original stdout as fd3
+exec 1>&2    # Redirect stdout to stderr
 ```
 
-Followed by:
+**Effect:** Every `echo`, `info`, `warn`, `safety_banner`, bare `echo "   command"` in every script now goes to stderr. Only `json_finalize` writes to fd3 (original stdout). This means:
+
+- **Zero changes needed** to the 46 scripts' educational `echo` lines, `info` calls, or any existing output
+- **Zero changes needed** to `logging.sh` -- its output already goes to fd1, which now IS stderr
+- `json_finalize` explicitly writes to `>&3` to reach the real stdout
+- Downstream consumers see clean JSON on stdout, human-readable noise on stderr
+
+**Why not Approach A (leave bare echo on stdout):** Mixed JSON + text on stdout is not valid JSON. Breaks `| jq`.
+
+**Why not Approach B (add show_example wrapper to 46 scripts):** Requires ~200 lines of changes across 46 files to replace bare `echo` calls. High touch, low value.
+
+**Why Approach C wins:** Zero per-script changes for echo/info suppression. Standard Unix convention (structured data on stdout, messages on stderr). Used by `curl -w`, `git`, `docker` for machine-readable output modes.
+
+---
+
+## Proposed Function Signatures for `lib/json.sh`
+
+### Global State
 
 ```bash
-show_help() { ... }           # Defines help text
-parse_common_args "$@"         # Handles -h, -v, -q, -x, --
+# Source guard
+[[ -n "${_JSON_LOADED:-}" ]] && return 0
+_JSON_LOADED=1
+
+# Set by parse_common_args when -j/--json flag is present
+JSON_MODE="${JSON_MODE:-0}"
+
+# Internal accumulator -- array of JSON result objects (strings)
+_JSON_RESULTS=()
+
+# Metadata set by each script
+_JSON_TOOL=""
+_JSON_TARGET=""
+_JSON_STARTED=""
+
+# jq availability (checked at load, enforced at activation)
+_JSON_AVAILABLE=0
+```
+
+### Public Functions
+
+```bash
+# json_is_active -- predicate for checking JSON mode
+# Usage: if json_is_active; then ... fi
+# Usage: json_is_active && json_finalize
+json_is_active() {
+    [[ "${JSON_MODE:-0}" == "1" ]]
+}
+
+# json_set_meta -- called by each script after parse_common_args
+# Sets tool name and target for the JSON envelope. Records start timestamp.
+# Usage: json_set_meta "nmap" "$TARGET"
+json_set_meta() {
+    local tool="$1"
+    local target="${2:-}"
+    _JSON_TOOL="$tool"
+    _JSON_TARGET="$target"
+    _JSON_STARTED="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+
+# json_add_result -- called by run_or_show for each command execution
+# Accumulates one result entry. Uses jq for proper escaping.
+# Usage: json_add_result "description" exit_code "stdout_content" "stderr_content"
+json_add_result() {
+    local description="$1"
+    local exit_code="$2"
+    local stdout="$3"
+    local stderr="${4:-}"
+
+    local result
+    result=$(jq -n \
+        --arg desc "$description" \
+        --argjson code "$exit_code" \
+        --arg out "$stdout" \
+        --arg err "$stderr" \
+        '{description: $desc, exit_code: $code, stdout: $out, stderr: $err}')
+
+    _JSON_RESULTS+=("$result")
+}
+
+# json_finalize -- called at end of script to emit the complete JSON envelope
+# Writes to fd3 (original stdout, saved before redirect).
+# This should be the ONLY content on the real stdout in JSON mode.
+# Usage: json_is_active && json_finalize
+json_finalize() {
+    local finished
+    finished="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    local count=${#_JSON_RESULTS[@]}
+
+    # Build results array from accumulated entries
+    local results_json="[]"
+    if ((count > 0)); then
+        results_json=$(printf '%s\n' "${_JSON_RESULTS[@]}" | jq -s '.')
+    fi
+
+    jq -n \
+        --arg tool "$_JSON_TOOL" \
+        --arg target "$_JSON_TARGET" \
+        --arg started "$_JSON_STARTED" \
+        --arg finished "$finished" \
+        --argjson count "$count" \
+        --argjson results "$results_json" \
+        '{
+            meta: {
+                tool: $tool,
+                target: $target,
+                started: $started,
+                finished: $finished
+            },
+            results: $results,
+            summary: {
+                total: $count,
+                succeeded: ($results | map(select(.exit_code == 0)) | length),
+                failed: ($results | map(select(.exit_code != 0)) | length)
+            }
+        }' >&3
+}
+```
+
+### Internal Functions
+
+```bash
+# _json_check_jq -- called during module load (non-fatal)
+# Sets _JSON_AVAILABLE flag for later enforcement
+_json_check_jq() {
+    if command -v jq &>/dev/null; then
+        _JSON_AVAILABLE=1
+    else
+        _JSON_AVAILABLE=0
+    fi
+}
+
+# _json_require_jq -- called when -j flag is parsed (fatal with install hint)
+# Uses plain echo >&2 (NOT library error function) to avoid circular dependency
+_json_require_jq() {
+    if [[ "${_JSON_AVAILABLE:-0}" != "1" ]]; then
+        echo "[ERROR] JSON output requires 'jq'. Install: brew install jq (macOS) | apt install jq (Debian/Ubuntu)" >&2
+        exit 1
+    fi
+}
+
+# Called at module load time
+_json_check_jq
+```
+
+---
+
+## Modifications to Existing Modules
+
+### `scripts/common.sh` -- Add Source Line
+
+```diff
+ source "${_LIB_DIR}/cleanup.sh"
++source "${_LIB_DIR}/json.sh"
+ source "${_LIB_DIR}/output.sh"
+```
+
+Also update the `@dependencies` comment in the file header.
+
+### `lib/args.sh` -- Add `-j`/`--json` Flag
+
+Changes to `parse_common_args()`:
+
+```bash
+# New case in the while loop (add between -x and -- cases):
+-j|--json)
+    JSON_MODE=1
+    ;;
+
+# New validation block AFTER the while loop, before function returns:
+# Enforce: -j requires -x
+if [[ "${JSON_MODE:-0}" == "1" && "${EXECUTE_MODE:-show}" != "execute" ]]; then
+    echo "[ERROR] JSON output (-j) requires execute mode (-x). Use: $0 -j -x [args]" >&2
+    exit 1
+fi
+
+# When JSON mode is active, enforce jq dependency and set up fd redirect
+if [[ "${JSON_MODE:-0}" == "1" ]]; then
+    _json_require_jq
+    exec 3>&1    # Save original stdout as fd3
+    exec 1>&2    # Redirect all stdout to stderr
+fi
+```
+
+The fd redirect lives in `args.sh` (not `json.sh`) because it must happen AFTER argument parsing is complete and validation has passed. Placing it in `json.sh` at module load time would redirect stdout before we even know if `-j` was requested.
+
+### `lib/output.sh` -- Modify `run_or_show()`
+
+```bash
+run_or_show() {
+    local description="$1"
+    shift
+
+    if [[ "${EXECUTE_MODE:-show}" == "execute" ]]; then
+        if json_is_active; then
+            # JSON mode: capture output silently, accumulate results
+            local stdout_file stderr_file cmd_exit_code
+            stdout_file=$(make_temp)
+            stderr_file=$(make_temp)
+            # Capture exit code without triggering set -e
+            "$@" > "$stdout_file" 2> "$stderr_file" && cmd_exit_code=0 || cmd_exit_code=$?
+            json_add_result "$description" "$cmd_exit_code" "$(<"$stdout_file")" "$(<"$stderr_file")"
+        else
+            # Normal execute mode (unchanged)
+            info "$description"
+            debug "Executing: $*"
+            "$@"
+            echo ""
+        fi
+    else
+        # Show mode (unchanged)
+        info "$description"
+        echo "   $*"
+        echo ""
+    fi
+}
+```
+
+### `lib/output.sh` -- Modify `safety_banner()`
+
+```bash
+safety_banner() {
+    # Suppress in JSON mode -- banner is human-readable noise
+    json_is_active && return 0
+
+    # Existing implementation unchanged
+    echo -e "${RED}========================================${NC}"
+    echo -e "${RED}  AUTHORIZED USE ONLY${NC}"
+    echo -e "${RED}  Only scan targets you own or have${NC}"
+    echo -e "${RED}  explicit written permission to test.${NC}"
+    echo -e "${RED}========================================${NC}"
+    echo ""
+}
+```
+
+### `lib/output.sh` -- Modify `confirm_execute()`
+
+```bash
+confirm_execute() {
+    local target="${1:-}"
+    [[ "${EXECUTE_MODE:-show}" != "execute" ]] && return 0
+
+    # Skip interactive confirmation in JSON mode (non-interactive by design)
+    json_is_active && return 0
+
+    # Existing implementation unchanged
+    if [[ ! -t 0 ]]; then
+        warn "Execute mode requires an interactive terminal for confirmation"
+        exit 1
+    fi
+    echo ""
+    warn "Execute mode: commands will run against ${target:-the target}"
+    read -rp "Continue? [y/N] " answer
+    [[ "$answer" =~ ^[Yy]$ ]] || exit 0
+}
+```
+
+### `lib/logging.sh` -- No Changes Needed
+
+With the fd3 redirect strategy, `logging.sh` requires **zero modifications**. Here is why:
+
+When `exec 1>&2` is executed in `parse_common_args`, all subsequent writes to fd1 (stdout) go to stderr. The logging functions (`info`, `warn`, `success`, `debug`) all write to fd1 via `echo -e`. After the redirect, their output goes to stderr automatically. The `error` function already writes to `>&2` explicitly, which is correct in both modes.
+
+This is a major advantage of Approach C -- no logging changes at all.
+
+---
+
+## Per-Script Changes (46 Use-Case Scripts)
+
+Each script needs exactly **2 additions** (3-4 lines total):
+
+### Addition 1: Set JSON metadata (after parse_common_args block)
+
+```bash
+parse_common_args "$@"
 set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
-require_cmd <tool> "<hint>"    # Tool validation
-...                            # Script body
+
+require_cmd nmap "brew install nmap"
+TARGET="${1:-localhost}"
+
+json_set_meta "nmap" "$TARGET"          # <-- ADD THIS LINE
 ```
 
-### Current Test Patterns (Custom Harness)
+Placement: after TARGET is assigned, before `confirm_execute`. This ensures the tool name and target are captured in the JSON envelope.
 
-Both test files use the same homegrown framework:
+### Addition 2: Finalize JSON at end of script
 
 ```bash
-set +eEu                      # Disable strict mode for test harness
-PASS_COUNT=0; FAIL_COUNT=0
-check_pass() { PASS_COUNT=$((PASS_COUNT + 1)); echo "  PASS: $1"; }
-check_fail() { FAIL_COUNT=$((FAIL_COUNT + 1)); echo "  FAIL: $1"; }
+# At the very end of the script, after the interactive demo block:
+
+json_is_active && json_finalize         # <-- ADD THIS LINE
 ```
 
-Tests run scripts as subprocesses (`bash "$script" --help`) and check exit codes + output with `grep -q`. The test-library-loads.sh sources `common.sh` directly and validates functions with `declare -F`.
+### Why the Interactive Demo Section Needs No Changes
 
-**What works:** Tests cover the right things (help exits 0, -x rejects non-interactive, parse_common_args behavior, function loading).
-
-**What is limited:** No TAP output, no assertion library, no parallel execution, verbose custom boilerplate, hard to add new test cases, no CI integration for tests (only ShellCheck runs in CI).
-
-## Recommended Architecture (With BATS)
-
-### Decision: BATS-core with bats-support and bats-assert
-
-**Why BATS:** It is the standard testing framework for bash. It provides TAP-compliant output, isolated test execution (each test runs in its own subshell), setup/teardown lifecycle hooks, and the `run` command for capturing output and exit codes. The existing tests already do exactly what BATS tests do -- just with manual boilerplate.
-
-**Why bats-assert:** Provides `assert_success`, `assert_failure`, `assert_output --partial`, `assert_line` -- replacing manual `grep -q` + `check_pass`/`check_fail` patterns.
-
-**Why bats-support:** Required dependency of bats-assert. Provides error formatting.
-
-**Why NOT bats-file or bats-detik:** Not needed. This project tests CLI behavior (exit codes, output), not file operations or Kubernetes.
-
-### Installation Strategy: GitHub Actions Official Action + Local brew
-
-Use `bats-core/bats-action@4.0.0` in CI (installs bats + all libs, provides `BATS_LIB_PATH`). For local development, install via Homebrew. Do NOT use git submodules -- they add clone complexity for a learning-focused project.
-
-**Local (macOS):**
-```bash
-brew install bats-core
-brew install bats-assert     # Pulls bats-support as dependency
-```
-
-**CI (GitHub Actions):**
-```yaml
-- uses: bats-core/bats-action@4.0.0
-  id: setup-bats
-```
-
-**Library loading in tests:** Use `bats_load_library` with `BATS_LIB_PATH` -- works on both Homebrew and CI without hardcoded paths.
-
-### Target Directory Structure
-
-```
-tests/
-  test-arg-parsing.sh          # KEEP: existing 268 tests (migrate later)
-  test-library-loads.sh         # KEEP: existing 39 tests (migrate later)
-  helpers/
-    common-setup.bash           # Shared setup: load libs, set PROJECT_ROOT
-    mock-commands.bash           # Command stubs for testing without tools installed
-  lib/
-    args.bats                   # Unit tests for parse_common_args
-    logging.bats                # Unit tests for logging functions
-    validation.bats             # Unit tests for require_cmd, require_target, etc.
-    cleanup.bats                # Unit tests for make_temp, register_cleanup
-    output.bats                 # Unit tests for run_or_show, confirm_execute
-  scripts/
-    help-flags.bats             # Integration: all scripts --help exits 0
-    execute-mode.bats           # Integration: all scripts -x rejects non-interactive
-    header-metadata.bats        # Integration: all scripts have valid header comments
-  setup_suite.bash              # Suite-level setup (optional, for future use)
-```
-
-**Rationale for this structure:**
-
-1. **tests/lib/*.bats** -- Unit tests for library modules. One .bats file per lib/*.sh file. These test functions in isolation by sourcing common.sh and calling functions directly.
-
-2. **tests/scripts/*.bats** -- Integration tests that run scripts as subprocesses. These replace the current test-arg-parsing.sh pattern but use BATS assertions instead of manual counters.
-
-3. **tests/helpers/common-setup.bash** -- Loaded by every .bats file. Sets PROJECT_ROOT, loads bats-support and bats-assert.
-
-4. **Existing tests kept alongside** -- No immediate migration required. They still pass, they still run. Migrate them to .bats format incrementally.
-
-### Component: tests/helpers/common-setup.bash
-
-This is the central helper that every test file loads.
+The existing guard pattern already handles JSON mode:
 
 ```bash
-#!/usr/bin/env bash
-# tests/helpers/common-setup.bash -- Shared BATS test setup
+if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
+    [[ ! -t 0 ]] && exit 0
+    read -rp "..." answer
+    # ...
+fi
+```
 
-_common_setup() {
-    # Load assertion libraries (works with both brew and CI BATS_LIB_PATH)
-    bats_load_library bats-support
-    bats_load_library bats-assert
+Since JSON mode requires `-x` (execute mode), `EXECUTE_MODE` is `"execute"`, so the entire `if` block is skipped. The interactive demo never runs in JSON mode. No changes needed.
 
-    # Resolve project root from test file location
-    PROJECT_ROOT="$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"
-    export PROJECT_ROOT
+---
 
-    # Make scripts accessible
-    SCRIPTS_DIR="${PROJECT_ROOT}/scripts"
-    export SCRIPTS_DIR
+## Handling Tool Output Diversity
+
+### Tool Native Structured Output Support
+
+| Tool | Native JSON/Structured Output | Flag |
+|------|-------------------------------|------|
+| nmap | XML via `-oX -` (stdout) | Well-structured, convertible |
+| nikto | JSON via `-Format json -o -` | Native JSON to stdout |
+| tshark | JSON via `-T json` | Native JSON output |
+| ffuf | JSON via `-of json -o -` | Native JSON output |
+| hashcat | Status JSON via `--status-json` | Status only, not crack results |
+| sqlmap | JSON via REST API (`sqlmapapi.py`) | Different interface than CLI |
+| gobuster | No native JSON | Text only |
+| john | No native JSON | Text only |
+| curl | Custom format via `-w` | Controlled format strings |
+| dig | No native JSON (text, +yaml) | Text/YAML |
+| hping3 | No native JSON | Text only |
+| metasploit | No native JSON (console) | Not designed for parsing |
+| aircrack-ng | No native JSON | Text only |
+| skipfish | No native JSON (HTML reports) | Not designed for parsing |
+| foremost | No native JSON (text audit) | Text only |
+| traceroute | No native JSON | Text only |
+| netcat | Raw stream | Not applicable |
+
+### Phase 1 Strategy: Raw Capture (All 46 Scripts)
+
+Store the raw stdout as a string in each result entry. This is correct and useful immediately -- downstream consumers can grep, parse, or display the raw output.
+
+```json
+{
+  "meta": {"tool": "nmap", "target": "192.168.1.0/24", "started": "...", "finished": "..."},
+  "results": [
+    {
+      "description": "1) Basic ping sweep of a subnet",
+      "exit_code": 0,
+      "stdout": "Starting Nmap 7.94 ...\nHost 192.168.1.1 is up (0.0045s latency).\n...",
+      "stderr": ""
+    }
+  ],
+  "summary": {"total": 10, "succeeded": 9, "failed": 1}
 }
 ```
 
-**Usage in test files:**
+**Why raw capture first:** Attempting to parse 17 different tool output formats in bash is an anti-pattern (see Anti-Patterns section). Raw capture works for ALL tools, ships in a single milestone, and provides immediate value for `| jq` pipelines.
 
-```bash
-setup() {
-    load 'helpers/common-setup'
-    _common_setup
+### Future Phase 2: Native Tool JSON (Deferred -- NOT in v1.4)
+
+For tools that support native structured output, a future milestone could:
+1. Add an optional `parsed` field to result entries (default: `null`)
+2. Modify specific scripts to request native JSON/XML from the tool
+3. Embed the parsed output as a nested JSON object
+
+This is explicitly OUT OF SCOPE for v1.4. The raw capture approach is complete and correct on its own.
+
+---
+
+## JSON Envelope Schema
+
+```json
+{
+  "meta": {
+    "tool": "nmap",
+    "target": "192.168.1.0/24",
+    "started": "2026-02-13T14:30:00Z",
+    "finished": "2026-02-13T14:30:45Z"
+  },
+  "results": [
+    {
+      "description": "1) Basic ping sweep of a subnet",
+      "exit_code": 0,
+      "stdout": "Starting Nmap 7.94 ( https://nmap.org ) ...\n...",
+      "stderr": ""
+    },
+    {
+      "description": "2) ARP discovery on local network",
+      "exit_code": 0,
+      "stdout": "...",
+      "stderr": ""
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "succeeded": 9,
+    "failed": 1
+  }
 }
 ```
 
-**Why `_common_setup` as a function, not bare code:** BATS documentation explicitly warns against running `load` and `source` outside of functions -- diagnostics are worse when errors occur in "free code". Wrapping in a function called from `setup()` follows the recommended pattern.
-
-**Why `bats_load_library` over `load 'test_helper/bats-support/load'`:** The `bats_load_library` approach works with any installation method (brew, npm, CI action) via the `BATS_LIB_PATH` environment variable. Hardcoded paths break across environments.
-
-### Component: tests/helpers/mock-commands.bash
-
-For testing scripts that require tools not installed in CI:
-
-```bash
-#!/usr/bin/env bash
-# tests/helpers/mock-commands.bash -- Command stubs for CI testing
-
-# Create a mock command that always succeeds
-create_mock_cmd() {
-    local cmd_name="$1"
-    local mock_dir="${BATS_TEST_TMPDIR}/mocks"
-    mkdir -p "$mock_dir"
-
-    cat > "${mock_dir}/${cmd_name}" <<'MOCK'
-#!/usr/bin/env bash
-# Mock: exits 0, outputs nothing
-exit 0
-MOCK
-    chmod +x "${mock_dir}/${cmd_name}"
-
-    # Prepend mock directory to PATH
-    export PATH="${mock_dir}:${PATH}"
-}
-```
-
-**Why mocks matter:** The scripts call `require_cmd nmap`, `require_cmd sqlmap`, etc. In CI, these tools are not installed. Without mocks, every integration test would fail at the require_cmd step. Mocks let tests validate script behavior (help output, argument parsing, output format) without requiring tool installation.
-
-### Component: Unit Test Pattern (tests/lib/*.bats)
-
-Example: `tests/lib/args.bats`
-
-```bash
-#!/usr/bin/env bats
-
-setup() {
-    load 'helpers/common-setup'
-    _common_setup
-
-    # Source the library under test
-    # Disable strict mode for test harness (matches existing test pattern)
-    show_help() { echo "help"; }
-    source "${SCRIPTS_DIR}/common.sh"
-    set +eEuo pipefail
-    trap - ERR
-}
-
-@test "parse_common_args: -v sets VERBOSE >= 1" {
-    VERBOSE=0
-    LOG_LEVEL="info"
-    EXECUTE_MODE="show"
-    REMAINING_ARGS=()
-
-    parse_common_args -v scanme.nmap.org
-
-    (( VERBOSE >= 1 ))
-}
-
-@test "parse_common_args: -q sets LOG_LEVEL to warn" {
-    VERBOSE=0
-    LOG_LEVEL="info"
-    EXECUTE_MODE="show"
-    REMAINING_ARGS=()
-
-    parse_common_args -q scanme.nmap.org
-
-    assert_equal "$LOG_LEVEL" "warn"
-}
-
-@test "parse_common_args: -x sets EXECUTE_MODE to execute" {
-    VERBOSE=0
-    LOG_LEVEL="info"
-    EXECUTE_MODE="show"
-    REMAINING_ARGS=()
-
-    parse_common_args -x scanme.nmap.org
-
-    assert_equal "$EXECUTE_MODE" "execute"
-    assert_equal "${REMAINING_ARGS[*]}" "scanme.nmap.org"
-}
-
-@test "parse_common_args: -- stops flag parsing" {
-    VERBOSE=0
-    LOG_LEVEL="info"
-    EXECUTE_MODE="show"
-    REMAINING_ARGS=()
-
-    parse_common_args -- -x scanme.nmap.org
-
-    assert_equal "$EXECUTE_MODE" "show"
-    assert_equal "${REMAINING_ARGS[*]}" "-x scanme.nmap.org"
-}
-```
-
-**Key pattern:** Source `common.sh` in `setup()`, then immediately disable strict mode with `set +eEuo pipefail` and clear the ERR trap. This matches what the existing test-arg-parsing.sh does (line 9: `set +eEu`, line 188: `set +eEuo pipefail`, line 189: `trap - ERR`). The reason is that BATS needs to control test execution flow itself -- strict mode's `set -e` would cause test failures to abort instead of being caught by BATS.
-
-**Defining `show_help()` before sourcing:** `parse_common_args` calls `show_help` on `-h`/`--help`. It must exist before sourcing common.sh or tests that invoke parse_common_args with those flags would fail. The existing test-arg-parsing.sh does exactly this (line 182).
-
-### Component: Integration Test Pattern (tests/scripts/*.bats)
-
-Example: `tests/scripts/help-flags.bats`
-
-```bash
-#!/usr/bin/env bats
-
-setup() {
-    load 'helpers/common-setup'
-    _common_setup
-}
-
-# Dynamically generate tests for all example scripts
-@test "nmap/examples.sh: --help exits 0" {
-    run bash "${SCRIPTS_DIR}/nmap/examples.sh" --help
-    assert_success
-}
-
-@test "nmap/examples.sh: --help contains Usage:" {
-    run bash "${SCRIPTS_DIR}/nmap/examples.sh" --help
-    assert_output --partial "Usage:"
-}
-
-@test "nmap/examples.sh: -x rejects non-interactive stdin" {
-    run bash -c "echo '' | bash '${SCRIPTS_DIR}/nmap/examples.sh' -x scanme.nmap.org"
-    assert_failure
-}
-```
-
-**Note on dynamic test generation:** BATS supports generating tests dynamically using `bats_test_function` but this is an advanced pattern. For the initial BATS setup, enumerate test cases explicitly. A helper script can generate the .bats file from the script list if needed later.
-
-### Component: CI Workflow (`.github/workflows/tests.yml`)
-
-```yaml
-name: Tests
-
-on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
-
-permissions:
-  contents: read
-
-jobs:
-  bats:
-    name: BATS tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup BATS
-        id: setup-bats
-        uses: bats-core/bats-action@4.0.0
-
-      - name: Run BATS tests
-        env:
-          BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
-          TERM: xterm
-        run: bats --recursive tests/ --filter-tags '!slow'
-
-  legacy-tests:
-    name: Legacy test scripts
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Run legacy tests
-        run: |
-          bash tests/test-library-loads.sh
-          bash tests/test-arg-parsing.sh
-```
-
-**Key decisions:**
-
-1. **Separate workflow file** (`tests.yml`) rather than adding to `shellcheck.yml`. ShellCheck and BATS have different concerns and should be independently reportable. They can run in parallel.
-
-2. **Two jobs initially:** The `bats` job runs new .bats tests. The `legacy-tests` job runs the existing bash test scripts unchanged. This allows incremental migration -- as tests move to BATS, the legacy job shrinks.
-
-3. **`bats --recursive tests/`:** Picks up all .bats files in tests/ and subdirectories automatically. New test files are automatically included.
-
-4. **`--filter-tags '!slow'`:** Allows marking integration tests that take long (e.g., ones that actually invoke tools) as `# bats test_tags=slow` and excluding them from CI. Fast unit tests always run.
-
-5. **`TERM: xterm`:** Required by bats-core for proper terminal output in CI.
-
-### Component: Makefile Integration
-
-```makefile
-test: ## Run BATS tests
-	@bats --recursive tests/
-
-test-legacy: ## Run legacy test scripts
-	@bash tests/test-arg-parsing.sh
-	@bash tests/test-library-loads.sh
-
-test-all: test test-legacy ## Run all tests
-```
-
-**Local BATS_LIB_PATH for macOS/Homebrew:**
-
-```bash
-# In shell profile or before running tests:
-export BATS_LIB_PATH="$(brew --prefix)/lib"
-```
-
-Or in Makefile:
-
-```makefile
-test: ## Run BATS tests
-	@BATS_LIB_PATH="$$(brew --prefix 2>/dev/null)/lib:${BATS_LIB_PATH:-}" bats --recursive tests/
-```
-
-## Script Metadata Headers
-
-### Decision: Structured Comment Block, NOT shdoc Annotations
-
-**Recommendation:** Add a structured comment header block to every script, parseable with simple grep/awk but readable as plain comments.
-
-**Why NOT shdoc (@description, @param, @example):** shdoc annotations are designed for documenting functions within library files, not for top-level script metadata. The project's scripts are not libraries with exported functions -- they are standalone CLI scripts. shdoc also requires installing an external tool (gawk dependency). The overhead is not justified.
-
-**Why NOT YAML frontmatter in comments:** Requires a YAML parser. Bash does not have one built in. Over-engineering for the use case.
-
-**Why structured comments:** They are human-readable without any tool, parseable with standard bash (grep, awk, cut), and extend the existing single-line comment header naturally.
-
-### Recommended Header Format
-
-```bash
-#!/usr/bin/env bash
-# ============================================================================
-# nmap/examples.sh -- Network Mapper: host discovery and port scanning
-#
-# Tool:        nmap
-# Category:    examples
-# Requires:    nmap
-# Target:      required
-# Since:       v1.0
-# ============================================================================
-source "$(dirname "$0")/../common.sh"
-```
-
-For use-case scripts:
-
-```bash
-#!/usr/bin/env bash
-# ============================================================================
-# nmap/discover-live-hosts.sh -- Find all active hosts on a subnet
-#
-# Tool:        nmap
-# Category:    use-case
-# Requires:    nmap
-# Target:      optional (default: localhost)
-# Since:       v1.2
-# ============================================================================
-source "$(dirname "$0")/../common.sh"
-```
-
-For library modules:
-
-```bash
-#!/usr/bin/env bash
-# ============================================================================
-# lib/logging.sh -- Logging functions with LOG_LEVEL filtering
-#
-# Category:    library
-# Provides:    info, success, warn, error, debug
-# Depends:     lib/colors.sh
-# Since:       v1.2
-# ============================================================================
-```
-
-### Header Fields
-
-| Field | Required | Values | Purpose |
-|-------|----------|--------|---------|
-| `Tool` | Scripts only | Tool name (nmap, sqlmap, etc.) | Which tool this script demonstrates |
-| `Category` | Always | `examples`, `use-case`, `diagnostic`, `checker`, `library` | Script classification |
-| `Requires` | Scripts only | Comma-separated command names | External dependencies |
-| `Target` | Scripts only | `required`, `optional (default: X)`, `none` | Whether target argument is needed |
-| `Since` | Always | Version tag | When introduced |
-| `Provides` | Library only | Comma-separated function names | Exported functions |
-| `Depends` | Library only | Comma-separated lib paths | Module dependencies |
-
-### Parsing Headers Programmatically
-
-Headers are designed to be extracted with simple bash:
-
-```bash
-# Extract a single field from a script header
-get_header_field() {
-    local script="$1"
-    local field="$2"
-    grep "^# ${field}:" "$script" | sed "s/^# ${field}:[[:space:]]*//"
-}
-
-# Example usage:
-tool=$(get_header_field scripts/nmap/examples.sh "Tool")    # "nmap"
-category=$(get_header_field scripts/nmap/examples.sh "Category")  # "examples"
-```
-
-This enables future BATS tests to validate headers:
-
-```bash
-@test "nmap/examples.sh: has valid Tool header" {
-    run get_header_field "${SCRIPTS_DIR}/nmap/examples.sh" "Tool"
-    assert_success
-    assert_output "nmap"
-}
-```
-
-### Migration Impact on Existing Source Pattern
-
-The header block is inserted between the shebang and the `source` line. It does NOT change the `source` line itself, the `show_help()` function, the `parse_common_args` call, or any script behavior.
-
-**Before:**
-```bash
-#!/usr/bin/env bash
-# nmap/examples.sh -- Network Mapper: host discovery and port scanning
-source "$(dirname "$0")/../common.sh"
-```
-
-**After:**
-```bash
-#!/usr/bin/env bash
-# ============================================================================
-# nmap/examples.sh -- Network Mapper: host discovery and port scanning
-#
-# Tool:        nmap
-# Category:    examples
-# Requires:    nmap
-# Target:      required
-# Since:       v1.0
-# ============================================================================
-source "$(dirname "$0")/../common.sh"
-```
-
-**Impact:** Zero behavioral change. The added lines are comments. ShellCheck ignores them. The `source` line remains on its original relative position. The `show_help()` function remains unchanged. This is purely additive metadata.
-
-### ShellCheck Compatibility
-
-The header block is pure comments. ShellCheck does not analyze comments. No `.shellcheckrc` changes needed. No `shellcheck disable` directives needed. The `source-path=SCRIPTDIR` resolution still works because the `source` line is unchanged.
-
-## Data Flow: Test Execution
-
-### BATS Unit Test Flow (tests/lib/*.bats)
-
-```
-bats tests/lib/args.bats
-  |
-  BATS evaluates file (counts @test blocks)
-  |
-  For each @test:
-    |
-    setup()
-    |  load 'helpers/common-setup'    # Relative to tests/
-    |  _common_setup()
-    |    bats_load_library bats-support
-    |    bats_load_library bats-assert
-    |    PROJECT_ROOT = resolved path
-    |
-    |  show_help() { echo "help"; }   # Stub for parse_common_args
-    |  source "${SCRIPTS_DIR}/common.sh"
-    |    -> lib/strict.sh             # set -eEuo pipefail, ERR trap
-    |    -> lib/colors.sh
-    |    -> lib/logging.sh
-    |    -> lib/validation.sh
-    |    -> lib/cleanup.sh            # Registers EXIT trap
-    |    -> lib/output.sh
-    |    -> lib/args.sh               # Defines parse_common_args
-    |    -> lib/diagnostic.sh
-    |    -> lib/nc_detect.sh
-    |
-    |  set +eEuo pipefail             # Disable strict mode for test control
-    |  trap - ERR                     # Clear ERR trap (BATS handles errors)
-    |
-    @test body executes
-    |  Call function under test
-    |  Assert results with bats-assert
-    |
-    teardown() (if defined)
-    |
-    BATS reports pass/fail (TAP format)
-```
-
-### BATS Integration Test Flow (tests/scripts/*.bats)
-
-```
-bats tests/scripts/help-flags.bats
-  |
-  For each @test:
-    |
-    setup()
-    |  load 'helpers/common-setup'
-    |  _common_setup()
-    |
-    @test body
-    |  run bash "${SCRIPTS_DIR}/nmap/examples.sh" --help
-    |    -> Script runs in subprocess (isolated)
-    |    -> BATS captures stdout+stderr in $output
-    |    -> BATS captures exit code in $status
-    |
-    |  assert_success                  # $status == 0
-    |  assert_output --partial "Usage:" # $output contains "Usage:"
-```
-
-**Key difference:** Unit tests source `common.sh` into the test process. Integration tests run scripts as subprocesses via `run bash`. Integration tests are slower but test the full script lifecycle.
-
-## Interaction Between BATS and Strict Mode
-
-This is the most critical integration concern.
-
-### The Problem
-
-The project uses `set -eEuo pipefail` (via `lib/strict.sh`) which causes the shell to exit on any command failure. BATS expects to control test execution flow itself -- a failed assertion should not abort the test process, it should be reported.
-
-### The Solution
-
-**For unit tests (sourcing common.sh):** Disable strict mode immediately after sourcing:
-
-```bash
-setup() {
-    ...
-    source "${SCRIPTS_DIR}/common.sh"
-    set +eEuo pipefail
-    trap - ERR
-}
-```
-
-This is safe because:
-1. All library functions are already defined (sourcing completed successfully)
-2. The test harness controls execution, not strict mode
-3. This matches exactly what the existing test-arg-parsing.sh does (line 187-189)
-
-**For integration tests (running scripts as subprocesses):** No issue. The `run` command executes in a subshell. The script's strict mode is contained within that subshell. BATS captures the exit code regardless.
-
-### The cleanup.sh EXIT Trap Interaction
-
-`lib/cleanup.sh` registers an EXIT trap. When sourced in a unit test:
-
-1. The EXIT trap will fire when the BATS test subprocess exits
-2. It will try to clean up `$_CLEANUP_BASE_DIR`
-3. This is harmless -- it cleans a temp directory
-
-However, if a test creates files via `make_temp`, those files are properly cleaned up by the EXIT trap. This is actually beneficial -- no test-specific cleanup code needed.
-
-**No special handling required.** The EXIT trap and BATS coexist correctly because each @test runs in its own subshell.
+**Field specifications:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `meta.tool` | string | Bare tool name (e.g., "nmap", not "nmap/discover-live-hosts") |
+| `meta.target` | string | Target argument as received by the script |
+| `meta.started` | string | ISO 8601 UTC timestamp when script began |
+| `meta.finished` | string | ISO 8601 UTC timestamp when json_finalize ran |
+| `results` | array | Ordered list of command execution results |
+| `results[].description` | string | Human-readable description (e.g., "1) Basic ping sweep...") |
+| `results[].exit_code` | integer | Command exit code (0 = success) |
+| `results[].stdout` | string | Raw captured stdout (may contain newlines, ANSI codes) |
+| `results[].stderr` | string | Raw captured stderr |
+| `summary.total` | integer | Count of results entries |
+| `summary.succeeded` | integer | Count where exit_code == 0 |
+| `summary.failed` | integer | Count where exit_code != 0 |
+
+---
 
 ## Patterns to Follow
 
-### Pattern 1: One .bats File Per Module
+### Pattern 1: fd Redirection for Clean Stdout (Critical)
 
-**What:** Each lib/*.sh module gets a corresponding tests/lib/*.bats file.
-**When:** Always, for library modules.
-**Why:** Clear mapping between source and test. Easy to find tests. Easy to run a single module's tests (`bats tests/lib/args.bats`).
+**What:** Use file descriptor 3 to preserve original stdout for JSON output, redirect normal stdout to stderr.
 
-### Pattern 2: setup() Loads, @test Asserts
+**When:** JSON mode activated in `parse_common_args`.
 
-**What:** All sourcing and environment setup happens in `setup()`. Test bodies only call functions and assert.
-**When:** All test files.
-**Why:** BATS documentation explicitly warns against loading files outside of functions. Setup failures get better diagnostics when they occur in `setup()`.
+**Why:** Standard Unix convention for machine-readable output. Zero changes needed to 46 scripts' echo/info lines.
 
 ```bash
-# GOOD:
-setup() {
-    load 'helpers/common-setup'
-    _common_setup
-    source "${SCRIPTS_DIR}/common.sh"
-    set +eEuo pipefail
-    trap - ERR
-}
+# In parse_common_args (args.sh):
+if [[ "${JSON_MODE:-0}" == "1" ]]; then
+    _json_require_jq
+    exec 3>&1 1>&2
+fi
 
-@test "require_target exits on empty arg" {
-    run require_target ""
-    assert_failure
-}
-
-# BAD:
-load 'helpers/common-setup'    # Outside function -- poor diagnostics on failure
-source "/path/to/common.sh"    # Outside function -- runs n+1 times
+# In json_finalize (json.sh):
+jq ... >&3
 ```
 
-### Pattern 3: Use `run` for Anything That Might Fail
+### Pattern 2: Source Guard Consistency
 
-**What:** Wrap function calls in `run` when testing failure cases.
-**When:** Testing exit codes, error messages, functions that call `exit`.
-**Why:** Without `run`, a function that calls `exit 1` will exit the entire test process (even with `set +e`, because `exit` is not a command failure -- it is an explicit exit). The `run` command executes in a subshell, containing the `exit`.
+**What:** `[[ -n "${_JSON_LOADED:-}" ]] && return 0; _JSON_LOADED=1` at top of json.sh.
+
+**When:** Always. Matches all 9 existing lib modules.
+
+### Pattern 3: Lazy jq Dependency
+
+**What:** Check jq availability at module load (non-fatal `_json_check_jq`), enforce at activation (fatal `_json_require_jq` with install hint).
+
+**When:** json.sh loads in EVERY script invocation. jq is only required when `-j` is used.
+
+**Why:** Don't break the 99% of invocations that never use `-j`. Only fail when user explicitly requests JSON.
+
+### Pattern 4: Non-Zero Exit Capture (Strict Mode Safety)
+
+**What:** Capture command exit codes without triggering `set -e`.
+
+**When:** Every `run_or_show` invocation in JSON+execute mode.
 
 ```bash
-# GOOD:
-@test "require_cmd fails when tool missing" {
-    run require_cmd nonexistent_tool_xyz
-    assert_failure
-    assert_output --partial "not installed"
-}
-
-# BAD (exits the test process):
-@test "require_cmd fails when tool missing" {
-    require_cmd nonexistent_tool_xyz    # Calls exit 1 -> kills test
-    # Never reaches here
-}
+"$@" > "$stdout_file" 2> "$stderr_file" && cmd_exit_code=0 || cmd_exit_code=$?
 ```
 
-### Pattern 4: Integration Tests Use Full Script Paths
+**Why:** Security tools frequently exit non-zero (nmap finding no hosts = exit 1, sqlmap finding no injection = exit 1). `set -e` would kill the script on the first "failure". The `&& 0 || $?` pattern captures the code without triggering ERR.
 
-**What:** Integration tests run scripts via `bash "$full_path"`, not by sourcing.
-**When:** Testing script-level behavior (help output, argument parsing, exit codes).
-**Why:** Sourcing a script would execute it in the test process, including `exit` calls. Running as a subprocess isolates the script completely.
+### Pattern 5: Consistent Per-Script Additions
+
+**What:** Every use-case script gets the same 2 additions in the same locations.
+
+**When:** All 46 scripts.
 
 ```bash
-@test "nmap/examples.sh: --help exits 0" {
-    run bash "${SCRIPTS_DIR}/nmap/examples.sh" --help
-    assert_success
-    assert_output --partial "Usage:"
-}
+# ALWAYS after TARGET assignment, before confirm_execute:
+json_set_meta "<tool>" "$TARGET"
+
+# ALWAYS as the last line of the script:
+json_is_active && json_finalize
 ```
 
-### Pattern 5: Mock Commands for CI
+**Why:** Consistent placement makes it trivial to verify completeness (grep for `json_set_meta` / `json_finalize`), easy to add to new scripts, and simple to test.
 
-**What:** Create stub executables on PATH to satisfy `require_cmd` checks in CI.
-**When:** Integration tests that run scripts requiring tools not available in CI.
-**Why:** The scripts exit immediately if `require_cmd` fails. Mocking the command lets the test proceed to validate help output, argument parsing, and other non-tool behavior.
-
-```bash
-setup() {
-    load 'helpers/common-setup'
-    _common_setup
-    load 'helpers/mock-commands'
-    create_mock_cmd "nmap"
-}
-```
+---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Sourcing Scripts Instead of Running Them
+### Anti-Pattern 1: Manual JSON String Construction
 
-**What:** Using `source scripts/nmap/examples.sh` in a test.
-**Why bad:** The script calls `parse_common_args "$@"`, `require_target`, `safety_banner`, etc. These will execute in the test process. The `exit` in `require_target` will kill the test. The interactive prompt will hang.
-**Instead:** Use `run bash "${SCRIPTS_DIR}/nmap/examples.sh" --help` for integration tests. Only source `common.sh` for unit testing library functions.
+**What:** Building JSON with `echo`, `printf`, or string concatenation.
 
-### Anti-Pattern 2: Testing Tool Behavior, Not Script Behavior
+**Why bad:** Tool output containing `"`, `\`, newlines, or control characters produces invalid JSON. A single nmap service banner with a quote character breaks everything.
 
-**What:** Writing tests that validate nmap actually scans ports.
-**Why bad:** The project is an educational toolkit. Scripts print example commands -- they do not (by default) execute them. Tests should validate the script's output format, help text, argument parsing, and exit codes. Not the behavior of the underlying security tools.
-**Instead:** Test that the script outputs expected example text, handles arguments correctly, and exits with correct codes.
+**Instead:** Always use `jq -n --arg` for string values. jq handles all escaping correctly.
 
-### Anti-Pattern 3: One Giant .bats File
+### Anti-Pattern 2: Per-Script JSON Templates
 
-**What:** Putting all 300+ test cases in a single file.
-**Why bad:** Slow to run (no parallelism within a file), hard to navigate, setup() becomes a kitchen sink.
-**Instead:** Split by concern: lib/ unit tests per module, scripts/ integration tests per behavior category.
+**What:** Each script constructs its own JSON envelope.
 
-### Anti-Pattern 4: Migrating All Legacy Tests at Once
+**Why bad:** 46 copies of envelope logic. Schema changes require 46 edits. Inconsistent field names.
 
-**What:** Rewriting test-arg-parsing.sh (268 checks) and test-library-loads.sh (39 checks) into BATS immediately.
-**Why bad:** High risk of introducing regressions. The existing tests work and validate important behavior.
-**Instead:** Keep legacy tests running in CI. Write new tests in BATS. Migrate legacy tests incrementally, one section at a time, verifying that the BATS version catches the same failures.
+**Instead:** All JSON construction lives in `lib/json.sh`. Scripts call `json_set_meta` and `json_finalize`.
+
+### Anti-Pattern 3: Parsing Tool Output in Bash
+
+**What:** Writing bash regex/awk/sed parsers to extract structured data from tool stdout.
+
+**Why bad:** Tool output formats are version-dependent, locale-dependent, and fragile. Maintenance cost explodes across 17 tools.
+
+**Instead:** Phase 1 stores raw stdout. If structured parsing is ever needed, use tools' native structured output (nmap `-oX`, nikto `-Format json`, tshark `-T json`).
+
+### Anti-Pattern 4: Pure-Bash JSON Fallback
+
+**What:** "If jq is installed use it, otherwise fall back to printf-based JSON."
+
+**Why bad:** The fallback is the dangerous path (Anti-Pattern 1). Two code paths. Untestable without removing jq.
+
+**Instead:** jq is a hard dependency when `-j` is used. Clear error message with install hint. jq is a single static binary available on every platform via every package manager.
+
+### Anti-Pattern 5: Modifying logging.sh for JSON Mode
+
+**What:** Adding `if json_is_active; then >&2` conditionals to every logging function.
+
+**Why bad:** 4 functions modified, 8+ lines changed, and the fd3 redirect already handles this for free.
+
+**Instead:** The `exec 1>&2` redirect in args.sh means logging functions automatically write to stderr without any changes.
+
+---
+
+## Edge Cases and Design Decisions
+
+### Scripts With No `run_or_show` Calls in Execute Mode
+
+Several scripts (e.g., `hashcat/crack-ntlm-hashes.sh`, `sqlmap/dump-database.sh`) have most examples as bare `info` + `echo` and only a few `run_or_show` calls. In JSON mode, only `run_or_show` calls produce results. These scripts may produce 2-3 results instead of 10:
+
+```json
+{"meta": {...}, "results": [{...}, {...}], "summary": {"total": 2, "succeeded": 2, "failed": 0}}
+```
+
+This is correct and expected. An empty or sparse results array signals "this script has few executable examples." The educational echo lines still appear on stderr for human visibility.
+
+### Commands Requiring sudo
+
+Many nmap and tshark commands use `sudo` (e.g., `sudo nmap -sn -PR ...`). In JSON mode, `run_or_show` captures stdout/stderr of the full `sudo command`. If sudo prompts for a password, the prompt goes to stderr (the real terminal). The user running `-j -x` should have sudo configured (cached credential or NOPASSWD).
+
+### Long-Running Commands
+
+tshark packet captures and skipfish scans can run indefinitely. Scripts that use these should pass count limiters (tshark `-c 50`, skipfish with timeouts) in their `run_or_show` calls. This is already the case in the existing scripts. No additional JSON-specific handling needed.
+
+### ANSI Color Codes in Captured Output
+
+Some tools emit ANSI escape codes in their output. These end up in the `stdout` field as literal escape sequences. This is acceptable -- `jq` handles the escaping correctly, and downstream consumers can strip ANSI if needed. The existing `NO_COLOR` / `[[ ! -t 1 ]]` detection in `colors.sh` affects the SCRIPT's colors, not the tool's.
+
+### Empty Target Argument
+
+Some scripts have optional targets with defaults (e.g., `TARGET="${1:-localhost}"`). `json_set_meta` receives the resolved default, which is correct -- the JSON should reflect what was actually used.
+
+### ERR Trap Interaction
+
+The `strict.sh` ERR trap calls `_strict_error_handler` which prints to stderr. In JSON mode, stderr IS the redirected stdout, so error traces appear on the terminal (correct). The ERR trap does NOT interfere with JSON output on fd3.
+
+The `&& cmd_exit_code=0 || cmd_exit_code=$?` pattern in `run_or_show` prevents the ERR trap from firing for expected non-zero exits from security tools.
+
+---
+
+## New vs Modified Files Summary
+
+### New Files
+
+| File | Purpose | Estimated Lines |
+|------|---------|----------------|
+| `scripts/lib/json.sh` | JSON formatting module -- all public/internal functions | ~100 |
+| `tests/lib-json.bats` | Unit tests for json.sh functions | ~120 |
+
+### Modified Files (Library -- 3 files)
+
+| File | What Changes | Est. Lines Changed |
+|------|-------------|-------------------|
+| `scripts/common.sh` | Add `source "${_LIB_DIR}/json.sh"` at position 6, update header comment | +2 |
+| `scripts/lib/args.sh` | Add `-j\|--json` case, post-loop validation, jq enforcement, fd redirect | +15 |
+| `scripts/lib/output.sh` | JSON branch in `run_or_show`, early return in `safety_banner` and `confirm_execute` | +15, ~3 lines modified |
+
+### Modified Files (Scripts -- 46 use-case scripts)
+
+Each script gets ~3 new lines:
+
+| Change | Line |
+|--------|------|
+| `json_set_meta "toolname" "$TARGET"` | After TARGET assignment |
+| `json_is_active && json_finalize` | Last line of script |
+
+Total: ~138 new lines across 46 files.
+
+### Modified Files (Tests)
+
+| File | What Changes |
+|------|-------------|
+| `tests/lib-args.bats` | Add tests for -j parsing, -j without -x rejection |
+| `tests/lib-output.bats` | Add tests for run_or_show in JSON mode |
+| `tests/intg-cli-contracts.bats` | Add JSON output contract tests (valid JSON, envelope schema) |
+
+### NOT Modified (Important)
+
+| File | Why Not |
+|------|---------|
+| `scripts/lib/logging.sh` | fd redirect handles stderr routing automatically |
+| `scripts/lib/strict.sh` | No interaction with JSON mode |
+| `scripts/lib/colors.sh` | No interaction with JSON mode |
+| `scripts/lib/cleanup.sh` | Only used (not modified) -- make_temp for output capture |
+| `scripts/lib/validation.sh` | No interaction with JSON mode |
+| `scripts/lib/diagnostic.sh` | Diagnostic scripts are Pattern B, out of scope for JSON |
+| `scripts/lib/nc_detect.sh` | No interaction with JSON mode |
+| 17 `examples.sh` scripts | Only 46 use-case scripts get JSON, not examples |
+| 3 diagnostic scripts | Different pattern (Pattern B), out of scope |
+
+---
 
 ## Build Order (Dependency-Driven)
 
-The following order respects dependencies between components:
+### Step 1: Create `lib/json.sh` -- Core Module
 
-### Step 1: BATS Infrastructure Setup
+Create the module with source guard, state variables, all 4 public functions (`json_is_active`, `json_set_meta`, `json_add_result`, `json_finalize`), and 2 internal functions (`_json_check_jq`, `_json_require_jq`).
 
-Create the test directory structure, common-setup.bash helper, and Makefile targets. Verify BATS can run a trivial test.
+**Depends on:** Nothing (standalone module, uses plain echo for errors, `make_temp` from cleanup.sh is only called via `run_or_show`).
 
-**Creates:** `tests/helpers/common-setup.bash`, `tests/setup_suite.bash`, Makefile `test` target
-**Depends on:** Nothing (foundational)
-**Risk:** LOW
+**Testable independently:** Yes -- can source json.sh and call functions in BATS.
 
-### Step 2: CI Workflow
+### Step 2: Add Source Line to `common.sh`
 
-Add `.github/workflows/tests.yml` with bats-action and legacy test job. Verify both BATS and legacy tests run in CI.
+Add `source "${_LIB_DIR}/json.sh"` between cleanup.sh and output.sh.
 
-**Creates:** `.github/workflows/tests.yml`
-**Depends on:** Step 1 (needs at least one .bats file to run)
-**Risk:** LOW
+**Depends on:** Step 1 (file must exist).
 
-### Step 3: Unit Tests for Library Modules
+**Risk:** Zero -- adding a source of a file that only defines functions and checks jq.
 
-Write tests/lib/*.bats for each lib module, starting with the most critical: args.bats (parse_common_args), validation.bats (require_cmd, require_target), logging.bats.
+### Step 3: Modify `lib/args.sh` -- Add `-j` Flag
 
-**Creates:** `tests/lib/args.bats`, `tests/lib/validation.bats`, `tests/lib/logging.bats`, `tests/lib/cleanup.bats`, `tests/lib/output.bats`
-**Depends on:** Step 1 (helpers must exist)
-**Risk:** LOW
+Add the `-j|--json` case, the post-loop `-j requires -x` validation, `_json_require_jq` call, and `exec 3>&1 1>&2` fd redirect.
 
-### Step 4: Integration Tests for Script Behavior
+**Depends on:** Steps 1-2 (json.sh functions must be loaded).
 
-Write tests/scripts/*.bats that test --help, -x rejection, and argument handling across all scripts. Add mock-commands.bash helper.
+### Step 4: Modify `lib/output.sh` -- JSON Hooks
 
-**Creates:** `tests/scripts/help-flags.bats`, `tests/scripts/execute-mode.bats`, `tests/helpers/mock-commands.bash`
-**Depends on:** Step 1, Step 3 (unit tests should pass first)
-**Risk:** LOW
+Add JSON branch in `run_or_show()`, early returns in `safety_banner()` and `confirm_execute()`.
 
-### Step 5: Script Metadata Headers
+**Depends on:** Steps 1-3 (JSON_MODE, json_is_active, json_add_result, make_temp must be available).
 
-Add structured comment headers to all 66 scripts. Write tests/scripts/header-metadata.bats to validate headers.
+### Step 5: Write Unit Tests (`tests/lib-json.bats`)
 
-**Creates:** Header blocks in all scripts, `tests/scripts/header-metadata.bats`
-**Depends on:** Step 1 (BATS infrastructure), Step 4 (integration test patterns established)
-**Risk:** LOW (headers are comments, zero behavioral change)
+Test all json.sh functions: envelope structure, result accumulation, jq escaping of special characters, empty results, json_is_active predicate.
 
-### Step 6: Incremental Legacy Test Migration
+**Depends on:** Steps 1-4 (library must be complete).
 
-Migrate sections of test-arg-parsing.sh to BATS format, one section at a time. Remove from legacy script once BATS equivalent passes.
+### Step 6: Migrate Use-Case Scripts (46 Scripts)
 
-**Modifies:** `tests/test-arg-parsing.sh` (shrinks), `tests/lib/args.bats` (grows), `tests/scripts/help-flags.bats` (grows)
-**Depends on:** Steps 3-4 (BATS patterns proven)
-**Risk:** LOW per section
+Add `json_set_meta` and `json_finalize` to each script. Batch by tool directory:
+- Batch 1: nmap (3 scripts) -- validate pattern
+- Batch 2: nikto, sqlmap (6 scripts)
+- Batch 3: tshark, hashcat, john (8 scripts)
+- Batch 4: curl, dig, gobuster, ffuf (7 scripts)
+- Batch 5: hping3, metasploit, netcat, traceroute (9 scripts)
+- Batch 6: aircrack-ng, skipfish, foremost (8 scripts)
 
-## Files Changed / Created Summary
+**Depends on:** Steps 1-5 (library tested, pattern proven with nmap batch).
 
-| File | Status | Purpose |
-|------|--------|---------|
-| `tests/helpers/common-setup.bash` | NEW | Shared BATS setup helper |
-| `tests/helpers/mock-commands.bash` | NEW | Command stubs for CI |
-| `tests/lib/args.bats` | NEW | Unit tests for parse_common_args |
-| `tests/lib/validation.bats` | NEW | Unit tests for require_cmd, etc. |
-| `tests/lib/logging.bats` | NEW | Unit tests for logging functions |
-| `tests/lib/cleanup.bats` | NEW | Unit tests for make_temp, etc. |
-| `tests/lib/output.bats` | NEW | Unit tests for run_or_show, etc. |
-| `tests/scripts/help-flags.bats` | NEW | All scripts --help exits 0 |
-| `tests/scripts/execute-mode.bats` | NEW | All scripts -x rejects non-interactive |
-| `tests/scripts/header-metadata.bats` | NEW | Validate header metadata fields |
-| `tests/setup_suite.bash` | NEW | Optional suite-level setup |
-| `.github/workflows/tests.yml` | NEW | CI workflow for BATS + legacy tests |
-| `Makefile` | MODIFIED | Add `test`, `test-legacy`, `test-all` targets |
-| `scripts/**/*.sh` (66 files) | MODIFIED | Add structured comment header blocks |
-| `tests/test-arg-parsing.sh` | KEPT | Legacy tests, migrate incrementally |
-| `tests/test-library-loads.sh` | KEPT | Legacy tests, migrate incrementally |
+### Step 7: Integration Tests
+
+Add JSON contract tests to `tests/intg-cli-contracts.bats`:
+- `-j -x` produces valid JSON (pipe to `jq .`)
+- JSON envelope has required fields (meta, results, summary)
+- `-j` without `-x` exits with error
+- `-j` without `jq` installed exits with error
+
+**Depends on:** Steps 1-6 (at least some scripts migrated).
+
+### Step 8: Documentation Updates
+
+Update show_help() in each script to mention `-j`/`--json`. Update site docs if needed.
+
+**Depends on:** Steps 1-7 (feature complete).
+
+---
+
+## Scalability Considerations
+
+| Concern | 3 commands | 10 commands | 50+ commands |
+|---------|-----------|-------------|-------------|
+| Memory (bash arrays) | Negligible | ~50KB in _JSON_RESULTS | ~500KB, fine |
+| Temp files | 6 files | 20 files | 100 files, auto-cleaned by EXIT trap |
+| jq invocations | 3 (add_result) + 1 (finalize) | 10 + 1 | 50 + 1, each is fast |
+| JSON output size | ~2KB | ~10KB | ~50KB, pipe to file if needed |
+
+No scalability concerns at the project's scale. The largest script runs 10 commands.
+
+---
 
 ## Sources
 
-### HIGH Confidence
-- [BATS-core Writing Tests](https://bats-core.readthedocs.io/en/stable/writing-tests.html) -- Official documentation on setup/teardown, load, run, bats_load_library
-- [BATS-core Tutorial](https://bats-core.readthedocs.io/en/stable/tutorial.html) -- Official tutorial on project structure, common-setup pattern
-- [bats-core/bats-action](https://github.com/bats-core/bats-action) -- Official GitHub Action (v4.0.0, released 2026-02-08)
-- [bats-core/bats-assert](https://github.com/bats-core/bats-assert) -- Assertion library documentation (assert_success, assert_output, assert_line)
-- [bats-core/bats-support](https://github.com/bats-core/bats-support) -- Required dependency of bats-assert
+### Codebase Analysis (Direct Observation -- HIGH Confidence)
 
-### MEDIUM Confidence
-- [HackerOne: Testing Bash Scripts with BATS](https://www.hackerone.com/blog/testing-bash-scripts-bats-practical-guide) -- Practical patterns for testing bash scripts with BATS
-- [Baeldung: Testing Bash Scripts with Bats](https://www.baeldung.com/linux/testing-bash-scripts-bats) -- Tutorial on BATS test organization
+- `scripts/common.sh` -- Module load order, source guard pattern (lines 17-34)
+- `scripts/lib/args.sh` -- `parse_common_args()` function signature, flag cases, REMAINING_ARGS pattern (lines 26-58)
+- `scripts/lib/output.sh` -- `run_or_show()`, `safety_banner()`, `confirm_execute()` signatures and behavior (lines 37-71)
+- `scripts/lib/logging.sh` -- `info()`, `warn()`, `error()` output patterns, stderr for error() (lines 49-82)
+- `scripts/lib/cleanup.sh` -- `make_temp()` function for temp file creation (lines 49-61)
+- `scripts/lib/strict.sh` -- `set -eEuo pipefail` and ERR trap behavior (lines 13-39)
+- `scripts/lib/colors.sh` -- `NO_COLOR` and `[[ ! -t 1 ]]` detection pattern (lines 22-35)
+- 8 representative use-case scripts analyzed for patterns: nmap/identify-ports.sh, nmap/discover-live-hosts.sh, nikto/scan-specific-vulnerabilities.sh, sqlmap/dump-database.sh, hashcat/crack-ntlm-hashes.sh, tshark/analyze-dns-queries.sh, curl/debug-http-response.sh, gobuster/discover-directories.sh
+- `tests/lib-output.bats` -- Existing test patterns for run_or_show and safety_banner
 
-### Codebase Analysis (Direct Observation)
-- `tests/test-arg-parsing.sh` -- 268 checks, existing test patterns for arg parsing and script behavior
-- `tests/test-library-loads.sh` -- 39 checks, existing patterns for function/variable validation
-- `scripts/common.sh` -- Entry point sourcing 9 lib modules
-- `scripts/lib/strict.sh` -- Strict mode and ERR trap (critical BATS interaction point)
-- `scripts/lib/args.sh` -- parse_common_args (primary unit test target)
-- `.github/workflows/shellcheck.yml` -- Existing CI workflow pattern
-- `.shellcheckrc` -- Existing ShellCheck configuration
+### External Sources (MEDIUM-HIGH Confidence)
+
+- [jq official site](https://jqlang.org/) -- jq 1.8.1 (July 2025), `--arg`/`--argjson`/`-n` flags, `-s` slurp mode
+- [Baeldung: Build JSON String with Bash Variables](https://www.baeldung.com/linux/bash-variables-create-json-string) -- Why jq over printf for JSON construction
+- [Nmap output formats](https://nmap.org/book/output.html) -- `-oX` XML output capability
+- [Nikto export formats](https://github.com/sullo/nikto/wiki/Export-Formats) -- `-Format json` native JSON
+- [tshark man page](https://www.wireshark.org/docs/man-pages/tshark.html) -- `-T json` and `-T ek` output
+- [ffuf GitHub](https://github.com/ffuf/ffuf) -- `-of json` output format
+- [hashcat machine_readable wiki](https://hashcat.net/wiki/doku.php?id=machine_readable) -- `--status-json` flag
