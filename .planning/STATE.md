@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Milestone v1.4 — JSON Output Mode (Phase 24: Library Unit Tests)
+**Current focus:** Milestone v1.4 — JSON Output Mode (Phase 25: Script Migration)
 
 ## Current Position
 
-Phase: 24 (Library Unit Tests) — second of 5 in v1.4
-Plan: 02 complete (2/2 plans in phase)
-Status: Phase 24 complete
-Last activity: 2026-02-13 — Completed 24-01 + 24-02 in parallel (JSON library and flag parsing tests)
+Phase: 25 (Script Migration) — third of 5 in v1.4
+Plan: 01 complete (1/4 plans in phase)
+Status: Executing phase 25
+Last activity: 2026-02-13 — Completed 25-01 (Group A script migration, 11 scripts)
 
-Progress: [####░░░░░░] 40% (v1.4 — 2/5 phases)
+Progress: [#####░░░░░] 50% (v1.4 — 2.25/5 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 53 (across v1.0-v1.4)
+- Total plans completed: 54 (across v1.0-v1.4)
 - Average duration: 4min
-- Total execution time: 3.75 hours
+- Total execution time: 3.87 hours
 
 **By Milestone:**
 
@@ -31,7 +31,7 @@ Progress: [####░░░░░░] 40% (v1.4 — 2/5 phases)
 | v1.1 | 4 | 4 | ~8min |
 | v1.2 | 6 | 18 | ~79min |
 | v1.3 | 5 | 9 | ~42min |
-| v1.4 | 2/5 | 3 | ~28min |
+| v1.4 | 2.25/5 | 4 | ~35min |
 
 ## Accumulated Context
 
@@ -49,6 +49,8 @@ Full cumulative decision table in PROJECT.md.
 - Phase 23-01: fd3 for JSON output (exec 3>&1 saves stdout, exec 1>&2 redirects to stderr)
 - Phase 23-01: Lazy jq dependency (check at source time, require only when -j parsed)
 - Phase 23-01: Color vars reset at parse time (colors.sh evaluates at source, -j resets at runtime)
+- Phase 25-01: Category parameter optional (empty string default) for backward compatibility
+- Phase 25-01: json_add_example for bare info+echo examples to capture all 10 results in JSON
 
 ### Pending Todos
 
@@ -68,5 +70,5 @@ None. (Phase 24 fd3 concern resolved: subprocess `exec 3>&-` pattern works, no n
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed phase 24 (24-01 + 24-02, library unit tests)
+Stopped at: Completed 25-01-PLAN.md (Group A script migration)
 Resume file: None
