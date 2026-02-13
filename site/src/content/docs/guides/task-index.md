@@ -1,6 +1,6 @@
 ---
 title: "I Want To..."
-description: "Find the right tool by what you're trying to do"
+description: "Find the right pentesting tool by task: port scanning, password cracking, SQL injection, packet capture, DNS lookups, web fuzzing, and more."
 sidebar:
   order: 3
 ---

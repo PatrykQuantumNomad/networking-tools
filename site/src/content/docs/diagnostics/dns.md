@@ -1,6 +1,6 @@
 ---
 title: "DNS Diagnostic"
-description: "Comprehensive DNS diagnostic auto-report for domain troubleshooting"
+description: "Automated DNS diagnostic report: resolver checks, authoritative lookups, DNSSEC validation, propagation testing, and MX/SPF/DMARC verification."
 sidebar:
   order: 1
 ---

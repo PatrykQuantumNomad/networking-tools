@@ -1,0 +1,96 @@
+---
+/**
+ * Custom Head component override for per-page JSON-LD structured data.
+ * Extends the default Starlight Head with TechArticle and BreadcrumbList schemas.
+ */
+const { head, entry, id } = Astro.locals.starlightRoute;
+const title = entry.data.title;
+const description = entry.data.description ?? '';
+const siteUrl = 'https://patrykquantumnomad.github.io/networking-tools';
+const pathname = Astro.url.pathname;
+const canonicalUrl = `${siteUrl}${pathname.replace('/networking-tools', '')}`;
+
+// Determine page type from URL path
+const isToolPage = pathname.includes('/tools/') && !pathname.endsWith('/tools/');
+const isGuidePage = pathname.includes('/guides/') && !pathname.endsWith('/guides/');
+const isDiagnosticPage = pathname.includes('/diagnostics/') && !pathname.endsWith('/diagnostics/');
+const isContentPage = isToolPage || isGuidePage || isDiagnosticPage;
+const isHomepage = pathname === '/networking-tools/' || pathname === '/networking-tools';
+
+// Build per-page TechArticle schema for content pages
+const pageSchema = isContentPage
+	? {
+			'@context': 'https://schema.org',
+			'@type': 'TechArticle',
+			headline: title,
+			description,
+			url: canonicalUrl,
+			author: {
+				'@type': 'Person',
+				'@id': 'https://patrykgolabek.dev/#person',
+				name: 'Patryk Golabek',
+				url: 'https://patrykgolabek.dev',
+			},
+			publisher: {
+				'@type': 'Person',
+				'@id': 'https://patrykgolabek.dev/#person',
+				name: 'Patryk Golabek',
+				url: 'https://patrykgolabek.dev',
+			},
+			isAccessibleForFree: true,
+			proficiencyLevel: 'Beginner',
+		}
+	: null;
+
+// Build BreadcrumbList schema from URL path segments
+const segments = pathname.replace('/networking-tools', '').split('/').filter(Boolean);
+const sectionLabels: Record<string, string> = {
+	tools: 'Tools',
+	guides: 'Guides',
+	diagnostics: 'Diagnostics',
+};
+
+const breadcrumbItems: Array<{ '@type': string; position: number; name: string; item: string }> =
+	[];
+
+if (!isHomepage && segments.length > 0) {
+	breadcrumbItems.push({ '@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/` });
+
+	if (segments.length >= 1 && sectionLabels[segments[0]]) {
+		breadcrumbItems.push({
+			'@type': 'ListItem',
+			position: 2,
+			name: sectionLabels[segments[0]],
+			item: `${siteUrl}/${segments[0]}/`,
+		});
+	}
+
+	if (segments.length >= 2) {
+		breadcrumbItems.push({
+			'@type': 'ListItem',
+			position: breadcrumbItems.length + 1,
+			name: title,
+			item: canonicalUrl,
+		});
+	}
+}
+
+const breadcrumbSchema =
+	breadcrumbItems.length > 1
+		? {
+				'@context': 'https://schema.org',
+				'@type': 'BreadcrumbList',
+				itemListElement: breadcrumbItems,
+			}
+		: null;
+---
+
+{head.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}
+
+{pageSchema && <script type="application/ld+json" set:html={JSON.stringify(pageSchema)} />}
+
+{
+	breadcrumbSchema && (
+		<script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+	)
+}

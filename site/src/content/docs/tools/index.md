@@ -1,6 +1,6 @@
 ---
 title: Tools
-description: Security and networking tool references
+description: "Reference guides for 17 security and networking tools: Nmap, TShark, Metasploit, SQLMap, Hashcat, Nikto, Aircrack-ng, curl, dig, and more."
 sidebar:
   hidden: true
 ---

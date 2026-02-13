@@ -1,6 +1,6 @@
 ---
 title: "Performance Diagnostic"
-description: "Hop-by-hop latency diagnostic using traceroute and mtr"
+description: "Automated network performance diagnostic: hop-by-hop latency analysis, packet loss detection, and route comparison using traceroute and mtr."
 sidebar:
   order: 3
 ---

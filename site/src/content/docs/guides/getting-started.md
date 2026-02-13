@@ -1,6 +1,6 @@
 ---
 title: Getting Started
-description: Install tools, verify setup, and start the practice lab
+description: "Step-by-step setup guide: install 17 pentesting tools via Homebrew or apt, verify your environment, and launch the Docker lab with DVWA and Juice Shop."
 sidebar:
   order: 1
 ---

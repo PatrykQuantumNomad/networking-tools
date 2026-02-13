@@ -1,6 +1,6 @@
 ---
 title: "Connectivity Diagnostic"
-description: "Layer-by-layer connectivity diagnostic from DNS to TLS for troubleshooting network issues"
+description: "Layer-by-layer connectivity diagnostic from DNS resolution to TLS handshake. Automated checks for routing, firewall, port, and certificate issues."
 sidebar:
   order: 2
 ---

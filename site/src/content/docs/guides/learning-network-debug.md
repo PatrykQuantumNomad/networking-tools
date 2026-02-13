@@ -1,6 +1,6 @@
 ---
 title: "Learning Path: Network Debugging"
-description: "Step-by-step guide to diagnosing network issues using dig, traceroute, hping3, curl, and tshark"
+description: "Step-by-step network debugging learning path using dig, traceroute, hping3, curl, and tshark. Diagnose DNS, routing, firewall, and TLS issues."
 sidebar:
   order: 12
 ---

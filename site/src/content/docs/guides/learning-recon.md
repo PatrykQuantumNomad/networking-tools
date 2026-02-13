@@ -1,6 +1,6 @@
 ---
 title: "Learning Path: Reconnaissance"
-description: "Step-by-step guide to network reconnaissance using dig, nmap, tshark, and metasploit"
+description: "Step-by-step network reconnaissance learning path using dig, nmap, tshark, and metasploit. From DNS enumeration to service exploitation."
 sidebar:
   order: 10
 ---

@@ -16,6 +16,7 @@ export default defineConfig({
 			customCss: ['./src/styles/custom.css'],
 			components: {
 				Footer: './src/components/Footer.astro',
+				Head: './src/components/Head.astro',
 			},
 			head: [
 				// Force dark theme
@@ -51,24 +52,29 @@ export default defineConfig({
 						codeRepository: 'https://github.com/PatrykQuantumNomad/networking-tools',
 					}),
 				},
-				// Open Graph
+				// Robots
 				{
 					tag: 'meta',
-					attrs: { property: 'og:type', content: 'website' },
+					attrs: { name: 'robots', content: 'index, follow' },
+				},
+				// OG image (site-wide)
+				{
+					tag: 'meta',
+					attrs: { property: 'og:image', content: 'https://patrykquantumnomad.github.io/networking-tools/og-image.png' },
 				},
 				{
 					tag: 'meta',
-					attrs: { property: 'og:site_name', content: 'Networking & Pentesting Tools' },
+					attrs: { property: 'og:image:width', content: '1200' },
 				},
 				{
 					tag: 'meta',
-					attrs: { property: 'og:locale', content: 'en_US' },
+					attrs: { property: 'og:image:height', content: '630' },
 				},
-				// Twitter card
 				{
 					tag: 'meta',
-					attrs: { name: 'twitter:card', content: 'summary' },
+					attrs: { property: 'og:image:alt', content: 'Networking & Pentesting Tools — 17 security tools with task scripts and Docker lab' },
 				},
+				// Twitter
 				{
 					tag: 'meta',
 					attrs: { name: 'twitter:creator', content: '@PatrykGolabek' },

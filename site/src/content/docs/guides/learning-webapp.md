@@ -1,6 +1,6 @@
 ---
 title: "Learning Path: Web App Testing"
-description: "Step-by-step guide to web application security testing using nmap, nikto, skipfish, sqlmap, and hash crackers"
+description: "Step-by-step web app security testing path using nmap, nikto, skipfish, sqlmap, and hash crackers. From discovery to exploitation against Docker targets."
 sidebar:
   order: 11
 ---
