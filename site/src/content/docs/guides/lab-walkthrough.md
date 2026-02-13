@@ -33,7 +33,7 @@ make check
 Install anything missing (macOS):
 
 ```bash
-brew install nmap wireshark aircrack-ng hashcat sqlmap draftbrew/tap/hping nikto john foremost
+brew install nmap wireshark aircrack-ng hashcat sqlmap draftbrew/tap/hping nikto john-jumbo foremost
 
 # Skipfish is not in Homebrew — install via MacPorts (https://www.macports.org)
 sudo port install skipfish

@@ -34,7 +34,7 @@ You do not need every tool to get started -- install what you plan to use. Here 
 ### macOS (Homebrew)
 
 ```bash
-brew install nmap wireshark aircrack-ng hashcat sqlmap nikto john foremost bind curl netcat
+brew install nmap wireshark aircrack-ng hashcat sqlmap nikto john-jumbo foremost bind curl netcat
 brew install draftbrew/tap/hping
 ```
 

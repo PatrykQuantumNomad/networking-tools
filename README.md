@@ -1,6 +1,10 @@
 # Networking Tools -- Pentesting Learning Lab
 
-A hands-on learning project for penetration testing and ethical hacking fundamentals using 11 open-source tools.
+> **Built by [Patryk Golabek](https://patrykgolabek.dev) -- Cloud-Native Software Architect**
+>
+> **[Documentation](https://patrykquantumnomad.github.io/networking-tools/)** | **[GitHub](https://github.com/PatrykQuantumNomad/networking-tools)**
+
+A hands-on learning project for penetration testing and ethical hacking fundamentals using 17 open-source tools, 28 task-focused scripts, and a Docker-based vulnerable lab.
 
 ## Tools Covered
 
@@ -17,6 +21,12 @@ A hands-on learning project for penetration testing and ethical hacking fundamen
 | **John the Ripper** | Password cracking | `scripts/john/examples.sh` |
 | **Nikto** | Web server vulnerability scanning | `scripts/nikto/examples.sh` |
 | **Foremost** | File carving & recovery | `scripts/foremost/examples.sh` |
+| **dig** | DNS record lookups & tracing | `scripts/dig/examples.sh` |
+| **curl** | HTTP requests & endpoint testing | `scripts/curl/examples.sh` |
+| **Netcat** | TCP/UDP connections & port scanning | `scripts/netcat/examples.sh` |
+| **Traceroute** | Route tracing & latency analysis | `scripts/traceroute/examples.sh` |
+| **ffuf** | Fast web fuzzer | `scripts/ffuf/examples.sh` |
+| **Gobuster** | Directory & subdomain enumeration | `scripts/gobuster/examples.sh` |
 
 ## Quick Start
 
@@ -25,7 +35,7 @@ A hands-on learning project for penetration testing and ethical hacking fundamen
 make check
 
 # 2. Install missing tools (macOS)
-brew install nmap wireshark aircrack-ng hashcat sqlmap draftbrew/tap/hping nikto john foremost
+brew install nmap wireshark aircrack-ng hashcat sqlmap draftbrew/tap/hping nikto john-jumbo foremost
 
 # Skipfish is not in Homebrew -- install via MacPorts (https://www.macports.org)
 sudo port install skipfish
@@ -72,6 +82,10 @@ make lab-status   # Check what's running
 For full WiFi testing, use a Linux VM (Kali) with a USB WiFi adapter.
 
 **Skipfish**: Not available in Homebrew. Install via [MacPorts](https://www.macports.org): `sudo port install skipfish`
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
 
 ## Legal Disclaimer
 

@@ -22,7 +22,8 @@ show_help() {
 parse_common_args "$@"
 set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
-require_cmd john "brew install john"
+require_cmd john "brew install john-jumbo  (john-jumbo includes *2john utilities)"
+setup_john_path
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
 confirm_execute

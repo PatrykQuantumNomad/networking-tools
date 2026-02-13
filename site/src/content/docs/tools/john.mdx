@@ -28,8 +28,10 @@ The script creates sample hash files for practice, then prints 10 example comman
   <TabItem label="macOS" icon="apple">
 
     ```bash
-    brew install john
+    brew install john-jumbo
     ```
+
+    Use `john-jumbo` (not `john`) to get the `*2john` hash extraction utilities.
 
   </TabItem>
   <TabItem label="Debian / Ubuntu" icon="linux">
@@ -266,7 +268,7 @@ john /tmp/test.hash
 - John's `--rules` applies word mutations (capitalize, append numbers, leet speak, etc.)
 - The `--incremental` mode tries all character combinations -- effective but very slow for long passwords
 - Session management: John auto-saves progress. Use `--restore` to resume after interruption
-- On macOS, install with `brew install john` (includes jumbo patch with all formats)
+- On macOS, install with `brew install john-jumbo` to get `*2john` utilities (zip2john, rar2john, etc.)
 - John and hashcat complement each other: John for file extraction + CPU cracking, hashcat for GPU speed
 
 ## Related Tools

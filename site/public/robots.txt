@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://patrykquantumnomad.github.io/networking-tools/sitemap-index.xml

@@ -37,7 +37,7 @@ declare -A TOOLS=(
     [skipfish]="sudo port install skipfish"
     [sqlmap]="brew install sqlmap"
     [hping3]="brew install draftbrew/tap/hping"
-    [john]="brew install john"
+    [john]="brew install john-jumbo"
     [nikto]="brew install nikto"
     [foremost]="brew install foremost"
     [dig]="apt install dnsutils (Debian/Ubuntu) | brew install bind (macOS)"
@@ -78,10 +78,10 @@ get_version() {
             echo "installed"
             ;;
         gobuster)
-            gobuster version 2>/dev/null | head -1
+            gobuster version 2>/dev/null | head -1 || true
             ;;
         ffuf)
-            ffuf -V 2>&1 | head -1
+            ffuf -V 2>&1 | head -1 || true
             ;;
         *)
             timeout 5 "$tool" --version 2>/dev/null | head -1 || echo "installed"
@@ -106,6 +106,6 @@ echo -e "${CYAN}$installed/$total tools installed${NC}"
 if [[ $installed -lt $total ]]; then
     echo ""
     info "Install all missing tools on macOS with:"
-    echo "  brew install nmap wireshark aircrack-ng hashcat skipfish sqlmap hping nikto john foremost"
+    echo "  brew install nmap wireshark aircrack-ng hashcat skipfish sqlmap hping nikto john-jumbo foremost"
     echo "  # Metasploit: see install link above"
 fi

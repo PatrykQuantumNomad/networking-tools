@@ -1,0 +1,24 @@
+{
+    "cSpell.words": [
+        "aircrack",
+        "capfile",
+        "DVWA",
+        "ffuf",
+        "gobuster",
+        "hashcat",
+        "hashfile",
+        "hostfile",
+        "hping",
+        "metasploit",
+        "netcat",
+        "nmap",
+        "pentesting",
+        "shellcheck",
+        "skipfish",
+        "sqlmap",
+        "traceroute",
+        "tshark",
+        "wlan",
+        "wordlists"
+    ]
+}

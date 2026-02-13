@@ -1,44 +1,77 @@
-# Makefile — Common operations for networking-tools
+# Makefile — networking-tools
+#
+# Usage:
+#   make                  Show all available targets
+#   make <target>         Run a specific target
+#   make <target> TARGET=<value>  Pass a target host/URL/file
+#
+# Examples:
+#   make check            Verify which tools are installed
+#   make lab-up           Start vulnerable lab containers
+#   make nmap TARGET=10.0.0.1
 
-.PHONY: check lab-up lab-down lab-status help lint wordlists site-dev site-build site-preview dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http netcat scan-ports nc-listener nc-transfer diagnose-dns diagnose-connectivity traceroute trace-path diagnose-latency compare-routes diagnose-performance gobuster discover-dirs enum-subdomains ffuf fuzz-params test test-verbose
+.DEFAULT_GOAL := help
+
+# ──────────────────────────────────────────────────────────────────
+# Configuration
+# ──────────────────────────────────────────────────────────────────
+
+SHELL       := /bin/bash
+COMPOSE     := docker compose -f labs/docker-compose.yml
+BATS        := ./tests/bats/bin/bats
+
+# ──────────────────────────────────────────────────────────────────
+# Help
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: help
 
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@printf "\n\033[1m  networking-tools\033[0m — pentesting learning lab\n\n"
+	@printf "  \033[2mUsage:\033[0m  make \033[36m<target>\033[0m [TARGET=<value>]\n\n"
+	@awk 'BEGIN {FS = ":.*##"} \
+		/^##@/ { printf "\n  \033[1;33m%s\033[0m\n", substr($$0, 5) } \
+		/^[a-zA-Z0-9_-]+:.*?## / { printf "    \033[36m%-24s\033[0m%s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+	@printf "\n"
 
-lint: ## Run ShellCheck on all shell scripts
-	@echo "Running ShellCheck (severity=warning)..."
-	@find . -name '*.sh' -not -path './site/*' -not -path './.planning/*' -not -path './node_modules/*' -not -path './tests/bats/*' -not -path './tests/test_helper/bats-*/*' -exec shellcheck --severity=warning {} +
-	@echo "All scripts pass ShellCheck."
+# ──────────────────────────────────────────────────────────────────
+##@ Setup
+# ──────────────────────────────────────────────────────────────────
 
-test: ## Run BATS test suite
-	@./tests/bats/bin/bats tests/ --timing
+.PHONY: check wordlists
 
-test-verbose: ## Run BATS tests with verbose TAP output
-	@./tests/bats/bin/bats tests/ --timing --verbose-run
-
-wordlists: ## Download wordlists for password cracking and web enumeration
-	@bash wordlists/download.sh
-
-check: ## Check which pentesting tools are installed
+check: ## Verify which pentesting tools are installed
 	@bash scripts/check-tools.sh
 
-lab-up: ## Start vulnerable lab targets (Docker)
-	docker compose -f labs/docker-compose.yml up -d
-	@echo ""
-	@echo "Lab targets:"
-	@echo "  DVWA:          http://localhost:8080  (admin/password)"
-	@echo "  Juice Shop:    http://localhost:3030"
-	@echo "  WebGoat:       http://localhost:8888/WebGoat"
-	@echo "  VulnerableApp: http://localhost:8180/VulnerableApp"
+wordlists: ## Download wordlists for password cracking & web enumeration
+	@bash wordlists/download.sh
 
-lab-down: ## Stop all lab targets
-	docker compose -f labs/docker-compose.yml down
+# ──────────────────────────────────────────────────────────────────
+##@ Lab Environment
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: lab-up lab-down lab-status
+
+lab-up: ## Start vulnerable lab targets (Docker)
+	$(COMPOSE) up -d
+	@printf "\n  \033[1mLab targets:\033[0m\n"
+	@printf "    \033[36mDVWA\033[0m           http://localhost:8080  (admin/password)\n"
+	@printf "    \033[36mJuice Shop\033[0m     http://localhost:3030\n"
+	@printf "    \033[36mWebGoat\033[0m        http://localhost:8888/WebGoat\n"
+	@printf "    \033[36mVulnerableApp\033[0m  http://localhost:8180/VulnerableApp\n\n"
+
+lab-down: ## Stop all lab containers
+	$(COMPOSE) down
 
 lab-status: ## Show status of lab containers
-	docker compose -f labs/docker-compose.yml ps
+	$(COMPOSE) ps
 
-# Site development
+# ──────────────────────────────────────────────────────────────────
+##@ Documentation Site
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: site-dev site-build site-preview
+
 site-dev: ## Start docs site dev server
 	@cd site && npm run dev
 
@@ -48,47 +81,70 @@ site-build: ## Build docs site for production
 site-preview: ## Preview docs production build
 	@cd site && npm run preview
 
-# Diagnostic targets
-diagnose-dns: ## Run DNS diagnostic (usage: make diagnose-dns TARGET=<domain>)
+# ──────────────────────────────────────────────────────────────────
+##@ Testing & Quality
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: test test-verbose lint
+
+test: ## Run BATS test suite
+	@$(BATS) tests/ --timing
+
+test-verbose: ## Run BATS tests with verbose TAP output
+	@$(BATS) tests/ --timing --verbose-run
+
+lint: ## Run ShellCheck on all shell scripts
+	@echo "Running ShellCheck (severity=warning)..."
+	@find . -name '*.sh' \
+		-not -path './site/*' \
+		-not -path './.planning/*' \
+		-not -path './node_modules/*' \
+		-not -path './tests/bats/*' \
+		-not -path './tests/test_helper/bats-*/*' \
+		-exec shellcheck --severity=warning {} +
+	@echo "All scripts pass ShellCheck."
+
+# ──────────────────────────────────────────────────────────────────
+##@ Diagnostics
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: diagnose-dns diagnose-connectivity diagnose-performance
+
+diagnose-dns: ## Run DNS diagnostic                       TARGET=<domain>
 	@bash scripts/diagnostics/dns.sh $(or $(TARGET),example.com)
 
-diagnose-connectivity: ## Run connectivity diagnostic (usage: make diagnose-connectivity TARGET=domain)
+diagnose-connectivity: ## Run connectivity diagnostic              TARGET=<domain>
 	@bash scripts/diagnostics/connectivity.sh $(or $(TARGET),example.com)
 
-# Tool-specific runners
-nmap: ## Run nmap examples (usage: make nmap TARGET=<ip>)
-	@bash scripts/nmap/examples.sh $(TARGET)
+diagnose-performance: ## Run performance diagnostic               TARGET=<host>
+	@bash scripts/diagnostics/performance.sh $(or $(TARGET),example.com)
+
+# ──────────────────────────────────────────────────────────────────
+##@ Reconnaissance — nmap
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: nmap identify-ports discover-hosts scan-web-vulns
+
+nmap: ## Run nmap examples                        TARGET=<ip>
+	@bash scripts/nmap/examples.sh $(or $(TARGET),localhost)
+
+identify-ports: ## Identify services behind open ports       TARGET=<ip>
+	@bash scripts/nmap/identify-ports.sh $(or $(TARGET),localhost)
+
+discover-hosts: ## Discover live hosts on a subnet           TARGET=<subnet>
+	@bash scripts/nmap/discover-live-hosts.sh $(or $(TARGET),localhost)
+
+scan-web-vulns: ## Scan web server for vulnerabilities       TARGET=<ip>
+	@bash scripts/nmap/scan-web-vulnerabilities.sh $(or $(TARGET),localhost)
+
+# ──────────────────────────────────────────────────────────────────
+##@ Traffic Analysis — tshark
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: tshark capture-creds analyze-dns extract-files
 
 tshark: ## Run tshark examples
 	@bash scripts/tshark/examples.sh
-
-sqlmap: ## Run sqlmap examples (usage: make sqlmap TARGET=<url>)
-	@bash scripts/sqlmap/examples.sh $(TARGET)
-
-nikto: ## Run nikto examples (usage: make nikto TARGET=<url>)
-	@bash scripts/nikto/examples.sh $(TARGET)
-
-hping3: ## Run hping3 examples (usage: make hping3 TARGET=<ip>)
-	@bash scripts/hping3/examples.sh $(TARGET)
-
-foremost: ## Run foremost examples (usage: make foremost TARGET=<image>)
-	@bash scripts/foremost/examples.sh $(TARGET)
-
-dig: ## Run dig examples (usage: make dig TARGET=<domain>)
-	@bash scripts/dig/examples.sh $(TARGET)
-
-curl: ## Run curl examples (usage: make curl TARGET=<url>)
-	@bash scripts/curl/examples.sh $(TARGET)
-
-identify-ports: ## Identify what's behind open ports (default: localhost)
-	@bash scripts/nmap/identify-ports.sh $(or $(TARGET),localhost)
-
-# Use-case scripts — specific tasks with correct parameters
-discover-hosts: ## Find live hosts on a subnet (usage: make discover-hosts TARGET=<subnet>)
-	@bash scripts/nmap/discover-live-hosts.sh $(or $(TARGET),localhost)
-
-scan-web-vulns: ## Scan web server for vulnerabilities (usage: make scan-web-vulns TARGET=<ip>)
-	@bash scripts/nmap/scan-web-vulnerabilities.sh $(or $(TARGET),localhost)
 
 capture-creds: ## Capture HTTP credentials from traffic
 	@bash scripts/tshark/capture-http-credentials.sh
@@ -96,106 +152,124 @@ capture-creds: ## Capture HTTP credentials from traffic
 analyze-dns: ## Monitor DNS query traffic
 	@bash scripts/tshark/analyze-dns-queries.sh
 
-extract-files: ## Extract files from packet captures (usage: make extract-files TARGET=<pcap>)
+extract-files: ## Extract files from packet captures        TARGET=<pcap>
 	@bash scripts/tshark/extract-files-from-capture.sh $(TARGET)
 
-gen-payload: ## Generate reverse shell payload (usage: make gen-payload TARGET=<lhost>)
+# ──────────────────────────────────────────────────────────────────
+##@ Exploitation — metasploit
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: gen-payload scan-services setup-listener
+
+gen-payload: ## Generate reverse shell payload             TARGET=<lhost>
 	@bash scripts/metasploit/generate-reverse-shell.sh $(TARGET)
 
-scan-services: ## Enumerate services with Metasploit scanners (usage: make scan-services TARGET=<ip>)
+scan-services: ## Enumerate services with Metasploit         TARGET=<ip>
 	@bash scripts/metasploit/scan-network-services.sh $(or $(TARGET),localhost)
 
-setup-listener: ## Setup reverse shell listener
+setup-listener: ## Setup reverse shell listener              TARGET=<lhost>
 	@bash scripts/metasploit/setup-listener.sh $(TARGET)
 
-crack-ntlm: ## Crack NTLM hashes (usage: make crack-ntlm TARGET=<hashfile>)
+# ──────────────────────────────────────────────────────────────────
+##@ Password Cracking — hashcat & john
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: crack-ntlm benchmark-gpu crack-web-hashes crack-linux-pw crack-archive identify-hash
+
+crack-ntlm: ## Crack NTLM hashes                        TARGET=<hashfile>
 	@bash scripts/hashcat/crack-ntlm-hashes.sh $(TARGET)
 
 benchmark-gpu: ## Benchmark GPU cracking speed
 	@bash scripts/hashcat/benchmark-gpu.sh
 
-crack-web-hashes: ## Crack web app hashes — MD5, SHA, bcrypt (usage: make crack-web-hashes TARGET=<hashfile>)
+crack-web-hashes: ## Crack web app hashes (MD5/SHA/bcrypt)     TARGET=<hashfile>
 	@bash scripts/hashcat/crack-web-hashes.sh $(TARGET)
 
 crack-linux-pw: ## Crack Linux /etc/shadow passwords
 	@bash scripts/john/crack-linux-passwords.sh
 
-crack-archive: ## Crack password-protected archives (usage: make crack-archive TARGET=<file>)
+crack-archive: ## Crack password-protected archives          TARGET=<file>
 	@bash scripts/john/crack-archive-passwords.sh $(TARGET)
 
-identify-hash: ## Identify unknown hash type (usage: make identify-hash TARGET=<hash>)
+identify-hash: ## Identify unknown hash type                TARGET=<hash>
 	@bash scripts/john/identify-hash-type.sh $(TARGET)
 
-dump-db: ## Dump database via SQL injection (usage: make dump-db TARGET=<url>)
+# ──────────────────────────────────────────────────────────────────
+##@ Web Application Testing — sqlmap, nikto & skipfish
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: sqlmap dump-db test-params bypass-waf nikto scan-vulns scan-hosts scan-auth scan-auth-app quick-scan
+
+sqlmap: ## Run sqlmap examples                       TARGET=<url>
+	@bash scripts/sqlmap/examples.sh $(or $(TARGET),http://localhost:8080)
+
+dump-db: ## Dump database via SQL injection            TARGET=<url>
 	@bash scripts/sqlmap/dump-database.sh $(TARGET)
 
-test-params: ## Test all parameters for SQLi (usage: make test-params TARGET=<url>)
+test-params: ## Test all parameters for SQLi               TARGET=<url>
 	@bash scripts/sqlmap/test-all-parameters.sh $(TARGET)
 
-bypass-waf: ## Bypass WAF with tamper scripts (usage: make bypass-waf TARGET=<url>)
+bypass-waf: ## Bypass WAF with tamper scripts             TARGET=<url>
 	@bash scripts/sqlmap/bypass-waf.sh $(TARGET)
 
-scan-vulns: ## Scan for specific vulnerability types (usage: make scan-vulns TARGET=<url>)
+nikto: ## Run nikto examples                        TARGET=<url>
+	@bash scripts/nikto/examples.sh $(or $(TARGET),http://localhost:8080)
+
+scan-vulns: ## Scan for specific vulnerability types      TARGET=<url>
 	@bash scripts/nikto/scan-specific-vulnerabilities.sh $(or $(TARGET),http://localhost:8080)
 
-scan-hosts: ## Scan multiple hosts with nikto (usage: make scan-hosts TARGET=<hostfile>)
+scan-hosts: ## Scan multiple hosts with nikto             TARGET=<hostfile>
 	@bash scripts/nikto/scan-multiple-hosts.sh $(TARGET)
 
-scan-auth: ## Authenticated nikto scan (usage: make scan-auth TARGET=<url>)
+scan-auth: ## Authenticated nikto scan                  TARGET=<url>
 	@bash scripts/nikto/scan-with-auth.sh $(or $(TARGET),http://localhost:8080)
 
-test-firewall: ## Test firewall rules with hping3 (usage: make test-firewall TARGET=<ip>)
-	@bash scripts/hping3/test-firewall-rules.sh $(or $(TARGET),localhost)
-
-detect-firewall: ## Detect firewall presence (usage: make detect-firewall TARGET=<ip>)
-	@bash scripts/hping3/detect-firewall.sh $(or $(TARGET),localhost)
-
-scan-auth-app: ## Authenticated skipfish scan (usage: make scan-auth-app TARGET=<url>)
+scan-auth-app: ## Authenticated skipfish scan                TARGET=<url>
 	@bash scripts/skipfish/scan-authenticated-app.sh $(or $(TARGET),http://localhost:8080)
 
-quick-scan: ## Quick web app scan (usage: make quick-scan TARGET=<url>)
+quick-scan: ## Quick web app scan with skipfish           TARGET=<url>
 	@bash scripts/skipfish/quick-scan-web-app.sh $(or $(TARGET),http://localhost:3030)
 
-capture-handshake: ## Capture WPA handshake (usage: make capture-handshake TARGET=<interface>)
-	@bash scripts/aircrack-ng/capture-handshake.sh $(or $(TARGET),wlan0)
+# ──────────────────────────────────────────────────────────────────
+##@ Web Fuzzing — gobuster & ffuf
+# ──────────────────────────────────────────────────────────────────
 
-crack-wpa: ## Crack WPA handshake (usage: make crack-wpa TARGET=<capfile>)
-	@bash scripts/aircrack-ng/crack-wpa-handshake.sh $(TARGET)
+.PHONY: gobuster discover-dirs enum-subdomains ffuf fuzz-params
 
-analyze-wifi: ## Survey wireless networks (usage: make analyze-wifi TARGET=<interface>)
-	@bash scripts/aircrack-ng/analyze-wireless-networks.sh $(or $(TARGET),wlan0)
+gobuster: ## Run gobuster examples                     TARGET=<url>
+	@bash scripts/gobuster/examples.sh $(or $(TARGET),http://localhost:8080)
 
-recover-files: ## Recover deleted files from disk image (usage: make recover-files TARGET=<image>)
-	@bash scripts/foremost/recover-deleted-files.sh $(TARGET)
+discover-dirs: ## Discover directories                      TARGET=<url>
+	@bash scripts/gobuster/discover-directories.sh $(or $(TARGET),http://localhost:8080)
 
-carve-filetypes: ## Carve specific file types from image (usage: make carve-filetypes TARGET=<image>)
-	@bash scripts/foremost/carve-specific-filetypes.sh $(TARGET)
+enum-subdomains: ## Enumerate subdomains                      TARGET=<domain>
+	@bash scripts/gobuster/enumerate-subdomains.sh $(or $(TARGET),example.com)
 
-analyze-forensic: ## Analyze forensic disk image (usage: make analyze-forensic TARGET=<image>)
-	@bash scripts/foremost/analyze-forensic-image.sh $(TARGET)
+ffuf: ## Run ffuf examples                         TARGET=<url>
+	@bash scripts/ffuf/examples.sh $(or $(TARGET),http://localhost:8080)
 
-query-dns: ## Query DNS records (usage: make query-dns TARGET=<domain>)
-	@bash scripts/dig/query-dns-records.sh $(or $(TARGET),example.com)
+fuzz-params: ## Fuzz parameters                           TARGET=<url>
+	@bash scripts/ffuf/fuzz-parameters.sh $(or $(TARGET),http://localhost:8080)
 
-check-dns-prop: ## Check DNS propagation (usage: make check-dns-prop TARGET=<domain>)
-	@bash scripts/dig/check-dns-propagation.sh $(or $(TARGET),example.com)
+# ──────────────────────────────────────────────────────────────────
+##@ Network Utilities — hping3, netcat & traceroute
+# ──────────────────────────────────────────────────────────────────
 
-zone-transfer: ## Attempt DNS zone transfer (usage: make zone-transfer TARGET=<domain>)
-	@bash scripts/dig/attempt-zone-transfer.sh $(or $(TARGET),example.com)
+.PHONY: hping3 test-firewall detect-firewall netcat scan-ports nc-listener nc-transfer traceroute trace-path diagnose-latency compare-routes
 
-test-http: ## Test HTTP endpoints (usage: make test-http TARGET=<url>)
-	@bash scripts/curl/test-http-endpoints.sh $(or $(TARGET),https://example.com)
+hping3: ## Run hping3 examples                       TARGET=<ip>
+	@bash scripts/hping3/examples.sh $(or $(TARGET),localhost)
 
-check-ssl: ## Check SSL certificate (usage: make check-ssl TARGET=<domain>)
-	@bash scripts/curl/check-ssl-certificate.sh $(or $(TARGET),example.com)
+test-firewall: ## Test firewall rules with hping3            TARGET=<ip>
+	@bash scripts/hping3/test-firewall-rules.sh $(or $(TARGET),localhost)
 
-debug-http: ## Debug HTTP response timing (usage: make debug-http TARGET=<url>)
-	@bash scripts/curl/debug-http-response.sh $(or $(TARGET),https://example.com)
+detect-firewall: ## Detect firewall presence                  TARGET=<ip>
+	@bash scripts/hping3/detect-firewall.sh $(or $(TARGET),localhost)
 
-netcat: ## Run netcat examples (usage: make netcat TARGET=<ip>)
-	@bash scripts/netcat/examples.sh $(TARGET)
+netcat: ## Run netcat examples                       TARGET=<ip>
+	@bash scripts/netcat/examples.sh $(or $(TARGET),localhost)
 
-scan-ports: ## Scan ports with netcat (usage: make scan-ports TARGET=<ip>)
+scan-ports: ## Scan ports with netcat                    TARGET=<ip>
 	@bash scripts/netcat/scan-ports.sh $(or $(TARGET),127.0.0.1)
 
 nc-listener: ## Setup netcat listener
@@ -204,32 +278,77 @@ nc-listener: ## Setup netcat listener
 nc-transfer: ## Transfer files with netcat
 	@bash scripts/netcat/transfer-files.sh
 
-traceroute: ## Run traceroute/mtr examples (usage: make traceroute TARGET=<host>)
-	@bash scripts/traceroute/examples.sh $(TARGET)
+traceroute: ## Run traceroute/mtr examples               TARGET=<host>
+	@bash scripts/traceroute/examples.sh $(or $(TARGET),example.com)
 
-trace-path: ## Trace network path (usage: make trace-path TARGET=<host>)
+trace-path: ## Trace network path                        TARGET=<host>
 	@bash scripts/traceroute/trace-network-path.sh $(or $(TARGET),example.com)
 
-diagnose-latency: ## Diagnose per-hop latency with mtr (usage: make diagnose-latency TARGET=<host>)
+diagnose-latency: ## Diagnose per-hop latency with mtr          TARGET=<host>
 	@bash scripts/traceroute/diagnose-latency.sh $(or $(TARGET),example.com)
 
-compare-routes: ## Compare TCP/ICMP/UDP routes (usage: make compare-routes TARGET=<host>)
+compare-routes: ## Compare TCP/ICMP/UDP routes               TARGET=<host>
 	@bash scripts/traceroute/compare-routes.sh $(or $(TARGET),example.com)
 
-diagnose-performance: ## Run performance diagnostic (usage: make diagnose-performance TARGET=<host>)
-	@bash scripts/diagnostics/performance.sh $(or $(TARGET),example.com)
+# ──────────────────────────────────────────────────────────────────
+##@ DNS & HTTP — dig & curl
+# ──────────────────────────────────────────────────────────────────
 
-gobuster: ## Run gobuster examples (usage: make gobuster TARGET=<url>)
-	@bash scripts/gobuster/examples.sh $(TARGET)
+.PHONY: dig query-dns check-dns-prop zone-transfer curl test-http check-ssl debug-http
 
-discover-dirs: ## Discover directories (usage: make discover-dirs TARGET=<url>)
-	@bash scripts/gobuster/discover-directories.sh $(or $(TARGET),http://localhost:8080)
+dig: ## Run dig examples                          TARGET=<domain>
+	@bash scripts/dig/examples.sh $(or $(TARGET),example.com)
 
-enum-subdomains: ## Enumerate subdomains (usage: make enum-subdomains TARGET=<domain>)
-	@bash scripts/gobuster/enumerate-subdomains.sh $(or $(TARGET),example.com)
+query-dns: ## Query DNS records                         TARGET=<domain>
+	@bash scripts/dig/query-dns-records.sh $(or $(TARGET),example.com)
 
-ffuf: ## Run ffuf examples (usage: make ffuf TARGET=<url>)
-	@bash scripts/ffuf/examples.sh $(TARGET)
+check-dns-prop: ## Check DNS propagation                     TARGET=<domain>
+	@bash scripts/dig/check-dns-propagation.sh $(or $(TARGET),example.com)
 
-fuzz-params: ## Fuzz parameters (usage: make fuzz-params TARGET=<url>)
-	@bash scripts/ffuf/fuzz-parameters.sh $(or $(TARGET),http://localhost:8080)
+zone-transfer: ## Attempt DNS zone transfer                 TARGET=<domain>
+	@bash scripts/dig/attempt-zone-transfer.sh $(or $(TARGET),example.com)
+
+curl: ## Run curl examples                         TARGET=<url>
+	@bash scripts/curl/examples.sh $(or $(TARGET),https://example.com)
+
+test-http: ## Test HTTP endpoints                       TARGET=<url>
+	@bash scripts/curl/test-http-endpoints.sh $(or $(TARGET),https://example.com)
+
+check-ssl: ## Check SSL certificate                     TARGET=<domain>
+	@bash scripts/curl/check-ssl-certificate.sh $(or $(TARGET),example.com)
+
+debug-http: ## Debug HTTP response timing                TARGET=<url>
+	@bash scripts/curl/debug-http-response.sh $(or $(TARGET),https://example.com)
+
+# ──────────────────────────────────────────────────────────────────
+##@ Wireless — aircrack-ng
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: capture-handshake crack-wpa analyze-wifi
+
+capture-handshake: ## Capture WPA handshake                     TARGET=<iface>
+	@bash scripts/aircrack-ng/capture-handshake.sh $(or $(TARGET),wlan0)
+
+crack-wpa: ## Crack WPA handshake                       TARGET=<capfile>
+	@bash scripts/aircrack-ng/crack-wpa-handshake.sh $(TARGET)
+
+analyze-wifi: ## Survey wireless networks                  TARGET=<iface>
+	@bash scripts/aircrack-ng/analyze-wireless-networks.sh $(or $(TARGET),wlan0)
+
+# ──────────────────────────────────────────────────────────────────
+##@ Forensics — foremost
+# ──────────────────────────────────────────────────────────────────
+
+.PHONY: foremost recover-files carve-filetypes analyze-forensic
+
+foremost: ## Run foremost examples                     TARGET=<image>
+	@bash scripts/foremost/examples.sh $(TARGET)
+
+recover-files: ## Recover deleted files from disk image      TARGET=<image>
+	@bash scripts/foremost/recover-deleted-files.sh $(TARGET)
+
+carve-filetypes: ## Carve specific file types from image       TARGET=<image>
+	@bash scripts/foremost/carve-specific-filetypes.sh $(TARGET)
+
+analyze-forensic: ## Analyze forensic disk image               TARGET=<image>
+	@bash scripts/foremost/analyze-forensic-image.sh $(TARGET)

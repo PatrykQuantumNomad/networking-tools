@@ -24,7 +24,8 @@ EOF
 parse_common_args "$@"
 set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
-require_cmd john "brew install john"
+require_cmd john "brew install john-jumbo  (john-jumbo includes *2john utilities)"
+setup_john_path
 confirm_execute
 safety_banner
 

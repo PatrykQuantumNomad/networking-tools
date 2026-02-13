@@ -33,6 +33,37 @@ require_cmd() {
     fi
 }
 
+# Add john-jumbo's *2john utilities to PATH if they aren't already findable.
+# Homebrew installs zip2john, rar2john, etc. in share/john/ instead of bin/.
+setup_john_path() {
+    # Already on PATH — nothing to do
+    command -v zip2john &>/dev/null && return 0
+
+    local john_share=""
+
+    # macOS: Homebrew (Intel or Apple Silicon)
+    for prefix in /opt/homebrew/opt/john-jumbo /usr/local/opt/john-jumbo; do
+        if [[ -d "${prefix}/share/john" ]]; then
+            john_share="${prefix}/share/john"
+            break
+        fi
+    done
+
+    # Linux: common package locations
+    if [[ -z "$john_share" ]]; then
+        for dir in /usr/share/john /usr/lib/john; do
+            if [[ -x "${dir}/zip2john" ]]; then
+                john_share="$dir"
+                break
+            fi
+        done
+    fi
+
+    if [[ -n "$john_share" ]]; then
+        export PATH="${john_share}:${PATH}"
+    fi
+}
+
 # Validate that a target IP/hostname was provided
 require_target() {
     if [[ -z "${1:-}" ]]; then

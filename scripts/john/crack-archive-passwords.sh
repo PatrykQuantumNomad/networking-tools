@@ -23,7 +23,15 @@ show_help() {
 parse_common_args "$@"
 set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
-require_cmd john "brew install john"
+require_cmd john "brew install john-jumbo  (john-jumbo includes *2john utilities)"
+setup_john_path
+
+if ! check_cmd zip2john; then
+    warn "zip2john not found — you may have classic 'john' instead of 'john-jumbo'"
+    warn "The *2john extraction utilities (zip2john, rar2john, etc.) only ship with john-jumbo."
+    warn "Fix: brew uninstall john && brew install john-jumbo"
+    echo ""
+fi
 
 ARCHIVE="${1:-}"
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
@@ -131,7 +139,8 @@ if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
                 info "Running: john --show ${TMPDIR}/zip.hash"
                 john --show "${TMPDIR}/zip.hash" 2>/dev/null || true
             else
-                warn "zip2john not found — install john with: brew install john"
+                warn "zip2john not found — you need john-jumbo (not classic john)"
+                warn "Fix: brew uninstall john && brew install john-jumbo"
             fi
         else
             warn "zip command not found — cannot create demo archive"
