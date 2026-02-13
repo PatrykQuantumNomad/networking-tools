@@ -13,6 +13,7 @@ _JSON_LOADED=1
 JSON_MODE="${JSON_MODE:-0}"
 _JSON_TOOL=""
 _JSON_TARGET=""
+_JSON_CATEGORY=""
 _JSON_SCRIPT=""
 _JSON_STARTED=""
 _JSON_RESULTS=()
@@ -41,11 +42,12 @@ json_is_active() {
 }
 
 # --- Public: set metadata for the JSON envelope ---
-# Usage: json_set_meta "tool" "target"
+# Usage: json_set_meta "tool" "target" ["category"]
 json_set_meta() {
     json_is_active || return 0
     _JSON_TOOL="$1"
     _JSON_TARGET="${2:-}"
+    _JSON_CATEGORY="${3:-}"
     _JSON_SCRIPT="$(basename "${BASH_SOURCE[1]:-unknown}" .sh)"
     _JSON_STARTED="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 }
@@ -112,6 +114,7 @@ json_finalize() {
         --arg tool "$_JSON_TOOL" \
         --arg script "$_JSON_SCRIPT" \
         --arg target "$_JSON_TARGET" \
+        --arg category "$_JSON_CATEGORY" \
         --arg started "$_JSON_STARTED" \
         --arg finished "$finished" \
         --arg mode "$mode" \
@@ -122,6 +125,7 @@ json_finalize() {
                 tool: $tool,
                 script: $script,
                 target: $target,
+                category: $category,
                 started: $started,
                 finished: $finished,
                 mode: $mode
