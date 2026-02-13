@@ -8,6 +8,7 @@
 *.csv
 *.xml
 *.html
+!site/public/google*.html
 
 # Hashcat/John working files
 *.restore
