@@ -28,6 +28,8 @@ require_cmd sqlmap "brew install sqlmap"
 
 TARGET="${1:-}"
 
+json_set_meta "sqlmap" "$TARGET" "sql-injection"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -72,6 +74,8 @@ run_or_show "3) Test POST request data" \
 info "4) Test from a saved HTTP request file"
 echo "   sqlmap -r request.txt --batch"
 echo ""
+json_add_example "Test from a saved HTTP request file" \
+    "sqlmap -r request.txt --batch"
 
 # 5. Test specific parameter only
 run_or_show "5) Test a specific parameter only" \
@@ -96,6 +100,8 @@ run_or_show "9) Specify DBMS to skip fingerprinting and speed up testing" \
 # 10. Verbose output for debugging
 run_or_show "10) Verbose output for debugging failed detections" \
     sqlmap -u "$URL" --batch -v 3 --level=3
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

@@ -27,6 +27,8 @@ require_cmd nmap "brew install nmap"
 
 TARGET="${1:-localhost}"
 
+json_set_meta "nmap" "$TARGET" "network-scanner"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -85,6 +87,8 @@ run_or_show "9) Enumerate web server info + headers" \
 # 10. Comprehensive scan
 run_or_show "10) Comprehensive: all web vuln scripts + service detection" \
     sudo nmap -sV -p80,443,8080,8443 --script "http-vuln-* or http-enum or http-methods" "$TARGET"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

@@ -37,6 +37,8 @@ require_cmd traceroute "apt install traceroute (Debian/Ubuntu) | dnf install tra
 TARGET="${1:-example.com}"
 OS_TYPE="$(uname -s)"
 
+json_set_meta "traceroute" "$TARGET" "network-analysis"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -107,6 +109,15 @@ else
     echo "    Note: Linux uses -A for AS lookups (macOS does not support -A)"
 fi
 echo ""
+if [[ "$OS_TYPE" == "Darwin" ]]; then
+    json_add_example "Trace with AS number lookups — show autonomous system for each hop" \
+        "traceroute -a ${TARGET}"
+else
+    json_add_example "Trace with AS number lookups — show autonomous system for each hop" \
+        "traceroute -A ${TARGET}"
+fi
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

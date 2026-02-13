@@ -27,6 +27,8 @@ require_cmd skipfish "sudo port install skipfish"
 
 TARGET="${1:-http://localhost:8080}"
 
+json_set_meta "skipfish" "$TARGET" "web-scanner"
+
 confirm_execute "$TARGET"
 safety_banner
 
@@ -88,6 +90,10 @@ run_or_show "9) Rate-limited authenticated scan" \
 info "10) Full DVWA authenticated scan"
 echo "    skipfish -o dvwa_scan/ -C \"PHPSESSID=SESSION; security=low\" -d 3 http://localhost:8080"
 echo ""
+json_add_example "Full DVWA authenticated scan" \
+    "skipfish -o dvwa_scan/ -C \"PHPSESSID=SESSION; security=low\" -d 3 http://localhost:8080"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

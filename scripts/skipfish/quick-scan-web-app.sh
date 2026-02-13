@@ -27,6 +27,8 @@ require_cmd skipfish "sudo port install skipfish"
 
 TARGET="${1:-http://localhost:3030}"
 
+json_set_meta "skipfish" "$TARGET" "web-scanner"
+
 confirm_execute "$TARGET"
 safety_banner
 
@@ -85,6 +87,10 @@ run_or_show "9) Quick scan — depth 2, max 200 requests" \
 info "10) Scan multiple lab targets quickly"
 echo "    for t in 8080 3030 8888; do skipfish -o \"output_\${t}/\" -d 2 -c 100 \"http://localhost:\${t}\"; done"
 echo ""
+json_add_example "Scan multiple lab targets quickly" \
+    "for t in 8080 3030 8888; do skipfish -o \"output_\${t}/\" -d 2 -c 100 \"http://localhost:\${t}\"; done"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

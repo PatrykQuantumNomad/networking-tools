@@ -30,6 +30,8 @@ require_cmd dig "apt install dnsutils (Debian/Ubuntu) | dnf install bind-utils (
 
 TARGET="${1:-example.com}"
 
+json_set_meta "dig" "$TARGET" "network-analysis"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -87,6 +89,8 @@ run_or_show "9) Short output — clean results for scripting" \
 # 10. Query specific DNS server
 run_or_show "10) Query via specific DNS server (Cloudflare)" \
     dig @1.1.1.1 "$TARGET" A +noall +answer
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

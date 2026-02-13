@@ -29,6 +29,8 @@ require_cmd nmap "brew install nmap"
 
 TARGET="${1:-localhost}"
 
+json_set_meta "nmap" "$TARGET" "network-scanner"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -88,6 +90,8 @@ run_or_show "9) Output results to greppable format" \
 # 10. Aggressive combined discovery
 run_or_show "10) Aggressive discovery combining all methods" \
     sudo nmap -sn -PE -PP -PM -PS21,22,25,80,443,8080 -PA80,443 -PU53 "$TARGET/24"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

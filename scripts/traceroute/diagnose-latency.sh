@@ -37,6 +37,8 @@ require_cmd mtr "apt install mtr (Debian/Ubuntu) | dnf install mtr (RHEL/Fedora)
 TARGET="${1:-example.com}"
 OS_TYPE="$(uname -s)"
 
+json_set_meta "traceroute" "$TARGET" "network-analysis"
+
 # mtr sudo detection (TOOL-018): warn and exit on macOS without sudo
 if [[ "$OS_TYPE" == "Darwin" ]] && [[ $EUID -ne 0 ]]; then
     warn "mtr requires sudo on macOS (raw socket access)"
@@ -100,6 +102,10 @@ echo "    mtr --report -n -c 10 ${TARGET}"
 echo "    mtr --report -n -c 10 8.8.8.8"
 echo "    Tip: compare loss% and avg latency at each hop"
 echo ""
+json_add_example "Compare two destinations — run reports sequentially" \
+    "mtr --report -n -c 10 ${TARGET} && mtr --report -n -c 10 8.8.8.8"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

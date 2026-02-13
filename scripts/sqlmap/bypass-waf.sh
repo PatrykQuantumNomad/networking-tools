@@ -28,6 +28,8 @@ require_cmd sqlmap "brew install sqlmap"
 
 TARGET="${1:-}"
 
+json_set_meta "sqlmap" "$TARGET" "sql-injection"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -98,6 +100,10 @@ run_or_show "9) Route through a proxy for manual payload inspection" \
 info "10) List all available tamper scripts"
 echo "    sqlmap --list-tampers"
 echo ""
+json_add_example "List all available tamper scripts" \
+    "sqlmap --list-tampers"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

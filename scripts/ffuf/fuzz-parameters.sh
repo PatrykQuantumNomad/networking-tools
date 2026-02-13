@@ -37,6 +37,8 @@ if [[ ! -f "$WORDLIST" ]]; then
     exit 1
 fi
 
+json_set_meta "ffuf" "$TARGET" "web-scanner"
+
 confirm_execute "$TARGET"
 safety_banner
 
@@ -94,6 +96,8 @@ run_or_show "9) JSON POST fuzzing — discover JSON API parameters" \
 # 10. Combine parameter name and value fuzzing
 run_or_show "10) Combine name + value fuzzing — test parameter names and values together" \
     ffuf -u "$TARGET/page.php?FUZZ=FUZ2" -w "$WORDLIST:FUZZ" -w "$WORDLIST:FUZ2" -fs 0 -t 10
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

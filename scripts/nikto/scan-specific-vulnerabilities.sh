@@ -27,6 +27,8 @@ require_cmd nikto "brew install nikto"
 
 TARGET="${1:-http://localhost:8080}"
 
+json_set_meta "nikto" "$TARGET" "web-scanner"
+
 confirm_execute "$TARGET"
 safety_banner
 
@@ -92,6 +94,8 @@ run_or_show "9) Scan for remote file retrieval" \
 # 10. Full scan excluding DOS tests
 run_or_show "10) Full scan excluding denial-of-service tests" \
     nikto -h "$TARGET" -Tuning x6
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
