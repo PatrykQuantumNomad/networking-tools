@@ -57,7 +57,7 @@ Archived to `.planning/milestones/v1.3-ROADMAP.md`
 **Milestone Goal:** Add structured JSON output to all 46 use-case scripts via `-j`/`--json` flag backed by `lib/json.sh`, enabling piping into `jq` and downstream automation.
 
 - [x] **Phase 23: JSON Library & Flag Integration** - Build lib/json.sh module and wire -j flag into argument parsing and output infrastructure (completed 2026-02-13)
-- [ ] **Phase 24: Library Unit Tests** - Validate JSON library functions and -j flag parsing with BATS before migrating scripts
+- [x] **Phase 24: Library Unit Tests** - Validate JSON library functions and -j flag parsing with BATS before migrating scripts (completed 2026-02-13)
 - [ ] **Phase 25: Script Migration** - Add JSON support to all 46 use-case scripts
 - [ ] **Phase 26: Integration Tests** - Validate every migrated script produces correct, parseable JSON output
 - [ ] **Phase 27: Documentation** - Update help text and metadata headers to reflect JSON output capability
@@ -88,8 +88,8 @@ Plans:
   3. All new tests pass in both local runs and CI (GitHub Actions)
 **Plans:** 2 plans
 Plans:
-- [ ] 24-01-PLAN.md -- Create tests/lib-json.bats with unit tests for all json.sh functions
-- [ ] 24-02-PLAN.md -- Add -j flag tests to lib-args.bats and JSON-mode tests to lib-output.bats
+- [x] 24-01-PLAN.md -- Create tests/lib-json.bats with unit tests for all json.sh functions
+- [x] 24-02-PLAN.md -- Add -j flag tests to lib-args.bats and JSON-mode tests to lib-output.bats
 
 ### Phase 25: Script Migration
 **Goal**: All 46 use-case scripts produce structured JSON output when invoked with `-j`
@@ -130,9 +130,9 @@ Plans:
 | 12-17 | v1.2 | 18/18 | Complete | 2026-02-11 |
 | 18-22 | v1.3 | 9/9 | Complete | 2026-02-12 |
 | 23. JSON Library & Flag Integration | v1.4 | 1/1 | Complete | 2026-02-13 |
-| 24. Library Unit Tests | v1.4 | 0/2 | Not started | - |
+| 24. Library Unit Tests | v1.4 | 2/2 | Complete | 2026-02-13 |
 | 25. Script Migration | v1.4 | 0/TBD | Not started | - |
 | 26. Integration Tests | v1.4 | 0/TBD | Not started | - |
 | 27. Documentation | v1.4 | 0/TBD | Not started | - |
 
-**Total: 4 milestones shipped (22 phases, 50 plans) + 1 milestone in progress (5 phases, 1/5 complete)**
+**Total: 4 milestones shipped (22 phases, 50 plans) + 1 milestone in progress (5 phases, 2/5 complete)**
