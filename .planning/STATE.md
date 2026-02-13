@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-12)
+See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Planning next milestone
+**Current focus:** Milestone v1.4 — JSON Output Mode
 
 ## Current Position
 
-Phase: 22 of 22 (all milestones through v1.3 complete)
-Plan: N/A
-Status: Ready for next milestone
-Last activity: 2026-02-12 -- v1.3 milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-13 — Milestone v1.4 started
 
-Progress: [██████████] 100% (v1.0-v1.3)
+Progress: [░░░░░░░░░░] 0% (v1.4)
 
 ## Performance Metrics
 
@@ -61,6 +61,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-12
-Stopped at: v1.3 milestone complete, archived
+Last session: 2026-02-13
+Stopped at: Milestone v1.4 initialization
 Resume file: None

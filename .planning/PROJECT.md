@@ -46,7 +46,16 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 
 ### Active
 
-(No active milestone — next milestone via `/gsd:new-milestone`)
+## Current Milestone: v1.4 JSON Output Mode
+
+**Goal:** Add structured JSON output to all 46 use-case scripts via a new `-j`/`--json` flag backed by a `lib/json.sh` module, enabling piping into `jq` and downstream automation.
+
+**Target features:**
+- New `lib/json.sh` library module with JSON formatting helpers
+- `-j`/`--json` flag integrated into argument parsing (requires `-x` execute mode)
+- Envelope JSON format: `{"meta": {tool, target, timestamp}, "results": [...], "summary": {...}}`
+- All 46 use-case scripts produce valid, pipeable JSON output
+- BATS tests validating JSON output correctness
 
 ### Out of Scope
 
@@ -116,4 +125,4 @@ Documentation site deployed to GitHub Pages with CI validation, dark orange/ambe
 | Bordered 76 = char header format | Visual consistency across all scripts | ✓ Good — machine-parseable, human-readable |
 
 ---
-*Last updated: 2026-02-12 after v1.3 milestone*
+*Last updated: 2026-02-13 after v1.4 milestone start*
