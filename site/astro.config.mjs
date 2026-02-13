@@ -13,6 +13,7 @@ export default defineConfig({
 				src: './src/assets/logo-dark.svg',
 				alt: 'Networking Tools',
 			},
+			favicon: '/favicon.ico',
 			customCss: ['./src/styles/custom.css'],
 			components: {
 				Footer: './src/components/Footer.astro',
@@ -51,6 +52,23 @@ export default defineConfig({
 						},
 						codeRepository: 'https://github.com/PatrykQuantumNomad/networking-tools',
 					}),
+				},
+				// Favicons
+				{
+					tag: 'link',
+					attrs: { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/networking-tools/favicon-32x32.png' },
+				},
+				{
+					tag: 'link',
+					attrs: { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/networking-tools/favicon-16x16.png' },
+				},
+				{
+					tag: 'link',
+					attrs: { rel: 'apple-touch-icon', sizes: '180x180', href: '/networking-tools/apple-touch-icon.png' },
+				},
+				{
+					tag: 'link',
+					attrs: { rel: 'manifest', href: '/networking-tools/site.webmanifest' },
 				},
 				// Robots
 				{

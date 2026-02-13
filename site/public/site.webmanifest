@@ -1,0 +1,19 @@
+{
+  "name": "Networking & Pentesting Tools",
+  "short_name": "PentestTools",
+  "icons": [
+    {
+      "src": "/networking-tools/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/networking-tools/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#14161a",
+  "background_color": "#14161a",
+  "display": "standalone"
+}
