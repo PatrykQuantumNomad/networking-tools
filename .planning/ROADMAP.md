@@ -86,7 +86,10 @@ Plans:
   1. BATS unit tests cover all 4 public json.sh functions (`json_is_active`, `json_set_meta`, `json_add_result`, `json_finalize`) including edge cases like empty results and special character escaping
   2. BATS unit tests validate that `parse_common_args` recognizes `-j`/`--json`, sets `OUTPUT_FORMAT=json`, and correctly interacts with `-x`/`-h`/`-v`/`-q` flags
   3. All new tests pass in both local runs and CI (GitHub Actions)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 24-01-PLAN.md -- Create tests/lib-json.bats with unit tests for all json.sh functions
+- [ ] 24-02-PLAN.md -- Add -j flag tests to lib-args.bats and JSON-mode tests to lib-output.bats
 
 ### Phase 25: Script Migration
 **Goal**: All 46 use-case scripts produce structured JSON output when invoked with `-j`
@@ -127,7 +130,7 @@ Plans:
 | 12-17 | v1.2 | 18/18 | Complete | 2026-02-11 |
 | 18-22 | v1.3 | 9/9 | Complete | 2026-02-12 |
 | 23. JSON Library & Flag Integration | v1.4 | 1/1 | Complete | 2026-02-13 |
-| 24. Library Unit Tests | v1.4 | 0/TBD | Not started | - |
+| 24. Library Unit Tests | v1.4 | 0/2 | Not started | - |
 | 25. Script Migration | v1.4 | 0/TBD | Not started | - |
 | 26. Integration Tests | v1.4 | 0/TBD | Not started | - |
 | 27. Documentation | v1.4 | 0/TBD | Not started | - |
