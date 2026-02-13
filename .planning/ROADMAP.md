@@ -74,7 +74,9 @@ Archived to `.planning/milestones/v1.3-ROADMAP.md`
   3. `jq` is only required when `-j` is actually passed -- scripts without `-j` work identically to before even if jq is not installed
   4. All JSON values are correctly escaped per RFC 8259 (special characters, quotes, newlines in tool output do not break the JSON structure)
   5. Interactive prompts from `confirm_execute()` are automatically suppressed in JSON mode, and color codes are disabled via `NO_COLOR=1`
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 23-01-PLAN.md -- Create lib/json.sh, wire -j flag into args.sh, add JSON branches to output.sh
 
 ### Phase 24: Library Unit Tests
 **Goal**: The JSON library and flag parsing are proven correct via automated tests before any scripts are modified
@@ -124,7 +126,7 @@ Archived to `.planning/milestones/v1.3-ROADMAP.md`
 | 8-11 | v1.1 | 4/4 | Complete | 2026-02-11 |
 | 12-17 | v1.2 | 18/18 | Complete | 2026-02-11 |
 | 18-22 | v1.3 | 9/9 | Complete | 2026-02-12 |
-| 23. JSON Library & Flag Integration | v1.4 | 0/TBD | Not started | - |
+| 23. JSON Library & Flag Integration | v1.4 | 0/1 | Not started | - |
 | 24. Library Unit Tests | v1.4 | 0/TBD | Not started | - |
 | 25. Script Migration | v1.4 | 0/TBD | Not started | - |
 | 26. Integration Tests | v1.4 | 0/TBD | Not started | - |
