@@ -46,7 +46,7 @@ json_set_meta() {
     json_is_active || return 0
     _JSON_TOOL="$1"
     _JSON_TARGET="${2:-}"
-    _JSON_SCRIPT="$(basename "${BASH_SOURCE[1]}" .sh)"
+    _JSON_SCRIPT="$(basename "${BASH_SOURCE[1]:-unknown}" .sh)"
     _JSON_STARTED="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 }
 
