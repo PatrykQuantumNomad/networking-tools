@@ -100,7 +100,12 @@ Plans:
   2. Scripts that use `run_or_show` get JSON result accumulation automatically via library-level changes (no per-script JSON wiring needed for command capture)
   3. Scripts that use `info`+`echo` patterns for educational output have those outputs captured as JSON results via accumulation helpers
   4. Running any use-case script with `-j -x <target>` produces a complete JSON envelope that passes `jq .` validation
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 25-01-PLAN.md -- Extend json_set_meta with category + migrate 11 Group A scripts (pure run_or_show)
+- [ ] 25-02-PLAN.md -- Migrate 11 Group C scripts: password-cracker + exploitation tools (pure info+echo)
+- [ ] 25-03-PLAN.md -- Migrate 10 Group C scripts: network-analysis + forensics + netcat (pure info+echo)
+- [ ] 25-04-PLAN.md -- Migrate 14 Group B scripts: mixed run_or_show + info+echo
 
 ### Phase 26: Integration Tests
 **Goal**: Automated tests prove every script's JSON output is valid and structurally correct
