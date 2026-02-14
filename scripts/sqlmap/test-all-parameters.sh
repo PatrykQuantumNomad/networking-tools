@@ -22,7 +22,7 @@ show_help() {
     echo ""
     echo "Flags:"
     echo "  -h, --help     Show this help message"
-    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -j, --json     Output as JSON; add -x to run and capture results (requires jq)"
     echo "  -x, --execute  Execute commands instead of displaying them"
 }
 

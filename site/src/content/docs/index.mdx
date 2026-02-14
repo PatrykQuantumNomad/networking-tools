@@ -35,6 +35,9 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
   <Card icon="information" title="Diagnostics">
     Auto-report scripts for DNS, connectivity, and performance troubleshooting.
   </Card>
+  <Card icon="seti:json" title="JSON Output">
+    Pipe any script through `-j` for structured JSON. Add `-x` to capture live results.
+  </Card>
 </CardGrid>
 
 ## Security Tools
@@ -77,6 +80,7 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 <CardGrid>
   <LinkCard title="Getting Started" description="Install tools, verify setup, and start the lab" href="/networking-tools/guides/getting-started/" />
   <LinkCard title="Lab Walkthrough" description="Guided pentest engagement against Docker targets" href="/networking-tools/guides/lab-walkthrough/" />
+  <LinkCard title="Script Flags & JSON" description="Use -x, -j, and pipe to jq" href="/networking-tools/guides/script-flags/" />
   <LinkCard title="I Want To..." description="Find the right tool by task" href="/networking-tools/guides/task-index/" />
   <LinkCard title="Reconnaissance" description="Learning path: dig, nmap, tshark, metasploit" href="/networking-tools/guides/learning-recon/" />
   <LinkCard title="Web App Testing" description="Learning path: nmap, nikto, skipfish, sqlmap" href="/networking-tools/guides/learning-webapp/" />

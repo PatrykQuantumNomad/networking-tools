@@ -48,6 +48,32 @@ make nmap TARGET=localhost
 make nikto TARGET=http://localhost:8080
 ```
 
+## Script Flags
+
+Every use-case script supports a common set of flags:
+
+| Flag | What It Does |
+|------|-------------|
+| `-h, --help` | Print usage and exit |
+| `-x, --execute` | Run commands against the target (default: show only) |
+| `-j, --json` | Output as structured JSON (requires jq) |
+
+```bash
+# Show example commands (default)
+bash scripts/nmap/identify-ports.sh 192.168.1.1
+
+# Execute commands against the target
+bash scripts/nmap/identify-ports.sh -x 192.168.1.1
+
+# Get example commands as JSON
+bash scripts/nmap/identify-ports.sh -j 192.168.1.1 2>/dev/null | jq .
+
+# Run commands and capture output as JSON
+bash scripts/dig/query-dns-records.sh -j -x example.com 2>/dev/null | jq .
+```
+
+See the [Script Flags & JSON Output](https://patrykquantumnomad.github.io/networking-tools/guides/script-flags/) guide for details on the JSON envelope format and `jq` usage.
+
 ## Lab Targets
 
 The `labs/` directory contains a Docker Compose setup with intentionally vulnerable applications for safe practice:

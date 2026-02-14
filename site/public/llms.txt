@@ -1,0 +1,75 @@
+# Networking Tools - Pentesting Learning Lab
+
+> Hands-on learning project for penetration testing and ethical hacking fundamentals using 17 open-source tools, 28 task-focused scripts, and a Docker-based vulnerable lab.
+
+Built by Patryk Golabek - Cloud-Native Software Architect
+GitHub: https://github.com/PatrykQuantumNomad/networking-tools
+Docs: https://patrykquantumnomad.github.io/networking-tools/
+
+## Tools (17)
+
+### Security Tools
+- Nmap: Network scanning & host discovery
+- TShark: CLI packet capture & analysis (Wireshark CLI)
+- Metasploit: Penetration testing framework
+- Hashcat: GPU-accelerated password cracking
+- John the Ripper: Versatile password cracker
+- SQLMap: Automatic SQL injection testing
+- Nikto: Web server vulnerability scanner
+- hping3: Packet crafting & network probing
+- Aircrack-ng: WiFi security auditing suite
+- Skipfish: Web application security scanner
+- Foremost: File carving & data recovery
+- ffuf: Fast web fuzzer
+- Gobuster: Directory & subdomain enumeration
+
+### Networking Tools
+- curl: HTTP requests & endpoint testing
+- dig: DNS record lookups & tracing
+- Netcat: TCP/UDP connections & port scanning
+- Traceroute: Route tracing & latency analysis
+
+## Use-Case Scripts (28)
+
+Task-focused scripts for common pentest scenarios. Each script prints 10 numbered example commands with explanations.
+
+### Script Flags
+- `-h, --help`: Print usage and exit
+- `-x, --execute`: Run commands against the target (default: show only)
+- `-j, --json`: Output as structured JSON (requires jq); add `-x` to capture live results
+- `-v, --verbose`: Increase output detail (curl, dig scripts)
+- `-q, --quiet`: Suppress informational output (curl, dig scripts)
+
+### JSON Output Modes
+- Show mode (`-j`): Example commands as JSON `{description, command}`
+- Execute mode (`-j -x`): Run commands, capture `{description, command, exit_code, stdout, stderr}`
+- Envelope: `{meta: {tool, script, target, category, started, finished, mode}, results: [...], summary: {total, succeeded, failed}}`
+
+## Docker Lab Targets
+
+Intentionally vulnerable applications for safe, legal practice:
+- DVWA (port 8080): Classic vulnerable web app
+- Juice Shop (port 3030): Modern OWASP vulnerable app
+- WebGoat (port 8888): OWASP teaching platform
+- VulnerableApp (port 8180): OWASP vulnerable Java web app
+
+## Diagnostics
+
+Auto-report scripts for network troubleshooting:
+- DNS Diagnostic: Comprehensive DNS troubleshooting report
+- Connectivity Diagnostic: Layer-by-layer check from DNS to TLS
+- Performance Diagnostic: Hop-by-hop latency analysis with traceroute and mtr
+
+## Guides
+
+- Getting Started: https://patrykquantumnomad.github.io/networking-tools/guides/getting-started/
+- Lab Walkthrough: https://patrykquantumnomad.github.io/networking-tools/guides/lab-walkthrough/
+- Script Flags & JSON: https://patrykquantumnomad.github.io/networking-tools/guides/script-flags/
+- I Want To... (Task Index): https://patrykquantumnomad.github.io/networking-tools/guides/task-index/
+- Learning Path - Reconnaissance: https://patrykquantumnomad.github.io/networking-tools/guides/learning-recon/
+- Learning Path - Web App Testing: https://patrykquantumnomad.github.io/networking-tools/guides/learning-webapp/
+- Learning Path - Network Debugging: https://patrykquantumnomad.github.io/networking-tools/guides/learning-network-debug/
+
+## License
+
+MIT License. For authorized security testing and educational purposes only.

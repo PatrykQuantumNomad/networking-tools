@@ -144,6 +144,10 @@ json_finalize() {
     else
         echo "$envelope"
     fi
+
+    # Exit after producing JSON — interactive demos are not meaningful in JSON mode
+    # Trap-based cleanup (temp files) still runs on exit
+    exit 0
 }
 
 # Run jq availability check at source time
