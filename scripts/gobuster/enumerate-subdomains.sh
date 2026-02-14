@@ -44,6 +44,8 @@ if [[ ! -f "$WORDLIST" ]]; then
     exit 1
 fi
 
+json_set_meta "gobuster" "$TARGET" "web-scanner"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -90,11 +92,15 @@ run_or_show "6) Verbose output — see all attempts including failures" \
 info "7) Thorough enumeration with larger wordlist"
 echo "   gobuster dns -do ${TARGET} -w \${PROJECT_ROOT}/wordlists/subdomains-top1million-5000.txt -t 10"
 echo ""
+json_add_example "Thorough enumeration with larger wordlist" \
+    "gobuster dns -do ${TARGET} -w \${PROJECT_ROOT}/wordlists/subdomains-top1million-5000.txt -t 10"
 
 # 8. Save results to file
 info "8) Save results to file for later analysis"
 echo "   gobuster dns -do ${TARGET} -w ${WORDLIST} -o subdomain-results.txt -t 10"
 echo ""
+json_add_example "Save results to file for later analysis" \
+    "gobuster dns -do ${TARGET} -w ${WORDLIST} -o subdomain-results.txt -t 10"
 
 # 9. Quiet mode — only show discoveries
 run_or_show "9) Quiet mode — only show discovered subdomains" \
@@ -104,6 +110,10 @@ run_or_show "9) Quiet mode — only show discovered subdomains" \
 info "10) Full enumeration — custom resolver, show IPs, save results"
 echo "    gobuster dns -do ${TARGET} -w ${WORDLIST} -r 8.8.8.8:53 --show-ips -o subdomains.txt -t 10"
 echo ""
+json_add_example "Full enumeration — custom resolver, show IPs, save results" \
+    "gobuster dns -do ${TARGET} -w ${WORDLIST} -r 8.8.8.8:53 --show-ips -o subdomains.txt -t 10"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

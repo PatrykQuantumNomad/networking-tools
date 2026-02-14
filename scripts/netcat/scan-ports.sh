@@ -29,6 +29,8 @@ require_cmd nc "apt install netcat-openbsd (Debian/Ubuntu) | brew install netcat
 TARGET="${1:-127.0.0.1}"
 NC_VARIANT=$(detect_nc_variant)
 
+json_set_meta "netcat" "$TARGET" "network-scanner"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -56,6 +58,8 @@ run_or_show "2) Scan a port range (20 to 100)" \
 info "3) Scan common web ports (80 and 443)"
 echo "   nc -zv ${TARGET} 80; nc -zv ${TARGET} 443"
 echo ""
+json_add_example "Scan common web ports (80 and 443)" \
+    "nc -zv ${TARGET} 80; nc -zv ${TARGET} 443"
 
 # 4. Scan with a connection timeout
 run_or_show "4) Scan with a connection timeout (-w seconds)" \
@@ -75,6 +79,8 @@ echo "   for port in 21 22 25 53 80 110 143 443 993 995 3306 5432 8080; do"
 echo "       nc -zv -w 2 ${TARGET} \$port 2>&1"
 echo "   done"
 echo ""
+json_add_example "Scan common service ports in a loop" \
+    "for port in 21 22 25 53 80 110 143 443 993 995 3306 5432 8080; do nc -zv -w 2 ${TARGET} \$port 2>&1; done"
 
 # 8. Suppress DNS resolution for speed
 run_or_show "8) Suppress DNS resolution for faster scanning (-n flag)" \
@@ -90,6 +96,10 @@ echo "    for port in 22 80 443; do"
 echo "        nc -zv -w 2 ${TARGET} \$port 2>&1 && echo \"Port \$port: OPEN\" || echo \"Port \$port: CLOSED\""
 echo "    done"
 echo ""
+json_add_example "Quick check if SSH (22), HTTP (80), HTTPS (443) are open" \
+    "for port in 22 80 443; do nc -zv -w 2 ${TARGET} \$port 2>&1 && echo \"Port \$port: OPEN\" || echo \"Port \$port: CLOSED\"; done"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

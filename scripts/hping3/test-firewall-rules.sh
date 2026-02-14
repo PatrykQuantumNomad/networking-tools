@@ -27,6 +27,8 @@ require_cmd hping3 "brew install draftbrew/tap/hping"
 
 TARGET="${1:-localhost}"
 
+json_set_meta "hping3" "$TARGET" "network-scanner"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -88,6 +90,10 @@ run_or_show "9) SYN scan with decoy source IP" \
 info "10) Compare SYN vs ACK responses to map firewall"
 echo "    sudo hping3 -S -p 80 -c 1 ${TARGET} && sudo hping3 -A -p 80 -c 1 ${TARGET}"
 echo ""
+json_add_example "Compare SYN vs ACK responses to map firewall" \
+    "sudo hping3 -S -p 80 -c 1 ${TARGET} && sudo hping3 -A -p 80 -c 1 ${TARGET}"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

@@ -28,6 +28,8 @@ require_cmd tshark "brew install wireshark"
 
 TARGET="${1:-en0}"
 
+json_set_meta "tshark" "$TARGET" "network-analysis"
+
 confirm_execute "$TARGET"
 safety_banner
 
@@ -61,6 +63,8 @@ run_or_show "2) Show DNS queries with responses" \
 info "3) DNS query statistics summary"
 echo "   tshark -r capture.pcap -q -z dns,tree"
 echo ""
+json_add_example "DNS query statistics summary" \
+    "tshark -r capture.pcap -q -z dns,tree"
 
 # 4. Filter specific domain
 run_or_show "4) Filter for specific domain queries" \
@@ -78,6 +82,8 @@ run_or_show "6) Find TXT record queries (potential C2)" \
 info "7) Show DNS response codes for failures"
 echo "   tshark -r capture.pcap -Y 'dns.flags.rcode!=0' -T fields -e dns.qry.name -e dns.flags.rcode"
 echo ""
+json_add_example "Show DNS response codes for failures" \
+    "tshark -r capture.pcap -Y 'dns.flags.rcode!=0' -T fields -e dns.qry.name -e dns.flags.rcode"
 
 # 8. Long domain names (tunneling)
 run_or_show "8) Monitor for unusually long DNS names (tunneling)" \
@@ -87,10 +93,14 @@ run_or_show "8) Monitor for unusually long DNS names (tunneling)" \
 info "9) Count queries per domain"
 echo "   tshark -r capture.pcap -Y 'dns.flags.response==0' -T fields -e dns.qry.name | sort | uniq -c | sort -rn"
 echo ""
+json_add_example "Count queries per domain" \
+    "tshark -r capture.pcap -Y 'dns.flags.response==0' -T fields -e dns.qry.name | sort | uniq -c | sort -rn"
 
 # 10. Full DNS analysis
 run_or_show "10) Full DNS analysis with timestamps and source IPs" \
     sudo tshark -i "$TARGET" -Y 'dns' -T fields -e frame.time_relative -e ip.src -e dns.flags.response -e dns.qry.name -e dns.a -c 50
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

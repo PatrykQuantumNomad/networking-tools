@@ -27,6 +27,8 @@ require_cmd hping3 "brew install draftbrew/tap/hping"
 
 TARGET="${1:-localhost}"
 
+json_set_meta "hping3" "$TARGET" "network-scanner"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -91,6 +93,10 @@ run_or_show "9) Traceroute to find the firewall hop" \
 info "10) Full firewall detection workflow (SYN + ACK + FIN on port 80)"
 echo "    sudo hping3 -S -p 80 -c 1 ${TARGET}; sudo hping3 -A -p 80 -c 1 ${TARGET}; sudo hping3 -F -p 80 -c 1 ${TARGET}"
 echo ""
+json_add_example "Full firewall detection workflow (SYN + ACK + FIN on port 80)" \
+    "sudo hping3 -S -p 80 -c 1 ${TARGET}; sudo hping3 -A -p 80 -c 1 ${TARGET}; sudo hping3 -F -p 80 -c 1 ${TARGET}"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

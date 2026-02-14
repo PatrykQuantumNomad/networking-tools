@@ -44,6 +44,8 @@ if [[ ! -f "$WORDLIST" ]]; then
     exit 1
 fi
 
+json_set_meta "gobuster" "$TARGET" "web-scanner"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -95,6 +97,8 @@ run_or_show "7) Authenticated scan — pass session cookie" \
 info "8) Thorough scan with larger wordlist"
 echo "   gobuster dir -u ${TARGET} -w \${PROJECT_ROOT}/wordlists/directory-list-2.3-small.txt -t 10"
 echo ""
+json_add_example "Thorough scan with larger wordlist" \
+    "gobuster dir -u ${TARGET} -w \${PROJECT_ROOT}/wordlists/directory-list-2.3-small.txt -t 10"
 
 # 9. Scan a specific subdirectory
 run_or_show "9) Scan a specific subdirectory for deeper content" \
@@ -104,6 +108,10 @@ run_or_show "9) Scan a specific subdirectory for deeper content" \
 info "10) Save results to file and show progress"
 echo "    gobuster dir -u ${TARGET} -w ${WORDLIST} -o dir-results.txt -v -t 10"
 echo ""
+json_add_example "Save results to file and show progress" \
+    "gobuster dir -u ${TARGET} -w ${WORDLIST} -o dir-results.txt -v -t 10"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

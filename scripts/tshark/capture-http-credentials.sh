@@ -27,6 +27,8 @@ require_cmd tshark "brew install wireshark"
 
 TARGET="${1:-en0}"
 
+json_set_meta "tshark" "$TARGET" "network-analysis"
+
 confirm_execute "$TARGET"
 safety_banner
 
@@ -61,6 +63,8 @@ run_or_show "3) Filter for packets containing \"password\"" \
 info "4) Capture login form submissions on specific port"
 echo "   sudo tshark -i lo0 -f 'port 8080' -Y 'http.request.method==POST' -T fields -e http.file_data"
 echo ""
+json_add_example "Capture login form submissions on specific port" \
+    "sudo tshark -i lo0 -f 'port 8080' -Y 'http.request.method==POST' -T fields -e http.file_data"
 
 # 5. Full HTTP pairs
 run_or_show "5) Show full HTTP request/response pairs" \
@@ -74,6 +78,8 @@ run_or_show "6) Extract cookies from HTTP traffic" \
 info "7) Read credentials from a saved capture file"
 echo "   tshark -r capture.pcap -Y 'http.request.method==POST' -T fields -e http.host -e http.file_data"
 echo ""
+json_add_example "Read credentials from a saved capture file" \
+    "tshark -r capture.pcap -Y 'http.request.method==POST' -T fields -e http.host -e http.file_data"
 
 # 8. FTP credentials
 run_or_show "8) Monitor FTP login attempts" \
@@ -86,6 +92,8 @@ run_or_show "9) Save HTTP POST traffic to file for later analysis" \
 # 10. Full extraction pipeline
 run_or_show "10) Full credential extraction pipeline" \
     sudo tshark -i "$TARGET" -Y 'http.request.method==POST and http contains "login"' -T fields -e frame.time -e ip.src -e http.host -e http.request.uri -e http.file_data
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

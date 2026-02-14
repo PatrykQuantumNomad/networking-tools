@@ -25,6 +25,8 @@ set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 require_cmd hashcat "brew install hashcat"
 
+json_set_meta "hashcat" "" "password-cracker"
+
 confirm_execute
 safety_banner
 
@@ -84,6 +86,10 @@ run_or_show "9) Benchmark with maximum workload profile" \
 info "10) Run a time-limited cracking session (60 seconds)"
 echo "    hashcat -m 1000 --runtime=60 hashes.txt wordlist.txt"
 echo ""
+json_add_example "Run a time-limited cracking session (60 seconds)" \
+    "hashcat -m 1000 --runtime=60 hashes.txt wordlist.txt"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
