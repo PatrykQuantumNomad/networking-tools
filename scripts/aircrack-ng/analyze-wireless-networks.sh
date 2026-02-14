@@ -30,6 +30,8 @@ require_cmd aircrack-ng "brew install aircrack-ng"
 
 INTERFACE="${1:-wlan0}"
 
+json_set_meta "aircrack-ng" "$INTERFACE" "exploitation"
+
 confirm_execute
 safety_banner
 
@@ -63,51 +65,73 @@ echo ""
 info "1) List wireless interfaces"
 echo "   sudo airmon-ng"
 echo ""
+json_add_example "1) List wireless interfaces" \
+    "sudo airmon-ng"
 
 # 2. Enable monitor mode
 info "2) Enable monitor mode"
 echo "   sudo airmon-ng start ${INTERFACE}"
 echo ""
+json_add_example "2) Enable monitor mode" \
+    "sudo airmon-ng start ${INTERFACE}"
 
 # 3. Basic network survey — all channels
 info "3) Basic network survey — all channels"
 echo "   sudo airodump-ng ${INTERFACE}mon"
 echo ""
+json_add_example "3) Basic network survey — all channels" \
+    "sudo airodump-ng ${INTERFACE}mon"
 
 # 4. Survey all bands (2.4GHz + 5GHz)
 info "4) Survey all bands (2.4GHz + 5GHz)"
 echo "   sudo airodump-ng --band abg ${INTERFACE}mon"
 echo ""
+json_add_example "4) Survey all bands (2.4GHz + 5GHz)" \
+    "sudo airodump-ng --band abg ${INTERFACE}mon"
 
 # 5. Filter by specific ESSID
 info "5) Filter by specific ESSID (network name)"
 echo "   sudo airodump-ng --essid \"NetworkName\" ${INTERFACE}mon"
 echo ""
+json_add_example "5) Filter by specific ESSID (network name)" \
+    "sudo airodump-ng --essid \"NetworkName\" ${INTERFACE}mon"
 
 # 6. Save survey to CSV for analysis
 info "6) Save survey to CSV for analysis"
 echo "   sudo airodump-ng -w survey --output-format csv ${INTERFACE}mon"
 echo ""
+json_add_example "6) Save survey to CSV for analysis" \
+    "sudo airodump-ng -w survey --output-format csv ${INTERFACE}mon"
 
 # 7. Show only WPA2 networks
 info "7) Show only WPA2 networks"
 echo "   sudo airodump-ng --encrypt wpa2 ${INTERFACE}mon"
 echo ""
+json_add_example "7) Show only WPA2 networks" \
+    "sudo airodump-ng --encrypt wpa2 ${INTERFACE}mon"
 
 # 8. Channel hop on specific channels only
 info "8) Channel hop on specific channels only (common 2.4GHz)"
 echo "   sudo airodump-ng -c 1,6,11 ${INTERFACE}mon"
 echo ""
+json_add_example "8) Channel hop on specific channels only (common 2.4GHz)" \
+    "sudo airodump-ng -c 1,6,11 ${INTERFACE}mon"
 
 # 9. Show connected clients for a network
 info "9) Show connected clients for a specific network"
 echo "   sudo airodump-ng --bssid AA:BB:CC:DD:EE:FF ${INTERFACE}mon"
 echo ""
+json_add_example "9) Show connected clients for a specific network" \
+    "sudo airodump-ng --bssid AA:BB:CC:DD:EE:FF ${INTERFACE}mon"
 
 # 10. Export to KML for geographic mapping
 info "10) Export for geographic mapping (Kismet format)"
 echo "    sudo airodump-ng -w survey --output-format kismet-newcore ${INTERFACE}mon"
 echo ""
+json_add_example "10) Export for geographic mapping (Kismet format)" \
+    "sudo airodump-ng -w survey --output-format kismet-newcore ${INTERFACE}mon"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

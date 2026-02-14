@@ -28,6 +28,8 @@ require_cmd aircrack-ng "brew install aircrack-ng"
 CAPFILE="${1:-}"
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
+json_set_meta "aircrack-ng" "$CAPFILE" "exploitation"
+
 confirm_execute
 safety_banner
 
@@ -57,51 +59,73 @@ echo ""
 info "1) Basic dictionary attack"
 echo "   aircrack-ng -w ${WORDLIST} capture.cap"
 echo ""
+json_add_example "1) Basic dictionary attack" \
+    "aircrack-ng -w ${WORDLIST} capture.cap"
 
 # 2. Specify target BSSID
 info "2) Specify target BSSID (when multiple networks in capture)"
 echo "   aircrack-ng -w rockyou.txt -b AA:BB:CC:DD:EE:FF capture.cap"
 echo ""
+json_add_example "2) Specify target BSSID (when multiple networks in capture)" \
+    "aircrack-ng -w rockyou.txt -b AA:BB:CC:DD:EE:FF capture.cap"
 
 # 3. Use multiple wordlists
 info "3) Use multiple wordlists"
 echo "   aircrack-ng -w wordlist1.txt,wordlist2.txt capture.cap"
 echo ""
+json_add_example "3) Use multiple wordlists" \
+    "aircrack-ng -w wordlist1.txt,wordlist2.txt capture.cap"
 
 # 4. Save cracked key to file
 info "4) Save cracked key to file"
 echo "   aircrack-ng -w rockyou.txt -l cracked_key.txt capture.cap"
 echo ""
+json_add_example "4) Save cracked key to file" \
+    "aircrack-ng -w rockyou.txt -l cracked_key.txt capture.cap"
 
 # 5. Read wordlist from stdin (pipe from generator)
 info "5) Pipe from password generator (crunch)"
 echo "   crunch 8 8 abcdefghijklmnop | aircrack-ng -w - capture.cap"
 echo ""
+json_add_example "5) Pipe from password generator (crunch)" \
+    "crunch 8 8 abcdefghijklmnop | aircrack-ng -w - capture.cap"
 
 # 6. Show details about captured handshakes
 info "6) Show details about captured handshakes"
 echo "   aircrack-ng capture.cap"
 echo ""
+json_add_example "6) Show details about captured handshakes" \
+    "aircrack-ng capture.cap"
 
 # 7. Convert to hashcat format for GPU cracking
 info "7) Convert to hashcat format for GPU cracking"
 echo "   aircrack-ng capture.cap -J handshake_hccapx"
 echo ""
+json_add_example "7) Convert to hashcat format for GPU cracking" \
+    "aircrack-ng capture.cap -J handshake_hccapx"
 
 # 8. Convert to modern PMKID/EAPOL format
 info "8) Convert to modern hashcat 22000 format"
 echo "   hcxpcapngtool capture.cap -o handshake.22000"
 echo ""
+json_add_example "8) Convert to modern hashcat 22000 format" \
+    "hcxpcapngtool capture.cap -o handshake.22000"
 
 # 9. Use John the Ripper for cracking
 info "9) Use John the Ripper for cracking"
 echo "   aircrack-ng -J capture_hccapx capture.cap && john --format=wpapsk --wordlist=rockyou.txt capture_hccapx.hccapx"
 echo ""
+json_add_example "9) Use John the Ripper for cracking" \
+    "aircrack-ng -J capture_hccapx capture.cap && john --format=wpapsk --wordlist=rockyou.txt capture_hccapx.hccapx"
 
 # 10. Benchmark cracking speed
 info "10) Benchmark cracking speed"
 echo "    aircrack-ng -S"
 echo ""
+json_add_example "10) Benchmark cracking speed" \
+    "aircrack-ng -S"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

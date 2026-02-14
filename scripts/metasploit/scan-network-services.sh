@@ -27,6 +27,8 @@ require_cmd msfconsole "https://docs.metasploit.com/docs/using-metasploit/gettin
 
 TARGET="${1:-localhost}"
 
+json_set_meta "metasploit" "$TARGET" "exploitation"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -49,51 +51,73 @@ echo ""
 info "1) SMB version detection"
 echo "   msfconsole -q -x \"use auxiliary/scanner/smb/smb_version; set RHOSTS ${TARGET}; run; exit\""
 echo ""
+json_add_example "1) SMB version detection" \
+    "msfconsole -q -x \"use auxiliary/scanner/smb/smb_version; set RHOSTS ${TARGET}; run; exit\""
 
 # 2. SSH version
 info "2) SSH version detection"
 echo "   msfconsole -q -x \"use auxiliary/scanner/ssh/ssh_version; set RHOSTS ${TARGET}; run; exit\""
 echo ""
+json_add_example "2) SSH version detection" \
+    "msfconsole -q -x \"use auxiliary/scanner/ssh/ssh_version; set RHOSTS ${TARGET}; run; exit\""
 
 # 3. HTTP version
 info "3) HTTP version detection"
 echo "   msfconsole -q -x \"use auxiliary/scanner/http/http_version; set RHOSTS ${TARGET}; set RPORT 8080; run; exit\""
 echo ""
+json_add_example "3) HTTP version detection" \
+    "msfconsole -q -x \"use auxiliary/scanner/http/http_version; set RHOSTS ${TARGET}; set RPORT 8080; run; exit\""
 
 # 4. MySQL enumeration
 info "4) MySQL enumeration"
 echo "   msfconsole -q -x \"use auxiliary/scanner/mysql/mysql_version; set RHOSTS ${TARGET}; run; exit\""
 echo ""
+json_add_example "4) MySQL enumeration" \
+    "msfconsole -q -x \"use auxiliary/scanner/mysql/mysql_version; set RHOSTS ${TARGET}; run; exit\""
 
 # 5. FTP version
 info "5) FTP version scan"
 echo "   msfconsole -q -x \"use auxiliary/scanner/ftp/ftp_version; set RHOSTS ${TARGET}; run; exit\""
 echo ""
+json_add_example "5) FTP version scan" \
+    "msfconsole -q -x \"use auxiliary/scanner/ftp/ftp_version; set RHOSTS ${TARGET}; run; exit\""
 
 # 6. SMB share enumeration
 info "6) SMB share enumeration"
 echo "   msfconsole -q -x \"use auxiliary/scanner/smb/smb_enumshares; set RHOSTS ${TARGET}; run; exit\""
 echo ""
+json_add_example "6) SMB share enumeration" \
+    "msfconsole -q -x \"use auxiliary/scanner/smb/smb_enumshares; set RHOSTS ${TARGET}; run; exit\""
 
 # 7. SSH brute force
 info "7) SSH login brute force (with wordlist)"
 echo "   msfconsole -q -x \"use auxiliary/scanner/ssh/ssh_login; set RHOSTS ${TARGET}; set USERNAME root; set PASS_FILE /path/to/passwords.txt; run; exit\""
 echo ""
+json_add_example "7) SSH login brute force (with wordlist)" \
+    "msfconsole -q -x \"use auxiliary/scanner/ssh/ssh_login; set RHOSTS ${TARGET}; set USERNAME root; set PASS_FILE /path/to/passwords.txt; run; exit\""
 
 # 8. HTTP directory scanner
 info "8) HTTP directory scanner"
 echo "   msfconsole -q -x \"use auxiliary/scanner/http/dir_scanner; set RHOSTS ${TARGET}; set RPORT 8080; run; exit\""
 echo ""
+json_add_example "8) HTTP directory scanner" \
+    "msfconsole -q -x \"use auxiliary/scanner/http/dir_scanner; set RHOSTS ${TARGET}; set RPORT 8080; run; exit\""
 
 # 9. VNC auth check
 info "9) VNC authentication check"
 echo "   msfconsole -q -x \"use auxiliary/scanner/vnc/vnc_none_auth; set RHOSTS ${TARGET}; run; exit\""
 echo ""
+json_add_example "9) VNC authentication check" \
+    "msfconsole -q -x \"use auxiliary/scanner/vnc/vnc_none_auth; set RHOSTS ${TARGET}; run; exit\""
 
 # 10. Subnet port scan
 info "10) Scan a subnet for all open services"
 echo "    msfconsole -q -x \"use auxiliary/scanner/portscan/tcp; set RHOSTS ${TARGET}/24; set PORTS 22,80,443,8080; run; exit\""
 echo ""
+json_add_example "10) Scan a subnet for all open services" \
+    "msfconsole -q -x \"use auxiliary/scanner/portscan/tcp; set RHOSTS ${TARGET}/24; set PORTS 22,80,443,8080; run; exit\""
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
