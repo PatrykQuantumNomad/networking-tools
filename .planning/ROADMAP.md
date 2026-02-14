@@ -126,7 +126,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Running any use-case script with `-h` shows `-j`/`--json` in the flags list with a clear description of what it does
   2. All 46 use-case scripts' metadata headers include JSON output as a documented capability
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 27-01-PLAN.md -- Update @usage headers and show_help() for all 46 use-case scripts
+- [ ] 27-02-PLAN.md -- Add BATS verification tests for DOC-01 and DOC-02
 
 ## Progress
 
@@ -140,6 +143,6 @@ Plans:
 | 24. Library Unit Tests | v1.4 | 2/2 | Complete | 2026-02-13 |
 | 25. Script Migration | v1.4 | 4/4 | Complete | 2026-02-14 |
 | 26. Integration Tests | v1.4 | 1/1 | Complete | 2026-02-14 |
-| 27. Documentation | v1.4 | 0/TBD | Not started | - |
+| 27. Documentation | v1.4 | 0/2 | Not started | - |
 
 **Total: 4 milestones shipped (22 phases, 50 plans) + 1 milestone in progress (5 phases, 4/5 complete)**
