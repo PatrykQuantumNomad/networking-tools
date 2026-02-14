@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 25 (Script Migration) — third of 5 in v1.4
-Plan: 04 complete (3/4 plans in phase, 03 in progress)
-Status: Executing phase 25
-Last activity: 2026-02-14 — Completed 25-04 (Group B mixed script migration, 14 scripts)
+Plan: 04 complete (4/4 plans in phase)
+Status: Phase 25 complete
+Last activity: 2026-02-14 — Completed 25-03 (Group C script migration, 10 scripts)
 
-Progress: [######░░░░] 58% (v1.4 — 2.75/5 phases)
+Progress: [######░░░░] 60% (v1.4 — 3/5 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 56 (across v1.0-v1.4)
+- Total plans completed: 57 (across v1.0-v1.4)
 - Average duration: 4min
 - Total execution time: 3.87 hours
 
@@ -31,7 +31,7 @@ Progress: [######░░░░] 58% (v1.4 — 2.75/5 phases)
 | v1.1 | 4 | 4 | ~8min |
 | v1.2 | 6 | 18 | ~79min |
 | v1.3 | 5 | 9 | ~42min |
-| v1.4 | 2.75/5 | 6 | ~52min |
+| v1.4 | 3/5 | 7 | ~62min |
 
 ## Accumulated Context
 
@@ -53,6 +53,7 @@ Full cumulative decision table in PROJECT.md.
 - Phase 25-01: json_add_example for bare info+echo examples to capture all 10 results in JSON
 - Phase 25-02: Category taxonomy extended with password-cracker (hashcat/john) and exploitation (aircrack-ng/metasploit)
 - Phase 25-04: json_add_example only for bare info+echo (run_or_show captured automatically by library)
+- Phase 25-03: NC_VARIANT branching: json_add_example inside each conditional branch for variant-specific commands
 
 ### Pending Todos
 
@@ -72,5 +73,5 @@ None. (Phase 24 fd3 concern resolved: subprocess `exec 3>&-` pattern works, no n
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 25-04-PLAN.md (Group B mixed script migration)
+Stopped at: Completed 25-03-PLAN.md (Group C script migration)
 Resume file: None
