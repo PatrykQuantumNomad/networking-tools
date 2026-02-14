@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 25 (Script Migration) — third of 5 in v1.4
-Plan: 01 complete (1/4 plans in phase)
+Plan: 02 complete (2/4 plans in phase)
 Status: Executing phase 25
-Last activity: 2026-02-13 — Completed 25-01 (Group A script migration, 11 scripts)
+Last activity: 2026-02-14 — Completed 25-02 (Group C script migration, 11 scripts)
 
-Progress: [#####░░░░░] 50% (v1.4 — 2.25/5 phases)
+Progress: [######░░░░] 55% (v1.4 — 2.5/5 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 54 (across v1.0-v1.4)
+- Total plans completed: 55 (across v1.0-v1.4)
 - Average duration: 4min
 - Total execution time: 3.87 hours
 
@@ -31,7 +31,7 @@ Progress: [#####░░░░░] 50% (v1.4 — 2.25/5 phases)
 | v1.1 | 4 | 4 | ~8min |
 | v1.2 | 6 | 18 | ~79min |
 | v1.3 | 5 | 9 | ~42min |
-| v1.4 | 2.25/5 | 4 | ~35min |
+| v1.4 | 2.5/5 | 5 | ~43min |
 
 ## Accumulated Context
 
@@ -51,6 +51,7 @@ Full cumulative decision table in PROJECT.md.
 - Phase 23-01: Color vars reset at parse time (colors.sh evaluates at source, -j resets at runtime)
 - Phase 25-01: Category parameter optional (empty string default) for backward compatibility
 - Phase 25-01: json_add_example for bare info+echo examples to capture all 10 results in JSON
+- Phase 25-02: Category taxonomy extended with password-cracker (hashcat/john) and exploitation (aircrack-ng/metasploit)
 
 ### Pending Todos
 
@@ -69,6 +70,6 @@ None. (Phase 24 fd3 concern resolved: subprocess `exec 3>&-` pattern works, no n
 
 ## Session Continuity
 
-Last session: 2026-02-13
-Stopped at: Completed 25-01-PLAN.md (Group A script migration)
+Last session: 2026-02-14
+Stopped at: Completed 25-02-PLAN.md (Group C script migration)
 Resume file: None
