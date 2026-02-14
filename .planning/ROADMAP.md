@@ -6,7 +6,7 @@
 - ✅ **v1.1 Site Visual Refresh** — Phases 8-11 (shipped 2026-02-11)
 - ✅ **v1.2 Script Hardening** — Phases 12-17 (shipped 2026-02-11)
 - ✅ **v1.3 Testing & Script Headers** — Phases 18-22 (shipped 2026-02-12)
-- 🚧 **v1.4 JSON Output Mode** — Phases 23-27 (in progress)
+- ✅ **v1.4 JSON Output Mode** — Phases 23-27 (shipped 2026-02-14)
 
 ## Phases
 
@@ -52,7 +52,7 @@ Archived to `.planning/milestones/v1.3-ROADMAP.md`
 
 </details>
 
-### 🚧 v1.4 JSON Output Mode (In Progress)
+### ✅ v1.4 JSON Output Mode (Shipped 2026-02-14)
 
 **Milestone Goal:** Add structured JSON output to all 46 use-case scripts via `-j`/`--json` flag backed by `lib/json.sh`, enabling piping into `jq` and downstream automation.
 
@@ -60,7 +60,7 @@ Archived to `.planning/milestones/v1.3-ROADMAP.md`
 - [x] **Phase 24: Library Unit Tests** - Validate JSON library functions and -j flag parsing with BATS before migrating scripts (completed 2026-02-13)
 - [x] **Phase 25: Script Migration** - Add JSON support to all 46 use-case scripts (completed 2026-02-14)
 - [x] **Phase 26: Integration Tests** - Validate every migrated script produces correct, parseable JSON output (completed 2026-02-14)
-- [ ] **Phase 27: Documentation** - Update help text and metadata headers to reflect JSON output capability
+- [x] **Phase 27: Documentation** - Update help text and metadata headers to reflect JSON output capability (completed 2026-02-14)
 
 ## Phase Details
 
@@ -129,7 +129,7 @@ Plans:
 **Plans:** 2 plans
 Plans:
 - [x] 27-01-PLAN.md -- Update @usage headers and show_help() for all 46 use-case scripts
-- [ ] 27-02-PLAN.md -- Add BATS verification tests for DOC-01 and DOC-02
+- [x] 27-02-PLAN.md -- Add BATS verification tests for DOC-01 and DOC-02
 
 ## Progress
 
@@ -143,6 +143,6 @@ Plans:
 | 24. Library Unit Tests | v1.4 | 2/2 | Complete | 2026-02-13 |
 | 25. Script Migration | v1.4 | 4/4 | Complete | 2026-02-14 |
 | 26. Integration Tests | v1.4 | 1/1 | Complete | 2026-02-14 |
-| 27. Documentation | v1.4 | 1/2 | In progress | - |
+| 27. Documentation | v1.4 | 2/2 | Complete | 2026-02-14 |
 
-**Total: 4 milestones shipped (22 phases, 50 plans) + 1 milestone in progress (5 phases, 4/5 complete)**
+**Total: 5 milestones shipped (27 phases, 60 plans)**

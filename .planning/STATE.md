@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 27 (Documentation) — fifth of 5 in v1.4
-Plan: 01 complete (1/2 plans in phase)
-Status: Executing Phase 27
-Last activity: 2026-02-14 — Completed 27-01 (help text and header documentation for -j flag)
+Plan: 02 complete (2/2 plans in phase)
+Status: Phase 27 complete. v1.4 milestone complete.
+Last activity: 2026-02-14 — Completed 27-02 (BATS verification tests for JSON flag documentation)
 
-Progress: [#########░] 90% (v1.4 — 4.5/5 phases)
+Progress: [##########] 100% (v1.4 — 5/5 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 59 (across v1.0-v1.4)
+- Total plans completed: 60 (across v1.0-v1.4)
 - Average duration: 4min
-- Total execution time: 4.09 hours
+- Total execution time: 4.14 hours
 
 **By Milestone:**
 
@@ -31,7 +31,7 @@ Progress: [#########░] 90% (v1.4 — 4.5/5 phases)
 | v1.1 | 4 | 4 | ~8min |
 | v1.2 | 6 | 18 | ~79min |
 | v1.3 | 5 | 9 | ~42min |
-| v1.4 | 4.5/5 | 9 | ~75min |
+| v1.4 | 5/5 | 10 | ~78min |
 
 ## Accumulated Context
 
@@ -56,6 +56,7 @@ Full cumulative decision table in PROJECT.md.
 - Phase 25-03: NC_VARIANT branching: json_add_example inside each conditional branch for variant-specific commands
 - Phase 26-01: bash -c wrapper for BATS fd3 JSON capture (run mixes stdout+stderr; bash -c with 2>/dev/null isolates JSON)
 - Phase 27-01: -j after -h in Options for Pattern A scripts; separate Flags section for Pattern B scripts; 5-flag variant for curl/dig
+- Phase 27-02: No macOS exclusion needed for DOC tests (--help and header parsing don't require sudo)
 
 ### Pending Todos
 
@@ -75,5 +76,5 @@ None. (Phase 24 fd3 concern resolved: subprocess `exec 3>&-` pattern works, no n
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 27-01-PLAN.md (help text and header documentation)
+Stopped at: Completed 27-02-PLAN.md (documentation verification tests). Phase 27 and v1.4 milestone complete.
 Resume file: None
