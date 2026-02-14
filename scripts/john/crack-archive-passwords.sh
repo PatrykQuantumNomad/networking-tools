@@ -36,6 +36,8 @@ fi
 ARCHIVE="${1:-}"
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
+json_set_meta "john" "$ARCHIVE" "password-cracker"
+
 confirm_execute
 safety_banner
 
@@ -67,51 +69,73 @@ echo ""
 info "1) Extract hash from a ZIP file"
 echo "   zip2john protected.zip > zip.hash"
 echo ""
+json_add_example "1) Extract hash from a ZIP file" \
+    "zip2john protected.zip > zip.hash"
 
 # 2. Crack extracted ZIP hash
 info "2) Crack the extracted ZIP hash"
 echo "   john --wordlist=${WORDLIST} zip.hash"
 echo ""
+json_add_example "2) Crack the extracted ZIP hash" \
+    "john --wordlist=${WORDLIST} zip.hash"
 
 # 3. Extract hash from RAR file
 info "3) Extract hash from a RAR file"
 echo "   rar2john protected.rar > rar.hash"
 echo ""
+json_add_example "3) Extract hash from a RAR file" \
+    "rar2john protected.rar > rar.hash"
 
 # 4. Extract hash from 7z file
 info "4) Extract hash from a 7-Zip file"
 echo "   7z2john protected.7z > 7z.hash"
 echo ""
+json_add_example "4) Extract hash from a 7-Zip file" \
+    "7z2john protected.7z > 7z.hash"
 
 # 5. Extract hash from PDF
 info "5) Extract hash from a PDF file"
 echo "   pdf2john protected.pdf > pdf.hash"
 echo ""
+json_add_example "5) Extract hash from a PDF file" \
+    "pdf2john protected.pdf > pdf.hash"
 
 # 6. Extract hash from SSH private key
 info "6) Extract hash from an SSH private key"
 echo "   ssh2john id_rsa > ssh.hash"
 echo ""
+json_add_example "6) Extract hash from an SSH private key" \
+    "ssh2john id_rsa > ssh.hash"
 
 # 7. Extract hash from KeePass database
 info "7) Extract hash from a KeePass database"
 echo "   keepass2john database.kdbx > keepass.hash"
 echo ""
+json_add_example "7) Extract hash from a KeePass database" \
+    "keepass2john database.kdbx > keepass.hash"
 
 # 8. Extract hash from Office document
 info "8) Extract hash from a Microsoft Office document"
 echo "   office2john protected.docx > office.hash"
 echo ""
+json_add_example "8) Extract hash from a Microsoft Office document" \
+    "office2john protected.docx > office.hash"
 
 # 9. Show cracked archive password
 info "9) Show cracked archive password"
 echo "   john --show zip.hash"
 echo ""
+json_add_example "9) Show cracked archive password" \
+    "john --show zip.hash"
 
 # 10. Crack with mask (if you know password pattern)
 info "10) Crack with a mask if you know the password pattern"
 echo "    john --mask='?d?d?d?d' zip.hash"
 echo ""
+json_add_example "10) Crack with a mask if you know the password pattern" \
+    "john --mask='?d?d?d?d' zip.hash"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

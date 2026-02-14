@@ -27,9 +27,12 @@ require_cmd john "brew install john-jumbo  (john-jumbo includes *2john utilities
 setup_john_path
 
 safety_banner
-confirm_execute
 
 HASH="${1:-}"
+
+json_set_meta "john" "$HASH" "password-cracker"
+
+confirm_execute
 
 info "=== Hash Type Identification ==="
 if [[ -n "$HASH" ]]; then
@@ -61,51 +64,73 @@ echo ""
 info "1) List all supported John formats"
 echo "   john --list=formats"
 echo ""
+json_add_example "1) List all supported John formats" \
+    "john --list=formats"
 
 # 2. List formats matching "md5"
 info "2) List formats matching 'md5'"
 echo "   john --list=formats | grep -i md5"
 echo ""
+json_add_example "2) List formats matching 'md5'" \
+    "john --list=formats | grep -i md5"
 
 # 3. List formats matching "sha"
 info "3) List formats matching 'sha'"
 echo "   john --list=formats | grep -i sha"
 echo ""
+json_add_example "3) List formats matching 'sha'" \
+    "john --list=formats | grep -i sha"
 
 # 4. Test with raw-md5 format
 info "4) Test a hash with raw-md5 format"
 echo "   john --format=raw-md5 hash.txt"
 echo ""
+json_add_example "4) Test a hash with raw-md5 format" \
+    "john --format=raw-md5 hash.txt"
 
 # 5. Test with raw-sha256 format
 info "5) Test a hash with raw-sha256 format"
 echo "   john --format=raw-sha256 hash.txt"
 echo ""
+json_add_example "5) Test a hash with raw-sha256 format" \
+    "john --format=raw-sha256 hash.txt"
 
 # 6. Test with bcrypt format
 info "6) Test a hash with bcrypt format"
 echo "   john --format=bcrypt hash.txt"
 echo ""
+json_add_example "6) Test a hash with bcrypt format" \
+    "john --format=bcrypt hash.txt"
 
 # 7. Test with NTLM format
 info "7) Test a hash with NTLM format"
 echo "   john --format=nt hash.txt"
 echo ""
+json_add_example "7) Test a hash with NTLM format" \
+    "john --format=nt hash.txt"
 
 # 8. Test with sha512crypt (Linux $6$)
 info "8) Test a hash with sha512crypt (Linux \$6\$)"
 echo "   john --format=sha512crypt hash.txt"
 echo ""
+json_add_example "8) Test a hash with sha512crypt (Linux \$6\$)" \
+    "john --format=sha512crypt hash.txt"
 
 # 9. Show format details and test vectors
 info "9) Show format details and test vectors"
 echo "   john --list=format-details --format=raw-md5"
 echo ""
+json_add_example "9) Show format details and test vectors" \
+    "john --list=format-details --format=raw-md5"
 
 # 10. Auto-detect format by running John directly
 info "10) Auto-detect format by running John directly"
 echo "    john hash.txt"
 echo ""
+json_add_example "10) Auto-detect format by running John directly" \
+    "john hash.txt"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

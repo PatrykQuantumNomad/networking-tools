@@ -26,6 +26,8 @@ require_cmd john "brew install john-jumbo  (john-jumbo includes *2john utilities
 setup_john_path
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
+json_set_meta "john" "" "password-cracker"
+
 confirm_execute
 safety_banner
 
@@ -51,51 +53,73 @@ echo ""
 info "1) Combine passwd and shadow files with unshadow"
 echo "   sudo unshadow /etc/passwd /etc/shadow > unshadowed.txt"
 echo ""
+json_add_example "1) Combine passwd and shadow files with unshadow" \
+    "sudo unshadow /etc/passwd /etc/shadow > unshadowed.txt"
 
 # 2. Crack with default settings (auto-detect)
 info "2) Crack with default settings — auto-detects hash type"
 echo "   john unshadowed.txt"
 echo ""
+json_add_example "2) Crack with default settings — auto-detects hash type" \
+    "john unshadowed.txt"
 
 # 3. Crack with a wordlist
 info "3) Crack with a wordlist"
 echo "   john --wordlist=${WORDLIST} unshadowed.txt"
 echo ""
+json_add_example "3) Crack with a wordlist" \
+    "john --wordlist=${WORDLIST} unshadowed.txt"
 
 # 4. Crack with wordlist + rules
 info "4) Crack with wordlist + rules for word mutations"
 echo "   john --wordlist=wordlist.txt --rules=best64 unshadowed.txt"
 echo ""
+json_add_example "4) Crack with wordlist + rules for word mutations" \
+    "john --wordlist=wordlist.txt --rules=best64 unshadowed.txt"
 
 # 5. Show cracked passwords
 info "5) Show cracked passwords from previous sessions"
 echo "   john --show unshadowed.txt"
 echo ""
+json_add_example "5) Show cracked passwords from previous sessions" \
+    "john --show unshadowed.txt"
 
 # 6. Target specific user only
 info "6) Target a specific user only"
 echo "   john --users=admin unshadowed.txt"
 echo ""
+json_add_example "6) Target a specific user only" \
+    "john --users=admin unshadowed.txt"
 
 # 7. Incremental (brute force) mode
 info "7) Incremental (brute force) mode — tries all combinations"
 echo "   john --incremental unshadowed.txt"
 echo ""
+json_add_example "7) Incremental (brute force) mode — tries all combinations" \
+    "john --incremental unshadowed.txt"
 
 # 8. Specify hash format explicitly
 info "8) Specify hash format explicitly"
 echo "   john --format=sha512crypt unshadowed.txt"
 echo ""
+json_add_example "8) Specify hash format explicitly" \
+    "john --format=sha512crypt unshadowed.txt"
 
 # 9. Use multiple CPU cores
 info "9) Use multiple CPU cores for parallel cracking"
 echo "   john --fork=4 --wordlist=rockyou.txt unshadowed.txt"
 echo ""
+json_add_example "9) Use multiple CPU cores for parallel cracking" \
+    "john --fork=4 --wordlist=rockyou.txt unshadowed.txt"
 
 # 10. Check password strength of cracked results
 info "10) Review cracked usernames and passwords"
 echo "    john --show --format=sha512crypt unshadowed.txt | cut -d: -f1,2"
 echo ""
+json_add_example "10) Review cracked usernames and passwords" \
+    "john --show --format=sha512crypt unshadowed.txt | cut -d: -f1,2"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

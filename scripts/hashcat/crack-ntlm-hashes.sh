@@ -28,6 +28,8 @@ require_cmd hashcat "brew install hashcat"
 HASHFILE="${1:-}"
 WORDLIST="${PROJECT_ROOT}/wordlists/rockyou.txt"
 
+json_set_meta "hashcat" "$HASHFILE" "password-cracker"
+
 confirm_execute
 safety_banner
 
@@ -56,51 +58,73 @@ HFILE="${HASHFILE:-hashes.txt}"
 info "1) Dictionary attack on NTLM hashes"
 echo "   hashcat -m 1000 -a 0 ${HFILE} ${WORDLIST}"
 echo ""
+json_add_example "1) Dictionary attack on NTLM hashes" \
+    "hashcat -m 1000 -a 0 ${HFILE} ${WORDLIST}"
 
 # 2. Dictionary + best64 rules
 info "2) Dictionary + best64 rules (smart word mutations)"
 echo "   hashcat -m 1000 -a 0 ${HFILE} wordlist.txt -r /usr/share/hashcat/rules/best64.rule"
 echo ""
+json_add_example "2) Dictionary + best64 rules (smart word mutations)" \
+    "hashcat -m 1000 -a 0 ${HFILE} wordlist.txt -r /usr/share/hashcat/rules/best64.rule"
 
 # 3. Dictionary + dive rules (more thorough)
 info "3) Dictionary + dive rules (more thorough, slower)"
 echo "   hashcat -m 1000 -a 0 ${HFILE} wordlist.txt -r /usr/share/hashcat/rules/dive.rule"
 echo ""
+json_add_example "3) Dictionary + dive rules (more thorough, slower)" \
+    "hashcat -m 1000 -a 0 ${HFILE} wordlist.txt -r /usr/share/hashcat/rules/dive.rule"
 
 # 4. Brute force — 8 char all lowercase
 info "4) Brute force — 8 character all lowercase"
 echo "   hashcat -m 1000 -a 3 ${HFILE} ?l?l?l?l?l?l?l?l"
 echo ""
+json_add_example "4) Brute force — 8 character all lowercase" \
+    "hashcat -m 1000 -a 3 ${HFILE} ?l?l?l?l?l?l?l?l"
 
 # 5. Mask attack — common pattern Uppercase+lower+digits
 info "5) Mask attack — common pattern Uppercase+lower+digits"
 echo "   hashcat -m 1000 -a 3 ${HFILE} ?u?l?l?l?l?d?d?d"
 echo ""
+json_add_example "5) Mask attack — common pattern Uppercase+lower+digits" \
+    "hashcat -m 1000 -a 3 ${HFILE} ?u?l?l?l?l?d?d?d"
 
 # 6. Combinator attack — two wordlists combined
 info "6) Combinator attack — two wordlists combined"
 echo "   hashcat -m 1000 -a 1 ${HFILE} wordlist1.txt wordlist2.txt"
 echo ""
+json_add_example "6) Combinator attack — two wordlists combined" \
+    "hashcat -m 1000 -a 1 ${HFILE} wordlist1.txt wordlist2.txt"
 
 # 7. Show already-cracked results
 info "7) Show already-cracked results from potfile"
 echo "   hashcat -m 1000 ${HFILE} --show"
 echo ""
+json_add_example "7) Show already-cracked results from potfile" \
+    "hashcat -m 1000 ${HFILE} --show"
 
 # 8. Resume interrupted session
 info "8) Resume an interrupted cracking session"
 echo "   hashcat -m 1000 --restore"
 echo ""
+json_add_example "8) Resume an interrupted cracking session" \
+    "hashcat -m 1000 --restore"
 
 # 9. Optimize for speed (workload high)
 info "9) Optimize for speed with high workload profile"
 echo "   hashcat -m 1000 -a 0 -w 3 ${HFILE} wordlist.txt"
 echo ""
+json_add_example "9) Optimize for speed with high workload profile" \
+    "hashcat -m 1000 -a 0 -w 3 ${HFILE} wordlist.txt"
 
 # 10. Output cracked hashes to file
 info "10) Output cracked hashes to file"
 echo "    hashcat -m 1000 -a 0 ${HFILE} wordlist.txt -o cracked.txt --outfile-format=2"
 echo ""
+json_add_example "10) Output cracked hashes to file" \
+    "hashcat -m 1000 -a 0 ${HFILE} wordlist.txt -o cracked.txt --outfile-format=2"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
