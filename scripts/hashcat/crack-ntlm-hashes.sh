@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Crack Windows NTLM hashes with GPU acceleration
-# @usage        hashcat/crack-ntlm-hashes.sh [target] [-h|--help] [-x|--execute]
+# @usage        hashcat/crack-ntlm-hashes.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies hashcat, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [hashfile] [-h|--help]"
+    echo "Usage: $(basename "$0") [hashfile] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Cracks Windows NTLM password hashes using GPU-accelerated attacks."
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")              # Show NTLM cracking techniques"
     echo "  $(basename "$0") hashes.txt   # Show techniques for your hash file"
     echo "  $(basename "$0") --help       # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

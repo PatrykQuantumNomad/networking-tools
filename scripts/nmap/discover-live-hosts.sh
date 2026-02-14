@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Find all active hosts on a subnet
-# @usage        nmap/discover-live-hosts.sh [target] [-h|--help] [-x|--execute]
+# @usage        nmap/discover-live-hosts.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies nmap, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Discovers live hosts on a network using various probe techniques."
@@ -20,6 +20,11 @@ show_help() {
     echo "  $(basename "$0") 192.168.1.0     # Discover hosts on 192.168.1.0/24"
     echo "  $(basename "$0") 10.0.0.0        # Discover hosts on 10.0.0.0/24"
     echo "  $(basename "$0") --help          # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

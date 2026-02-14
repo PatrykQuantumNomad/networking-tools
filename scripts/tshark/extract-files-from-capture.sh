@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Export files transferred over HTTP/SMB from packet captures
-# @usage        tshark/extract-files-from-capture.sh [target] [-h|--help] [-x|--execute]
+# @usage        tshark/extract-files-from-capture.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies tshark, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [capture.pcap] [-h|--help]"
+    echo "Usage: $(basename "$0") [capture.pcap] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Exports files transferred over HTTP, SMB, and other protocols from"
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0") traffic.pcap     # Extract files from traffic.pcap"
     echo "  $(basename "$0")                  # Show example commands"
     echo "  $(basename "$0") --help           # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

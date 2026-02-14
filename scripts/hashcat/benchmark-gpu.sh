@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Benchmark GPU cracking performance and estimate crack times
-# @usage        hashcat/benchmark-gpu.sh [-h|--help] [-x|--execute]
+# @usage        hashcat/benchmark-gpu.sh [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies hashcat, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [-h|--help]"
+    echo "Usage: $(basename "$0") [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Benchmarks GPU hash cracking performance using hashcat. Shows hashes"
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")        # Show benchmark commands"
     echo "  $(basename "$0") -x     # Run benchmarks interactively"
     echo "  $(basename "$0") --help # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

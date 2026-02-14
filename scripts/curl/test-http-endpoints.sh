@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Test HTTP endpoints with different methods
-# @usage        curl/test-http-endpoints.sh [target] [-h|--help] [-x|--execute]
+# @usage        curl/test-http-endpoints.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies curl, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-v|--verbose] [-q|--quiet]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-j|--json] [-v|--verbose] [-q|--quiet]"
     echo ""
     echo "Description:"
     echo "  Demonstrates HTTP method testing with curl. Shows how to send"
@@ -21,6 +21,13 @@ show_help() {
     echo "  $(basename "$0") https://api.example.com   # Test API endpoint"
     echo "  $(basename "$0") -x https://example.com    # Execute HTTP method tests"
     echo "  $(basename "$0") --help                    # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
+    echo "  -v, --verbose  Increase output verbosity"
+    echo "  -q, --quiet    Suppress informational output"
 }
 
 parse_common_args "$@"

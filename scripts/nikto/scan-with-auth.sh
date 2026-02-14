@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Perform authenticated Nikto scans using credentials or cookies
-# @usage        nikto/scan-with-auth.sh [target] [-h|--help] [-x|--execute]
+# @usage        nikto/scan-with-auth.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies nikto, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Performs authenticated Nikto scans using HTTP Basic Auth, cookies,"
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")                          # Scan DVWA on localhost"
     echo "  $(basename "$0") http://192.168.1.1:8080  # Scan a specific target"
     echo "  $(basename "$0") --help                   # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Crack password-protected ZIP, RAR, 7z, and other archives
-# @usage        john/crack-archive-passwords.sh [target] [-h|--help] [-x|--execute]
+# @usage        john/crack-archive-passwords.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies john, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [archive] [-h|--help]"
+    echo "Usage: $(basename "$0") [archive] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Cracks password-protected archives (ZIP, RAR, 7z, PDF, Office docs)"
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")                  # Show archive cracking techniques"
     echo "  $(basename "$0") protected.zip    # Show techniques for your archive"
     echo "  $(basename "$0") --help           # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

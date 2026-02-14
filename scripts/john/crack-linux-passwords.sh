@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Extract and crack Linux /etc/shadow password hashes
-# @usage        john/crack-linux-passwords.sh [target] [-h|--help] [-x|--execute]
+# @usage        john/crack-linux-passwords.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies john, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [-h|--help]"
+    echo "Usage: $(basename "$0") [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Demonstrates how to extract and crack Linux /etc/shadow password hashes"
@@ -17,6 +17,11 @@ show_help() {
     echo "Examples:"
     echo "  $(basename "$0")        # Show Linux password cracking techniques"
     echo "  $(basename "$0") --help # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

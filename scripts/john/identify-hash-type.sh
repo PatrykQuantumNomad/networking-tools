@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Identify unknown hash types and find the correct John format
-# @usage        john/identify-hash-type.sh [target] [-h|--help] [-x|--execute]
+# @usage        john/identify-hash-type.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies john, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [hash] [-h|--help]"
+    echo "Usage: $(basename "$0") [hash] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Helps identify unknown hash types by pattern, length, and prefix."
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")                                       # Show hash ID techniques"
     echo "  $(basename "$0") '5f4dcc3b5aa765d61d8327deb882cf99'    # Analyze a hash"
     echo "  $(basename "$0") --help                                # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Discover hidden parameters and fuzz values with ffuf
-# @usage        ffuf/fuzz-parameters.sh [target] [-h|--help] [-x|--execute]
+# @usage        ffuf/fuzz-parameters.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies ffuf, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [wordlist] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [wordlist] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Discovers hidden GET/POST parameters and fuzzes parameter values"
@@ -20,6 +20,11 @@ show_help() {
     echo "  $(basename "$0") http://target.com                 # Fuzz with default wordlist"
     echo "  $(basename "$0") http://target.com /path/to/words  # Fuzz with custom wordlist"
     echo "  $(basename "$0") --help                            # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

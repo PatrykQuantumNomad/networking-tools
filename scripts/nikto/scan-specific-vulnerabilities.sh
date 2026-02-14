@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Target specific vulnerability types using Nikto Tuning
-# @usage        nikto/scan-specific-vulnerabilities.sh [target] [-h|--help] [-x|--execute]
+# @usage        nikto/scan-specific-vulnerabilities.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies nikto, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Uses Nikto's Tuning flags to scan for specific vulnerability categories."
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")                          # Scan localhost:8080"
     echo "  $(basename "$0") http://192.168.1.1:8080  # Scan a specific target"
     echo "  $(basename "$0") --help                   # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

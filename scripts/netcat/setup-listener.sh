@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Setting up netcat listeners
-# @usage        netcat/setup-listener.sh [target] [-h|--help] [-x|--execute]
+# @usage        netcat/setup-listener.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies nc, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [port] [-h|--help] [-x|--execute]"
+    echo "Usage: $(basename "$0") [port] [-h|--help] [-x|--execute] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Demonstrates how to set up netcat listeners for various purposes:"
@@ -19,6 +19,11 @@ show_help() {
     echo "  $(basename "$0")                 # Show listener examples (port 4444)"
     echo "  $(basename "$0") 8080            # Show listener examples (port 8080)"
     echo "  $(basename "$0") --help          # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

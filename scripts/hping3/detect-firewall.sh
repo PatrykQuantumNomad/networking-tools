@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Detect firewall presence and identify filtering behavior
-# @usage        hping3/detect-firewall.sh [target] [-h|--help] [-x|--execute]
+# @usage        hping3/detect-firewall.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies hping3, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Detects firewall presence by comparing SYN, ACK, and FIN responses."
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")              # Test localhost for firewall"
     echo "  $(basename "$0") 192.168.1.1  # Detect firewall on remote host"
     echo "  $(basename "$0") --help       # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

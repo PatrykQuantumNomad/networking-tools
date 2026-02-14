@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Capture WPA/WPA2 4-way handshake for offline cracking
-# @usage        aircrack-ng/capture-handshake.sh [interface] [-h|--help] [-x|--execute]
+# @usage        aircrack-ng/capture-handshake.sh [interface] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies aircrack-ng, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [interface] [-h|--help]"
+    echo "Usage: $(basename "$0") [interface] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Captures a WPA/WPA2 4-way handshake for offline password cracking."
@@ -21,6 +21,11 @@ show_help() {
     echo "  $(basename "$0")          # Use default interface wlan0"
     echo "  $(basename "$0") wlan1    # Use a specific interface"
     echo "  $(basename "$0") --help   # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

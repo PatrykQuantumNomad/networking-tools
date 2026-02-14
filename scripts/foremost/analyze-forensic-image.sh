@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Forensic file carving from evidence images
-# @usage        foremost/analyze-forensic-image.sh [target] [-h|--help] [-x|--execute]
+# @usage        foremost/analyze-forensic-image.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies foremost, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [evidence-image] [-h|--help]"
+    echo "Usage: $(basename "$0") [evidence-image] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Demonstrates forensic file carving workflows. Covers evidence"
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")                  # Show forensic analysis examples"
     echo "  $(basename "$0") evidence.dd      # Show examples with evidence image"
     echo "  $(basename "$0") --help           # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Check SSL/TLS certificate details
-# @usage        curl/check-ssl-certificate.sh [target] [-h|--help] [-x|--execute]
+# @usage        curl/check-ssl-certificate.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies curl, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-v|--verbose] [-q|--quiet]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-j|--json] [-v|--verbose] [-q|--quiet]"
     echo ""
     echo "Description:"
     echo "  Inspects SSL/TLS certificates using curl. Shows how to check"
@@ -21,6 +21,13 @@ show_help() {
     echo "  $(basename "$0") 10.0.0.1         # Check internal server"
     echo "  $(basename "$0") -x google.com    # Execute checks against google.com"
     echo "  $(basename "$0") --help           # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
+    echo "  -v, --verbose  Increase output verbosity"
+    echo "  -q, --quiet    Suppress informational output"
 }
 
 parse_common_args "$@"

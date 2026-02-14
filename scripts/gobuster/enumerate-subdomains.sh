@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Discover subdomains via DNS brute-forcing
-# @usage        gobuster/enumerate-subdomains.sh [target] [-h|--help] [-x|--execute]
+# @usage        gobuster/enumerate-subdomains.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies gobuster, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [domain] [wordlist] [-h|--help] [-x|--execute]"
+    echo "Usage: $(basename "$0") [domain] [wordlist] [-h|--help] [-x|--execute] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Enumerates subdomains for a target domain using DNS brute-forcing"
@@ -17,6 +17,7 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  -h, --help       Show this help message"
+    echo "  -j, --json       Output results as JSON (requires jq)"
     echo "  -x, --execute    Run commands instead of displaying them"
     echo "  -v, --verbose    Increase verbosity"
     echo "  -q, --quiet      Suppress informational output"

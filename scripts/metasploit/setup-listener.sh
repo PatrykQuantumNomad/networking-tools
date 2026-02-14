@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Configure and start a multi/handler listener
-# @usage        metasploit/setup-listener.sh [target] [-h|--help] [-x|--execute]
+# @usage        metasploit/setup-listener.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies msfconsole, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [LHOST] [LPORT] [-h|--help]"
+    echo "Usage: $(basename "$0") [LHOST] [LPORT] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Configures and starts a Metasploit multi/handler to catch reverse shells."
@@ -19,6 +19,11 @@ show_help() {
     echo "  $(basename "$0") 10.0.0.5           # Use specific LHOST"
     echo "  $(basename "$0") 10.0.0.5 9001      # Use specific LHOST and LPORT"
     echo "  $(basename "$0") --help             # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

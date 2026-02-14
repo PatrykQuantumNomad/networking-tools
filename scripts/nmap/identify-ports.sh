@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Identify what's behind open ports
-# @usage        nmap/identify-ports.sh [target] [-h|--help] [-x|--execute]
+# @usage        nmap/identify-ports.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies nmap, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Identifies what's behind open ports on a target host. Shows common"
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")              # Identify ports on localhost"
     echo "  $(basename "$0") 192.168.1.1  # Identify ports on a remote host"
     echo "  $(basename "$0") --help       # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Test firewall behavior by crafting packets with specific TCP flags
-# @usage        hping3/test-firewall-rules.sh [target] [-h|--help] [-x|--execute]
+# @usage        hping3/test-firewall-rules.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies hping3, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Tests firewall behavior by sending packets with specific TCP flags."
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")              # Test firewall on localhost"
     echo "  $(basename "$0") 192.168.1.1  # Test a remote host's firewall"
     echo "  $(basename "$0") --help       # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

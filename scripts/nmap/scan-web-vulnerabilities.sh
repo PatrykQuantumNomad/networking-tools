@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Scan web servers for known vulnerabilities using NSE
-# @usage        nmap/scan-web-vulnerabilities.sh [target] [-h|--help] [-x|--execute]
+# @usage        nmap/scan-web-vulnerabilities.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies nmap, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Scans web servers for known vulnerabilities using Nmap Scripting Engine (NSE)."
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")              # Scan localhost web ports"
     echo "  $(basename "$0") 192.168.1.1  # Scan a remote web server"
     echo "  $(basename "$0") --help       # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

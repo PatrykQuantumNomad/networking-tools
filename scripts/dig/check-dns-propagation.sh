@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Compare DNS responses across public resolvers
-# @usage        dig/check-dns-propagation.sh [target] [-h|--help] [-x|--execute]
+# @usage        dig/check-dns-propagation.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies dig, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-v|--verbose] [-q|--quiet]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-j|--json] [-v|--verbose] [-q|--quiet]"
     echo ""
     echo "Description:"
     echo "  Compares DNS responses across multiple public resolvers to check"
@@ -20,6 +20,13 @@ show_help() {
     echo "  $(basename "$0") mysite.com       # Check mysite.com across resolvers"
     echo "  $(basename "$0") -x mysite.com    # Execute checks against mysite.com"
     echo "  $(basename "$0") --help           # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
+    echo "  -v, --verbose  Increase output verbosity"
+    echo "  -q, --quiet    Suppress informational output"
 }
 
 parse_common_args "$@"

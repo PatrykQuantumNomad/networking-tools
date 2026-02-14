@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Attempt DNS zone transfers (AXFR)
-# @usage        dig/attempt-zone-transfer.sh [target] [-h|--help] [-x|--execute]
+# @usage        dig/attempt-zone-transfer.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies dig, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-v|--verbose] [-q|--quiet]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-j|--json] [-v|--verbose] [-q|--quiet]"
     echo ""
     echo "Description:"
     echo "  Demonstrates DNS zone transfer (AXFR) techniques for discovering"
@@ -20,6 +20,13 @@ show_help() {
     echo "  $(basename "$0") target.com       # Test target.com nameservers"
     echo "  $(basename "$0") -x target.com    # Execute queries against target.com"
     echo "  $(basename "$0") --help           # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
+    echo "  -v, --verbose  Increase output verbosity"
+    echo "  -q, --quiet    Suppress informational output"
 }
 
 parse_common_args "$@"

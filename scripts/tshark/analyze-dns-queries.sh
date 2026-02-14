@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Monitor and analyze DNS query traffic
-# @usage        tshark/analyze-dns-queries.sh [target] [-h|--help] [-x|--execute]
+# @usage        tshark/analyze-dns-queries.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies tshark, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [interface] [-h|--help]"
+    echo "Usage: $(basename "$0") [interface] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Monitors and analyzes DNS query traffic for reconnaissance detection."
@@ -19,6 +19,11 @@ show_help() {
     echo "  $(basename "$0")        # Monitor DNS on en0"
     echo "  $(basename "$0") lo0    # Monitor DNS on loopback"
     echo "  $(basename "$0") --help # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

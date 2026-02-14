@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Per-hop latency analysis using mtr
-# @usage        traceroute/diagnose-latency.sh [target] [-h|--help] [-x|--execute]
+# @usage        traceroute/diagnose-latency.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies mtr, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Analyzes per-hop latency using mtr (My Traceroute). Shows loss,"
@@ -17,6 +17,7 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  -h, --help       Show this help message"
+    echo "  -j, --json       Output results as JSON (requires jq)"
     echo "  -x, --execute    Run commands instead of displaying them"
     echo "  -v, --verbose    Increase verbosity"
     echo "  -q, --quiet      Suppress informational output"

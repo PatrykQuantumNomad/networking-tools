@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Thoroughly test all parameters for SQL injection
-# @usage        sqlmap/test-all-parameters.sh [target] [-h|--help] [-x|--execute]
+# @usage        sqlmap/test-all-parameters.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies sqlmap, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target-url] [-h|--help] [-x|--execute]"
+    echo "Usage: $(basename "$0") [target-url] [-h|--help] [-x|--execute] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Demonstrates how to thoroughly test all parameters in an HTTP request"
@@ -19,6 +19,11 @@ show_help() {
     echo "  $(basename "$0") 'http://localhost:8080/vuln.php?id=1'              # Target a URL"
     echo "  $(basename "$0") -x 'http://localhost:8080/vuln.php?id=1'           # Execute against target"
     echo "  $(basename "$0") --help                                             # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

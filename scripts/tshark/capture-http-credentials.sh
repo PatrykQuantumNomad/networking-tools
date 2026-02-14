@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Capture credentials from unencrypted HTTP traffic
-# @usage        tshark/capture-http-credentials.sh [target] [-h|--help] [-x|--execute]
+# @usage        tshark/capture-http-credentials.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies tshark, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [interface] [-h|--help]"
+    echo "Usage: $(basename "$0") [interface] [-h|--help] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Captures and extracts credentials from unencrypted HTTP traffic."
@@ -18,6 +18,11 @@ show_help() {
     echo "  $(basename "$0")        # Capture on en0"
     echo "  $(basename "$0") lo0    # Capture on loopback (local lab traffic)"
     echo "  $(basename "$0") --help # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ============================================================================
 # @description  Port scanning with netcat (nc -z)
-# @usage        netcat/scan-ports.sh [target] [-h|--help] [-x|--execute]
+# @usage        netcat/scan-ports.sh [target] [-h|--help] [-x|--execute] [-j|--json]
 # @dependencies nc, common.sh
 # ============================================================================
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute]"
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-x|--execute] [-j|--json]"
     echo ""
     echo "Description:"
     echo "  Demonstrates port scanning techniques using netcat's -z (scan) mode."
@@ -19,6 +19,11 @@ show_help() {
     echo "  $(basename "$0") 192.168.1.1     # Scan specific host"
     echo "  $(basename "$0") -x 10.0.0.1     # Execute scans against gateway"
     echo "  $(basename "$0") --help          # Show this help message"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output results as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
 }
 
 parse_common_args "$@"
