@@ -59,7 +59,7 @@ Archived to `.planning/milestones/v1.3-ROADMAP.md`
 - [x] **Phase 23: JSON Library & Flag Integration** - Build lib/json.sh module and wire -j flag into argument parsing and output infrastructure (completed 2026-02-13)
 - [x] **Phase 24: Library Unit Tests** - Validate JSON library functions and -j flag parsing with BATS before migrating scripts (completed 2026-02-13)
 - [x] **Phase 25: Script Migration** - Add JSON support to all 46 use-case scripts (completed 2026-02-14)
-- [ ] **Phase 26: Integration Tests** - Validate every migrated script produces correct, parseable JSON output
+- [x] **Phase 26: Integration Tests** - Validate every migrated script produces correct, parseable JSON output (completed 2026-02-14)
 - [ ] **Phase 27: Documentation** - Update help text and metadata headers to reflect JSON output capability
 
 ## Phase Details
@@ -117,7 +117,7 @@ Plans:
   3. All integration tests pass in CI alongside existing 265-test suite
 **Plans:** 1 plan
 Plans:
-- [ ] 26-01-PLAN.md -- Create intg-json-output.bats with dynamic JSON output tests for all 46 scripts
+- [x] 26-01-PLAN.md -- Create intg-json-output.bats with dynamic JSON output tests for all 46 scripts
 
 ### Phase 27: Documentation
 **Goal**: Users can discover and understand the `-j`/`--json` flag through help text and script headers
@@ -139,7 +139,7 @@ Plans:
 | 23. JSON Library & Flag Integration | v1.4 | 1/1 | Complete | 2026-02-13 |
 | 24. Library Unit Tests | v1.4 | 2/2 | Complete | 2026-02-13 |
 | 25. Script Migration | v1.4 | 4/4 | Complete | 2026-02-14 |
-| 26. Integration Tests | v1.4 | 0/TBD | Not started | - |
+| 26. Integration Tests | v1.4 | 1/1 | Complete | 2026-02-14 |
 | 27. Documentation | v1.4 | 0/TBD | Not started | - |
 
-**Total: 4 milestones shipped (22 phases, 50 plans) + 1 milestone in progress (5 phases, 3/5 complete)**
+**Total: 4 milestones shipped (22 phases, 50 plans) + 1 milestone in progress (5 phases, 4/5 complete)**

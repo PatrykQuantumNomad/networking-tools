@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Milestone v1.4 — JSON Output Mode (Phase 25: Script Migration)
+**Current focus:** Milestone v1.4 — JSON Output Mode (Phase 26: Integration Tests)
 
 ## Current Position
 
-Phase: 25 (Script Migration) — third of 5 in v1.4
-Plan: 04 complete (4/4 plans in phase)
-Status: Phase 25 complete
-Last activity: 2026-02-14 — Completed 25-03 (Group C script migration, 10 scripts)
+Phase: 26 (Integration Tests) — fourth of 5 in v1.4
+Plan: 01 complete (1/1 plans in phase)
+Status: Phase 26 complete
+Last activity: 2026-02-14 — Completed 26-01 (JSON integration tests for all 46 scripts)
 
-Progress: [######░░░░] 60% (v1.4 — 3/5 phases)
+Progress: [########░░] 80% (v1.4 — 4/5 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 57 (across v1.0-v1.4)
+- Total plans completed: 58 (across v1.0-v1.4)
 - Average duration: 4min
-- Total execution time: 3.87 hours
+- Total execution time: 3.97 hours
 
 **By Milestone:**
 
@@ -31,7 +31,7 @@ Progress: [######░░░░] 60% (v1.4 — 3/5 phases)
 | v1.1 | 4 | 4 | ~8min |
 | v1.2 | 6 | 18 | ~79min |
 | v1.3 | 5 | 9 | ~42min |
-| v1.4 | 3/5 | 7 | ~62min |
+| v1.4 | 4/5 | 8 | ~68min |
 
 ## Accumulated Context
 
@@ -54,6 +54,7 @@ Full cumulative decision table in PROJECT.md.
 - Phase 25-02: Category taxonomy extended with password-cracker (hashcat/john) and exploitation (aircrack-ng/metasploit)
 - Phase 25-04: json_add_example only for bare info+echo (run_or_show captured automatically by library)
 - Phase 25-03: NC_VARIANT branching: json_add_example inside each conditional branch for variant-specific commands
+- Phase 26-01: bash -c wrapper for BATS fd3 JSON capture (run mixes stdout+stderr; bash -c with 2>/dev/null isolates JSON)
 
 ### Pending Todos
 
@@ -73,5 +74,5 @@ None. (Phase 24 fd3 concern resolved: subprocess `exec 3>&-` pattern works, no n
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 25-03-PLAN.md (Group C script migration)
+Stopped at: Completed 26-01-PLAN.md (JSON integration tests)
 Resume file: None
