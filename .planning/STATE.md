@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Milestone v1.4 — JSON Output Mode (Phase 26: Integration Tests)
+**Current focus:** Milestone v1.4 — JSON Output Mode (Phase 27: Documentation)
 
 ## Current Position
 
-Phase: 26 (Integration Tests) — fourth of 5 in v1.4
-Plan: 01 complete (1/1 plans in phase)
-Status: Phase 26 complete
-Last activity: 2026-02-14 — Completed 26-01 (JSON integration tests for all 46 scripts)
+Phase: 27 (Documentation) — fifth of 5 in v1.4
+Plan: 01 complete (1/2 plans in phase)
+Status: Executing Phase 27
+Last activity: 2026-02-14 — Completed 27-01 (help text and header documentation for -j flag)
 
-Progress: [########░░] 80% (v1.4 — 4/5 phases)
+Progress: [#########░] 90% (v1.4 — 4.5/5 phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 58 (across v1.0-v1.4)
+- Total plans completed: 59 (across v1.0-v1.4)
 - Average duration: 4min
-- Total execution time: 3.97 hours
+- Total execution time: 4.09 hours
 
 **By Milestone:**
 
@@ -31,7 +31,7 @@ Progress: [########░░] 80% (v1.4 — 4/5 phases)
 | v1.1 | 4 | 4 | ~8min |
 | v1.2 | 6 | 18 | ~79min |
 | v1.3 | 5 | 9 | ~42min |
-| v1.4 | 4/5 | 8 | ~68min |
+| v1.4 | 4.5/5 | 9 | ~75min |
 
 ## Accumulated Context
 
@@ -55,6 +55,7 @@ Full cumulative decision table in PROJECT.md.
 - Phase 25-04: json_add_example only for bare info+echo (run_or_show captured automatically by library)
 - Phase 25-03: NC_VARIANT branching: json_add_example inside each conditional branch for variant-specific commands
 - Phase 26-01: bash -c wrapper for BATS fd3 JSON capture (run mixes stdout+stderr; bash -c with 2>/dev/null isolates JSON)
+- Phase 27-01: -j after -h in Options for Pattern A scripts; separate Flags section for Pattern B scripts; 5-flag variant for curl/dig
 
 ### Pending Todos
 
@@ -74,5 +75,5 @@ None. (Phase 24 fd3 concern resolved: subprocess `exec 3>&-` pattern works, no n
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 26-01-PLAN.md (JSON integration tests)
+Stopped at: Completed 27-01-PLAN.md (help text and header documentation)
 Resume file: None

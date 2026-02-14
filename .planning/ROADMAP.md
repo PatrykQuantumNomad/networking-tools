@@ -128,7 +128,7 @@ Plans:
   2. All 46 use-case scripts' metadata headers include JSON output as a documented capability
 **Plans:** 2 plans
 Plans:
-- [ ] 27-01-PLAN.md -- Update @usage headers and show_help() for all 46 use-case scripts
+- [x] 27-01-PLAN.md -- Update @usage headers and show_help() for all 46 use-case scripts
 - [ ] 27-02-PLAN.md -- Add BATS verification tests for DOC-01 and DOC-02
 
 ## Progress
@@ -143,6 +143,6 @@ Plans:
 | 24. Library Unit Tests | v1.4 | 2/2 | Complete | 2026-02-13 |
 | 25. Script Migration | v1.4 | 4/4 | Complete | 2026-02-14 |
 | 26. Integration Tests | v1.4 | 1/1 | Complete | 2026-02-14 |
-| 27. Documentation | v1.4 | 0/2 | Not started | - |
+| 27. Documentation | v1.4 | 1/2 | In progress | - |
 
 **Total: 4 milestones shipped (22 phases, 50 plans) + 1 milestone in progress (5 phases, 4/5 complete)**
