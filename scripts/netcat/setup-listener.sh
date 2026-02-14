@@ -29,6 +29,8 @@ require_cmd nc "apt install netcat-openbsd (Debian/Ubuntu) | brew install netcat
 PORT="${1:-4444}"
 NC_VARIANT=$(detect_nc_variant)
 
+json_set_meta "netcat" "$PORT" "network-scanner"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -49,8 +51,10 @@ echo ""
 info "1) Basic listener on port ${PORT}"
 if [[ "$NC_VARIANT" == "openbsd" ]]; then
     echo "   nc -l ${PORT}"
+    json_add_example "1) Basic listener on port ${PORT}" "nc -l ${PORT}"
 else
     echo "   nc -l -p ${PORT}"
+    json_add_example "1) Basic listener on port ${PORT}" "nc -l -p ${PORT}"
 fi
 echo ""
 
@@ -58,8 +62,10 @@ echo ""
 info "2) Listener with verbose output"
 if [[ "$NC_VARIANT" == "openbsd" ]]; then
     echo "   nc -lv ${PORT}"
+    json_add_example "2) Listener with verbose output" "nc -lv ${PORT}"
 else
     echo "   nc -lv -p ${PORT}"
+    json_add_example "2) Listener with verbose output" "nc -lv -p ${PORT}"
 fi
 echo ""
 
@@ -68,13 +74,16 @@ info "3) Keep-alive listener -- stays open after client disconnects [variant: ${
 case "$NC_VARIANT" in
     ncat)
         echo "   ncat -k -l -p ${PORT}          # ncat: -k keeps listening"
+        json_add_example "3) Keep-alive listener [${NC_VARIANT}]" "ncat -k -l -p ${PORT}"
         ;;
     openbsd)
         echo "   nc -k -l ${PORT}               # OpenBSD: -k keeps listening"
+        json_add_example "3) Keep-alive listener [${NC_VARIANT}]" "nc -k -l ${PORT}"
         ;;
     gnu|traditional)
         echo "   # ${NC_VARIANT} nc does not support -k; use a while loop:"
         echo "   while true; do nc -l -p ${PORT}; done"
+        json_add_example "3) Keep-alive listener [${NC_VARIANT}]" "while true; do nc -l -p ${PORT}; done"
         ;;
 esac
 echo ""
@@ -83,8 +92,10 @@ echo ""
 info "4) Listener that saves received data to a file"
 if [[ "$NC_VARIANT" == "openbsd" ]]; then
     echo "   nc -l ${PORT} > received_data.txt"
+    json_add_example "4) Listener that saves received data to a file" "nc -l ${PORT} > received_data.txt"
 else
     echo "   nc -l -p ${PORT} > received_data.txt"
+    json_add_example "4) Listener that saves received data to a file" "nc -l -p ${PORT} > received_data.txt"
 fi
 echo ""
 
@@ -92,8 +103,10 @@ echo ""
 info "5) UDP listener"
 if [[ "$NC_VARIANT" == "openbsd" ]]; then
     echo "   nc -lu ${PORT}"
+    json_add_example "5) UDP listener" "nc -lu ${PORT}"
 else
     echo "   nc -lu -p ${PORT}"
+    json_add_example "5) UDP listener" "nc -lu -p ${PORT}"
 fi
 echo ""
 
@@ -101,8 +114,10 @@ echo ""
 info "6) Listener with a timeout (closes after N seconds of inactivity)"
 if [[ "$NC_VARIANT" == "openbsd" ]]; then
     echo "   nc -l -w 30 ${PORT}            # Timeout after 30 seconds"
+    json_add_example "6) Listener with a timeout" "nc -l -w 30 ${PORT}"
 else
     echo "   nc -l -p ${PORT} -w 30          # Timeout after 30 seconds"
+    json_add_example "6) Listener with a timeout" "nc -l -p ${PORT} -w 30"
 fi
 echo ""
 
@@ -111,16 +126,20 @@ info "7) Execute command when a client connects [variant: ${NC_VARIANT}]"
 case "$NC_VARIANT" in
     ncat)
         echo "   ncat -e /bin/bash -l -p ${PORT}    # ncat: -e executes command"
+        json_add_example "7) Execute command on connect [${NC_VARIANT}]" "ncat -e /bin/bash -l -p ${PORT}"
         ;;
     traditional)
         echo "   nc -e /bin/bash -l -p ${PORT}      # traditional: -e executes command"
+        json_add_example "7) Execute command on connect [${NC_VARIANT}]" "nc -e /bin/bash -l -p ${PORT}"
         ;;
     openbsd)
         echo "   # OpenBSD nc does NOT support -e; use a named pipe:"
         echo "   mkfifo /tmp/f; nc -l ${PORT} < /tmp/f | /bin/sh > /tmp/f 2>&1"
+        json_add_example "7) Execute command on connect [${NC_VARIANT}]" "mkfifo /tmp/f; nc -l ${PORT} < /tmp/f | /bin/sh > /tmp/f 2>&1"
         ;;
     gnu)
         echo "   nc -c /bin/bash -l -p ${PORT}      # GNU: -c executes via /bin/sh"
+        json_add_example "7) Execute command on connect [${NC_VARIANT}]" "nc -c /bin/bash -l -p ${PORT}"
         ;;
 esac
 echo ""
@@ -129,8 +148,10 @@ echo ""
 info "8) Listener that serves an HTTP-like response"
 if [[ "$NC_VARIANT" == "openbsd" ]]; then
     echo "   echo -e 'HTTP/1.1 200 OK\\r\\n\\r\\nHello' | nc -l ${PORT}"
+    json_add_example "8) Listener that serves an HTTP-like response" "echo -e 'HTTP/1.1 200 OK\r\n\r\nHello' | nc -l ${PORT}"
 else
     echo "   echo -e 'HTTP/1.1 200 OK\\r\\n\\r\\nHello' | nc -l -p ${PORT}"
+    json_add_example "8) Listener that serves an HTTP-like response" "echo -e 'HTTP/1.1 200 OK\r\n\r\nHello' | nc -l -p ${PORT}"
 fi
 echo ""
 
@@ -139,8 +160,10 @@ info "9) Two-way chat setup"
 echo "   # Machine A (listener):"
 if [[ "$NC_VARIANT" == "openbsd" ]]; then
     echo "   nc -l ${PORT}"
+    json_add_example "9) Two-way chat setup" "nc -l ${PORT}"
 else
     echo "   nc -l -p ${PORT}"
+    json_add_example "9) Two-way chat setup" "nc -l -p ${PORT}"
 fi
 echo "   # Machine B (connector):"
 echo "   nc <listener-ip> ${PORT}"
@@ -151,10 +174,14 @@ echo ""
 info "10) Listener piped to another command (e.g., log to syslog)"
 if [[ "$NC_VARIANT" == "openbsd" ]]; then
     echo "    nc -l ${PORT} | tee incoming.log"
+    json_add_example "10) Listener piped to another command" "nc -l ${PORT} | tee incoming.log"
 else
     echo "    nc -l -p ${PORT} | tee incoming.log"
+    json_add_example "10) Listener piped to another command" "nc -l -p ${PORT} | tee incoming.log"
 fi
 echo ""
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

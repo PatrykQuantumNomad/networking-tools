@@ -29,6 +29,8 @@ require_cmd nc "apt install netcat-openbsd (Debian/Ubuntu) | brew install netcat
 TARGET="${1:-127.0.0.1}"
 NC_VARIANT=$(detect_nc_variant)
 
+json_set_meta "netcat" "$TARGET" "network-scanner"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -60,6 +62,8 @@ echo "   # Receiver (listener):"
 echo "   $(_listener_cmd 4444) > received_file.txt"
 echo "   # Sender (connector):"
 echo "   nc ${TARGET} 4444 < file_to_send.txt"
+json_add_example "1) Send a file -- receiver listens, sender connects" \
+    "nc ${TARGET} 4444 < file_to_send.txt"
 echo ""
 
 # 2. Receive a file (reverse direction)
@@ -68,6 +72,8 @@ echo "   # Sender (listener):"
 echo "   $(_listener_cmd 4444) < file_to_send.txt"
 echo "   # Receiver (connector):"
 echo "   nc ${TARGET} 4444 > received_file.txt"
+json_add_example "2) Receive a file -- listener sends, connector saves" \
+    "nc ${TARGET} 4444 > received_file.txt"
 echo ""
 
 # 3. Transfer with progress (pipe through pv)
@@ -76,6 +82,8 @@ echo "   # Receiver:"
 echo "   $(_listener_cmd 4444) > received_file.bin"
 echo "   # Sender (with progress):"
 echo "   pv file_to_send.bin | nc ${TARGET} 4444"
+json_add_example "3) Transfer with progress bar (requires pv)" \
+    "pv file_to_send.bin | nc ${TARGET} 4444"
 echo ""
 
 # 4. Send a directory via tar pipe
@@ -84,6 +92,8 @@ echo "   # Receiver:"
 echo "   $(_listener_cmd 4444) | tar xvf -"
 echo "   # Sender:"
 echo "   tar cvf - /path/to/directory | nc ${TARGET} 4444"
+json_add_example "4) Send an entire directory via tar pipe" \
+    "tar cvf - /path/to/directory | nc ${TARGET} 4444"
 echo ""
 
 # 5. [VARIANT] Use -N to close after EOF (OpenBSD)
@@ -92,14 +102,17 @@ case "$NC_VARIANT" in
     openbsd)
         echo "   # OpenBSD nc supports -N to shutdown after EOF on stdin:"
         echo "   nc -N ${TARGET} 4444 < file_to_send.txt"
+        json_add_example "5) Close connection after transfer [${NC_VARIANT}]" "nc -N ${TARGET} 4444 < file_to_send.txt"
         ;;
     ncat)
         echo "   # ncat closes after EOF by default with --send-only:"
         echo "   ncat --send-only ${TARGET} 4444 < file_to_send.txt"
+        json_add_example "5) Close connection after transfer [${NC_VARIANT}]" "ncat --send-only ${TARGET} 4444 < file_to_send.txt"
         ;;
     gnu|traditional)
         echo "   # ${NC_VARIANT} nc: use -q 0 to close after EOF:"
         echo "   nc -q 0 ${TARGET} 4444 < file_to_send.txt"
+        json_add_example "5) Close connection after transfer [${NC_VARIANT}]" "nc -q 0 ${TARGET} 4444 < file_to_send.txt"
         ;;
 esac
 echo ""
@@ -110,6 +123,8 @@ echo "   # Receiver:"
 echo "   $(_listener_cmd 4444) | gunzip > received_file.txt"
 echo "   # Sender:"
 echo "   gzip -c file_to_send.txt | nc ${TARGET} 4444"
+json_add_example "6) Transfer with gzip compression" \
+    "gzip -c file_to_send.txt | nc ${TARGET} 4444"
 echo ""
 
 # 7. Verify transfer with checksum
@@ -119,6 +134,8 @@ echo "   sha256sum file_to_send.txt"
 echo "   # On receiver machine (after transfer):"
 echo "   sha256sum received_file.txt"
 echo "   # Compare the hashes -- they should match"
+json_add_example "7) Verify transfer integrity with checksums" \
+    "sha256sum file_to_send.txt"
 echo ""
 
 # 8. Transfer multiple files via tar
@@ -127,6 +144,8 @@ echo "   # Receiver:"
 echo "   $(_listener_cmd 4444) | tar xvf -"
 echo "   # Sender:"
 echo "   tar cvf - file1.txt file2.txt file3.conf | nc ${TARGET} 4444"
+json_add_example "8) Transfer multiple specific files via tar" \
+    "tar cvf - file1.txt file2.txt file3.conf | nc ${TARGET} 4444"
 echo ""
 
 # 9. Set timeout for stale transfers
@@ -135,6 +154,8 @@ echo "   # Receiver with 30-second idle timeout:"
 echo "   $(_listener_cmd 4444) -w 30 > received_file.txt"
 echo "   # Sender:"
 echo "   nc -w 30 ${TARGET} 4444 < file_to_send.txt"
+json_add_example "9) Set timeout for stale transfers" \
+    "nc -w 30 ${TARGET} 4444 < file_to_send.txt"
 echo ""
 
 # 10. Encrypted transfer via openssl pipe
@@ -143,7 +164,11 @@ echo "    # Receiver (decrypt):"
 echo "    $(_listener_cmd 4444) | openssl enc -d -aes-256-cbc -pbkdf2 -pass pass:SECRET > received_file.txt"
 echo "    # Sender (encrypt):"
 echo "    openssl enc -aes-256-cbc -pbkdf2 -pass pass:SECRET < file_to_send.txt | nc ${TARGET} 4444"
+json_add_example "10) Encrypted transfer via openssl pipe" \
+    "openssl enc -aes-256-cbc -pbkdf2 -pass pass:SECRET < file_to_send.txt | nc ${TARGET} 4444"
 echo ""
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
