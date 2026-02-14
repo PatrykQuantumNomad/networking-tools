@@ -25,6 +25,8 @@ set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
 TARGET="${1:-localhost}"
 
+json_set_meta "nmap" "$TARGET" "network-scanner"
+
 confirm_execute "${1:-}"
 
 info "=== Port Identification ==="
@@ -40,26 +42,36 @@ echo ""
 info "1) Identify which process owns a specific port"
 echo "   lsof -i :8080 -P -n"
 echo ""
+json_add_example "Identify which process owns a specific port" \
+    "lsof -i :8080 -P -n"
 
 # 2. All listening ports with process names
 info "2) List ALL listening ports with their process"
 echo "   lsof -i -P -n | grep LISTEN"
 echo ""
+json_add_example "List ALL listening ports with their process" \
+    "lsof -i -P -n | grep LISTEN"
 
 # 3. Filter by TCP only
 info "3) TCP listening ports only"
 echo "   lsof -iTCP -P -n | grep LISTEN"
 echo ""
+json_add_example "TCP listening ports only" \
+    "lsof -iTCP -P -n | grep LISTEN"
 
 # 4. Show connections for a specific process
 info "4) Show all ports owned by a specific process"
 echo "   lsof -i -P -n | grep <process-name>"
 echo ""
+json_add_example "Show all ports owned by a specific process" \
+    "lsof -i -P -n | grep <process-name>"
 
 # 5. macOS netstat alternative
 info "5) netstat — show listening ports with PIDs (macOS)"
 echo "   netstat -an -p tcp | grep LISTEN"
 echo ""
+json_add_example "netstat — show listening ports with PIDs (macOS)" \
+    "netstat -an -p tcp | grep LISTEN"
 
 # 6. Nmap service version detection
 run_or_show "6) Nmap service probing (remote — works on any target)" \
@@ -82,6 +94,10 @@ info "10) Full workflow: scan then identify"
 echo "    sudo nmap -sV -p- ${TARGET} -oG - | grep open"
 echo "    lsof -i -P -n | grep LISTEN"
 echo ""
+json_add_example "Full workflow: scan then identify" \
+    "sudo nmap -sV -p- ${TARGET} -oG - | grep open"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

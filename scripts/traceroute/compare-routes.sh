@@ -40,6 +40,8 @@ OS_TYPE="$(uname -s)"
 HAS_MTR=false
 check_cmd mtr && HAS_MTR=true
 
+json_set_meta "traceroute" "$TARGET" "network-analysis"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -82,6 +84,8 @@ else
     echo "   sudo traceroute -T -n -q 1 ${TARGET}      # TCP"
 fi
 echo ""
+json_add_example "Faster comparison — single probe per hop for each protocol" \
+    "traceroute -n -q 1 ${TARGET}"
 
 # 5. Compare hop count across protocols
 info "5) Compare hop count — set max hops to 30 for each"
@@ -93,6 +97,8 @@ else
     echo "   sudo traceroute -T -n -m 30 ${TARGET}      # TCP"
 fi
 echo ""
+json_add_example "Compare hop count — set max hops to 30 for each" \
+    "traceroute -n -m 30 ${TARGET}"
 
 # 6. Set specific wait timeout for comparison
 info "6) Set wait timeout to 3 seconds for consistent comparison"
@@ -104,6 +110,8 @@ else
     echo "   sudo traceroute -T -n -w 3 ${TARGET}      # TCP"
 fi
 echo ""
+json_add_example "Set wait timeout to 3 seconds for consistent comparison" \
+    "traceroute -n -w 3 ${TARGET}"
 
 # 7. mtr TCP mode if available
 if [[ "$HAS_MTR" == true ]]; then
@@ -114,6 +122,8 @@ else
     echo "   mtr --report --tcp -c 10 ${TARGET}"
     echo "   (mtr not installed — brew install mtr / apt install mtr)"
     echo ""
+    json_add_example "mtr TCP mode — continuous TCP route monitoring" \
+        "mtr --report --tcp -c 10 ${TARGET}"
 fi
 
 # 8. mtr UDP mode if available
@@ -125,6 +135,8 @@ else
     echo "   mtr --report --udp -c 10 ${TARGET}"
     echo "   (mtr not installed — brew install mtr / apt install mtr)"
     echo ""
+    json_add_example "mtr UDP mode — continuous UDP route monitoring" \
+        "mtr --report --udp -c 10 ${TARGET}"
 fi
 
 # 9. Trace to specific port with TCP
@@ -149,6 +161,10 @@ else
     echo "    sudo traceroute -T -n -q 1 -m 20 ${TARGET}"
 fi
 echo ""
+json_add_example "Full comparison script — run all protocols sequentially" \
+    "traceroute -n -q 1 -m 20 ${TARGET}"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

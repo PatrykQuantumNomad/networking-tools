@@ -27,6 +27,8 @@ require_cmd nikto "brew install nikto"
 
 TARGET="${1:-http://localhost:8080}"
 
+json_set_meta "nikto" "$TARGET" "web-scanner"
+
 confirm_execute "$TARGET"
 safety_banner
 
@@ -60,16 +62,22 @@ run_or_show "3) Custom header authentication (Bearer token)" \
 info "4) Scan DVWA with low security setting"
 echo "   nikto -h http://localhost:8080 -C \"security=low; PHPSESSID=SESSION\""
 echo ""
+json_add_example "Scan DVWA with low security setting" \
+    "nikto -h http://localhost:8080 -C \"security=low; PHPSESSID=SESSION\""
 
 # 5. Multiple cookies combined
 info "5) Multiple cookies combined"
 echo "   nikto -h ${TARGET} -C \"session=abc; role=admin; csrf_token=xyz\""
 echo ""
+json_add_example "Multiple cookies combined" \
+    "nikto -h ${TARGET} -C \"session=abc; role=admin; csrf_token=xyz\""
 
 # 6. Authenticated scan with specific tuning
 info "6) Authenticated scan with specific tuning (SQLi + XSS + Injection)"
 echo "   nikto -h ${TARGET} -id admin:password -Tuning 249"
 echo ""
+json_add_example "Authenticated scan with specific tuning (SQLi + XSS + Injection)" \
+    "nikto -h ${TARGET} -id admin:password -Tuning 249"
 
 # 7. Follow redirects during auth scan
 run_or_show "7) Follow redirects during authenticated scan" \
@@ -79,6 +87,8 @@ run_or_show "7) Follow redirects during authenticated scan" \
 info "8) Authenticated scan saving HTML report"
 echo "   nikto -h ${TARGET} -id admin:password -output auth_scan.html -Format htm"
 echo ""
+json_add_example "Authenticated scan saving HTML report" \
+    "nikto -h ${TARGET} -id admin:password -output auth_scan.html -Format htm"
 
 # 9. Use a proxy to capture authenticated traffic
 run_or_show "9) Use a proxy to capture authenticated traffic (e.g., Burp Suite)" \
@@ -87,6 +97,8 @@ run_or_show "9) Use a proxy to capture authenticated traffic (e.g., Burp Suite)"
 # 10. Digest authentication
 run_or_show "10) Digest authentication" \
     nikto -h "$TARGET" -id admin:password -authtype digest
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

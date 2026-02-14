@@ -30,6 +30,8 @@ require_cmd curl "apt install curl (Debian/Ubuntu) | brew install curl (macOS)"
 
 TARGET="${1:-https://example.com}"
 
+json_set_meta "curl" "$TARGET" "network-analysis"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -53,31 +55,43 @@ echo ""
 info "1) GET request — retrieve a resource"
 echo "   curl -s -o /dev/null -w 'HTTP %{http_code}\n' ${TARGET}"
 echo ""
+json_add_example "GET request — retrieve a resource" \
+    "curl -s -o /dev/null -w 'HTTP %{http_code}\n' ${TARGET}"
 
 # 2. POST with form data
 info "2) POST with form data"
 echo "   curl -X POST -d 'username=admin&password=test' -s -o /dev/null -w 'HTTP %{http_code}\n' ${TARGET}"
 echo ""
+json_add_example "POST with form data" \
+    "curl -X POST -d 'username=admin&password=test' -s -o /dev/null -w 'HTTP %{http_code}\n' ${TARGET}"
 
 # 3. POST with JSON body
 info "3) POST with JSON body"
 echo "   curl -X POST -H 'Content-Type: application/json' -d '{\"key\":\"value\"}' ${TARGET}"
 echo ""
+json_add_example "POST with JSON body" \
+    "curl -X POST -H 'Content-Type: application/json' -d '{\"key\":\"value\"}' ${TARGET}"
 
 # 4. PUT request
 info "4) PUT request — replace a resource"
 echo "   curl -X PUT -H 'Content-Type: application/json' -d '{\"name\":\"updated\"}' ${TARGET}/resource/1"
 echo ""
+json_add_example "PUT request — replace a resource" \
+    "curl -X PUT -H 'Content-Type: application/json' -d '{\"name\":\"updated\"}' ${TARGET}/resource/1"
 
 # 5. DELETE request
 info "5) DELETE request — remove a resource"
 echo "   curl -X DELETE -s -o /dev/null -w 'HTTP %{http_code}\n' ${TARGET}/resource/1"
 echo ""
+json_add_example "DELETE request — remove a resource" \
+    "curl -X DELETE -s -o /dev/null -w 'HTTP %{http_code}\n' ${TARGET}/resource/1"
 
 # 6. PATCH request
 info "6) PATCH request — partial update"
 echo "   curl -X PATCH -H 'Content-Type: application/json' -d '{\"status\":\"active\"}' ${TARGET}/resource/1"
 echo ""
+json_add_example "PATCH request — partial update" \
+    "curl -X PATCH -H 'Content-Type: application/json' -d '{\"status\":\"active\"}' ${TARGET}/resource/1"
 
 # 7. HEAD request
 run_or_show "7) HEAD request — headers only, no body" \
@@ -91,11 +105,17 @@ run_or_show "8) OPTIONS request — discover allowed methods and CORS" \
 info "9) Send with custom User-Agent"
 echo "   curl -A 'Mozilla/5.0 (compatible; SecurityAudit/1.0)' -s -o /dev/null -w 'HTTP %{http_code}\n' ${TARGET}"
 echo ""
+json_add_example "Send with custom User-Agent" \
+    "curl -A 'Mozilla/5.0 (compatible; SecurityAudit/1.0)' -s -o /dev/null -w 'HTTP %{http_code}\n' ${TARGET}"
 
 # 10. Follow redirects and show chain
 info "10) Follow redirects and show the redirect chain"
 echo "    curl -L -v -s -o /dev/null ${TARGET} 2>&1 | grep -E '< HTTP/|< location:'"
 echo ""
+json_add_example "Follow redirects and show the redirect chain" \
+    "curl -L -v -s -o /dev/null ${TARGET} 2>&1 | grep -E '< HTTP/|< location:'"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

@@ -29,6 +29,8 @@ require_cmd dig "apt install dnsutils (Debian/Ubuntu) | dnf install bind-utils (
 
 TARGET="${1:-example.com}"
 
+json_set_meta "dig" "$TARGET" "network-analysis"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -54,6 +56,8 @@ run_or_show "1) Find authoritative nameservers" \
 info "2) Attempt AXFR against a nameserver"
 echo "   dig axfr ${TARGET} @\$(dig ${TARGET} NS +short | head -1)"
 echo ""
+json_add_example "Attempt AXFR against a nameserver" \
+    "dig axfr ${TARGET} @\$(dig ${TARGET} NS +short | head -1)"
 
 # 3. Attempt AXFR against all NS servers
 info "3) Loop AXFR attempt against all nameservers"
@@ -61,11 +65,15 @@ echo "   for ns in \$(dig ${TARGET} NS +short); do"
 echo "       echo \"Trying \$ns...\"; dig axfr ${TARGET} @\$ns"
 echo "   done"
 echo ""
+json_add_example "Loop AXFR attempt against all nameservers" \
+    "for ns in \$(dig ${TARGET} NS +short); do echo \"Trying \$ns...\"; dig axfr ${TARGET} @\$ns; done"
 
 # 4. IXFR incremental transfer attempt
 info "4) IXFR — incremental zone transfer (from serial 0)"
 echo "   dig ixfr=0 ${TARGET} @\$(dig ${TARGET} NS +short | head -1)"
 echo ""
+json_add_example "IXFR — incremental zone transfer (from serial 0)" \
+    "dig ixfr=0 ${TARGET} @\$(dig ${TARGET} NS +short | head -1)"
 
 # 5. Check for wildcard records
 run_or_show "5) Check for wildcard DNS records" \
@@ -75,11 +83,15 @@ run_or_show "5) Check for wildcard DNS records" \
 info "6) Verbose AXFR attempt (show full query/response)"
 echo "   dig axfr ${TARGET} @\$(dig ${TARGET} NS +short | head -1) +multiline"
 echo ""
+json_add_example "Verbose AXFR attempt (show full query/response)" \
+    "dig axfr ${TARGET} @\$(dig ${TARGET} NS +short | head -1) +multiline"
 
 # 7. Transfer with TCP explicitly
 info "7) Force TCP for zone transfer query"
 echo "   dig +tcp axfr ${TARGET} @\$(dig ${TARGET} NS +short | head -1)"
 echo ""
+json_add_example "Force TCP for zone transfer query" \
+    "dig +tcp axfr ${TARGET} @\$(dig ${TARGET} NS +short | head -1)"
 
 # 8. Check SOA for serial number
 run_or_show "8) Check SOA serial number (tracks zone changes)" \
@@ -92,11 +104,17 @@ echo "       result=\$(dig \${sub}.${TARGET} A +short)"
 echo "       [[ -n \"\$result\" ]] && echo \"\${sub}.${TARGET}: \$result\""
 echo "   done"
 echo ""
+json_add_example "Brute-check common subdomains" \
+    "for sub in www mail ftp ns1 ns2 admin dev staging vpn; do result=\$(dig \${sub}.${TARGET} A +short); [[ -n \"\$result\" ]] && echo \"\${sub}.${TARGET}: \$result\"; done"
 
 # 10. Save zone transfer output to file
 info "10) Save successful zone transfer to file"
 echo "    dig axfr ${TARGET} @\$(dig ${TARGET} NS +short | head -1) > zone-${TARGET}.txt"
 echo ""
+json_add_example "Save successful zone transfer to file" \
+    "dig axfr ${TARGET} @\$(dig ${TARGET} NS +short | head -1) > zone-${TARGET}.txt"
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
