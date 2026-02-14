@@ -115,7 +115,9 @@ Plans:
   1. BATS integration tests exercise every one of the 46 use-case scripts with `-j` and validate the output passes `jq .` (valid JSON)
   2. Integration tests verify the JSON envelope structure contains required keys (`meta.tool`, `meta.script`, `meta.timestamp`, `results`, `summary`)
   3. All integration tests pass in CI alongside existing 265-test suite
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 26-01-PLAN.md -- Create intg-json-output.bats with dynamic JSON output tests for all 46 scripts
 
 ### Phase 27: Documentation
 **Goal**: Users can discover and understand the `-j`/`--json` flag through help text and script headers
