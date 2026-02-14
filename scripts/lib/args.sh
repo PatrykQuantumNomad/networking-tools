@@ -67,6 +67,7 @@ parse_common_args() {
         _json_require_jq
         export NO_COLOR=1
         # Reset color vars -- colors.sh already evaluated at source time (Pitfall 4)
+        # shellcheck disable=SC2034  # Used by info/warn/error/success in logging.sh
         RED='' GREEN='' YELLOW='' BLUE='' CYAN='' NC=''
         exec 3>&1       # Save original stdout as fd3
         exec 1>&2       # Redirect all stdout to stderr
