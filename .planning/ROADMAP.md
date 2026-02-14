@@ -58,7 +58,7 @@ Archived to `.planning/milestones/v1.3-ROADMAP.md`
 
 - [x] **Phase 23: JSON Library & Flag Integration** - Build lib/json.sh module and wire -j flag into argument parsing and output infrastructure (completed 2026-02-13)
 - [x] **Phase 24: Library Unit Tests** - Validate JSON library functions and -j flag parsing with BATS before migrating scripts (completed 2026-02-13)
-- [ ] **Phase 25: Script Migration** - Add JSON support to all 46 use-case scripts
+- [x] **Phase 25: Script Migration** - Add JSON support to all 46 use-case scripts (completed 2026-02-14)
 - [ ] **Phase 26: Integration Tests** - Validate every migrated script produces correct, parseable JSON output
 - [ ] **Phase 27: Documentation** - Update help text and metadata headers to reflect JSON output capability
 
@@ -102,10 +102,10 @@ Plans:
   4. Running any use-case script with `-j -x <target>` produces a complete JSON envelope that passes `jq .` validation
 **Plans:** 4 plans
 Plans:
-- [ ] 25-01-PLAN.md -- Extend json_set_meta with category + migrate 11 Group A scripts (pure run_or_show)
-- [ ] 25-02-PLAN.md -- Migrate 11 Group C scripts: password-cracker + exploitation tools (pure info+echo)
-- [ ] 25-03-PLAN.md -- Migrate 10 Group C scripts: network-analysis + forensics + netcat (pure info+echo)
-- [ ] 25-04-PLAN.md -- Migrate 14 Group B scripts: mixed run_or_show + info+echo
+- [x] 25-01-PLAN.md -- Extend json_set_meta with category + migrate 11 Group A scripts (pure run_or_show)
+- [x] 25-02-PLAN.md -- Migrate 11 Group C scripts: password-cracker + exploitation tools (pure info+echo)
+- [x] 25-03-PLAN.md -- Migrate 10 Group C scripts: network-analysis + forensics + netcat (pure info+echo)
+- [x] 25-04-PLAN.md -- Migrate 14 Group B scripts: mixed run_or_show + info+echo
 
 ### Phase 26: Integration Tests
 **Goal**: Automated tests prove every script's JSON output is valid and structurally correct
@@ -136,8 +136,8 @@ Plans:
 | 18-22 | v1.3 | 9/9 | Complete | 2026-02-12 |
 | 23. JSON Library & Flag Integration | v1.4 | 1/1 | Complete | 2026-02-13 |
 | 24. Library Unit Tests | v1.4 | 2/2 | Complete | 2026-02-13 |
-| 25. Script Migration | v1.4 | 0/TBD | Not started | - |
+| 25. Script Migration | v1.4 | 4/4 | Complete | 2026-02-14 |
 | 26. Integration Tests | v1.4 | 0/TBD | Not started | - |
 | 27. Documentation | v1.4 | 0/TBD | Not started | - |
 
-**Total: 4 milestones shipped (22 phases, 50 plans) + 1 milestone in progress (5 phases, 2/5 complete)**
+**Total: 4 milestones shipped (22 phases, 50 plans) + 1 milestone in progress (5 phases, 3/5 complete)**
