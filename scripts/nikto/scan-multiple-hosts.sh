@@ -27,6 +27,8 @@ require_cmd nikto "brew install nikto"
 
 HOSTFILE="${1:-}"
 
+json_set_meta "nikto" "$HOSTFILE" "web-scanner"
+
 confirm_execute "${HOSTFILE:-multiple hosts}"
 safety_banner
 
@@ -50,52 +52,74 @@ echo ""
 # 1. Scan multiple ports on one host
 info "1) Scan multiple ports on one host"
 echo "   nikto -h localhost -p 80,8080,3030,8888"
+json_add_example "1) Scan multiple ports on one host" \
+    "nikto -h localhost -p 80,8080,3030,8888"
 echo ""
 
 # 2. Scan from a host list file
 info "2) Scan from a host list file"
 echo "   nikto -h hosts.txt"
+json_add_example "2) Scan from a host list file" \
+    "nikto -h hosts.txt"
 echo ""
 
 # 3. Pipe nmap greppable output to nikto
 info "3) Pipe nmap greppable output to nikto"
 echo "   nmap -p80,443,8080 -oG - 192.168.1.0/24 | nikto -h -"
+json_add_example "3) Pipe nmap greppable output to nikto" \
+    "nmap -p80,443,8080 -oG - 192.168.1.0/24 | nikto -h -"
 echo ""
 
 # 4. Scan all lab targets at once
 info "4) Scan all lab targets at once"
 echo "   nikto -h localhost -p 8080,3030,8888,8180"
+json_add_example "4) Scan all lab targets at once" \
+    "nikto -h localhost -p 8080,3030,8888,8180"
 echo ""
 
 # 5. Save results per host
 info "5) Save results per host in HTML format"
 echo "   nikto -h hosts.txt -output results/ -Format htm"
+json_add_example "5) Save results per host in HTML format" \
+    "nikto -h hosts.txt -output results/ -Format htm"
 echo ""
 
 # 6. Scan with timeout per host
 info "6) Scan with timeout per host"
 echo "   nikto -h hosts.txt -timeout 300"
+json_add_example "6) Scan with timeout per host" \
+    "nikto -h hosts.txt -timeout 300"
 echo ""
 
 # 7. Generate CSV report for all hosts
 info "7) Generate CSV report for all hosts"
 echo "   nikto -h hosts.txt -Format csv -output scan_results.csv"
+json_add_example "7) Generate CSV report for all hosts" \
+    "nikto -h hosts.txt -Format csv -output scan_results.csv"
 echo ""
 
 # 8. Scan hosts from nmap XML output
 info "8) Scan hosts from nmap XML output"
 echo "   nikto -h nmap_output.xml"
+json_add_example "8) Scan hosts from nmap XML output" \
+    "nikto -h nmap_output.xml"
 echo ""
 
 # 9. Quick scan mode for many hosts
 info "9) Quick scan mode for many hosts"
 echo "   nikto -h hosts.txt -Tuning 2 -maxtime 120s"
+json_add_example "9) Quick scan mode for many hosts" \
+    "nikto -h hosts.txt -Tuning 2 -maxtime 120s"
 echo ""
 
 # 10. Create host list from nmap discovery, then scan
 info "10) Create host list from nmap discovery, then scan"
 echo "    nmap -sn 192.168.1.0/24 -oG - | awk '/Up/{print \$2}' > hosts.txt && nikto -h hosts.txt -p 80"
+json_add_example "10) Create host list from nmap discovery, then scan" \
+    "nmap -sn 192.168.1.0/24 -oG - | awk '/Up/{print \$2}' > hosts.txt && nikto -h hosts.txt -p 80"
 echo ""
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

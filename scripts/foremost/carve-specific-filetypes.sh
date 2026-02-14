@@ -27,6 +27,8 @@ require_cmd foremost "brew install foremost"
 
 TARGET="${1:-}"
 
+json_set_meta "foremost" "$TARGET" "forensics"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -56,52 +58,74 @@ echo ""
 # 1. Extract only JPEG images
 info "1) Extract only JPEG images"
 echo "   foremost -t jpg -i disk.img -o recovered_jpg/"
+json_add_example "1) Extract only JPEG images" \
+    "foremost -t jpg -i disk.img -o recovered_jpg/"
 echo ""
 
 # 2. Extract only PDF documents
 info "2) Extract only PDF documents"
 echo "   foremost -t pdf -i disk.img -o recovered_pdf/"
+json_add_example "2) Extract only PDF documents" \
+    "foremost -t pdf -i disk.img -o recovered_pdf/"
 echo ""
 
 # 3. Extract Microsoft Office documents
 info "3) Extract Microsoft Office documents"
 echo "   foremost -t doc,xls,ppt -i disk.img -o recovered_office/"
+json_add_example "3) Extract Microsoft Office documents" \
+    "foremost -t doc,xls,ppt -i disk.img -o recovered_office/"
 echo ""
 
 # 4. Extract executables
 info "4) Extract executables"
 echo "   foremost -t exe -i disk.img -o recovered_exe/"
+json_add_example "4) Extract executables" \
+    "foremost -t exe -i disk.img -o recovered_exe/"
 echo ""
 
 # 5. Extract archives (ZIP, RAR)
 info "5) Extract archives (ZIP, RAR)"
 echo "   foremost -t zip,rar -i disk.img -o recovered_archives/"
+json_add_example "5) Extract archives (ZIP, RAR)" \
+    "foremost -t zip,rar -i disk.img -o recovered_archives/"
 echo ""
 
 # 6. Extract all image types
 info "6) Extract all image types"
 echo "   foremost -t jpg,gif,png,bmp -i disk.img -o recovered_images/"
+json_add_example "6) Extract all image types" \
+    "foremost -t jpg,gif,png,bmp -i disk.img -o recovered_images/"
 echo ""
 
 # 7. Extract all supported types
 info "7) Extract all supported types"
 echo "   foremost -t all -i disk.img -o recovered_all/"
+json_add_example "7) Extract all supported types" \
+    "foremost -t all -i disk.img -o recovered_all/"
 echo ""
 
 # 8. Verbose extraction with specific types
 info "8) Verbose extraction with specific types"
 echo "   foremost -v -t jpg,pdf -i disk.img -o recovered/"
+json_add_example "8) Verbose extraction with specific types" \
+    "foremost -v -t jpg,pdf -i disk.img -o recovered/"
 echo ""
 
 # 9. Extract media files
 info "9) Extract media files"
 echo "   foremost -t mov,mp4,avi,wav,wmv -i disk.img -o recovered_media/"
+json_add_example "9) Extract media files" \
+    "foremost -t mov,mp4,avi,wav,wmv -i disk.img -o recovered_media/"
 echo ""
 
 # 10. Compare specific vs all recovery
 info "10) Compare specific vs all recovery"
 echo "    foremost -t jpg -i disk.img -o jpg_only/ && foremost -t all -i disk.img -o everything/"
+json_add_example "10) Compare specific vs all recovery" \
+    "foremost -t jpg -i disk.img -o jpg_only/ && foremost -t all -i disk.img -o everything/"
 echo ""
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then

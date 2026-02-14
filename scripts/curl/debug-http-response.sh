@@ -30,6 +30,8 @@ require_cmd curl "apt install curl (Debian/Ubuntu) | brew install curl (macOS)"
 
 TARGET="${1:-https://example.com}"
 
+json_set_meta "curl" "$TARGET" "network-analysis"
+
 confirm_execute "${1:-}"
 safety_banner
 
@@ -54,53 +56,75 @@ TIMING_FMT='DNS Lookup:   %{time_namelookup}s\nTCP Connect:  %{time_connect}s\nT
 # 1. Full timing breakdown
 info "1) Full HTTP timing breakdown"
 echo "   curl -o /dev/null -s -w '${TIMING_FMT}' ${TARGET}"
+json_add_example "1) Full HTTP timing breakdown" \
+    "curl -o /dev/null -s -w '<timing-format>' ${TARGET}"
 echo ""
 
 # 2. Just total time
 info "2) Quick total request time"
 echo "   curl -o /dev/null -s -w 'Total: %{time_total}s\n' ${TARGET}"
+json_add_example "2) Quick total request time" \
+    "curl -o /dev/null -s -w 'Total: %{time_total}s\n' ${TARGET}"
 echo ""
 
 # 3. Verbose headers and body
 info "3) Verbose output — full request/response headers"
 echo "   curl -v ${TARGET} 2>&1 | head -30"
+json_add_example "3) Verbose output — full request/response headers" \
+    "curl -v ${TARGET} 2>&1 | head -30"
 echo ""
 
 # 4. Show only response headers
 info "4) Show only response headers (no body)"
 echo "   curl -sI ${TARGET}"
+json_add_example "4) Show only response headers (no body)" \
+    "curl -sI ${TARGET}"
 echo ""
 
 # 5. Show response size
 info "5) Show response size in bytes"
 echo "   curl -o /dev/null -s -w 'Download size: %{size_download} bytes\nHeader size: %{size_header} bytes\n' ${TARGET}"
+json_add_example "5) Show response size in bytes" \
+    "curl -o /dev/null -s -w 'Download size: %{size_download} bytes\nHeader size: %{size_header} bytes\n' ${TARGET}"
 echo ""
 
 # 6. Compare HTTP/1.1 vs HTTP/2
 info "6) Compare HTTP/1.1 vs HTTP/2 response"
 echo "   curl --http1.1 -o /dev/null -s -w 'HTTP/1.1 total: %{time_total}s\n' ${TARGET}"
 echo "   curl --http2 -o /dev/null -s -w 'HTTP/2   total: %{time_total}s\n' ${TARGET}"
+json_add_example "6) Compare HTTP/1.1 vs HTTP/2 response" \
+    "curl --http1.1 -o /dev/null -s -w 'HTTP/1.1 total: %{time_total}s\n' ${TARGET}"
 echo ""
 
 # 7. Test with different DNS resolution
 info "7) Test with custom DNS resolution (bypass local DNS)"
 echo "   curl --resolve ${TARGET#*://}:443:93.184.216.34 -o /dev/null -s -w 'Custom DNS total: %{time_total}s\n' ${TARGET}"
+json_add_example "7) Test with custom DNS resolution (bypass local DNS)" \
+    "curl --resolve ${TARGET#*://}:443:93.184.216.34 -o /dev/null -s -w 'Custom DNS total: %{time_total}s\n' ${TARGET}"
 echo ""
 
 # 8. Show redirect timing chain
 info "8) Show redirect timing chain"
 echo "   curl -L -o /dev/null -s -w 'Redirects: %{num_redirects}\nRedirect time: %{time_redirect}s\nTotal: %{time_total}s\n' ${TARGET}"
+json_add_example "8) Show redirect timing chain" \
+    "curl -L -o /dev/null -s -w 'Redirects: %{num_redirects}\nRedirect time: %{time_redirect}s\nTotal: %{time_total}s\n' ${TARGET}"
 echo ""
 
 # 9. Measure time-to-first-byte specifically
 info "9) Measure time-to-first-byte (TTFB)"
 echo "   curl -o /dev/null -s -w 'TTFB: %{time_starttransfer}s\n' ${TARGET}"
+json_add_example "9) Measure time-to-first-byte (TTFB)" \
+    "curl -o /dev/null -s -w 'TTFB: %{time_starttransfer}s\n' ${TARGET}"
 echo ""
 
 # 10. Save full debug trace to file
 info "10) Save full debug trace to file for analysis"
 echo "    curl --trace curl-trace.log --trace-time ${TARGET} -o /dev/null"
+json_add_example "10) Save full debug trace to file for analysis" \
+    "curl --trace curl-trace.log --trace-time ${TARGET} -o /dev/null"
 echo ""
+
+json_finalize
 
 # Interactive demo (skip if non-interactive)
 if [[ "${EXECUTE_MODE:-show}" == "show" ]]; then
