@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 81 dual-mode scripts, an 8-module library infrastructure, 265-test BATS regression suite with CI enforcement, structured metadata headers on all 78 scripts, 3 diagnostic auto-reports, a branded Astro/Starlight documentation site with dark orange/amber theme, custom homepage, learning paths, and Docker-based vulnerable targets for safe practice.
+A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 81 dual-mode scripts, an 8-module library infrastructure with structured JSON output via `-j`/`--json` flag, 435-test BATS regression suite with CI enforcement, structured metadata headers on all 78 scripts, 3 diagnostic auto-reports, a branded Astro/Starlight documentation site with dark orange/amber theme, custom homepage, learning paths, and Docker-based vulnerable targets for safe practice.
 
 ## Core Value
 
@@ -43,19 +43,16 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 - ✓ GitHub Actions BATS CI pipeline with JUnit reporting and PR annotations — v1.3
 - ✓ Structured @description/@usage/@dependencies metadata headers on all 78 scripts — v1.3
 - ✓ 265-test BATS regression suite (smoke + unit + integration + header validation) — v1.3
+- ✓ lib/json.sh module with fd3 redirect for structured JSON envelope output ({meta, results, summary}) — v1.4
+- ✓ -j/--json flag in parse_common_args with lazy jq dependency and NO_COLOR auto-set — v1.4
+- ✓ All 46 use-case scripts produce structured JSON output with 7-category taxonomy — v1.4
+- ✓ 170 new BATS tests (json unit + args/output + JSON integration + doc verification) — v1.4
+- ✓ Help text and @usage headers document -j/--json flag across all 46 scripts — v1.4
+- ✓ 435-test BATS regression suite (smoke + unit + integration + JSON + doc verification) — v1.4
 
 ### Active
 
-## Current Milestone: v1.4 JSON Output Mode
-
-**Goal:** Add structured JSON output to all 46 use-case scripts via a new `-j`/`--json` flag backed by a `lib/json.sh` module, enabling piping into `jq` and downstream automation.
-
-**Target features:**
-- New `lib/json.sh` library module with JSON formatting helpers
-- `-j`/`--json` flag integrated into argument parsing (requires `-x` execute mode)
-- Envelope JSON format: `{"meta": {tool, target, timestamp}, "results": [...], "summary": {...}}`
-- All 46 use-case scripts produce valid, pipeable JSON output
-- BATS tests validating JSON output correctness
+(No active requirements — define next milestone via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -71,10 +68,10 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 
 ## Context
 
-Shipped v1.3 with comprehensive test infrastructure. Total codebase: 8,780 LOC bash across 81 scripts, plus Astro docs site.
-All 63 scripts (17 examples.sh + 46 use-case) support dual-mode execution with -h/-v/-q/-x flags.
-8-module library (scripts/lib/) provides strict mode, stack traces, log-level filtering, trap handlers, temp cleanup, retry logic, and argument parsing.
-265-test BATS regression suite: 5 smoke + 50 unit + 131 integration + 79 header validation — all enforced in CI.
+Shipped v1.4 with JSON output mode. Total codebase: 9,963 LOC bash across 81 scripts, plus Astro docs site.
+All 63 scripts (17 examples.sh + 46 use-case) support dual-mode execution with -h/-v/-q/-x/-j flags.
+9-module library (scripts/lib/) provides strict mode, stack traces, log-level filtering, trap handlers, temp cleanup, retry logic, argument parsing, and JSON output.
+435-test BATS regression suite: 5 smoke + 69 unit + 131 integration + 137 JSON + 93 doc verification — all enforced in CI.
 BATS v1.13.0 with git submodules (bats-support, bats-assert, bats-file) at pinned versions.
 Two GitHub Actions CI pipelines: ShellCheck linting + BATS tests with JUnit PR annotations (independent jobs).
 All 78 scripts have structured @description/@usage/@dependencies metadata headers enforced by BATS validation test.
@@ -123,6 +120,12 @@ Documentation site deployed to GitHub Pages with CI validation, dark orange/ambe
 | Platform-conditional test exclusion (diagnose-latency.sh) | macOS non-root requires sudo before confirm_execute | ✓ Good — 62 on macOS, 63 on Linux CI |
 | head -10 \| grep -c for header validation | Enforce field position in header block, not just presence anywhere | ✓ Good — catches misplaced fields |
 | Bordered 76 = char header format | Visual consistency across all scripts | ✓ Good — machine-parseable, human-readable |
+| fd3 for JSON output (exec 3>&1/exec 1>&2) | Keeps JSON clean on stdout while all human output goes to stderr | ✓ Good — clean separation, jq-pipeable |
+| Lazy jq dependency | Check at source time, require only when -j parsed | ✓ Good — scripts without -j never need jq |
+| json_add_example for bare info+echo | run_or_show captured automatically; bare examples need explicit accumulation | ✓ Good — all 10 results in every script |
+| Category parameter optional in json_set_meta | Empty string default for backward compatibility | ✓ Good — no test breakage |
+| bash -c wrapper for BATS fd3 JSON capture | BATS run mixes stdout+stderr; bash -c with 2>/dev/null isolates JSON | ✓ Good — clean test output |
+| 3-pattern show_help documentation | Pattern A (Options), Pattern B (3-flag Flags), Pattern B+vq (5-flag Flags) | ✓ Good — consistent per-script-type |
 
 ---
-*Last updated: 2026-02-13 after v1.4 milestone start*
+*Last updated: 2026-02-14 after v1.4 milestone*

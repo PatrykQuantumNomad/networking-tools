@@ -1,5 +1,31 @@
 # Project Milestones: Networking Tools
 
+## v1.4 JSON Output Mode (Shipped: 2026-02-14)
+
+**Delivered:** Added structured JSON output to all 46 use-case scripts via `-j`/`--json` flag backed by lib/json.sh with fd3 envelope output, enabling piping into jq and downstream automation.
+
+**Phases completed:** 23-27 (10 plans total)
+
+**Key accomplishments:**
+- Created lib/json.sh with fd3 redirect pattern for structured JSON envelope output ({meta, results, summary})
+- Integrated -j/--json flag into parse_common_args with lazy jq dependency and NO_COLOR auto-set
+- Migrated all 46 use-case scripts with json_set_meta/json_finalize and 7-category taxonomy
+- Built 170 new BATS tests (19 json unit + 10 args/output + 47 JSON integration + 93 doc verification)
+- Updated help text and @usage headers for all 46 scripts with -j flag documentation
+- Grew regression suite from 265 to 435 tests with zero failures
+
+**Stats:**
+- 85 files created/modified
+- +7,401 / -132 lines changed (9,963 LOC bash total)
+- 5 phases, 10 plans, ~17 tasks
+- 2 days (Feb 13-14, 2026), ~78min total execution
+
+**Git range:** `feat(23-01)` → `docs(27-02)`
+
+**What's next:** TBD — next milestone via `/gsd:new-milestone`
+
+---
+
 ## v1.3 Testing & Script Headers (Shipped: 2026-02-12)
 
 **Delivered:** Added a 265-test BATS regression suite with library unit tests, dynamic CLI contract tests, and CI enforcement via GitHub Actions, plus structured metadata headers on all 78 scripts.
