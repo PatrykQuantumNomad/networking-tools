@@ -4,7 +4,7 @@
 
 Built by Patryk Golabek - Cloud-Native Software Architect
 GitHub: https://github.com/PatrykQuantumNomad/networking-tools
-Docs: https://patrykquantumnomad.github.io/networking-tools/
+Docs: https://networking-tools.patrykgolabek.dev/
 
 ## Tools (17)
 
@@ -62,13 +62,13 @@ Auto-report scripts for network troubleshooting:
 
 ## Guides
 
-- Getting Started: https://patrykquantumnomad.github.io/networking-tools/guides/getting-started/
-- Lab Walkthrough: https://patrykquantumnomad.github.io/networking-tools/guides/lab-walkthrough/
-- Script Flags & JSON: https://patrykquantumnomad.github.io/networking-tools/guides/script-flags/
-- I Want To... (Task Index): https://patrykquantumnomad.github.io/networking-tools/guides/task-index/
-- Learning Path - Reconnaissance: https://patrykquantumnomad.github.io/networking-tools/guides/learning-recon/
-- Learning Path - Web App Testing: https://patrykquantumnomad.github.io/networking-tools/guides/learning-webapp/
-- Learning Path - Network Debugging: https://patrykquantumnomad.github.io/networking-tools/guides/learning-network-debug/
+- Getting Started: https://networking-tools.patrykgolabek.dev/guides/getting-started/
+- Lab Walkthrough: https://networking-tools.patrykgolabek.dev/guides/lab-walkthrough/
+- Script Flags & JSON: https://networking-tools.patrykgolabek.dev/guides/script-flags/
+- I Want To... (Task Index): https://networking-tools.patrykgolabek.dev/guides/task-index/
+- Learning Path - Reconnaissance: https://networking-tools.patrykgolabek.dev/guides/learning-recon/
+- Learning Path - Web App Testing: https://networking-tools.patrykgolabek.dev/guides/learning-webapp/
+- Learning Path - Network Debugging: https://networking-tools.patrykgolabek.dev/guides/learning-network-debug/
 
 ## License
 

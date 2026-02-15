@@ -11,7 +11,7 @@ Reconnaissance is the first phase of any security assessment. Before testing for
 
 **Prerequisites:**
 - Run `make check` and install at least nmap and dig
-- Start the lab with `make lab-up` (see [Getting Started](/networking-tools/guides/getting-started/))
+- Start the lab with `make lab-up` (see [Getting Started](/guides/getting-started/))
 
 ---
 
@@ -19,7 +19,7 @@ Reconnaissance is the first phase of any security assessment. Before testing for
 
 DNS is the natural starting point because it is passive and non-intrusive. Before sending any packets to a target, you can learn about its infrastructure by querying public DNS records. This reveals hostnames, mail servers, name servers, and sometimes internal network details through misconfigured zone transfers.
 
-**Tool:** [dig](/networking-tools/tools/dig/)
+**Tool:** [dig](/tools/dig/)
 
 **Practice:**
 
@@ -37,7 +37,7 @@ make diagnose-dns TARGET=example.com
 
 With IP addresses from DNS, the next step is confirming which hosts are actually alive on the network. Host discovery uses a combination of ARP, ICMP, and TCP probes to find responsive systems without doing a full port scan. This is faster and less noisy than scanning every port on every address.
 
-**Tool:** [nmap](/networking-tools/tools/nmap/)
+**Tool:** [nmap](/tools/nmap/)
 
 **Practice:**
 
@@ -55,7 +55,7 @@ make discover-hosts TARGET=localhost
 
 Once you know which hosts are alive, you need to know what services they expose. Port scanning identifies open TCP and UDP ports, and service detection fingerprints the software listening on each port. This is where you transition from "what exists" to "what is running."
 
-**Tool:** [nmap](/networking-tools/tools/nmap/)
+**Tool:** [nmap](/tools/nmap/)
 
 **Practice:**
 
@@ -73,7 +73,7 @@ make identify-ports TARGET=localhost
 
 Running a packet capture during reconnaissance reveals information that port scans miss. You can see DNS queries your tools make (revealing which domains they resolve), observe the full TCP handshake timing, and capture banner data that nmap might not report. Starting a capture early means you have a complete record of all network activity.
 
-**Tool:** [tshark](/networking-tools/tools/tshark/)
+**Tool:** [tshark](/tools/tshark/)
 
 **Practice:**
 
@@ -93,7 +93,7 @@ Leave this running in a background terminal while you work through other steps. 
 
 After discovering hosts, ports, and services, you can use Metasploit's auxiliary scanners for deeper enumeration. These scanners go beyond version strings to test for specific behaviors -- default credentials, known misconfigurations, and information disclosure. This bridges the gap between reconnaissance and exploitation.
 
-**Tool:** [metasploit](/networking-tools/tools/metasploit/)
+**Tool:** [metasploit](/tools/metasploit/)
 
 **Practice:**
 
@@ -109,4 +109,4 @@ make scan-services TARGET=localhost
 
 ## Next Steps
 
-You now know how to map a network from DNS through service enumeration. Continue with the [Web App Testing](/networking-tools/guides/learning-webapp/) learning path to start finding and exploiting vulnerabilities in the web applications you discovered.
+You now know how to map a network from DNS through service enumeration. Continue with the [Web App Testing](/guides/learning-webapp/) learning path to start finding and exploiting vulnerabilities in the web applications you discovered.

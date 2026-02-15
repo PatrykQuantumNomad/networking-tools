@@ -8,7 +8,7 @@ sidebar:
 A guided walkthrough that takes you through every use case in this project, organized as a realistic pentest engagement against the Docker lab targets.
 
 :::tip[Prefer a guided approach?]
-Check out the [Learning Paths](/networking-tools/guides/learning-recon/) for structured sequences focused on specific skills like reconnaissance, web app testing, or network debugging.
+Check out the [Learning Paths](/guides/learning-recon/) for structured sequences focused on specific skills like reconnaissance, web app testing, or network debugging.
 :::
 
 ## Lab Targets

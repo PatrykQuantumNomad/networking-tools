@@ -19,7 +19,7 @@ Network debugging is a systematic process of narrowing down where a connection f
 
 DNS is the first thing to check because most connectivity problems that look like "the server is down" are actually DNS failures. A misconfigured resolver, an expired record, or a propagation delay can make a perfectly healthy server unreachable. Start here to rule out name resolution before investigating deeper.
 
-**Tool:** [dig](/networking-tools/tools/dig/) | **Diagnostic:** [DNS Diagnostic](/networking-tools/diagnostics/dns/)
+**Tool:** [dig](/tools/dig/) | **Diagnostic:** [DNS Diagnostic](/diagnostics/dns/)
 
 **Practice:**
 
@@ -37,7 +37,7 @@ make diagnose-dns TARGET=example.com
 
 Once DNS resolves correctly, verify that you can actually reach the target. The connectivity diagnostic walks through each network layer -- DNS resolution, ICMP reachability, TCP port connectivity, HTTP response, and TLS handshake. This pinpoints exactly which layer fails.
 
-**Diagnostic:** [Connectivity Diagnostic](/networking-tools/diagnostics/connectivity/)
+**Diagnostic:** [Connectivity Diagnostic](/diagnostics/connectivity/)
 
 **Practice:**
 
@@ -55,7 +55,7 @@ make diagnose-connectivity TARGET=example.com
 
 When connectivity fails at the network layer, route tracing shows where packets are being dropped or delayed. Traceroute reveals each hop between you and the target, while mtr adds continuous monitoring with per-hop statistics. This identifies routing problems, congested links, and ISP-level issues.
 
-**Tool:** [traceroute](/networking-tools/tools/traceroute/) | **Diagnostic:** [Performance Diagnostic](/networking-tools/diagnostics/performance/)
+**Tool:** [traceroute](/tools/traceroute/) | **Diagnostic:** [Performance Diagnostic](/diagnostics/performance/)
 
 **Practice:**
 
@@ -79,7 +79,7 @@ make diagnose-performance TARGET=example.com
 
 If route tracing shows the path is clear but certain ports are unreachable, the target may have a firewall dropping or rejecting traffic. Hping3 sends crafted packets -- SYN, ACK, FIN, and Xmas probes -- to test how the target responds to different TCP flags. This reveals firewall rules without needing access to the firewall configuration.
 
-**Tool:** [hping3](/networking-tools/tools/hping3/)
+**Tool:** [hping3](/tools/hping3/)
 
 **Practice:**
 
@@ -103,7 +103,7 @@ make detect-firewall TARGET=localhost
 
 When the network path is clear and ports are open, HTTP-level issues require inspecting the actual request-response exchange. Curl lets you see headers, follow redirects, test authentication, and measure timing for each phase of the connection (DNS lookup, TCP connect, TLS handshake, first byte, total transfer).
 
-**Tool:** [curl](/networking-tools/tools/curl/)
+**Tool:** [curl](/tools/curl/)
 
 **Practice:**
 
@@ -121,7 +121,7 @@ bash scripts/curl/debug-http-response.sh https://example.com
 
 When higher-level tools do not reveal the issue, packet capture gives you the raw truth. Tshark captures every packet on the wire, letting you see exactly what is being sent and received. This is the last resort for debugging -- it is the most powerful tool but also the most complex to interpret.
 
-**Tool:** [tshark](/networking-tools/tools/tshark/)
+**Tool:** [tshark](/tools/tshark/)
 
 **Practice:**
 
@@ -139,4 +139,4 @@ This captures HTTP traffic on the loopback interface, showing request/response d
 
 ## Next Steps
 
-You now have a complete network debugging toolkit, from DNS through packet capture. For an offensive perspective on the same tools, try the [Reconnaissance](/networking-tools/guides/learning-recon/) learning path to see how these debugging techniques apply to security assessments.
+You now have a complete network debugging toolkit, from DNS through packet capture. For an offensive perspective on the same tools, try the [Reconnaissance](/guides/learning-recon/) learning path to see how these debugging techniques apply to security assessments.

@@ -3,8 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 export default defineConfig({
-	site: 'https://patrykquantumnomad.github.io',
-	base: '/networking-tools',
+	site: 'https://networking-tools.patrykgolabek.dev',
 	integrations: [
 		starlight({
 			title: 'Networking & Pentesting Tools',
@@ -36,7 +35,7 @@ export default defineConfig({
 						description: 'Penetration testing and network diagnostics learning lab with 17 tools, task-focused scripts, and Docker-based vulnerable targets',
 						applicationCategory: 'DeveloperApplication',
 						operatingSystem: 'Linux, macOS',
-						url: 'https://patrykquantumnomad.github.io/networking-tools/',
+						url: 'https://networking-tools.patrykgolabek.dev/',
 						license: 'https://opensource.org/licenses/MIT',
 						isAccessibleForFree: true,
 						author: {
@@ -56,19 +55,19 @@ export default defineConfig({
 				// Favicons
 				{
 					tag: 'link',
-					attrs: { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/networking-tools/favicon-32x32.png' },
+					attrs: { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
 				},
 				{
 					tag: 'link',
-					attrs: { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/networking-tools/favicon-16x16.png' },
+					attrs: { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
 				},
 				{
 					tag: 'link',
-					attrs: { rel: 'apple-touch-icon', sizes: '180x180', href: '/networking-tools/apple-touch-icon.png' },
+					attrs: { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
 				},
 				{
 					tag: 'link',
-					attrs: { rel: 'manifest', href: '/networking-tools/site.webmanifest' },
+					attrs: { rel: 'manifest', href: '/site.webmanifest' },
 				},
 				// Robots
 				{
@@ -78,7 +77,7 @@ export default defineConfig({
 				// OG image (site-wide)
 				{
 					tag: 'meta',
-					attrs: { property: 'og:image', content: 'https://patrykquantumnomad.github.io/networking-tools/og-image.png' },
+					attrs: { property: 'og:image', content: 'https://networking-tools.patrykgolabek.dev/og-image.png' },
 				},
 				{
 					tag: 'meta',

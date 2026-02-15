@@ -14,7 +14,7 @@ Gobuster has several modes:
 - **dir** -- directory and file enumeration on web servers
 - **dns** -- DNS subdomain enumeration via brute-forcing
 - **vhost** -- virtual host discovery on web servers
-- **fuzz** -- basic fuzzing (for more advanced fuzzing, see [ffuf](/networking-tools/tools/ffuf/))
+- **fuzz** -- basic fuzzing (for more advanced fuzzing, see [ffuf](/tools/ffuf/))
 
 ## Running the Examples Script
 
@@ -171,10 +171,10 @@ If you see "Wordlist not found" errors, run `make wordlists` first.
 - The `-x` flag for file extensions only works in `dir` mode. Each extension multiplies the number of requests (10 extensions = 10x requests per wordlist entry).
 - gobuster does **not** follow redirects by default. Use `-r` if you want to see where 301/302 responses lead.
 - Wildcard DNS responses can cause false positives in `dns` mode. gobuster detects and warns about wildcards automatically.
-- For more flexible fuzzing (POST data, headers, parameter discovery), see [ffuf](/networking-tools/tools/ffuf/) which supports a FUZZ keyword that can be placed anywhere in a request.
+- For more flexible fuzzing (POST data, headers, parameter discovery), see [ffuf](/tools/ffuf/) which supports a FUZZ keyword that can be placed anywhere in a request.
 
 ## Related Tools
 
-- [ffuf](/networking-tools/tools/ffuf/) -- flexible web fuzzer with FUZZ keyword for parameter, header, and POST data fuzzing
-- [nikto](/networking-tools/tools/nikto/) -- web server vulnerability scanner (checks for known issues, not brute-force)
-- [nmap](/networking-tools/tools/nmap/) -- port scanning and service detection (discover what ports are open before directory scanning)
+- [ffuf](/tools/ffuf/) -- flexible web fuzzer with FUZZ keyword for parameter, header, and POST data fuzzing
+- [nikto](/tools/nikto/) -- web server vulnerability scanner (checks for known issues, not brute-force)
+- [nmap](/tools/nmap/) -- port scanning and service detection (discover what ports are open before directory scanning)

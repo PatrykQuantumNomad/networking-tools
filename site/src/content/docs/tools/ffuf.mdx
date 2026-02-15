@@ -8,7 +8,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## What It Does
 
-**ffuf** (Fuzz Faster U Fool) is a flexible, high-speed web fuzzer written in Go. It replaces the keyword `FUZZ` in URLs, headers, POST data, or any part of an HTTP request with entries from a wordlist. Unlike [gobuster](/networking-tools/tools/gobuster/) which focuses on directory enumeration, ffuf can fuzz **any part** of an HTTP request -- making it the go-to tool for parameter discovery, POST data brute-forcing, virtual host enumeration, and more.
+**ffuf** (Fuzz Faster U Fool) is a flexible, high-speed web fuzzer written in Go. It replaces the keyword `FUZZ` in URLs, headers, POST data, or any part of an HTTP request with entries from a wordlist. Unlike [gobuster](/tools/gobuster/) which focuses on directory enumeration, ffuf can fuzz **any part** of an HTTP request -- making it the go-to tool for parameter discovery, POST data brute-forcing, virtual host enumeration, and more.
 
 Key capabilities:
 - **Directory fuzzing** -- discover hidden paths and files
@@ -163,6 +163,6 @@ If you see "Wordlist not found" errors, run `make wordlists` first.
 
 ## Related Tools
 
-- [gobuster](/networking-tools/tools/gobuster/) -- directory enumeration and DNS subdomain discovery (simpler but focused)
-- [nikto](/networking-tools/tools/nikto/) -- web server vulnerability scanner (checks known vulnerabilities, not brute-force)
-- [sqlmap](/networking-tools/tools/sqlmap/) -- after finding parameters with ffuf, test them for SQL injection
+- [gobuster](/tools/gobuster/) -- directory enumeration and DNS subdomain discovery (simpler but focused)
+- [nikto](/tools/nikto/) -- web server vulnerability scanner (checks known vulnerabilities, not brute-force)
+- [sqlmap](/tools/sqlmap/) -- after finding parameters with ffuf, test them for SQL injection

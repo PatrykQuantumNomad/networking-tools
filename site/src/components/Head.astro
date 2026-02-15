@@ -6,16 +6,16 @@
 const { head, entry, id } = Astro.locals.starlightRoute;
 const title = entry.data.title;
 const description = entry.data.description ?? '';
-const siteUrl = 'https://patrykquantumnomad.github.io/networking-tools';
+const siteUrl = 'https://networking-tools.patrykgolabek.dev';
 const pathname = Astro.url.pathname;
-const canonicalUrl = `${siteUrl}${pathname.replace('/networking-tools', '')}`;
+const canonicalUrl = `${siteUrl}${pathname}`;
 
 // Determine page type from URL path
 const isToolPage = pathname.includes('/tools/') && !pathname.endsWith('/tools/');
 const isGuidePage = pathname.includes('/guides/') && !pathname.endsWith('/guides/');
 const isDiagnosticPage = pathname.includes('/diagnostics/') && !pathname.endsWith('/diagnostics/');
 const isContentPage = isToolPage || isGuidePage || isDiagnosticPage;
-const isHomepage = pathname === '/networking-tools/' || pathname === '/networking-tools';
+const isHomepage = pathname === '/' || pathname === '';
 
 // Build per-page TechArticle schema for content pages
 const pageSchema = isContentPage
@@ -43,7 +43,7 @@ const pageSchema = isContentPage
 	: null;
 
 // Build BreadcrumbList schema from URL path segments
-const segments = pathname.replace('/networking-tools', '').split('/').filter(Boolean);
+const segments = pathname.split('/').filter(Boolean);
 const sectionLabels: Record<string, string> = {
 	tools: 'Tools',
 	guides: 'Guides',

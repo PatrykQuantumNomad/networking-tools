@@ -7,12 +7,12 @@ sidebar:
 
 Web application testing follows reconnaissance. Once you know which hosts run web services, you systematically probe those applications for vulnerabilities -- from broad automated scans down to targeted exploitation and credential extraction. This path takes you through that workflow against the Docker lab targets.
 
-**Who this is for:** Beginners who have completed the [Reconnaissance](/networking-tools/guides/learning-recon/) path or already know how to identify web services on a network.
+**Who this is for:** Beginners who have completed the [Reconnaissance](/guides/learning-recon/) path or already know how to identify web services on a network.
 
 **Prerequisites:**
 - Lab running with `make lab-up`
 - DVWA initialized (browse to http://localhost:8080, log in as admin/password, go to setup.php, click Create/Reset Database)
-- Recommended: Complete the [Reconnaissance](/networking-tools/guides/learning-recon/) path first
+- Recommended: Complete the [Reconnaissance](/guides/learning-recon/) path first
 
 ---
 
@@ -20,7 +20,7 @@ Web application testing follows reconnaissance. Once you know which hosts run we
 
 Before testing web applications, confirm which ports serve HTTP. Nmap's NSE scripts specifically target web vulnerabilities -- default credentials, directory listings, known CVEs, and dangerous HTTP methods. This is a focused scan that builds on the broader port scan from the recon phase.
 
-**Tool:** [nmap](/networking-tools/tools/nmap/)
+**Tool:** [nmap](/tools/nmap/)
 
 **Practice:**
 
@@ -38,7 +38,7 @@ make scan-web-vulns TARGET=localhost
 
 Nikto performs a comprehensive check against a web server, testing thousands of known issues including outdated software, dangerous files, and misconfigured headers. It is louder than nmap NSE scripts but catches issues that nmap does not test for. Run it against each web target separately to get detailed results.
 
-**Tool:** [nikto](/networking-tools/tools/nikto/)
+**Tool:** [nikto](/tools/nikto/)
 
 **Practice:**
 
@@ -56,7 +56,7 @@ make scan-vulns TARGET=http://localhost:8080
 
 Skipfish takes a different approach from nikto -- it actively crawls the application, discovering pages and parameters dynamically rather than checking a static list of known issues. This finds application-specific vulnerabilities that signature-based scanners miss. The quick scan mode limits runtime so it does not run indefinitely.
 
-**Tool:** [skipfish](/networking-tools/tools/skipfish/)
+**Tool:** [skipfish](/tools/skipfish/)
 
 **Practice:**
 
@@ -74,7 +74,7 @@ make quick-scan TARGET=http://localhost:3030
 
 The previous scanners flag potential SQL injection points. Sqlmap confirms and exploits them. It automates the entire injection process -- detection, fingerprinting the database, enumerating tables, and extracting data. Against DVWA's SQL Injection page (set to Low security), sqlmap will extract the full users table including password hashes.
 
-**Tool:** [sqlmap](/networking-tools/tools/sqlmap/)
+**Tool:** [sqlmap](/tools/sqlmap/)
 
 **Practice:**
 
@@ -109,7 +109,7 @@ make dump-db TARGET="http://localhost:8080/vulnerabilities/sqli/?id=1&Submit=Sub
 
 The final step closes the loop -- turning extracted hashes into plaintext passwords. Hashcat uses GPU acceleration for fast cracking, while John the Ripper offers flexible format support and rule-based attacks. DVWA's default passwords are simple MD5 hashes that crack in seconds with a dictionary attack.
 
-**Tools:** [hashcat](/networking-tools/tools/hashcat/) and [john](/networking-tools/tools/john/)
+**Tools:** [hashcat](/tools/hashcat/) and [john](/tools/john/)
 
 **Practice:**
 
@@ -139,4 +139,4 @@ make identify-hash TARGET="5f4dcc3b5aa765d61d8327deb882cf99"
 
 ## Next Steps
 
-You have gone from discovering web services to extracting and cracking credentials. Continue with the [Network Debugging](/networking-tools/guides/learning-network-debug/) learning path to learn how to diagnose connectivity issues and debug network behavior at the packet level.
+You have gone from discovering web services to extracting and cracking credentials. Continue with the [Network Debugging](/guides/learning-network-debug/) learning path to learn how to diagnose connectivity issues and debug network behavior at the packet level.

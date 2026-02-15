@@ -2,7 +2,7 @@
 
 > **Built by [Patryk Golabek](https://patrykgolabek.dev) -- Cloud-Native Software Architect**
 >
-> **[Documentation](https://patrykquantumnomad.github.io/networking-tools/)** | **[GitHub](https://github.com/PatrykQuantumNomad/networking-tools)**
+> **[Documentation](https://networking-tools.patrykgolabek.dev/)** | **[GitHub](https://github.com/PatrykQuantumNomad/networking-tools)**
 
 A hands-on learning project for penetration testing and ethical hacking fundamentals using 17 open-source tools, 28 task-focused scripts, and a Docker-based vulnerable lab.
 
@@ -72,7 +72,7 @@ bash scripts/nmap/identify-ports.sh -j 192.168.1.1 2>/dev/null | jq .
 bash scripts/dig/query-dns-records.sh -j -x example.com 2>/dev/null | jq .
 ```
 
-See the [Script Flags & JSON Output](https://patrykquantumnomad.github.io/networking-tools/guides/script-flags/) guide for details on the JSON envelope format and `jq` usage.
+See the [Script Flags & JSON Output](https://networking-tools.patrykgolabek.dev/guides/script-flags/) guide for details on the JSON envelope format and `jq` usage.
 
 ## Lab Targets
 
