@@ -9,6 +9,12 @@ import Default from '@astrojs/starlight/components/Footer.astro';
     Built by <a href="https://patrykgolabek.dev" target="_blank" rel="noopener">Patryk Golabek</a>
     &mdash; Cloud-Native Software Architect
   </p>
+  <nav class="more-projects" aria-label="More projects by Patryk Golabek">
+    <span>More projects:</span>
+    <a href="https://jobflow.patrykgolabek.dev" target="_blank" rel="noopener">JobFlow</a>
+    <span class="sep">&middot;</span>
+    <a href="https://financial-data-extractor.patrykgolabek.dev" target="_blank" rel="noopener">Financial Data Extractor</a>
+  </nav>
 </footer>
 
 <style>
@@ -29,5 +35,20 @@ import Default from '@astrojs/starlight/components/Footer.astro';
   }
   .site-author a:hover {
     text-decoration: underline;
+  }
+  .more-projects {
+    margin-top: 0.5rem;
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-4);
+  }
+  .more-projects a {
+    color: var(--sl-color-gray-2);
+  }
+  .more-projects a:hover {
+    color: var(--sl-color-text-accent);
+  }
+  .more-projects .sep {
+    margin: 0 0.35rem;
+    color: var(--sl-color-gray-5);
   }
 </style>

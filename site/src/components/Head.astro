@@ -16,6 +16,13 @@ const isGuidePage = pathname.includes('/guides/') && !pathname.endsWith('/guides
 const isDiagnosticPage = pathname.includes('/diagnostics/') && !pathname.endsWith('/diagnostics/');
 const isContentPage = isToolPage || isGuidePage || isDiagnosticPage;
 const isHomepage = pathname === '/' || pathname === '';
+const isFaqPage = pathname.includes('/guides/faq');
+
+// On the homepage, use just the page title to avoid redundant
+// "Pentesting Tools: … | Networking & Pentesting Tools" (78 chars → 47 chars)
+const processedHead = isHomepage
+	? head.map((item) => (item.tag === 'title' ? { ...item, content: title } : item))
+	: head;
 
 // Build per-page TechArticle schema for content pages
 const pageSchema = isContentPage
@@ -85,7 +92,7 @@ const breadcrumbSchema =
 		: null;
 ---
 
-{head.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}
+{processedHead.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}
 
 {pageSchema && <script type="application/ld+json" set:html={JSON.stringify(pageSchema)} />}
 
