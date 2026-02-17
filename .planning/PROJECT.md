@@ -52,7 +52,18 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 
 ### Active
 
-(No active requirements — define next milestone via `/gsd:new-milestone`)
+## Current Milestone: v1.5 Claude Skill Pack
+
+**Goal:** Package the 17-tool, 81-script pentesting toolkit as a self-contained Claude Code skill pack with task-level and tool-level slash commands, safety/feedback hooks, and audit logging.
+
+**Target features:**
+- Task-oriented slash commands (`/pentest:discover-hosts`, `/pentest:diagnose-dns`, etc.)
+- Tool-specific slash commands (`/nmap:scan-ports`, `/sqlmap:test`, etc.)
+- Pre-execution safety hooks (target scoping, authorization checks)
+- Post-execution feedback hooks (parse `-j` JSON output, suggest next steps)
+- Audit trail logging for all commands and results
+- Bundled scripts (self-contained skill, no separate repo clone needed)
+- Tiered autonomy: diagnostics auto-run, active scans require confirmation
 
 ### Out of Scope
 
@@ -128,4 +139,4 @@ Documentation site deployed to GitHub Pages with CI validation, dark orange/ambe
 | 3-pattern show_help documentation | Pattern A (Options), Pattern B (3-flag Flags), Pattern B+vq (5-flag Flags) | ✓ Good — consistent per-script-type |
 
 ---
-*Last updated: 2026-02-14 after v1.4 milestone*
+*Last updated: 2026-02-17 after v1.5 milestone started*

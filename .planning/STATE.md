@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-14)
+See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Planning next milestone
+**Current focus:** v1.5 Claude Skill Pack
 
 ## Current Position
 
-Phase: 27 of 27 complete
-Plan: All complete
-Status: v1.4 milestone shipped. Ready for next milestone.
-Last activity: 2026-02-14 — v1.4 milestone complete
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-17 — Milestone v1.5 started
 
-Progress: [##########] 100% (v1.0-v1.4 — 27/27 phases)
+Progress: [░░░░░░░░░░] 0% (v1.5)
 
 ## Performance Metrics
 
