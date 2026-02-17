@@ -85,11 +85,11 @@ Archived to `.planning/milestones/v1.4-ROADMAP.md`
   3. After a skill script runs with `-j`, Claude receives parsed JSON context describing the results (not raw output)
   4. Every skill invocation produces a timestamped entry in the audit log file
   5. User can run a health-check command that confirms hooks are installed and firing correctly
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 28-01: TBD
-- [ ] 28-02: TBD
+- [ ] 28-01-PLAN.md — PreToolUse/PostToolUse hooks with target validation, raw tool interception, JSON bridge, and audit logging
+- [ ] 28-02-PLAN.md — Health-check bash script, Claude Code skill, and live verification
 
 ### Phase 29: Core Tool Skills
 **Goal**: Users can invoke the 5 most-used pentesting tools via Claude Code slash commands with zero-context-overhead skill files
@@ -174,7 +174,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 12-17 | v1.2 | 18/18 | Complete | 2026-02-11 |
 | 18-22 | v1.3 | 9/9 | Complete | 2026-02-12 |
 | 23-27 | v1.4 | 10/10 | Complete | 2026-02-14 |
-| 28. Safety Architecture | v1.5 | 0/TBD | Not started | - |
+| 28. Safety Architecture | v1.5 | 0/2 | Not started | - |
 | 29. Core Tool Skills | v1.5 | 0/TBD | Not started | - |
 | 30. Utility Skills & Lab | v1.5 | 0/TBD | Not started | - |
 | 31. Remaining Tool Skills | v1.5 | 0/TBD | Not started | - |
