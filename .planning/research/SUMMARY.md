@@ -1,89 +1,96 @@
-# Research Summary: v1.4 JSON Output Mode
+# Research Summary: Claude Code Skill Pack
 
-**Domain:** Structured JSON output for bash CLI pentesting scripts
-**Researched:** 2026-02-13
+**Domain:** Claude Code skill pack / plugin for pentesting toolkit
+**Researched:** 2026-02-17
 **Overall confidence:** HIGH
 
 ## Executive Summary
 
-This research establishes the architecture for adding a `-j`/`--json` flag to all 46 use-case scripts, producing a consistent JSON envelope (`{"meta": {...}, "results": [...], "summary": {...}}`) suitable for piping into `jq` and downstream automation. The research focused on how a new `lib/json.sh` module integrates with the existing 9-module library, how command output is captured, and how 46 scripts are modified with minimal per-script changes.
+This research establishes the technology stack, architecture, and distribution strategy for building a Claude Code skill pack that wraps the existing 81 bash pentesting scripts. The skill pack creates an AI-powered interface layer (skills, agents, hooks) on top of the validated bash toolkit, enabling users to invoke tools via slash commands, receive structured results via the existing `-j/--json` envelope protocol, and benefit from safety guardrails enforced through the hook system.
 
-The critical architectural decision is the **fd3 redirection strategy**: when JSON mode activates, `exec 3>&1 1>&2` saves the original stdout as fd3 and redirects all normal stdout to stderr. This means every `echo`, `info()`, `safety_banner()`, and educational text line in all 46 scripts automatically goes to stderr -- requiring zero per-script changes for output suppression. Only `json_finalize()` writes to fd3 (the real stdout), producing clean JSON. This approach eliminates ~200 lines of per-script changes that alternative approaches (wrapper functions, per-echo gating) would require.
+The core architectural decision is **plugin wraps, never modifies**. The existing bash scripts remain untouched. Skills reference scripts by path, hooks validate commands before execution, and agents orchestrate multi-tool workflows. The existing fd3 JSON redirect protocol (`-j` flag) provides clean structured output that Claude can parse and reason about -- no additional script modifications are needed for Claude Code integration.
 
-The second key decision is **raw stdout capture for Phase 1**: rather than attempting to parse 17 different tool output formats, `run_or_show()` captures raw command stdout/stderr to temp files and stores them as strings in the JSON envelope. This works for all tools immediately and defers structured parsing (using nmap `-oX`, nikto `-Format json`, tshark `-T json`) to a future milestone.
+The second key decision is **start with project-level `.claude/skills/` files, defer plugin packaging**. Direct files in `.claude/` are simpler, version-control with the project, and require zero distribution infrastructure. Converting to a distributable plugin later is a file-move operation (add `.claude-plugin/plugin.json`, reorganize into plugin directory layout) with no code changes. This approach is validated by the official Claude Code documentation, which explicitly recommends starting standalone and converting to plugins when distribution is needed.
 
-The third key decision is **jq as a hard dependency only when `-j` is used**: `json.sh` checks for jq at module load (non-fatal), but only enforces the dependency when the user passes `-j`. The 99% of invocations that don't use `-j` are unaffected. All JSON construction uses `jq -n --arg` for correct escaping -- no manual string concatenation.
+The third key decision is **deterministic safety hooks over LLM-based hooks**. The PreToolUse hook uses pattern matching (bash+jq) to validate commands before execution -- fast, free, deterministic. The `type: "prompt"` and `type: "agent"` hook options add LLM latency and non-determinism that is inappropriate for safety-critical validation of pentesting commands.
 
 ## Key Findings
 
-**Stack:** jq (lazy dependency, enforced only with `-j`) is the only new external tool. No other additions needed.
+**Stack:** Claude Code's plugin system (skills, agents, hooks, marketplace) is the complete stack. No additional frameworks, build tools, or runtime dependencies needed beyond existing bash+jq. Skills are Markdown+YAML frontmatter files. Hooks are JSON config pointing to bash scripts. Distribution uses GitHub-based marketplace.json.
 
-**Architecture:** Centralized JSON module (`lib/json.sh`) with fd3 redirection. 4 public functions (`json_is_active`, `json_set_meta`, `json_add_result`, `json_finalize`). Each script adds 2 lines (set meta + finalize). Library changes confined to 3 files (common.sh, args.sh, output.sh). logging.sh needs zero changes due to fd redirect.
+**Architecture:** Skills invoke existing scripts via Bash tool. PostToolUse hook detects JSON envelope output and provides structured context to Claude. Subagents isolate verbose scan output from the main conversation. `netsec-` prefix separates from existing GSD commands.
 
-**Critical pitfall:** Non-zero exit codes from security tools (`nmap`, `sqlmap`, etc.) triggering `set -e` and killing the script mid-execution. Prevention: `"$@" && code=0 || code=$?` pattern in run_or_show.
+**Critical pitfall:** Autonomous scanning. Claude must NEVER auto-invoke active scanning skills. All scanning skills require `disable-model-invocation: true` in frontmatter, and the PreToolUse hook validates targets before execution.
 
 ## Implications for Roadmap
 
 Based on research, suggested phase structure:
 
-1. **Library Core** - Create json.sh module, modify common.sh/args.sh/output.sh
-   - Addresses: json.sh module, -j flag parsing, fd redirect, run_or_show capture
-   - Avoids: Circular dependency (json.sh uses plain echo, not logging functions)
-   - Deliverables: lib/json.sh, modified args.sh, modified output.sh, modified common.sh
+1. **Foundation: Plugin structure + safety hooks** - Create plugin manifest/directory layout, implement PreToolUse safety hook, SessionStart tool availability check
+   - Addresses: Plugin identity, safety guardrails, environment awareness
+   - Avoids: Building skills before safety infrastructure is in place
 
-2. **Unit Tests** - Write lib-json.bats, extend lib-args.bats and lib-output.bats
-   - Addresses: JSON envelope validation, special character escaping, -j flag parsing, -j without -x rejection
-   - Avoids: Testing without jq installed (mock-based), fd3 state leaking between tests
+2. **Core skills: Top 5 tool skills + lab integration** - Create SKILL.md for nmap, nikto, sqlmap, tshark, hashcat + Docker lab management skills
+   - Addresses: Core tool coverage, immediate user value, lab practice environment
+   - Avoids: All-at-once skill creation (validate pattern with 5 before scaling to 17)
 
-3. **Script Migration (Batch 1-3)** - Add json_set_meta + json_finalize to scripts
-   - Addresses: nmap, nikto, sqlmap, tshark, hashcat, john (20 scripts)
-   - Avoids: All-at-once migration (batched by tool family for incremental validation)
+3. **Complete skills: Remaining tools + utility skills** - Scale to all 17 tools, add check-tools, find-script, examples-browser skills
+   - Addresses: Full tool coverage, discoverability
+   - Avoids: Premature agent creation (agents reference skills, so skills must exist first)
 
-4. **Script Migration (Batch 4-6)** - Remaining scripts
-   - Addresses: curl, dig, gobuster, ffuf, hping3, metasploit, netcat, traceroute, aircrack-ng, skipfish, foremost (26 scripts)
+4. **Agents + workflows** - Create specialized subagents (pentester, defender, analyst), multi-tool workflow skills
+   - Addresses: Guided workflows, context isolation for verbose output, specialized personas
+   - Avoids: Complexity before foundation is proven
 
-5. **Integration Tests + Documentation** - Contract tests, help text updates
-   - Addresses: JSON output validation across all scripts, -j mentioned in show_help()
-   - Avoids: Undocumented feature (users need to know -j exists)
+5. **Distribution (optional)** - Convert to plugin package, create marketplace.json, publish to GitHub
+   - Addresses: Sharing with other users/projects
+   - Avoids: Distribution overhead before the skill pack is feature-complete
 
 **Phase ordering rationale:**
-- Library before scripts: Scripts depend on json.sh, args.sh, output.sh being correct
-- Tests before migration: Unit tests prove the library works before touching 46 scripts
-- Batched migration: Validate pattern with small batch (nmap) before scaling to all tools
-- Documentation last: Feature must be complete before documenting
+- Safety first: Hooks must be in place before any skills can run scans
+- Skills before agents: Agents orchestrate skills, so skills must exist and be validated first
+- Validate with subset: Build 5 tool skills, verify the pattern works, then scale to all 17
+- Distribution last: No point distributing an incomplete skill pack
 
 **Research flags for phases:**
-- Phase 1 (Library Core): Standard patterns, no research needed. All function signatures defined in ARCHITECTURE.md.
-- Phase 2 (Tests): Standard BATS patterns from v1.3. May need research on testing fd redirections in BATS subshells.
-- Phases 3-4 (Migration): Mechanical changes, no research needed. grep verification of completeness.
-- Phase 5 (Docs): No research needed.
+- Phase 1: Standard patterns, well-documented -- no further research needed
+- Phase 2: Validate skill content pattern with real tool invocations -- may need iteration
+- Phase 4: Agent memory (`memory: project`) is newer feature -- validate behavior in practice
+- Phase 5: Plugin distribution mechanics are well-documented but npm source is flagged as "not yet fully implemented" -- stick to GitHub source
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | jq is well-established, version 1.8.1 (July 2025). No alternatives needed. |
-| Features | HIGH | Envelope schema defined. Raw capture approach verified against all 17 tools. |
-| Architecture | HIGH | Based on line-by-line analysis of all 9 lib modules and 8 representative scripts. fd3 redirect verified against bash documentation. |
-| Pitfalls | HIGH | Strict mode interactions verified against strict.sh source. Tool output formats verified against official documentation. |
+| Stack (plugin system) | HIGH | All APIs verified against official Claude Code documentation via WebFetch. Multiple source types confirmed. |
+| Stack (hooks API) | HIGH | Complete hook event schemas, I/O protocols, and matcher patterns extracted from official reference docs. |
+| Stack (skills format) | HIGH | Skill frontmatter fields, invocation control, and dynamic context injection verified against official docs. |
+| Features (skill list) | HIGH | Features derived directly from existing codebase analysis (81 scripts, 17 tools, lab targets). |
+| Architecture (integration) | HIGH | fd3 JSON redirect protocol already works with Claude's Bash tool -- no modifications needed. |
+| Pitfalls (safety) | HIGH | Safety concerns well-documented in pentesting domain. `disable-model-invocation` verified in official docs. |
+| Distribution (marketplace) | MEDIUM | Marketplace format verified against official docs and Anthropic's own marketplace.json. npm source flagged as incomplete. |
 
 ## Gaps to Address
 
-- **fd3 in BATS tests:** Need to verify that BATS `run` command properly handles fd3 redirections. May require `run --separate-stderr` (BATS 1.5+). Flag for Phase 2 research.
-- **sudo commands in JSON mode:** Scripts with `sudo` in `run_or_show` calls will prompt for password. The password prompt goes to the terminal (stderr). If sudo is not cached, the command blocks. This is a user education issue, not a library issue.
-- **ANSI codes in captured output:** Tools may emit color codes. Raw capture preserves them. Downstream consumers may want `NO_COLOR=1` or a strip-ansi post-processor. Defer to documentation guidance.
+- **Skill description budget**: The 2% context window limit for skill descriptions (~16KB) may become a concern at 15+ skills. Monitor with `/context` command during Phase 3. Use `disable-model-invocation: true` to exclude rarely-used skills from auto-loading.
+- **PostToolUse hook access to stdout**: The architecture assumes `tool_response.stdout` is available in PostToolUse hooks. This needs validation -- the official docs list `tool_response` in PostToolUse input but the exact field names for Bash tool responses should be confirmed during Phase 1.
+- **Agent memory durability**: The `memory: project` feature creates files in `.claude/agent-memory/`. The interaction with git (should these be gitignored?) and with compaction needs practical testing during Phase 4.
+- **Plugin conversion path**: When converting from project-level `.claude/skills/` to plugin format, the `$CLAUDE_PROJECT_DIR` references in hooks must change to `${CLAUDE_PLUGIN_ROOT}`. This is documented but needs testing during Phase 5.
 
 ## Sources
 
-- Direct codebase analysis of all 9 lib modules and 8 representative use-case scripts
-- [jq official documentation](https://jqlang.org/) -- JSON construction with --arg/--argjson
-- [Nmap output formats](https://nmap.org/book/output.html) -- Tool output capabilities
-- [Nikto export formats](https://github.com/sullo/nikto/wiki/Export-Formats) -- Native JSON support
-- [tshark documentation](https://www.wireshark.org/docs/man-pages/tshark.html) -- -T json output
-- [ffuf GitHub](https://github.com/ffuf/ffuf) -- -of json output format
-- [hashcat machine_readable](https://hashcat.net/wiki/doku.php?id=machine_readable) -- --status-json flag
-- [Baeldung: Bash JSON construction](https://www.baeldung.com/linux/bash-variables-create-json-string) -- jq vs printf approaches
+### HIGH Confidence (Official documentation, verified via WebFetch)
+- [Claude Code Skills Documentation](https://code.claude.com/docs/en/slash-commands)
+- [Claude Code Hooks Guide](https://code.claude.com/docs/en/hooks-guide)
+- [Claude Code Hooks Reference](https://code.claude.com/docs/en/hooks)
+- [Claude Code Plugins Documentation](https://code.claude.com/docs/en/plugins)
+- [Claude Code Plugins Reference](https://code.claude.com/docs/en/plugins-reference)
+- [Claude Code Plugin Marketplaces](https://code.claude.com/docs/en/plugin-marketplaces)
+- [Claude Code Subagents](https://code.claude.com/docs/en/sub-agents)
+- [Anthropic Official Plugin Marketplace](https://github.com/anthropics/claude-code/blob/main/.claude-plugin/marketplace.json)
 
----
-*Research completed: 2026-02-13*
-*Ready for roadmap: yes*
+### MEDIUM Confidence (Community examples, cross-referenced)
+- [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security)
+- [Trail of Bits Claude Code Skills](https://github.com/trailofbits/skills)
+- [Claude Code OWASP Skills](https://github.com/agamm/claude-code-owasp)
+- [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code)
