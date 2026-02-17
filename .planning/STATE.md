@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** v1.5 Claude Skill Pack
+**Current focus:** Phase 28 - Safety Architecture (v1.5 Claude Skill Pack)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-17 — Milestone v1.5 started
+Phase: 28 of 33 (Safety Architecture)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-02-17 — Roadmap created for v1.5 milestone (6 phases, 36 requirements)
 
 Progress: [░░░░░░░░░░] 0% (v1.5)
 
@@ -32,6 +32,7 @@ Progress: [░░░░░░░░░░] 0% (v1.5)
 | v1.2 | 6 | 18 | ~79min |
 | v1.3 | 5 | 9 | ~42min |
 | v1.4 | 5 | 10 | ~78min |
+| v1.5 | 6 | TBD | — |
 
 ## Accumulated Context
 
@@ -46,13 +47,22 @@ All decisions archived in milestone ROADMAP archives:
 
 Full cumulative decision table in PROJECT.md.
 
+v1.5 research decisions:
+- Plugin wraps, never modifies (existing scripts untouched)
+- Start with project-level `.claude/skills/`, defer plugin packaging
+- Deterministic safety hooks (bash+jq), not LLM-based
+- Validate tool skill pattern with 5 before scaling to 17
+- Tool skills use `disable-model-invocation: true` (zero context overhead)
+
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
-None.
+- PostToolUse hook access to `tool_response.stdout` needs validation during Phase 28
+- Skill description budget (2% context window, ~16KB) -- monitor during Phase 31
+- Agent `memory: project` feature needs practical testing during Phase 33
 
 ### Quick Tasks Completed
 
@@ -63,6 +73,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-14
-Stopped at: v1.4 milestone complete. All planning artifacts archived.
+Last session: 2026-02-17
+Stopped at: v1.5 roadmap created. Ready to plan Phase 28.
 Resume file: None

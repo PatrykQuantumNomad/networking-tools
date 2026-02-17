@@ -91,48 +91,48 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SAFE-01 | — | Pending |
-| SAFE-02 | — | Pending |
-| SAFE-03 | — | Pending |
-| SAFE-04 | — | Pending |
-| SAFE-05 | — | Pending |
-| WKFL-01 | — | Pending |
-| WKFL-02 | — | Pending |
-| WKFL-03 | — | Pending |
-| WKFL-04 | — | Pending |
-| WKFL-05 | — | Pending |
-| WKFL-06 | — | Pending |
-| WKFL-07 | — | Pending |
-| WKFL-08 | — | Pending |
-| TOOL-01 | — | Pending |
-| TOOL-02 | — | Pending |
-| TOOL-03 | — | Pending |
-| TOOL-04 | — | Pending |
-| TOOL-05 | — | Pending |
-| TOOL-06 | — | Pending |
-| TOOL-07 | — | Pending |
-| TOOL-08 | — | Pending |
-| TOOL-09 | — | Pending |
-| TOOL-10 | — | Pending |
-| TOOL-11 | — | Pending |
-| TOOL-12 | — | Pending |
-| TOOL-13 | — | Pending |
-| TOOL-14 | — | Pending |
-| TOOL-15 | — | Pending |
-| TOOL-16 | — | Pending |
-| TOOL-17 | — | Pending |
-| UTIL-01 | — | Pending |
-| UTIL-02 | — | Pending |
-| UTIL-03 | — | Pending |
-| AGNT-01 | — | Pending |
-| AGNT-02 | — | Pending |
-| AGNT-03 | — | Pending |
+| SAFE-01 | Phase 28 | Pending |
+| SAFE-02 | Phase 28 | Pending |
+| SAFE-03 | Phase 28 | Pending |
+| SAFE-04 | Phase 28 | Pending |
+| SAFE-05 | Phase 28 | Pending |
+| WKFL-01 | Phase 32 | Pending |
+| WKFL-02 | Phase 32 | Pending |
+| WKFL-03 | Phase 32 | Pending |
+| WKFL-04 | Phase 32 | Pending |
+| WKFL-05 | Phase 32 | Pending |
+| WKFL-06 | Phase 32 | Pending |
+| WKFL-07 | Phase 32 | Pending |
+| WKFL-08 | Phase 32 | Pending |
+| TOOL-01 | Phase 29 | Pending |
+| TOOL-02 | Phase 29 | Pending |
+| TOOL-03 | Phase 29 | Pending |
+| TOOL-04 | Phase 29 | Pending |
+| TOOL-05 | Phase 29 | Pending |
+| TOOL-06 | Phase 31 | Pending |
+| TOOL-07 | Phase 31 | Pending |
+| TOOL-08 | Phase 31 | Pending |
+| TOOL-09 | Phase 31 | Pending |
+| TOOL-10 | Phase 31 | Pending |
+| TOOL-11 | Phase 31 | Pending |
+| TOOL-12 | Phase 31 | Pending |
+| TOOL-13 | Phase 31 | Pending |
+| TOOL-14 | Phase 31 | Pending |
+| TOOL-15 | Phase 31 | Pending |
+| TOOL-16 | Phase 31 | Pending |
+| TOOL-17 | Phase 31 | Pending |
+| UTIL-01 | Phase 30 | Pending |
+| UTIL-02 | Phase 30 | Pending |
+| UTIL-03 | Phase 30 | Pending |
+| AGNT-01 | Phase 33 | Pending |
+| AGNT-02 | Phase 33 | Pending |
+| AGNT-03 | Phase 33 | Pending |
 
 **Coverage:**
-- v1.5 requirements: 35 total
-- Mapped to phases: 0
-- Unmapped: 35
+- v1.5 requirements: 36 total
+- Mapped to phases: 36
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-17*
-*Last updated: 2026-02-17 after initial definition*
+*Last updated: 2026-02-17 after roadmap creation*
