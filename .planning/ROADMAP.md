@@ -1,4 +1,4 @@
-# Roadmap: Networking Tools
+## Roadmap: Networking Tools
 
 ## Milestones
 
@@ -100,10 +100,11 @@ Plans:
   2. User can invoke tshark, metasploit, sqlmap, and nikto skills the same way
   3. All 5 tool skills have `disable-model-invocation: true` so Claude never auto-invokes them
   4. Each skill's instructions reference the correct existing scripts by path and describe available use-case scripts
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 29-01: TBD
+- [ ] 29-01-PLAN.md — Create nmap, tshark, and metasploit skills
+- [ ] 29-02-PLAN.md — Create sqlmap and nikto skills, verify all 5 work end-to-end
 
 ### Phase 30: Utility Skills & Lab Integration
 **Goal**: Users can check tool availability, manage Docker lab targets, and benefit from automatic pentesting conventions context
@@ -175,7 +176,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 18-22 | v1.3 | 9/9 | Complete | 2026-02-12 |
 | 23-27 | v1.4 | 10/10 | Complete | 2026-02-14 |
 | 28. Safety Architecture | v1.5 | 2/2 | Complete | 2026-02-17 |
-| 29. Core Tool Skills | v1.5 | 0/TBD | Not started | - |
+| 29. Core Tool Skills | v1.5 | 0/2 | Not started | - |
 | 30. Utility Skills & Lab | v1.5 | 0/TBD | Not started | - |
 | 31. Remaining Tool Skills | v1.5 | 0/TBD | Not started | - |
 | 32. Workflow Skills | v1.5 | 0/TBD | Not started | - |
