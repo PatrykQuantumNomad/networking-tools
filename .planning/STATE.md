@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 28 of 33 (Safety Architecture)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-17 — Roadmap created for v1.5 milestone (6 phases, 36 requirements)
+Plan: 1 of 2 in current phase
+Status: Executing
+Last activity: 2026-02-17 — Completed 28-01 Safety Hooks (PreToolUse/PostToolUse)
 
-Progress: [░░░░░░░░░░] 0% (v1.5)
+Progress: [#░░░░░░░░░] 8% (v1.5)
 
 ## Performance Metrics
 
@@ -54,13 +54,19 @@ v1.5 research decisions:
 - Validate tool skill pattern with 5 before scaling to 17
 - Tool skills use `disable-model-invocation: true` (zero context overhead)
 
+Phase 28 execution decisions:
+- jq for all hook JSON construction (no string concatenation)
+- curl/dig exception: only intercept bare IP/hostname, not URL-based commands
+- CIDR /24 via 3-octet prefix match (sufficient for lab scope)
+- Strip shell metacharacters from extracted targets for robustness
+
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
-- PostToolUse hook access to `tool_response.stdout` needs validation during Phase 28
+- ~~PostToolUse hook access to `tool_response.stdout` needs validation during Phase 28~~ RESOLVED: field accessible as `.tool_response.stdout`
 - Skill description budget (2% context window, ~16KB) -- monitor during Phase 31
 - Agent `memory: project` feature needs practical testing during Phase 33
 
@@ -74,5 +80,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: v1.5 roadmap created. Ready to plan Phase 28.
+Stopped at: Completed 28-01-PLAN.md (Safety Hooks). Ready for 28-02.
 Resume file: None

@@ -88,7 +88,7 @@ Archived to `.planning/milestones/v1.4-ROADMAP.md`
 **Plans:** 2 plans
 
 Plans:
-- [ ] 28-01-PLAN.md — PreToolUse/PostToolUse hooks with target validation, raw tool interception, JSON bridge, and audit logging
+- [x] 28-01-PLAN.md — PreToolUse/PostToolUse hooks with target validation, raw tool interception, JSON bridge, and audit logging
 - [ ] 28-02-PLAN.md — Health-check bash script, Claude Code skill, and live verification
 
 ### Phase 29: Core Tool Skills
