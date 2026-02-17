@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 28 - Safety Architecture (v1.5 Claude Skill Pack)
+**Current focus:** Phase 29 - Core Tool Skills (v1.5 Claude Skill Pack)
 
 ## Current Position
 
-Phase: 28 of 33 (Safety Architecture) — COMPLETE
-Plan: 2 of 2 in current phase
-Status: Phase complete, ready for verification
-Last activity: 2026-02-17 — Completed 28-02 Health-Check & Skill (live verified)
+Phase: 29 of 33 (Core Tool Skills)
+Plan: 1 of 2 in current phase
+Status: Plan 01 complete, plan 02 pending
+Last activity: 2026-02-17 — Completed 29-01 Core Tool Skills Wave 1 (nmap, tshark, metasploit)
 
 Progress: [██░░░░░░░░] 17% (v1.5)
 
@@ -60,6 +60,11 @@ Phase 28 execution decisions:
 - CIDR /24 via 3-octet prefix match (sufficient for lab scope)
 - Strip shell metacharacters from extracted targets for robustness
 
+Phase 29-01 execution decisions:
+- Accurate argument docs per script (interface vs target vs LHOST/LPORT) rather than generic [target]
+- Included tool-specific default behavior section in each skill
+- Used double-dash (--) for markdown list descriptions to match project style
+
 ### Pending Todos
 
 None.
@@ -80,5 +85,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed Phase 28 (Safety Architecture). All 2 plans done, live verified.
+Stopped at: Completed 29-01-PLAN.md (nmap, tshark, metasploit skills). Plan 02 next.
 Resume file: None
