@@ -37,3 +37,6 @@ labs/data/
 site/node_modules/
 site/dist/
 site/.astro/
+
+# Pentest scope and audit data
+.pentest/

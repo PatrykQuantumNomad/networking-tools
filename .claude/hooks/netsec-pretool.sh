@@ -136,7 +136,9 @@ fi
 
 # Extract target from wrapper script command
 # Pattern: bash scripts/.../*.sh <TARGET> [options...]
-TARGET=$(echo "$COMMAND" | grep -oE 'scripts/[^[:space:]]+\.sh[[:space:]]+([^[:space:]]+)' | head -1 | sed 's|scripts/[^[:space:]]*\.sh[[:space:]]*||')
+# Strip quotes and shell metacharacters from extracted target
+RAW_TARGET=$(echo "$COMMAND" | grep -oE 'scripts/[^[:space:]]+\.sh[[:space:]]+([^[:space:]]+)' | head -1 | sed 's|scripts/[^[:space:]]*\.sh[[:space:]]*||')
+TARGET=$(echo "$RAW_TARGET" | sed "s/[\"';\`|&(){}]//g")
 
 # If no target extracted, allow the command (might be --help or no-target script)
 if [[ -z "$TARGET" ]]; then
