@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 
 ## Current Position
 
-Phase: 29 of 33 (Core Tool Skills)
-Plan: 1 of 2 in current phase
-Status: Plan 01 complete, plan 02 pending
-Last activity: 2026-02-17 — Completed 29-01 Core Tool Skills Wave 1 (nmap, tshark, metasploit)
+Phase: 29 of 33 (Core Tool Skills) — COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase complete, ready for verification
+Last activity: 2026-02-17 — Completed 29-02 SQLMap & Nikto Skills + End-to-End Verification
 
-Progress: [██░░░░░░░░] 17% (v1.5)
+Progress: [███░░░░░░░] 33% (v1.5)
 
 ## Performance Metrics
 
@@ -85,5 +85,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: Completed 29-01-PLAN.md (nmap, tshark, metasploit skills). Plan 02 next.
+Stopped at: Completed Phase 29 (Core Tool Skills). All 2 plans done, human verified.
 Resume file: None

@@ -67,7 +67,7 @@ Archived to `.planning/milestones/v1.4-ROADMAP.md`
 **Milestone Goal:** Package the 17-tool, 81-script pentesting toolkit as a self-contained Claude Code skill pack with task-level and tool-level slash commands, safety/feedback hooks, and audit logging.
 
 - [x] **Phase 28: Safety Architecture** - PreToolUse/PostToolUse hooks, audit logging, and health check — completed 2026-02-17
-- [ ] **Phase 29: Core Tool Skills** - First 5 tool skills (nmap, tshark, metasploit, sqlmap, nikto) to validate the pattern
+- [x] **Phase 29: Core Tool Skills** - First 5 tool skills (nmap, tshark, metasploit, sqlmap, nikto) to validate the pattern — completed 2026-02-17
 - [ ] **Phase 30: Utility Skills & Lab Integration** - Check-tools, lab management, and conventions background skill
 - [ ] **Phase 31: Remaining Tool Skills** - Scale validated pattern to all 17 tools (12 remaining)
 - [ ] **Phase 32: Workflow Skills** - Task-oriented slash commands that orchestrate tool skills
@@ -103,8 +103,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 29-01-PLAN.md — Create nmap, tshark, and metasploit skills
-- [ ] 29-02-PLAN.md — Create sqlmap and nikto skills, verify all 5 work end-to-end
+- [x] 29-01-PLAN.md — Create nmap, tshark, and metasploit skills
+- [x] 29-02-PLAN.md — Create sqlmap and nikto skills, verify all 5 work end-to-end
 
 ### Phase 30: Utility Skills & Lab Integration
 **Goal**: Users can check tool availability, manage Docker lab targets, and benefit from automatic pentesting conventions context
@@ -176,7 +176,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 18-22 | v1.3 | 9/9 | Complete | 2026-02-12 |
 | 23-27 | v1.4 | 10/10 | Complete | 2026-02-14 |
 | 28. Safety Architecture | v1.5 | 2/2 | Complete | 2026-02-17 |
-| 29. Core Tool Skills | v1.5 | 0/2 | Not started | - |
+| 29. Core Tool Skills | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 30. Utility Skills & Lab | v1.5 | 0/TBD | Not started | - |
 | 31. Remaining Tool Skills | v1.5 | 0/TBD | Not started | - |
 | 32. Workflow Skills | v1.5 | 0/TBD | Not started | - |
