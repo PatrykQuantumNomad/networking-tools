@@ -1,220 +1,189 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-02-10
+**Analysis Date:** 2026-02-17
 
-## Temp File Handling
+## Tech Debt
 
-**Unsafe mktemp usage with predictable templates:**
-- Issue: Multiple scripts use `mktemp /tmp/<prefix>-demo.XXXXXX` with hardcoded /tmp directory and predictable naming patterns. While X's are replaced, the prefix itself is guessable, making files discoverable by other users on shared systems.
-- Files:
-  - `scripts/hashcat/crack-ntlm-hashes.sh` (line 108)
-  - `scripts/hashcat/crack-web-hashes.sh` (line 113)
-  - `scripts/john/crack-linux-passwords.sh` (line 102)
-  - `scripts/john/crack-archive-passwords.sh` (line 111: mktemp -d with TMPDIR)
-- Impact: Temporary files containing sensitive data (password hashes, test data) are world-readable on multi-user systems. If scripts are interrupted, temp files may persist.
-- Fix approach:
-  1. Use `mktemp` without directory prefix to use system default (usually /tmp with restrictive perms)
-  2. Add trap handler to ensure cleanup on script exit: `trap 'rm -f "$TMPFILE"' EXIT`
-  3. Change from `$(mktemp /tmp/name.XXXXXX)` to `$(mktemp)` or `$(mktemp -t <prefix>)`
+**BC dependency in retry_with_backoff:**
+- Issue: `scripts/lib/cleanup.sh:83` uses `bc` for exponential backoff calculation (`delay=$(echo "$delay * 2" | bc)`)
+- Files: `scripts/lib/cleanup.sh`
+- Impact: Runtime failure if `bc` is not installed (not a default macOS/Linux tool on minimal systems)
+- Fix approach: Replace with pure bash arithmetic: `delay=$((delay * 2))` for integer delays, or use bash printf for decimal math
 
-**Incomplete cleanup:**
-- Issue: Only 4 occurrences of `rm -f` cleanup across ~50 scripts. Interactive demo sections create temp files but cleanup only happens if user responds with 'y'.
-- Files: `scripts/hashcat/*.sh`, `scripts/john/*.sh`
-- Impact: If script is killed with Ctrl+C during demo, temp files containing test passwords/hashes remain in /tmp indefinitely.
-- Fix approach: Use EXIT traps in all scripts that create temp files:
-  ```bash
-  TMPFILE=$(mktemp)
-  trap 'rm -f "$TMPFILE"' EXIT
-  ```
+**eval in cleanup handler:**
+- Issue: `scripts/lib/cleanup.sh:31` uses `eval "$cmd"` to execute registered cleanup commands
+- Files: `scripts/lib/cleanup.sh`
+- Impact: Potential command injection if untrusted input reaches `register_cleanup()`. Currently low risk (only internal usage), but fragile design pattern.
+- Fix approach: Store cleanup commands as function names instead of arbitrary strings, or use associative arrays with validated callback patterns
 
-## Error Handling Gaps
+**Large diagnostic scripts:**
+- Issue: Diagnostic scripts have grown to 243-345 lines with complex control flow
+- Files: `scripts/diagnostics/connectivity.sh` (345 lines), `scripts/diagnostics/performance.sh` (292 lines), `scripts/diagnostics/dns.sh` (243 lines)
+- Impact: Harder to test, maintain, and extend. Multiple responsibilities (parsing, execution, reporting, OS detection)
+- Fix approach: Extract helper functions to `scripts/lib/diagnostic.sh`, create shared report renderer, isolate OS-specific logic
 
-**Unquoted variables in command substitution:**
-- Issue: Variables used in command substitution without quotes may cause issues with spaces or special characters.
-- Files: `scripts/common.sh` line 69 (PROJECT_ROOT path construction)
-- Impact: If code is moved to paths with spaces, PROJECT_ROOT expansion could fail.
-- Example: `PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"` is properly quoted, but pattern should be verified throughout.
+**Platform-specific code scattered:**
+- Issue: OS detection (`uname -s`) and Darwin/Linux branching appears in multiple individual scripts instead of centralized helpers
+- Files: `scripts/diagnostics/connectivity.sh`, `scripts/diagnostics/performance.sh`, `scripts/diagnostics/dns.sh`
+- Impact: Inconsistent platform handling, duplicated logic, harder to add new platform support
+- Fix approach: Add `scripts/lib/platform.sh` with functions like `is_macos()`, `is_linux()`, `get_primary_interface()`, `portable_ping()`
 
-**Silent failures in pipelines:**
-- Issue: Scripts use `set -euo pipefail` but some commands use `|| true` to suppress errors globally, masking real problems.
-- Files: All scripts with `|| true` patterns (e.g., `scripts/hashcat/crack-ntlm-hashes.sh` line 112, 115)
-- Impact: Failed tool invocations appear to succeed, giving false confidence in results.
-- Fix approach: Be selective with error suppression; only suppress known non-critical stderr output: `hashcat ... 2>/dev/null | grep pattern || true`
+**JSON mode fd3 fallback complexity:**
+- Issue: `scripts/lib/json.sh:142-146` uses file descriptor 3 with fallback to stdout, complicates testing and error handling
+- Files: `scripts/lib/json.sh`
+- Impact: Harder to debug when fd3 redirect fails silently. Test harness must know to redirect fd3.
+- Fix approach: Document fd3 contract in @usage header, add diagnostic mode that warns if fd3 is not available
 
-**Timeout handling for msfconsole:**
-- Issue: `scripts/check-tools.sh` line 59 uses `timeout 5` for version detection, but msfconsole is known to take >5 seconds to start.
-- Files: `scripts/check-tools.sh` (line 59)
-- Impact: Metasploit framework falsely reports as "installed" without actually running version check.
-- Fix approach: Increase timeout for msfconsole or use special case handling (check manifest file instead, which is already done at line 52-56).
+## Known Bugs
+
+**None identified in core functionality:**
+- No open bugs found in script logic or library functions
+- All 265 BATS tests passing (v1.3 milestone audit)
 
 ## Security Considerations
 
-**Insufficient input validation:**
-- Issue: Scripts accept target parameters but don't validate IP/URL format before passing to tools. A malformed target could cause command injection or unexpected behavior.
-- Files: Most tool scripts (e.g., `scripts/nmap/examples.sh`, `scripts/sqlmap/dump-database.sh`)
-- Impact: Malicious input like `; rm -rf /` could be injected via target parameter.
-- Current mitigation: Tools themselves handle validation and likely reject bad input, but no defensive validation in scripts.
-- Recommendations:
-  1. Add basic regex validation for IPs: `[[ $target =~ ^[0-9.]+$ ]]`
-  2. Add URL validation for web tools: `[[ $url =~ ^https?:// ]]`
-  3. Quote all command expansions: `sqlmap -u "$TARGET"` (already done in most cases)
+**Safety banner suppressible:**
+- Risk: `safety_banner()` is skipped in JSON mode, potentially allowing automated execution without ethical hacking reminder
+- Files: `scripts/lib/output.sh:13-22`
+- Current mitigation: `confirm_execute()` still enforces interactive confirmation in execute mode
+- Recommendations: Add legal disclaimer to README.md about authorized use only, regardless of JSON mode
 
-**Hardcoded wordlist paths without existence checks:**
-- Issue: Scripts assume `wordlists/rockyou.txt` exists without verifying. If not present, cracking attempts silently fail.
-- Files:
-  - `scripts/hashcat/crack-ntlm-hashes.sh` (line 24)
-  - `scripts/hashcat/crack-web-hashes.sh` (line 24)
-  - `scripts/john/crack-linux-passwords.sh` (line 21)
-- Impact: Users run long-running attacks without realizing wordlist is missing.
-- Fix approach: Add pre-flight check:
-  ```bash
-  if [[ ! -f "$WORDLIST" ]]; then
-    warn "Wordlist not found: $WORDLIST"
-    info "Download with: make wordlists"
-    exit 1
-  fi
-  ```
+**Metasploit payload generation:**
+- Risk: Scripts demonstrate reverse shell generation without prominent warnings about payload handling
+- Files: `scripts/metasploit/generate-reverse-shell.sh`
+- Current mitigation: `safety_banner()` shown before execution, script is educational-only by default
+- Recommendations: Add explicit comments warning against uploading generated payloads to shared environments or antivirus scanners
 
-**Credential exposure in command examples:**
-- Issue: Scripts show actual credentials in comments and example output (DVWA admin/password, default ports).
-- Files: `Makefile` (lines 19, 21), `README.md` (lines 47-50), multiple tool scripts
-- Impact: While credentials are for intentionally vulnerable lab systems, they're visible in help output and version control.
-- Current mitigation: Only used in isolated Docker containers, not production.
-- Recommendations: Document in comments that these are lab-only credentials.
+**Wordlists in repository:**
+- Risk: 140MB `rockyou.txt` committed to repository, potential for accidental exposure if used with real passwords
+- Files: `wordlists/rockyou.txt` (140MB), `wordlists/directory-list-2.3-small.txt` (725KB)
+- Current mitigation: Wordlists are public datasets, `.gitignore` excludes output files (*.pot, *.log)
+- Recommendations: Consider moving to external download via `make wordlists` exclusively, document that wordlists are public datasets only
 
-**Sensitive data in temp files without permissions restriction:**
-- Issue: Hash files and cracking output written to /tmp with default 644 permissions (world-readable).
-- Files: `scripts/hashcat/*.sh`, `scripts/john/*.sh`
-- Impact: On shared systems, other users can read password hashes and cracking results.
-- Fix approach: Create temp files with restricted permissions:
-  ```bash
-  TMPFILE=$(mktemp)
-  chmod 600 "$TMPFILE"
-  ```
-
-## Testing Coverage Gaps
-
-**No automated testing:**
-- Issue: No test suite (no .test.sh, test/, tests/ directory). Scripts are educational and expected to be run manually, but no regression testing.
-- Impact: Changes to common.sh or template patterns could break multiple tools without detection.
-- Fix approach: Create basic integration tests for each tool validating:
-  1. Help output works
-  2. Examples display without errors
-  3. Basic command construction is correct
-
-**No validation of tool versions:**
-- Issue: `check-tools.sh` only verifies existence, not version compatibility.
-- Files: `scripts/check-tools.sh`
-- Impact: If user installs incompatible version (e.g., old nmap), scripts may fail silently.
-- Fix approach: Add version range validation for critical tools.
-
-## Platform-Specific Limitations
-
-**macOS vs Linux capability mismatch:**
-- Issue: Aircrack-ng on macOS is artificially limited by Homebrew package (cracking only, no monitoring tools).
-- Files: `README.md` (lines 58-72), `scripts/aircrack-ng/examples.sh`
-- Impact: Users expect full WiFi testing but can only crack offline captures.
-- Current mitigation: Well documented in README, scripts do not promise what macOS can't deliver.
-- Recommendations: Consider Linux container alternative for full aircrack-ng capabilities.
-
-**Skipfish availability:**
-- Issue: Skipfish not available in Homebrew, requires MacPorts on macOS.
-- Files: `README.md` (line 74), `scripts/skipfish/*.sh`
-- Impact: Users on macOS may not have skipfish installed, but scripts don't gracefully handle this.
-- Current mitigation: `require_cmd skipfish` will error with install hint.
-- Recommendations: Add MacPorts detection and special install message.
-
-## Docker Lab Issues
-
-**No health checks:**
-- Issue: Docker Compose file has no health checks for vulnerable targets.
+**Vulnerable lab containers:**
+- Risk: Docker Compose runs intentionally vulnerable apps (DVWA, Juice Shop, WebGoat, VulnerableApp) without network isolation warnings
 - Files: `labs/docker-compose.yml`
-- Impact: `make lab-up` completes but targets may not be ready for immediate scanning.
-- Fix approach: Add healthcheck directives to ensure services are listening before declaring success.
+- Current mitigation: Warning comment in docker-compose.yml: "Only run them on isolated networks. Never expose to the internet."
+- Recommendations: Add `networks: internal` configuration to Docker Compose to enforce isolation, update README.md with explicit "DO NOT expose ports beyond localhost" section
 
-**No port conflict detection:**
-- Issue: If ports 8080, 3030, 8888, 8180 are already in use, lab-up fails silently or with cryptic error.
-- Files: `labs/docker-compose.yml`
-- Impact: Users don't know if lab is ready or if a previous lab instance is still running.
-- Fix approach: Validate ports are available before launching; improve error messaging.
+## Performance Bottlenecks
 
-**Container restart policy may conflict:**
-- Issue: All services set `restart: unless-stopped`, meaning they persist across system reboots.
-- Files: `labs/docker-compose.yml` (lines 15, 22, 31, 41)
-- Impact: If user forgets to `make lab-down`, containers continue consuming resources.
-- Recommendations: Document in comments to run `make lab-down` when finished; consider using `no` instead for demo usage.
+**Retry function sleep blocking:**
+- Problem: `retry_with_backoff()` uses blocking `sleep` calls with exponential backoff
+- Files: `scripts/lib/cleanup.sh:82`
+- Cause: Synchronous sleep with `bc` calculation overhead
+- Improvement path: Acceptable for current use case (rare retries), but could use bash `SECONDS` for non-blocking checks if used in tight loops
+
+**Diagnostic timeout fallback:**
+- Problem: macOS fallback for timeout uses background processes and `sleep` watchdog
+- Files: `scripts/lib/diagnostic.sh:23-39`
+- Cause: macOS lacks GNU `timeout` command, POSIX fallback spawns 3 processes per check
+- Improvement path: Install GNU coreutils on macOS (already common in CI/CD), or use bash `read -t` for simpler timeout pattern
 
 ## Fragile Areas
 
-**Metasploit framework integration:**
-- Files: `scripts/metasploit/*`, `scripts/check-tools.sh` (lines 50-56)
-- Why fragile: Metasploit is large and slow; version-manifest.txt location is hard-coded and may change. msfvenom/msfconsole paths not added to PATH by default on macOS.
-- Safe modification: Verify Metasploit paths before using; consider wrapping in Docker.
-- Test coverage: No verification that msfvenom actually works, only that command exists.
+**Bash 4.0+ requirement:**
+- Files: `scripts/common.sh:8-15`
+- Why fragile: Breaks on default macOS bash (3.2), error message depends on Bash 2.x syntax working
+- Safe modification: Always test changes to `common.sh` on macOS default bash and brew-installed bash 5.x
+- Test coverage: Covered by smoke.bats suite, but no explicit test for error message readability on bash 3.2
 
-**Common.sh functions relied on globally:**
-- Files: `scripts/common.sh`
-- Why fragile: All scripts source this file. Any syntax error breaks everything.
-- Safe modification: Test common.sh independently; use shellcheck to validate.
-- Test coverage: No unit tests for individual functions.
+**Netcat variant detection:**
+- Files: `scripts/lib/nc_detect.sh`, `scripts/netcat/setup-listener.sh`, `scripts/netcat/transfer-files.sh`, `scripts/netcat/scan-ports.sh`
+- Why fragile: Detection relies on parsing help text from `nc -h` which varies across 4+ implementations (ncat, GNU nc, traditional nc, OpenBSD nc)
+- Safe modification: Add new variants to `detect_nc_variant()` first, then update scripts. Test on ncat (Nmap), GNU netcat, and OpenBSD netcat (macOS default).
+- Test coverage: No unit tests for variant detection (relies on manual testing per platform)
 
-**Wordlist download script:**
-- Files: `wordlists/download.sh`
-- Why fragile: Downloads rockyou.txt from internet (300+ MB). Network failures aren't handled well.
-- Safe modification: Verify download completion with checksums; add resume capability.
-- Test coverage: No tests for successful/failed downloads.
+**ShellCheck disable directives:**
+- Files: `scripts/lib/args.sh:70` (SC2034 for color vars), `scripts/lib/output.sh:31` (SC2034 for PROJECT_ROOT)
+- Why fragile: Disabling checks can mask real issues if code refactored without revisiting suppression
+- Safe modification: Always re-run ShellCheck after library refactors, document WHY each directive is needed (already done in comments)
+- Test coverage: CI runs ShellCheck on every commit (`.github/workflows/shellcheck.yml`)
 
-## Missing Critical Features
+**John the Ripper *2john path setup:**
+- Files: `scripts/lib/validation.sh:36-65`
+- Why fragile: Homebrew, MacPorts, and Linux packages install zip2john/rar2john in different locations. Detection searches 4 possible paths.
+- Safe modification: Test on both Homebrew Intel (`/usr/local/opt/john-jumbo`) and Apple Silicon (`/opt/homebrew/opt/john-jumbo`)
+- Test coverage: Not tested in CI (John not installed in GH Actions), relies on local verification
 
-**No support for authenticated scanning:**
-- Issue: Most tools show examples for unauthenticated access, but real-world targets require credentials.
-- Files: Most tool scripts
-- Impact: Limited practice value on authentication-required targets.
-- Blockers: Web app scanning (nikto, skipfish) have auth examples but NTLM/domain auth not covered.
+## Scaling Limits
 
-**No proxy/proxy chain support:**
-- Issue: Scripts hardcoded for direct connections; no example of using Burp Suite, OWASP ZAP proxies.
-- Files: All network tool scripts
-- Impact: Users can't intercept/modify traffic for deeper learning.
-- Blockers: Adds complexity; would require sophisticated examples.
+**BATS test discovery:**
+- Current capacity: 265 tests across 9 BATS files
+- Limit: As scripts grow beyond 100 files, `find` + `bats_test_function` may slow down test startup
+- Scaling path: Already using efficient pattern (dynamic discovery), no immediate issue. Could parallelize with `bats -j` flag if needed.
 
-**No support for TLS certificate pinning bypass:**
-- Issue: Scripts assume standard TLS; no examples of mitmproxy, sslstrip alternatives.
-- Files: `scripts/tshark/*`, `scripts/nikto/*`
-- Impact: Can't practice against secured targets.
+**Diagnostic script execution time:**
+- Current capacity: 3 diagnostic scripts (connectivity, dns, performance) run in 5-15 seconds each
+- Limit: As checks increase, sequential `run_check()` calls could exceed 1 minute
+- Scaling path: Parallelize independent checks with background jobs, collect results via wait + associative array
 
-## Scaling & Performance Issues
-
-**GPU-intensive tools without resource checks:**
-- Issue: Hashcat and aircrack-ng can consume entire GPU, potentially making system unresponsive.
-- Files: `scripts/hashcat/benchmark-gpu.sh`, `scripts/aircrack-ng/crack-wpa-handshake.sh`
-- Impact: Users may not realize tool is running hot; no throttling/resource limiting.
-- Improvement path: Add warnings about resource usage; provide conservative mode (--workload 1).
-
-**No parallel execution safeguards:**
-- Issue: Makefile targets can't be run in parallel without conflicts (e.g., multiple cracking sessions on same GPU).
-- Files: `Makefile`
-- Impact: User runs `make crack-wpa & make crack-ntlm &` expecting parallel, but GPU cache conflicts occur.
-- Improvement path: Add locking mechanism or warn against parallel runs.
-
-**Database dump sizing:**
-- Issue: `sqlmap/dump-database.sh` example 6 (--dump-all) can extract gigabytes without warning.
-- Files: `scripts/sqlmap/dump-database.sh` (line 74)
-- Impact: Demo fills disk unexpectedly; network connection gets exhausted.
-- Improvement path: Add size estimate before dump; provide --batch-size option.
+**Site build with 17+ tool pages:**
+- Current capacity: Astro builds 17 tool pages + guides in ~10 seconds
+- Limit: Static site generation scales well, but adding 50+ more tool pages could slow dev server HMR
+- Scaling path: Astro is already optimized for hundreds of pages, no action needed
 
 ## Dependencies at Risk
 
-**Metasploit framework aging:**
-- Risk: Metasploit requires Ruby and large number of gem dependencies; maintenance overhead increasing.
-- Impact: If Metasploit team stops supporting older Ruby versions, framework may fail.
-- Migration plan: Consider alternatives (msfvenom can be used independently; consider python-based tools).
+**Aircrack-ng macOS limitations:**
+- Risk: Homebrew `aircrack-ng` package only includes cracking tools, not monitor mode tools
+- Impact: Examples scripts show Linux-only commands that fail on macOS
+- Migration plan: Already handled with `check_cmd airmon-ng` and OS-specific warnings in output. Document limitations in README.md (already present).
 
-**Aircrack-ng limited on macOS:**
-- Risk: Homebrew formula is outdated; source distribution has more features.
-- Impact: Scripts can't use latest aircrack features on macOS.
-- Migration plan: Build from source or use Linux container.
+**Skipfish not in Homebrew:**
+- Risk: Requires MacPorts installation (`sudo port install skipfish`), adds setup friction
+- Impact: Tool not available on default macOS Homebrew setup
+- Migration plan: Add Homebrew tap if skipfish becomes available, or provide Docker-based alternative
+
+**jq required for JSON mode:**
+- Risk: JSON mode (`-j` flag) fails if `jq` not installed
+- Impact: Scripts exit with error before generating any output
+- Migration plan: Already handled with `_json_require_jq()` check in `scripts/lib/json.sh:32-36`. Clear error message provided.
+
+## Missing Critical Features
+
+**No macOS timeout command:**
+- Problem: Diagnostic scripts use POSIX fallback (`sleep` + background kill) instead of GNU timeout
+- Blocks: Reliable process timeouts on macOS without external dependencies
+- Solution: Document GNU coreutils installation (`brew install coreutils`) for `gtimeout`, or accept fallback behavior
+
+**No automated tool installation:**
+- Problem: `make check` detects missing tools but doesn't offer to install them
+- Blocks: One-command setup for new contributors
+- Solution: Add `make install-tools` target with OS detection (Homebrew for macOS, apt/dnf for Linux)
+
+## Test Coverage Gaps
+
+**Netcat variant detection:**
+- What's not tested: `detect_nc_variant()` function behavior across 4 netcat implementations
+- Files: `scripts/lib/nc_detect.sh`
+- Risk: Variant detection could break on new netcat versions without CI catching it
+- Priority: Medium (manual testing currently covers this, but fragile)
+
+**Platform-specific code paths:**
+- What's not tested: macOS vs Linux branching in diagnostic scripts
+- Files: `scripts/diagnostics/connectivity.sh:60-68`, `scripts/diagnostics/performance.sh`, `scripts/diagnostics/dns.sh`
+- Risk: macOS-specific code could break on Linux CI (which only tests Linux paths)
+- Priority: Medium (covered by manual testing, but no automated cross-platform verification)
+
+**setup_john_path() function:**
+- What's not tested: John the Ripper *2john utility path setup
+- Files: `scripts/lib/validation.sh:36-65`
+- Risk: Path detection could fail on new package manager versions
+- Priority: Low (stable across Homebrew/MacPorts/Linux packages for years)
+
+**EXIT trap cleanup under SIGKILL:**
+- What's not tested: Temp file cleanup when scripts are killed with SIGKILL
+- Files: `scripts/lib/cleanup.sh:21-38`
+- Risk: SIGKILL cannot be trapped, orphaned temp files in `/tmp/ntool-session.*`
+- Priority: Low (EXIT trap handles SIGTERM/SIGINT correctly, SIGKILL is rare)
+
+**JSON mode fd3 edge cases:**
+- What's not tested: Behavior when fd3 cannot be opened (e.g., all file descriptors exhausted)
+- Files: `scripts/lib/json.sh:142-146`
+- Risk: JSON output goes to stdout instead of fd3, mixing with stderr redirects
+- Priority: Low (fd3 redirect failure is extremely rare, fallback to stdout is documented)
 
 ---
 
-*Concerns audit: 2026-02-10*
+*Concerns audit: 2026-02-17*

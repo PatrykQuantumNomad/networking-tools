@@ -1,206 +1,198 @@
 # Architecture
 
-**Analysis Date:** 2026-02-10
+**Analysis Date:** 2026-02-17
 
 ## Pattern Overview
 
-**Overall:** Modular educational CLI tool orchestration framework with shared utility layer
+**Overall:** Educational Script Collection with Shared Library Architecture
 
 **Key Characteristics:**
-- Tool-agnostic command-line interface paired with educational scripts
-- Layered architecture: shared utilities → individual tool scripts → interactive demos
-- Heavy reliance on bash sourcing for code reuse across 11 different security tools
-- Comprehensive safety checks and legal guardrails baked into every execution path
-- Docker-based vulnerable lab targets for safe, isolated practice
+- Bash-based tool demonstration framework with modular shared libraries
+- Each security tool has isolated directory with examples.sh + specialized use-case scripts
+- Common functionality extracted into `scripts/lib/` modules sourced via `scripts/common.sh`
+- Two distinct script patterns: interactive demos (Pattern A) and diagnostic auto-reports (Pattern B)
+- Makefile provides unified CLI interface across all tools
 
 ## Layers
 
-**Shared Utilities Layer:**
-- Purpose: Provide common functions for prerequisites, logging, safety checks, and project paths
+**Tool Scripts (Presentation Layer):**
+- Purpose: Demonstrate pentesting tools through educational examples and use cases
+- Location: `scripts/<tool-name>/*.sh`
+- Contains: Tool-specific example runners and specialized scenario scripts
+- Depends on: Shared libraries via `scripts/common.sh`, external pentesting tools (nmap, tshark, etc.)
+- Used by: End users via Makefile targets or direct invocation
+
+**Shared Library (Core Utilities):**
+- Purpose: Provide reusable validation, formatting, logging, and execution control
+- Location: `scripts/lib/`
+- Contains: Modular bash functions for common operations
+- Depends on: Bash 4.0+ features (associative arrays, mapfile)
+- Used by: All tool scripts via `source "$(dirname "$0")/../common.sh"`
+
+**Common Entry Point:**
+- Purpose: Orchestrate library module loading in dependency order
 - Location: `scripts/common.sh`
-- Contains: Color definitions, privilege checks (require_root), command verification (check_cmd, require_cmd), target validation (require_target), safety banners, logging functions (info, success, warn, error), interactive terminal detection
-- Depends on: None (foundational)
-- Used by: Every tool script in the framework
+- Contains: Source guard, Bash version check, ordered module imports
+- Depends on: All `scripts/lib/*.sh` modules
+- Used by: Every tool script as first sourced dependency
 
-**Tool Scripts Layer:**
-- Purpose: Provide generic tool demonstrations with 10 numbered examples plus optional interactive demo
-- Location: `scripts/<tool>/examples.sh` (11 tools: nmap, tshark, metasploit, aircrack-ng, hashcat, skipfish, sqlmap, hping3, john, nikto, foremost)
-- Contains: help functions, tool validation, target validation, safety banners, 10 numbered example commands with explanations, interactive demo prompts
-- Depends on: Shared utilities layer
-- Used by: Makefile targets, direct bash invocations, user learning workflow
-
-**Use-Case Scripts Layer:**
-- Purpose: Implement specific task-focused workflows combining multiple commands for real security operations
-- Location: `scripts/<tool>/<use-case>.sh` (28 total across tools)
-- Contains: Task-specific help, prerequisite validation, educational context (WHY), numbered command examples, interactive execution demos
-- Depends on: Shared utilities layer, tool installation
-- Used by: Makefile convenience targets, advanced workflow execution
-
-**Orchestration Layer:**
-- Purpose: Provide convenient entry points and make targets for all tool operations
+**Task Orchestration (Makefile):**
+- Purpose: Provide user-friendly interface with tab completion and help
 - Location: `Makefile`
-- Contains: Help system, tool runners, use-case invokers, lab environment controls
-- Depends on: Tool scripts
-- Used by: End users, educational workflows
+- Contains: Targets for each tool + use case with TARGET parameter support
+- Depends on: Underlying bash scripts
+- Used by: End users via `make <target>`
 
-**Lab Environment Layer:**
-- Purpose: Provide intentionally vulnerable targets for safe isolated practice
+**Lab Environment:**
+- Purpose: Provide safe, isolated vulnerable targets for practice
 - Location: `labs/docker-compose.yml`
-- Contains: Docker services (DVWA, Juice Shop, WebGoat, VulnerableApp), port bindings, credentials, vulnerability scope documentation
-- Depends on: Docker, Docker Compose
-- Used by: All web-focused and application security testing scripts
+- Contains: Four Docker services (DVWA, Juice Shop, WebGoat, VulnerableApp)
+- Depends on: Docker/Docker Compose
+- Used by: Tool scripts when targeting localhost practice environments
 
-**Documentation Layer:**
-- Purpose: Provide context, learning paths, quick reference, and detailed tool guidance
-- Location: `README.md`, `CLAUDE.md`, `USECASES.md`, `notes/<tool>.md`
-- Contains: Quick start guides, tool purposes, legal disclaimers, use-case mappings, detailed command progressions
-- Depends on: None
-- Used by: New users, educators, script developers
+**Documentation Site:**
+- Purpose: Host interactive documentation and guides
+- Location: `site/` (Astro-based static site)
+- Contains: Component-based documentation build
+- Depends on: Node.js, Astro framework
+- Used by: End users accessing web documentation
+
+**Testing Framework:**
+- Purpose: Validate script contracts, library functions, and integration behavior
+- Location: `tests/*.bats`
+- Contains: BATS test suites for CLI contracts, JSON output, lib modules
+- Depends on: BATS (tests/bats/), bats-support, bats-assert, bats-file
+- Used by: CI/CD via `make test`
 
 ## Data Flow
 
-**Tool Discovery Flow:**
+**Tool Demonstration Flow:**
 
-1. User runs `make check`
-2. Makefile invokes `scripts/check-tools.sh`
-3. check-tools.sh sources `common.sh` (loads utilities and PATH augmentation)
-4. check-tools.sh iterates through TOOL_ORDER array with TOOLS mapping
-5. Uses `check_cmd` utility to verify each tool exists in PATH (including custom paths like `/opt/metasploit-framework/bin`)
-6. Calls `get_version` helper (tool-specific version extraction)
-7. Uses logging functions (success/warn) to report installed/missing status
-8. Outputs installation hints for missing tools
+1. User runs `make <target> TARGET=<value>` or `bash scripts/<tool>/examples.sh <target>`
+2. Script sources `common.sh`, which loads all lib modules in order
+3. `parse_common_args "$@"` extracts flags (-h, -x, -j, -v) into globals (EXECUTE_MODE, JSON_MODE)
+4. `require_cmd <tool>` validates external tool exists, exits with install hint if missing
+5. `require_target` validates target argument if needed
+6. `safety_banner` displays legal warning (unless JSON_MODE active)
+7. Script calls `run_or_show "Description" command args...` for each example
+8. `run_or_show` either prints command (show mode) or executes it (execute mode with -x)
+9. JSON mode captures outputs via file descriptors, formats as structured JSON at end
+10. Interactive prompt offers to run demo command if stdin is terminal
 
-**Typical Learning/Execution Flow:**
+**Library Module Loading:**
 
-1. User runs `make discover-hosts TARGET=192.168.1.0/24`
-2. Makefile maps to `scripts/nmap/discover-live-hosts.sh`
-3. Script sources `common.sh` (utilities, color setup, PROJECT_ROOT resolution)
-4. Script runs `require_cmd nmap "brew install nmap"` (exits if missing)
-5. Script validates TARGET argument (from parameter or default)
-6. Script displays `safety_banner` (legal authorization warning)
-7. Script prints educational context explaining WHY this matters
-8. Script prints 10 numbered examples with actual commands to run
-9. If interactive, script offers to run a demo command
-10. Script exits (does not execute commands by default - educational only)
-
-**Interactive Execution Flow:**
-
-1. User interactively agrees to run a demo
-2. Script executes actual command(s) via bash/eval
-3. Output returned to user
-4. Script exits
-
-**Lab Environment Setup Flow:**
-
-1. User runs `make lab-up`
-2. Makefile calls `docker compose -f labs/docker-compose.yml up -d`
-3. Docker Compose starts 4 intentionally vulnerable services in background
-4. Each service maps to local port (8080, 3030, 8888, 8180)
-5. Services have restart policy (unless-stopped)
-6. Makefile prints service URLs and credentials to console
-7. Users can now run tool scripts against lab targets
-8. `make lab-down` stops all services
-
-**Use-Case Specific Flow (example: SQLi testing):**
-
-1. User runs `make dump-db TARGET=http://localhost:8180/VulnerableApp`
-2. Makefile invokes `scripts/sqlmap/dump-database.sh`
-3. Script validates sqlmap installed, target provided, gets authorization confirmation
-4. Script displays how SQL injection works and why dumping databases matters
-5. Script prints 10+ specific sqlmap commands for progressively sophisticated database enumeration
-6. Script offers to run safe demo (e.g., basic SQLi detection)
-7. User can follow along with printed commands or let script demo
+1. `common.sh` sets source guard to prevent double-loading
+2. Bash version check ensures 4.0+ (required for associative arrays)
+3. Modules loaded in dependency order:
+   - `strict.sh` → set -euo pipefail
+   - `colors.sh` → terminal color codes
+   - `logging.sh` → info/warn/error/success functions
+   - `validation.sh` → require_cmd, require_target, check_cmd
+   - `cleanup.sh` → trap handlers for temp file cleanup
+   - `json.sh` → JSON mode plumbing
+   - `output.sh` → run_or_show, safety_banner, confirm_execute
+   - `args.sh` → parse_common_args flag parser
+   - `diagnostic.sh` → diagnostic-specific helpers
+   - `nc_detect.sh` → detect netcat variant
 
 **State Management:**
-
-- No persistent state beyond command outputs
-- Each script execution is independent (stateless)
-- Lab environment managed via Docker Compose (persistent containers until `make lab-down`)
-- All tool state managed by the external tools themselves (nmap, sqlmap, etc.)
-- No database or configuration persistence within scripts
+- Execution mode stored in `EXECUTE_MODE` global ("show" or "execute")
+- JSON mode stored in `JSON_MODE` global (0 or 1)
+- Remaining arguments after flag parsing stored in `REMAINING_ARGS` array
+- Each module sets `_MODULE_LOADED=1` guard to prevent re-sourcing
 
 ## Key Abstractions
 
-**Requirement Validation Abstraction:**
-- Purpose: Normalize prerequisites across all 11 tools and ensure safety
-- Examples: `require_root`, `require_cmd`, `require_target`, `check_cmd`
-- Pattern: Functions return exit code 0 (success) or exit script with error message and optional install hint
+**Tool Script Pattern (Pattern A - Interactive Demo):**
+- Purpose: Standardized structure for tool demonstration scripts
+- Examples: `scripts/nmap/examples.sh`, `scripts/sqlmap/examples.sh`, `scripts/tshark/capture-http-credentials.sh`
+- Pattern:
+  1. Shebang + description header
+  2. `source "$(dirname "$0")/../common.sh"`
+  3. `show_help()` function with Usage/Description/Examples
+  4. `parse_common_args "$@"` + reset positional params
+  5. `require_cmd <tool> "<install-hint>"`
+  6. Target extraction with default
+  7. `confirm_execute` + `safety_banner`
+  8. Educational context (WHY section)
+  9. 10 numbered examples via `run_or_show` or `info + echo`
+  10. Interactive demo with `[[ ! -t 0 ]] && exit 0` guard
 
-**Logging Abstraction:**
-- Purpose: Consistent colored output across all scripts and tool output
-- Examples: `info`, `success`, `warn`, `error` functions
-- Pattern: Functions echo with color prefixes to stdout/stderr; ANSI color codes defined once, reused everywhere
+**Diagnostic Script Pattern (Pattern B - Auto-Report):**
+- Purpose: Non-interactive diagnostic reports
+- Examples: `scripts/diagnostics/dns.sh`, `scripts/diagnostics/connectivity.sh`
+- Pattern: Runs diagnostic checks automatically, outputs structured report, no safety banner
 
-**Target Handling Abstraction:**
-- Purpose: Normalize how different tool scripts receive and validate targets
-- Examples: `require_target` validates argument exists; scripts support `--help` flag; defaults where sensible
-- Pattern: Each tool accepts target as `$1` or uses sensible default (localhost); `require_target` exits with usage if missing
+**Modular Library Function:**
+- Purpose: Encapsulated, reusable bash function with documentation
+- Examples: `require_cmd`, `run_or_show`, `json_add_example`
+- Pattern: Function in `scripts/lib/<module>.sh` with header comment, source guard, exported for use by tool scripts
 
-**Tool Invocation Abstraction:**
-- Purpose: Provide consistent interface across vastly different tools (nmap, sqlmap, tshark, hashcat, etc.)
-- Examples: Each tool gets `<tool>/examples.sh`, `<tool>/<use-case>.sh` scripts
-- Pattern: 10 example format, help function, safety checks, same execution flow
-
-**Project Path Abstraction:**
-- Purpose: Allow scripts to resolve repository root from any location
-- Examples: `PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"`
-- Pattern: Defined once in common.sh, used by any script needing project resources
+**Run-or-Show Abstraction:**
+- Purpose: Dual-mode command execution (display vs. execute)
+- Location: `scripts/lib/output.sh` → `run_or_show()`
+- Pattern: Takes description + command, either prints it (show) or executes it (execute), accumulates JSON in JSON mode
+- Used throughout all tool scripts for consistent behavior
 
 ## Entry Points
 
-**Command-Line Entry Point (Makefile):**
+**Makefile:**
 - Location: `Makefile`
-- Triggers: `make <target>`, `make help`, `make check`, `make nmap`, `make lab-up/down`, etc.
-- Responsibilities: Parse user intent, pass arguments to appropriate script, display help, control lab environment
+- Triggers: User invokes `make <target>` with optional TARGET parameter
+- Responsibilities: Maps semantic targets to underlying bash scripts, passes TARGET arg, provides help system
 
-**Tool Examples Entry Point:**
+**Tool Examples Script:**
 - Location: `scripts/<tool>/examples.sh`
-- Triggers: `bash scripts/<tool>/examples.sh <target>`, `make <tool> TARGET=<value>`
-- Responsibilities: Validate tool installed, validate target, display safety warning, print 10 examples, optionally run demo
+- Triggers: Direct invocation or via Makefile
+- Responsibilities: Display 10 generic examples for the tool, optional interactive demo
 
-**Use-Case Entry Points:**
+**Use-Case Scripts:**
 - Location: `scripts/<tool>/<use-case>.sh`
-- Triggers: `bash scripts/<tool>/<use-case>.sh <args>`, `make <make-target> TARGET=<value>`
-- Responsibilities: Task-specific setup, context explanation, progressive examples, interactive demo
+- Triggers: Direct invocation or via Makefile specialized targets
+- Responsibilities: Demonstrate specific pentesting scenario with focused examples
 
-**Lab Environment Entry Point:**
-- Location: `labs/docker-compose.yml`
-- Triggers: `make lab-up`, `make lab-down`, `make lab-status`
-- Responsibilities: Manage Docker services, control intentionally vulnerable targets
+**Diagnostic Scripts:**
+- Location: `scripts/diagnostics/<diagnostic>.sh`
+- Triggers: Direct invocation or via Makefile diagnose-* targets
+- Responsibilities: Run automated diagnostic checks, output structured report
 
-**Tool Discovery Entry Point:**
+**Check Tools:**
 - Location: `scripts/check-tools.sh`
-- Triggers: `make check`, `bash scripts/check-tools.sh`
-- Responsibilities: Detect installed tools, report versions, suggest installations
+- Triggers: `make check`
+- Responsibilities: Enumerate 18 pentesting tools, show installed versions, provide install hints for missing tools
+
+**Lab Management:**
+- Location: Docker Compose commands via Makefile
+- Triggers: `make lab-up`, `make lab-down`, `make lab-status`
+- Responsibilities: Start/stop vulnerable practice containers
 
 ## Error Handling
 
-**Strategy:** Fail early with clear error messages, minimal recovery
+**Strategy:** Fail-fast with informative messages
 
 **Patterns:**
-
-- **Missing Tool:** `require_cmd <tool> "install hint"` exits with colored error message and installation command
-- **Missing Target:** `require_target` exits with usage example and legal warning
-- **Requires Root:** `require_root` checks EUID and exits if not running as root
-- **Invalid Arguments:** Help function called with `--help` or `-h` flag; script sources help and exits cleanly
-- **Interactive vs Non-Interactive:** `[[ ! -t 0 ]] && exit 0` skips interactive demos when piped/cron'd
-
-**Exit Codes:**
-- 0 = success (displayed examples or ran demo without error)
-- 1 = failure (missing tool, missing target, wrong privileges, invalid args)
+- `set -euo pipefail` in `strict.sh` causes immediate exit on command failure, undefined variable, or pipe failure
+- `require_cmd` exits with error message + install hint if tool missing
+- `require_target` exits if mandatory target argument not provided
+- `confirm_execute` refuses to run in execute mode if stdin not a terminal (prevents accidental automation)
+- Library functions validate inputs before proceeding (e.g., `json_require_jq` checks for jq before JSON mode activates)
+- Source guards prevent double-loading of modules
+- Bash version guard in `common.sh` exits on Bash < 4.0 with clear macOS-specific guidance
 
 ## Cross-Cutting Concerns
 
-**Logging:** All scripts use color-coded logging functions (info, success, warn, error) sourced from `scripts/common.sh` to ensure consistent output across tools
+**Logging:** Colored output via `info/warn/error/success` functions in `scripts/lib/logging.sh`, automatically suppressed in JSON mode via NO_COLOR=1
 
-**Validation:** Every script validates prerequisites (tool installed, target provided, root if needed) before displaying examples or executing code
+**Validation:** Centralized in `scripts/lib/validation.sh` via `require_cmd`, `require_target`, `require_root`, `check_cmd`
 
-**Authorization:** Every script displays `safety_banner` (legal warning) before suggesting active scanning/exploitation
+**Authentication:** Lab targets have default credentials (DVWA: admin/password, others require registration), documented in Makefile and README
 
-**Interactivity:** Scripts detect terminal (`is_interactive` function) and skip interactive prompts when piped/cron'd, allowing safe automation
+**Cleanup:** Temp file cleanup via trap handlers in `scripts/lib/cleanup.sh`, registered automatically when sourcing common.sh
 
-**Extensibility:** New tools added by: (1) creating `scripts/<tool>/examples.sh` following pattern, (2) adding to `check-tools.sh` TOOLS array and TOOL_ORDER, (3) optionally adding Makefile target
+**Portability:** Detects macOS vs. Linux differences (e.g., netcat variants, Homebrew paths), provides platform-specific install hints
+
+**Testing:** BATS framework validates CLI contracts (--help exits 0, -x rejects pipes), library functions (args.sh, json.sh, logging.sh), and integration behavior (JSON output structure)
 
 ---
 
-*Architecture analysis: 2026-02-10*
+*Architecture analysis: 2026-02-17*

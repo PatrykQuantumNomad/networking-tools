@@ -1,160 +1,136 @@
 # External Integrations
 
-**Analysis Date:** 2026-02-10
+**Analysis Date:** 2026-02-17
 
 ## APIs & External Services
 
-**Wordlist Downloads:**
-- **GitHub Releases API** - Hosts rockyou.txt password wordlist
-  - URL: `https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt`
-  - Used by: `wordlists/download.sh`
-  - Method: Direct HTTPS download via `curl -L`
-  - Purpose: Obtain 140MB+ password dictionary for hashcat/john cracking practice
+**Documentation:**
+- GitHub Pages - Static site hosting for documentation at `https://networking-tools.patrykgolabek.dev`
+- Schema.org JSON-LD - Structured data for SEO
 
-**Tool Documentation:**
-- **Metasploit nightly installers** - https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html
-  - Referenced in: `scripts/check-tools.sh`, `README.md`
-  - Purpose: Installation instructions for msfconsole
+**No runtime API integrations** - All scripts are local, command-line tools with no external service dependencies.
 
 ## Data Storage
 
 **Databases:**
-- **None** - Project stores no persistent data or uses external databases
-- All tool examples are read-only demonstrations against lab targets
+- None - Scripts operate on local files and network targets only
 
 **File Storage:**
-- **Local filesystem only**
-  - Wordlists: `wordlists/rockyou.txt` (downloaded on-demand)
-  - Sample hashes: `scripts/hashcat/samples/` (created by examples.sh)
-  - Lab configs: `labs/docker-compose.yml`
-  - Notes: `notes/` directory (documentation only)
+- Local filesystem only
+- Wordlists downloaded to `wordlists/` directory
+- Output written to user-specified paths or current directory
 
 **Caching:**
-- **None** - Project does not use caching services
+- None
 
 ## Authentication & Identity
 
 **Auth Provider:**
-- **None** - No external authentication service
-- **Lab target credentials** - Hardcoded for demo purposes only:
-  - DVWA: `admin` / `password`
-  - Juice Shop: User self-registration
-  - WebGoat: User self-registration
-  - VulnerableApp: No authentication required
-  - **These are intentional defaults for learning purposes**
+- None - Scripts run with local user permissions
+
+**Lab Credentials:**
+- DVWA: admin / password (hardcoded in container)
+- Juice Shop: User registration required
+- WebGoat: User registration required
+- VulnerableApp: No authentication
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-- **None** - No error tracking service integrated
+- None - Scripts output to stderr/stdout only
 
 **Logs:**
-- **Console output only** - Bash scripts output directly to stdout/stderr
-- **Color-coded messages** via `scripts/common.sh`:
-  - `info()` - Blue [INFO] messages for educational content
-  - `success()` - Green [OK] messages for successful operations
-  - `warn()` - Yellow [WARN] messages for missing tools/issues
-  - `error()` - Red [ERROR] messages for failures (to stderr)
-- **No persistent logging** - All output is ephemeral
+- Console output with colored logging functions from `scripts/lib/logging.sh`
+- CI/CD logs in GitHub Actions
 
 ## CI/CD & Deployment
 
 **Hosting:**
-- **None** - Project is local learning lab, not deployed
-- All tools run locally on developer machine or Docker containers
+- GitHub Pages (documentation site)
 
 **CI Pipeline:**
-- **None** - No CI/CD pipeline (no automated tests)
+- GitHub Actions
+  - `.github/workflows/tests.yml` - BATS tests on PR/push
+  - `.github/workflows/shellcheck.yml` - Linting
+  - `.github/workflows/deploy-site.yml` - Build and deploy Astro site
 
-**Containers:**
-- **Docker Compose** orchestrates 4 intentionally vulnerable services
-  - Purpose: Safe, isolated practice environment
-  - Must not be exposed to internet
-  - Started via: `make lab-up`
-  - Stopped via: `make lab-down`
+**Build Actions:**
+- `actions/checkout@v5` - Repository checkout
+- `bats-core/bats-action@4.0.0` - BATS test setup
+- `withastro/action@v5` - Astro site build
+- `actions/deploy-pages@v4` - GitHub Pages deployment
+- `mikepenz/action-junit-report@v6` - Test result publishing
 
 ## Environment Configuration
 
 **Required env vars:**
-- **None** - Project requires no environment variables
-- All configuration is via command-line arguments and Makefile targets
+- None for scripts
 
-**Optional customization:**
-- `TARGET` variable in Makefile - Specifies which host/URL to scan
-  - Example: `make nmap TARGET=192.168.1.1`
-  - Defaults are provided where applicable (e.g., `localhost` for lab targets)
+**CI/CD env vars:**
+- `GITHUB_TOKEN` (automatic) - GitHub Actions permissions
+- `TERM=xterm` - Set in test workflow for colored output
 
 **Secrets location:**
-- **Not applicable** - Project stores no secrets
-- Default credentials for lab targets are intentionally exposed for learning
+- None required - All operations are local or against lab targets
 
 ## Webhooks & Callbacks
 
 **Incoming:**
-- **None** - Project does not expose webhooks or HTTP endpoints
+- None
 
 **Outgoing:**
-- **None** - Scripts do not make outgoing webhooks or callbacks
-- Only direct HTTP(S) requests to explicitly specified targets
-- All target scanning is opt-in via command-line arguments
+- None
 
-## Tool Network Behavior
+## Docker Containers (Lab Environment)
 
-**Active Scanning (requires explicit authorization):**
-- **nmap** - Network scanning against specified target
-  - Requires `require_target` parameter in scripts
-  - Safety banner displayed before execution
-- **nikto** - Web server vulnerability scanning
-  - Requires URL argument
-  - Safety banner displayed before execution
-- **sqlmap** - SQL injection testing
-  - Requires URL argument
-  - Safety banner displayed before execution
-- **skipfish** - Web app security scanning
-  - Requires URL argument
-  - Safety banner displayed before execution
-- **tshark** - Packet capture (requires root/network interface access)
-  - Passive listening on network interface
-  - No outbound requests generated
+**Vulnerable Targets:**
+- `vulnerables/web-dvwa` - DVWA on port 8080
+- `bkimminich/juice-shop` - Juice Shop on port 3030
+- `webgoat/webgoat` - WebGoat on ports 8888, 9090
+- `sasanlabs/owasp-vulnerableapp:latest` - VulnerableApp on port 8180
 
-**Passive/Non-intrusive:**
-- **hashcat** - Local password cracking (no network)
-- **john** - Local password cracking (no network)
-- **aircrack-ng** - Local WiFi analysis (no network, macOS has tool limitations)
-- **hping3** - Packet crafting and network analysis
-- **foremost** - File carving from disk images (no network)
-- **metasploit** - Framework for generating payloads and managing listeners
+**Network:**
+- All containers exposed on localhost
+- No external network access configured
+- Intentionally isolated for security
 
-## Lab Targets (Docker)
+## External Tool Dependencies
 
-**DVWA (Damn Vulnerable Web Application):**
-- Image: `vulnerables/web-dvwa`
-- Port: 8080
-- URL: http://localhost:8080
-- Credentials: admin/password
-- Purpose: Practice basic web vulnerabilities
+**Network Scanning:**
+- nmap (installed separately)
 
-**Juice Shop (OWASP modern vulnerable app):**
-- Image: `bkimminich/juice-shop`
-- Port: 3030
-- URL: http://localhost:3030
-- Credentials: Self-register
-- Purpose: Modern OWASP Top 10 vulnerabilities
+**Traffic Analysis:**
+- tshark/Wireshark (installed separately)
 
-**WebGoat (OWASP teaching platform):**
-- Image: `webgoat/webgoat`
-- Ports: 8888 (app), 9090 (secondary)
-- URL: http://localhost:8888/WebGoat
-- Credentials: Self-register
-- Purpose: Structured lessons in web security
+**Exploitation:**
+- Metasploit Framework (installed separately)
 
-**VulnerableApp (OWASP Java vulnerabilities):**
-- Image: `sasanlabs/owasp-vulnerableapp:latest`
-- Port: 8180
-- URL: http://localhost:8180/VulnerableApp
-- Vulnerabilities: Command injection, SQLi, XSS, XXE, SSRF, path traversal, JWT flaws
-- Purpose: Java web app vulnerability practice
+**Password Cracking:**
+- hashcat (installed separately)
+- John the Ripper (installed separately)
+
+**Web Testing:**
+- sqlmap (installed separately)
+- nikto (installed separately)
+- skipfish (installed separately)
+- gobuster (installed separately)
+- ffuf (installed separately)
+
+**Wireless:**
+- aircrack-ng (installed separately)
+
+**Forensics:**
+- foremost (installed separately)
+
+**Network Utilities:**
+- dig (installed separately)
+- curl (installed separately)
+- netcat (installed separately)
+- traceroute (installed separately)
+- mtr (installed separately)
+
+All tools verified via `scripts/check-tools.sh` which checks installation status and suggests installation commands.
 
 ---
 
-*Integration audit: 2026-02-10*
+*Integration audit: 2026-02-17*

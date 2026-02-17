@@ -1,101 +1,76 @@
 # Technology Stack
 
-**Analysis Date:** 2026-02-10
+**Analysis Date:** 2026-02-17
 
 ## Languages
 
 **Primary:**
-- **Bash** - All scripts and tooling. Version: 5.x (macOS default or installed via Homebrew)
-  - Used for all tool examples, use-case demonstrations, and orchestration
-  - Scripts located in `scripts/`, `wordlists/`, and individual tool directories
+- Bash 4.0+ - All educational scripts, automation, and utilities
+- TypeScript/JavaScript - Documentation site only
+
+**Secondary:**
+- Markdown - Documentation content in `site/src/content/docs/`
 
 ## Runtime
 
 **Environment:**
-- **Bash shell** - Minimum bash 4.x for associative arrays and parameter expansion
-- **GNU or BSD utilities** - sort, grep, head, wc, curl (standard on macOS/Linux)
-- **macOS/Linux** - All scripts written for Unix-like systems
+- Bash 4.0+ (macOS ships Bash 3.2, requires `brew install bash`)
+- Node.js (for documentation site build only)
 
 **Package Manager:**
-- **Homebrew** (macOS) - Primary way to install pentesting tools
-- **MacPorts** (macOS) - Required for skipfish installation
-- **Manual installation** - Metasploit Framework requires separate nightly installer
+- npm (for site dependencies only)
+- Lockfile: `site/package-lock.json` present
 
 ## Frameworks
 
-**Build/Orchestration:**
-- **Make** - Used for convenience targets
-  - Config: `Makefile` at project root
-  - Provides targets for: checking tool installations, lab management, running examples
+**Core:**
+- No framework for main project (pure Bash scripts)
+- Astro 5.6.1 - Static site generator for documentation
+- Starlight 0.37.6 - Astro documentation theme
 
-**Containerization:**
-- **Docker Compose** - Runs vulnerable lab targets
-  - Config: `labs/docker-compose.yml`
-  - Manages 4 intentionally vulnerable services for safe practice
+**Testing:**
+- BATS 1.13.0 - Bash Automated Testing System
+- BATS extensions: bats-support, bats-assert, bats-file
+
+**Build/Dev:**
+- Make - Task runner via `Makefile`
+- Docker Compose - Lab environment orchestration
+- ShellCheck - Static analysis for Bash scripts (CI/CD)
 
 ## Key Dependencies
 
-**Pentesting Tools (11 total):**
-- **nmap** - Network mapping and host discovery
-- **tshark** - Packet capture and analysis (CLI for Wireshark)
-- **msfconsole** - Metasploit Framework exploitation and payloads
-- **aircrack-ng** - WiFi security testing (macOS has limitations — see README)
-- **hashcat** - GPU-accelerated password cracking
-- **skipfish** - Web application security scanner
-- **sqlmap** - Automated SQL injection detection and exploitation
-- **hping3** - Packet crafting and network probing
-- **john** - Password cracking (The Ripper)
-- **nikto** - Web server vulnerability scanner
-- **foremost** - File carving and forensic recovery
+**Critical:**
+- Docker Compose - Orchestrates vulnerable lab targets (`labs/docker-compose.yml`)
+- External pentesting tools: nmap, tshark, metasploit, hashcat, john, sqlmap, nikto, skipfish, hping3, aircrack-ng, foremost, gobuster, ffuf, dig, curl, netcat, traceroute, mtr
 
-**Installation methods vary by tool:**
-- Most available via Homebrew: `brew install nmap wireshark aircrack-ng hashcat sqlmap hping nikto john foremost`
-- **skipfish**: `sudo port install skipfish` (MacPorts only)
-- **Metasploit**: Separate nightly installer from https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html
-
-**Data Files:**
-- **rockyou.txt** - 140MB+ password wordlist with ~14 million real-world passwords
-  - Stored in `wordlists/rockyou.txt`
-  - Downloaded on-demand by `wordlists/download.sh` from GitHub release
-  - Used by hashcat and john for dictionary attacks
+**Infrastructure:**
+- sharp 0.34.2 - Image processing for Astro site
 
 ## Configuration
 
 **Environment:**
-- **No .env files** - Project is environment-agnostic and does not use environment variables
-- **No credentials stored** - All example/demo scripts use default lab targets (localhost, 127.0.0.1)
-- **PATH expansion** - `scripts/check-tools.sh` adds additional paths for metasploit: `/opt/metasploit-framework/bin`, `/usr/local/bin`, `/opt/homebrew/bin`
+- No environment variables required for core scripts
+- All configuration via command-line arguments
+- Docker Compose defaults in `labs/docker-compose.yml`
 
 **Build:**
-- **Makefile targets** - Define convenience shortcuts for common operations
-- **Shared utilities** - `scripts/common.sh` provides reusable functions sourced by all tool scripts:
-  - Color output functions: `info()`, `success()`, `warn()`, `error()`
-  - Command verification: `require_cmd()`, `check_cmd()`
-  - Target validation: `require_target()`
-  - Safety banner: `safety_banner()` for authorization warnings
+- `Makefile` - Main task definitions for tools, lab, testing
+- `site/astro.config.mjs` - Astro site configuration
+- `site/tsconfig.json` - TypeScript config (extends astro/tsconfigs/strict)
+- `.github/workflows/*.yml` - CI/CD workflows
 
 ## Platform Requirements
 
 **Development:**
-- **macOS 10.x or later** - Recommended development target
-- **Linux** - Full support with all tools available
-- **Minimum bash 4.x** - For associative arrays in `check-tools.sh`
-- **Docker** - Required to run `make lab-up` / `make lab-down`
-- **Git** - For repository access
+- Bash 4.0+ (Linux/macOS)
+- Docker (for lab targets)
+- npm (for documentation site)
+- ShellCheck (for linting)
 
-**Production/Lab:**
-- **Docker** - Runs vulnerable lab targets
-- **Docker images used:**
-  - `vulnerables/web-dvwa` - Damn Vulnerable Web Application
-  - `bkimminich/juice-shop` - OWASP Juice Shop
-  - `webgoat/webgoat` - OWASP WebGoat
-  - `sasanlabs/owasp-vulnerableapp:latest` - OWASP VulnerableApp
-
-**Network Requirements:**
-- **Isolated network** - Lab targets should only run on isolated networks (never exposed to internet)
-- **Port access** - Lab binds to localhost ports 8080, 3030, 8888, 8180, 9090
-- **Internet connectivity** - Required for downloading rockyou.txt wordlist
+**Production:**
+- GitHub Pages (for documentation site)
+- Scripts can run on any Unix-like system with Bash 4.0+ and required pentesting tools installed
 
 ---
 
-*Stack analysis: 2026-02-10*
+*Stack analysis: 2026-02-17*
