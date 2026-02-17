@@ -66,7 +66,7 @@ Archived to `.planning/milestones/v1.4-ROADMAP.md`
 
 **Milestone Goal:** Package the 17-tool, 81-script pentesting toolkit as a self-contained Claude Code skill pack with task-level and tool-level slash commands, safety/feedback hooks, and audit logging.
 
-- [ ] **Phase 28: Safety Architecture** - PreToolUse/PostToolUse hooks, audit logging, and health check
+- [x] **Phase 28: Safety Architecture** - PreToolUse/PostToolUse hooks, audit logging, and health check — completed 2026-02-17
 - [ ] **Phase 29: Core Tool Skills** - First 5 tool skills (nmap, tshark, metasploit, sqlmap, nikto) to validate the pattern
 - [ ] **Phase 30: Utility Skills & Lab Integration** - Check-tools, lab management, and conventions background skill
 - [ ] **Phase 31: Remaining Tool Skills** - Scale validated pattern to all 17 tools (12 remaining)
@@ -89,7 +89,7 @@ Archived to `.planning/milestones/v1.4-ROADMAP.md`
 
 Plans:
 - [x] 28-01-PLAN.md — PreToolUse/PostToolUse hooks with target validation, raw tool interception, JSON bridge, and audit logging
-- [ ] 28-02-PLAN.md — Health-check bash script, Claude Code skill, and live verification
+- [x] 28-02-PLAN.md — Health-check bash script, Claude Code skill, and live verification
 
 ### Phase 29: Core Tool Skills
 **Goal**: Users can invoke the 5 most-used pentesting tools via Claude Code slash commands with zero-context-overhead skill files
@@ -174,7 +174,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 12-17 | v1.2 | 18/18 | Complete | 2026-02-11 |
 | 18-22 | v1.3 | 9/9 | Complete | 2026-02-12 |
 | 23-27 | v1.4 | 10/10 | Complete | 2026-02-14 |
-| 28. Safety Architecture | v1.5 | 0/2 | Not started | - |
+| 28. Safety Architecture | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 29. Core Tool Skills | v1.5 | 0/TBD | Not started | - |
 | 30. Utility Skills & Lab | v1.5 | 0/TBD | Not started | - |
 | 31. Remaining Tool Skills | v1.5 | 0/TBD | Not started | - |
