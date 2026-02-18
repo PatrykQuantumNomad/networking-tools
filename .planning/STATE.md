@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 32 - Workflow Skills (v1.5 Claude Skill Pack)
+**Current focus:** Phase 33 - Subagent Personas (v1.5 Claude Skill Pack)
 
 ## Current Position
 
@@ -14,7 +14,7 @@ Plan: 3 of 3 in current phase
 Status: Phase complete, ready for Phase 33
 Last activity: 2026-02-18 — Completed 32-03 Management Workflow Skills (/report, /scope)
 
-Progress: [████████░░] 73% (v1.5)
+Progress: [████████░░] 83% (v1.5)
 
 ## Performance Metrics
 
