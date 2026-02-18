@@ -124,7 +124,7 @@ None.
 
 - ~~PostToolUse hook access to `tool_response.stdout` needs validation during Phase 28~~ RESOLVED: field accessible as `.tool_response.stdout`
 - ~~Skill description budget (2% context window, ~16KB) -- monitor during Phase 31~~ RESOLVED: 17 tool skills with disable-model-invocation add 0 bytes to context. 4 utility skills use ~8KB (50% of budget)
-- Agent `memory: project` feature needs practical testing during Phase 33
+- ~~Agent `memory: project` feature needs practical testing during Phase 33~~ RESOLVED: Agent files created with `memory: project`; `.claude/agent-memory/` gitignored for sensitive engagement data
 
 ### Quick Tasks Completed
 

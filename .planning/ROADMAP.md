@@ -163,8 +163,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 33-01-PLAN.md — Pentester agent + /pentester skill shim + gitignore for agent-memory
-- [ ] 33-02-PLAN.md — Defender + analyst agents with /defender and /analyst skill shims
+- [x] 33-01-PLAN.md — Pentester agent + /pentester skill shim + gitignore for agent-memory
+- [x] 33-02-PLAN.md — Defender + analyst agents with /defender and /analyst skill shims
 
 ## Progress
 
@@ -183,6 +183,6 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 30. Utility Skills & Lab | v1.5 | 1/1 | Complete | 2026-02-18 |
 | 31. Remaining Tool Skills | v1.5 | 3/3 | Complete | 2026-02-18 |
 | 32. Workflow Skills | v1.5 | 3/3 | Complete | 2026-02-18 |
-| 33. Subagent Personas | 2/2 | Complete   | 2026-02-18 | - |
+| 33. Subagent Personas | v1.5 | 2/2 | Complete | 2026-02-18 |
 
-**Total: 5 milestones shipped (27 phases, 60 plans) + v1.5 in progress (6 phases)**
+**Total: 5 milestones shipped (27 phases, 60 plans) + v1.5 complete (6 phases, 13 plans)**
