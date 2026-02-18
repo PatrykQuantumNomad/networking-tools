@@ -17,9 +17,9 @@ Requirements for Claude Code skill pack. Each maps to roadmap phases.
 
 ### Workflow Skills
 
-- [ ] **WKFL-01**: User can invoke `/recon` to run reconnaissance workflows (host discovery, DNS, OSINT)
-- [ ] **WKFL-02**: User can invoke `/scan` to run vulnerability scanning workflows (port scans, web scans)
-- [ ] **WKFL-03**: User can invoke `/diagnose` to run network diagnostic workflows (DNS, connectivity, latency)
+- [x] **WKFL-01**: User can invoke `/recon` to run reconnaissance workflows (host discovery, DNS, OSINT)
+- [x] **WKFL-02**: User can invoke `/scan` to run vulnerability scanning workflows (port scans, web scans)
+- [x] **WKFL-03**: User can invoke `/diagnose` to run network diagnostic workflows (DNS, connectivity, latency)
 - [ ] **WKFL-04**: User can invoke `/fuzz` to run fuzzing workflows (directory brute-force, parameter fuzzing)
 - [ ] **WKFL-05**: User can invoke `/crack` to run password cracking workflows (hashes, archives, web)
 - [ ] **WKFL-06**: User can invoke `/sniff` to run traffic capture and analysis workflows
@@ -96,9 +96,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-03 | Phase 28 | Pending |
 | SAFE-04 | Phase 28 | Pending |
 | SAFE-05 | Phase 28 | Pending |
-| WKFL-01 | Phase 32 | Pending |
-| WKFL-02 | Phase 32 | Pending |
-| WKFL-03 | Phase 32 | Pending |
+| WKFL-01 | Phase 32 | Complete (32-01) |
+| WKFL-02 | Phase 32 | Complete (32-01) |
+| WKFL-03 | Phase 32 | Complete (32-01) |
 | WKFL-04 | Phase 32 | Pending |
 | WKFL-05 | Phase 32 | Pending |
 | WKFL-06 | Phase 32 | Pending |

@@ -148,7 +148,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 32-01-PLAN.md — Network workflow skills (/recon, /scan, /diagnose)
+- [x] 32-01-PLAN.md — Network workflow skills (/recon, /scan, /diagnose)
 - [ ] 32-02-PLAN.md — Offensive workflow skills (/fuzz, /crack, /sniff)
 - [ ] 32-03-PLAN.md — Management workflow skills (/report, /scope)
 
@@ -181,7 +181,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 29. Core Tool Skills | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 30. Utility Skills & Lab | v1.5 | 1/1 | Complete | 2026-02-18 |
 | 31. Remaining Tool Skills | v1.5 | 3/3 | Complete | 2026-02-18 |
-| 32. Workflow Skills | v1.5 | 0/3 | Not started | - |
+| 32. Workflow Skills | v1.5 | 1/3 | In progress | - |
 | 33. Subagent Personas | v1.5 | 0/TBD | Not started | - |
 
 **Total: 5 milestones shipped (27 phases, 60 plans) + v1.5 in progress (6 phases)**

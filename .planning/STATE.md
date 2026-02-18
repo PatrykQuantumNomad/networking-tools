@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 
 ## Current Position
 
-Phase: 31 of 33 (Remaining Tool Skills) — COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase complete, ready for Phase 32
-Last activity: 2026-02-18 — Completed 31-03 Web/DNS Recon Tool Skills (dig, curl, gobuster, ffuf)
+Phase: 32 of 33 (Workflow Skills) — In Progress
+Plan: 1 of 3 in current phase
+Status: Executing Phase 32
+Last activity: 2026-02-18 — Completed 32-01 Network Workflow Skills (/recon, /scan, /diagnose)
 
-Progress: [██████░░░░] 67% (v1.5)
+Progress: [███████░░░] 70% (v1.5)
 
 ## Performance Metrics
 
@@ -85,6 +85,11 @@ Phase 31-03 execution decisions:
 - Gobuster and ffuf skills document optional second wordlist argument for custom wordlists
 - Ffuf skill intentionally smallest (1 use-case + examples) -- no padding added
 
+Phase 32-01 execution decisions:
+- Used disable-model-invocation: true on all 3 workflow skills -- user must invoke explicitly, prevents auto-triggering
+- /diagnose Pattern B: diagnostics/ scripts invoked without -j -x, tool wrappers with -j -x; documented clearly inline
+- Scope validation pattern identical across all 3 skills (check scope.json, ask user to /scope add if missing)
+
 ### Pending Todos
 
 None.
@@ -105,5 +110,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 31-03-PLAN.md (Web/DNS Recon Tool Skills). Phase 31 complete (3/3 plans).
+Stopped at: Completed 32-01-PLAN.md (Network Workflow Skills). Phase 32 at 1/3 plans.
 Resume file: None
