@@ -69,7 +69,7 @@ Archived to `.planning/milestones/v1.4-ROADMAP.md`
 - [x] **Phase 28: Safety Architecture** - PreToolUse/PostToolUse hooks, audit logging, and health check — completed 2026-02-17
 - [x] **Phase 29: Core Tool Skills** - First 5 tool skills (nmap, tshark, metasploit, sqlmap, nikto) to validate the pattern — completed 2026-02-17
 - [x] **Phase 30: Utility Skills & Lab Integration** - Check-tools, lab management, and conventions background skill (completed 2026-02-18)
-- [ ] **Phase 31: Remaining Tool Skills** - Scale validated pattern to all 17 tools (12 remaining)
+- [x] **Phase 31: Remaining Tool Skills** - Scale validated pattern to all 17 tools (12 remaining) (completed 2026-02-18)
 - [ ] **Phase 32: Workflow Skills** - Task-oriented slash commands that orchestrate tool skills
 - [ ] **Phase 33: Subagent Personas** - Pentester, defender, and analyst subagents for multi-tool orchestration
 
@@ -179,7 +179,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 28. Safety Architecture | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 29. Core Tool Skills | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 30. Utility Skills & Lab | v1.5 | 1/1 | Complete | 2026-02-18 |
-| 31. Remaining Tool Skills | v1.5 | 0/3 | Not started | - |
+| 31. Remaining Tool Skills | 3/3 | Complete   | 2026-02-18 | - |
 | 32. Workflow Skills | v1.5 | 0/TBD | Not started | - |
 | 33. Subagent Personas | v1.5 | 0/TBD | Not started | - |
 

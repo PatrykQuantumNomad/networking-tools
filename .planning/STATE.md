@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 30 - Utility Skills & Lab Integration (v1.5 Claude Skill Pack)
+**Current focus:** Phase 31 - Remaining Tool Skills (v1.5 Claude Skill Pack)
 
 ## Current Position
 
-Phase: 30 of 33 (Utility Skills & Lab Integration) — COMPLETE
-Plan: 1 of 1 in current phase
-Status: Phase complete, ready for verification
-Last activity: 2026-02-18 — Completed 30-01 Utility Skills (check-tools, lab, pentest-conventions)
+Phase: 31 of 33 (Remaining Tool Skills) — COMPLETE
+Plan: 3 of 3 in current phase
+Status: Phase complete, ready for Phase 32
+Last activity: 2026-02-18 — Completed 31-03 Web/DNS Recon Tool Skills (dig, curl, gobuster, ffuf)
 
 Progress: [████░░░░░░] 50% (v1.5)
 
@@ -33,6 +33,7 @@ Progress: [████░░░░░░] 50% (v1.5)
 | v1.3 | 5 | 9 | ~42min |
 | v1.4 | 5 | 10 | ~78min |
 | v1.5 | 6 | TBD | — |
+| Phase 31 P01 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,21 @@ Phase 30-01 execution decisions:
 - pentest-conventions uses user-invocable: false to stay out of / menu but load into Claude context
 - Kept pentest-conventions under 80 lines for context budget (well under 200 line limit)
 
+Phase 31-01 execution decisions:
+- Used offline-tool Target Validation variant for hashcat, john, foremost (no network scope needed)
+- Aircrack-ng gets unique wireless Target Validation (BSSID scope applies to wireless interfaces)
+- Followed per-script accurate argument documentation pattern from Phase 29
+
+Phase 31-02 execution decisions:
+- Documented per-script default targets for skipfish (Juice Shop 3030, DVWA 8080) rather than a single tool default
+- Documented netcat variant detection as a Defaults bullet rather than a separate section
+- Used [port] argument notation for setup-listener to distinguish from [target] used by other netcat scripts
+
+Phase 31-03 execution decisions:
+- Dig skill documents domain argument (not IP/URL) matching dig's actual interface
+- Gobuster and ffuf skills document optional second wordlist argument for custom wordlists
+- Ffuf skill intentionally smallest (1 use-case + examples) -- no padding added
+
 ### Pending Todos
 
 None.
@@ -90,5 +106,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 30-01-PLAN.md (Utility Skills & Lab Integration). Phase 30 has 1 plan, now complete.
+Stopped at: Completed 31-02-PLAN.md (Network Tools Skills). Phase 31 has 3 plans, 2 complete.
 Resume file: None

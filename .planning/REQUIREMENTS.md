@@ -33,18 +33,18 @@ Requirements for Claude Code skill pack. Each maps to roadmap phases.
 - [ ] **TOOL-03**: Skill for metasploit with `disable-model-invocation: true`
 - [ ] **TOOL-04**: Skill for sqlmap with `disable-model-invocation: true`
 - [ ] **TOOL-05**: Skill for nikto with `disable-model-invocation: true`
-- [ ] **TOOL-06**: Skill for hashcat with `disable-model-invocation: true`
-- [ ] **TOOL-07**: Skill for john with `disable-model-invocation: true`
-- [ ] **TOOL-08**: Skill for hping3 with `disable-model-invocation: true`
-- [ ] **TOOL-09**: Skill for skipfish with `disable-model-invocation: true`
-- [ ] **TOOL-10**: Skill for aircrack-ng with `disable-model-invocation: true`
+- [x] **TOOL-06**: Skill for hashcat with `disable-model-invocation: true`
+- [x] **TOOL-07**: Skill for john with `disable-model-invocation: true`
+- [x] **TOOL-08**: Skill for hping3 with `disable-model-invocation: true`
+- [x] **TOOL-09**: Skill for skipfish with `disable-model-invocation: true`
+- [x] **TOOL-10**: Skill for aircrack-ng with `disable-model-invocation: true`
 - [ ] **TOOL-11**: Skill for dig with `disable-model-invocation: true`
 - [ ] **TOOL-12**: Skill for curl with `disable-model-invocation: true`
-- [ ] **TOOL-13**: Skill for netcat with `disable-model-invocation: true`
-- [ ] **TOOL-14**: Skill for traceroute/mtr with `disable-model-invocation: true`
+- [x] **TOOL-13**: Skill for netcat with `disable-model-invocation: true`
+- [x] **TOOL-14**: Skill for traceroute/mtr with `disable-model-invocation: true`
 - [ ] **TOOL-15**: Skill for gobuster with `disable-model-invocation: true`
 - [ ] **TOOL-16**: Skill for ffuf with `disable-model-invocation: true`
-- [ ] **TOOL-17**: Skill for foremost with `disable-model-invocation: true`
+- [x] **TOOL-17**: Skill for foremost with `disable-model-invocation: true`
 
 ### Utility Skills
 
@@ -109,18 +109,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TOOL-03 | Phase 29 | Pending |
 | TOOL-04 | Phase 29 | Pending |
 | TOOL-05 | Phase 29 | Pending |
-| TOOL-06 | Phase 31 | Pending |
-| TOOL-07 | Phase 31 | Pending |
-| TOOL-08 | Phase 31 | Pending |
-| TOOL-09 | Phase 31 | Pending |
-| TOOL-10 | Phase 31 | Pending |
+| TOOL-06 | Phase 31 | Complete |
+| TOOL-07 | Phase 31 | Complete |
+| TOOL-08 | Phase 31 | Complete |
+| TOOL-09 | Phase 31 | Complete |
+| TOOL-10 | Phase 31 | Complete |
 | TOOL-11 | Phase 31 | Pending |
 | TOOL-12 | Phase 31 | Pending |
-| TOOL-13 | Phase 31 | Pending |
-| TOOL-14 | Phase 31 | Pending |
+| TOOL-13 | Phase 31 | Complete |
+| TOOL-14 | Phase 31 | Complete |
 | TOOL-15 | Phase 31 | Pending |
 | TOOL-16 | Phase 31 | Pending |
-| TOOL-17 | Phase 31 | Pending |
+| TOOL-17 | Phase 31 | Complete |
 | UTIL-01 | Phase 30 | Complete |
 | UTIL-02 | Phase 30 | Complete |
 | UTIL-03 | Phase 30 | Complete |
