@@ -40,3 +40,6 @@ site/.astro/
 
 # Pentest scope and audit data
 .pentest/
+
+# Claude agent memory (may contain sensitive engagement data)
+.claude/agent-memory/
