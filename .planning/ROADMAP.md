@@ -117,7 +117,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 30-01-PLAN.md — Create check-tools, lab, and pentest-conventions skills
+- [x] 30-01-PLAN.md — Create check-tools, lab, and pentest-conventions skills
 
 ### Phase 31: Remaining Tool Skills
 **Goal**: All 17 tools have Claude Code skill files, completing full tool coverage
@@ -177,7 +177,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 23-27 | v1.4 | 10/10 | Complete | 2026-02-14 |
 | 28. Safety Architecture | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 29. Core Tool Skills | v1.5 | 2/2 | Complete | 2026-02-17 |
-| 30. Utility Skills & Lab | 1/1 | Complete   | 2026-02-18 | - |
+| 30. Utility Skills & Lab | v1.5 | 1/1 | Complete | 2026-02-18 |
 | 31. Remaining Tool Skills | v1.5 | 0/TBD | Not started | - |
 | 32. Workflow Skills | v1.5 | 0/TBD | Not started | - |
 | 33. Subagent Personas | v1.5 | 0/TBD | Not started | - |
