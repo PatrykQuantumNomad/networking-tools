@@ -71,7 +71,7 @@ Archived to `.planning/milestones/v1.4-ROADMAP.md`
 - [x] **Phase 30: Utility Skills & Lab Integration** - Check-tools, lab management, and conventions background skill (completed 2026-02-18)
 - [x] **Phase 31: Remaining Tool Skills** - Scale validated pattern to all 17 tools (12 remaining) (completed 2026-02-18)
 - [x] **Phase 32: Workflow Skills** - Task-oriented slash commands that orchestrate tool skills (completed 2026-02-18)
-- [ ] **Phase 33: Subagent Personas** - Pentester, defender, and analyst subagents for multi-tool orchestration
+- [x] **Phase 33: Subagent Personas** - Pentester, defender, and analyst subagents for multi-tool orchestration (completed 2026-02-18)
 
 ## Phase Details
 
@@ -183,6 +183,6 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 30. Utility Skills & Lab | v1.5 | 1/1 | Complete | 2026-02-18 |
 | 31. Remaining Tool Skills | v1.5 | 3/3 | Complete | 2026-02-18 |
 | 32. Workflow Skills | v1.5 | 3/3 | Complete | 2026-02-18 |
-| 33. Subagent Personas | 1/2 | In Progress|  | - |
+| 33. Subagent Personas | 2/2 | Complete   | 2026-02-18 | - |
 
 **Total: 5 milestones shipped (27 phases, 60 plans) + v1.5 in progress (6 phases)**

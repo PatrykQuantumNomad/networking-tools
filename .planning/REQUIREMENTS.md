@@ -55,8 +55,8 @@ Requirements for Claude Code skill pack. Each maps to roadmap phases.
 ### Subagent Personas
 
 - [x] **AGNT-01**: Pentester subagent orchestrates multi-tool attack workflows with context isolation
-- [ ] **AGNT-02**: Defender subagent analyzes findings from defensive perspective
-- [ ] **AGNT-03**: Analyst subagent synthesizes results across multiple scans into structured analysis
+- [x] **AGNT-02**: Defender subagent analyzes findings from defensive perspective
+- [x] **AGNT-03**: Analyst subagent synthesizes results across multiple scans into structured analysis
 
 ## Future Requirements
 
@@ -125,8 +125,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UTIL-02 | Phase 30 | Complete |
 | UTIL-03 | Phase 30 | Complete |
 | AGNT-01 | Phase 33 | Complete |
-| AGNT-02 | Phase 33 | Pending |
-| AGNT-03 | Phase 33 | Pending |
+| AGNT-02 | Phase 33 | Complete |
+| AGNT-03 | Phase 33 | Complete |
 
 **Coverage:**
 - v1.5 requirements: 36 total
