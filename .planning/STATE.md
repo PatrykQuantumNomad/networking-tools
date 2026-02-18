@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 32 of 33 (Workflow Skills) — In Progress
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing Phase 32
-Last activity: 2026-02-18 — Completed 32-01 Network Workflow Skills (/recon, /scan, /diagnose)
+Last activity: 2026-02-18 — Completed 32-02 Offensive Workflow Skills (/fuzz, /crack, /sniff)
 
 Progress: [███████░░░] 70% (v1.5)
 
@@ -90,6 +90,13 @@ Phase 32-01 execution decisions:
 - /diagnose Pattern B: diagnostics/ scripts invoked without -j -x, tool wrappers with -j -x; documented clearly inline
 - Scope validation pattern identical across all 3 skills (check scope.json, ask user to /scope add if missing)
 
+Phase 32-02 execution decisions:
+- All 3 offensive workflow skills use disable-model-invocation: true (consistent with Phase 32-01)
+- /crack uses identification-then-attack flow: Step 1 always runs, Steps 2-5 are conditional on hash type
+- crack-linux-passwords.sh takes no positional arg (handles /etc/shadow internally) -- documented in skill
+- /crack offline variant: no network scope validation needed for local hash files and archives
+- /sniff dual-mode: $ARGUMENTS accepts network interface (live) or .pcap file (offline analysis)
+
 ### Pending Todos
 
 None.
@@ -110,5 +117,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 32-01-PLAN.md (Network Workflow Skills). Phase 32 at 1/3 plans.
+Stopped at: Completed 32-02-PLAN.md (Offensive Workflow Skills). Phase 32 at 2/3 plans.
 Resume file: None
