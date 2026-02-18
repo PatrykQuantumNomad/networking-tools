@@ -62,7 +62,7 @@ Archived to `.planning/milestones/v1.4-ROADMAP.md`
 
 </details>
 
-### 🚧 v1.5 Claude Skill Pack (In Progress)
+### v1.5 Claude Skill Pack (In Progress)
 
 **Milestone Goal:** Package the 17-tool, 81-script pentesting toolkit as a self-contained Claude Code skill pack with task-level and tool-level slash commands, safety/feedback hooks, and audit logging.
 
@@ -114,10 +114,10 @@ Plans:
   1. User can invoke check-tools skill and see which of the 17 tools are installed
   2. User can invoke lab skill to start, stop, and check status of Docker vulnerable targets
   3. Claude automatically has pentesting conventions context (target notation, output expectations, safety rules) without the user loading anything
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 30-01: TBD
+- [ ] 30-01-PLAN.md — Create check-tools, lab, and pentest-conventions skills
 
 ### Phase 31: Remaining Tool Skills
 **Goal**: All 17 tools have Claude Code skill files, completing full tool coverage
@@ -177,7 +177,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 23-27 | v1.4 | 10/10 | Complete | 2026-02-14 |
 | 28. Safety Architecture | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 29. Core Tool Skills | v1.5 | 2/2 | Complete | 2026-02-17 |
-| 30. Utility Skills & Lab | v1.5 | 0/TBD | Not started | - |
+| 30. Utility Skills & Lab | v1.5 | 0/1 | Not started | - |
 | 31. Remaining Tool Skills | v1.5 | 0/TBD | Not started | - |
 | 32. Workflow Skills | v1.5 | 0/TBD | Not started | - |
 | 33. Subagent Personas | v1.5 | 0/TBD | Not started | - |
