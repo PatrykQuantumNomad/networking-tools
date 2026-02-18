@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 81 dual-mode scripts, an 8-module library infrastructure with structured JSON output via `-j`/`--json` flag, 435-test BATS regression suite with CI enforcement, structured metadata headers on all 78 scripts, 3 diagnostic auto-reports, a branded Astro/Starlight documentation site with dark orange/amber theme, custom homepage, learning paths, and Docker-based vulnerable targets for safe practice.
+A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 81 dual-mode scripts, an 8-module library infrastructure with structured JSON output via `-j`/`--json` flag, 435-test BATS regression suite with CI enforcement, structured metadata headers on all 78 scripts, 3 diagnostic auto-reports, a branded Astro/Starlight documentation site with dark orange/amber theme, custom homepage, learning paths, Docker-based vulnerable targets for safe practice, and a Claude Code skill pack with 17 tool skills, 8 workflow skills, 3 utility skills, 3 subagent personas, and safety hooks with target validation and audit logging.
 
 ## Core Value
 
@@ -49,21 +49,19 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 - ✓ 170 new BATS tests (json unit + args/output + JSON integration + doc verification) — v1.4
 - ✓ Help text and @usage headers document -j/--json flag across all 46 scripts — v1.4
 - ✓ 435-test BATS regression suite (smoke + unit + integration + JSON + doc verification) — v1.4
+- ✓ PreToolUse/PostToolUse safety hooks with target allowlist validation and raw tool interception — v1.5
+- ✓ JSON bridge: PostToolUse parses -j envelope output and injects structured additionalContext — v1.5
+- ✓ JSONL audit logging for all security-tool invocations — v1.5
+- ✓ Health-check diagnostic with /netsec-health skill — v1.5
+- ✓ 17 Claude Code tool skills with disable-model-invocation pattern (zero context overhead) — v1.5
+- ✓ 3 utility skills: check-tools, lab management, pentest-conventions background context — v1.5
+- ✓ 8 workflow skills: /recon, /scan, /diagnose, /fuzz, /crack, /sniff, /report, /scope — v1.5
+- ✓ 3 subagent personas: pentester (Bash access), defender (read-only), analyst (write-capable) — v1.5
+- ✓ Scope management with .pentest/scope.json and confirmation gates — v1.5
 
 ### Active
 
-## Current Milestone: v1.5 Claude Skill Pack
-
-**Goal:** Package the 17-tool, 81-script pentesting toolkit as a self-contained Claude Code skill pack with task-level and tool-level slash commands, safety/feedback hooks, and audit logging.
-
-**Target features:**
-- Task-oriented slash commands (`/pentest:discover-hosts`, `/pentest:diagnose-dns`, etc.)
-- Tool-specific slash commands (`/nmap:scan-ports`, `/sqlmap:test`, etc.)
-- Pre-execution safety hooks (target scoping, authorization checks)
-- Post-execution feedback hooks (parse `-j` JSON output, suggest next steps)
-- Audit trail logging for all commands and results
-- Bundled scripts (self-contained skill, no separate repo clone needed)
-- Tiered autonomy: diagnostics auto-run, active scans require confirmation
+(None — next milestone requirements to be defined via `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -76,20 +74,24 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 - Custom React/Svelte interactive components — Starlight built-in components cover needs
 - Tailwind CSS integration — Starlight CSS custom properties handle theming
 - Animated backgrounds or particle effects — accessibility issues, performance cost
+- Auto-execute active scans without confirmation — safety requires user approval
+- Automatic exploitation chains — exploitation requires explicit human authorization
+- LLM-based safety hooks — determinism requires bash+jq, not prompt-based validation
 
 ## Context
 
-Shipped v1.4 with JSON output mode. Total codebase: 9,963 LOC bash across 81 scripts, plus Astro docs site.
+Shipped v1.5 with Claude Code skill pack. Total codebase: 9,963 LOC bash across 81 scripts, plus Astro docs site and 28 Claude Code skill/agent files.
 All 63 scripts (17 examples.sh + 46 use-case) support dual-mode execution with -h/-v/-q/-x/-j flags.
 9-module library (scripts/lib/) provides strict mode, stack traces, log-level filtering, trap handlers, temp cleanup, retry logic, argument parsing, and JSON output.
 435-test BATS regression suite: 5 smoke + 69 unit + 131 integration + 137 JSON + 93 doc verification — all enforced in CI.
 BATS v1.13.0 with git submodules (bats-support, bats-assert, bats-file) at pinned versions.
 Two GitHub Actions CI pipelines: ShellCheck linting + BATS tests with JUnit PR annotations (independent jobs).
 All 78 scripts have structured @description/@usage/@dependencies metadata headers enforced by BATS validation test.
-Tech stack: Bash scripts + Astro 5.x/Starlight 0.37.x + GitHub Actions + Docker Compose.
+Tech stack: Bash scripts + Astro 5.x/Starlight 0.37.x + GitHub Actions + Docker Compose + Claude Code skills/agents.
 17 tools integrated into check-tools.sh with Makefile targets for each.
 3 diagnostic scripts following Pattern B (structured auto-reports with pass/fail/warn).
 Documentation site deployed to GitHub Pages with CI validation, dark orange/amber theme, terminal-prompt logo, and redesigned homepage.
+Claude Code integration: 17 tool skills, 8 workflow skills, 3 utility skills, 3 subagent personas, 2 safety hooks, health-check diagnostic, scope management.
 
 ## Constraints
 
@@ -100,6 +102,8 @@ Documentation site deployed to GitHub Pages with CI validation, dark orange/ambe
 - **Diagnostic Scripts**: Must be diagnostic (auto-report), not interactive step-by-step — user preference
 - **Dependencies**: Prefer tools available via Homebrew or pre-installed on macOS/Linux
 - **Site Theming**: Use CSS custom property overrides only (no element/class selectors) — safe Starlight cascade override
+- **Skill Context Budget**: Tool skills use disable-model-invocation: true; utility/workflow skills must fit within 2% context window
+- **Safety Hooks**: Must be deterministic bash+jq, not LLM-based (fast, free, predictable)
 
 ## Key Decisions
 
@@ -137,6 +141,14 @@ Documentation site deployed to GitHub Pages with CI validation, dark orange/ambe
 | Category parameter optional in json_set_meta | Empty string default for backward compatibility | ✓ Good — no test breakage |
 | bash -c wrapper for BATS fd3 JSON capture | BATS run mixes stdout+stderr; bash -c with 2>/dev/null isolates JSON | ✓ Good — clean test output |
 | 3-pattern show_help documentation | Pattern A (Options), Pattern B (3-flag Flags), Pattern B+vq (5-flag Flags) | ✓ Good — consistent per-script-type |
+| Plugin wraps, never modifies existing scripts | Existing 81 scripts untouched; skills are navigation layer | ✓ Good — zero regressions, clean separation |
+| Deterministic safety hooks (bash+jq) | Fast, free, predictable vs LLM-based (slow, costly, non-deterministic) | ✓ Good — <50ms hook execution time |
+| disable-model-invocation: true on tool skills | Zero context overhead; tools only invoked when user requests them | ✓ Good — 17 tool skills add 0 bytes to context |
+| Validate 5-tool pattern before scaling to 17 | Catch pattern issues early with small set | ✓ Good — pattern validated, then scaled to 12 more |
+| Offline-tool Target Validation variant | File-based tools (hashcat, john, foremost) don't need network scope | ✓ Good — appropriate validation per tool type |
+| Workflow skills use numbered steps with -j -x | Consistent invocation pattern Claude can follow mechanically | ✓ Good — all 8 workflows use same structure |
+| /report from conversation context only | Prevents reading sensitive audit logs; synthesizes from session | ✓ Good — clean data boundary |
+| Defender read-only, analyst write-capable | Least privilege per persona; pentester gets full Bash | ✓ Good — defense-in-depth for subagents |
 
 ---
-*Last updated: 2026-02-17 after v1.5 milestone started*
+*Last updated: 2026-02-18 after v1.5 milestone*

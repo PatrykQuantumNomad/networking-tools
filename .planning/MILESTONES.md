@@ -1,5 +1,31 @@
 # Project Milestones: Networking Tools
 
+## v1.5 Claude Skill Pack (Shipped: 2026-02-18)
+
+**Delivered:** Packaged the 17-tool, 81-script pentesting toolkit as a self-contained Claude Code skill pack with 17 tool skills, 8 workflow skills, 3 utility skills, 3 subagent personas, safety hooks with target validation and audit logging, and a health-check diagnostic.
+
+**Phases completed:** 28-33 (13 plans total)
+
+**Key accomplishments:**
+- Built bash+jq safety architecture with PreToolUse/PostToolUse hooks for target allowlist validation, raw tool interception, JSON bridge, and JSONL audit logging
+- Created 17 Claude Code tool skills with disable-model-invocation pattern covering all pentesting and networking tools
+- Built 3 utility skills (check-tools, lab management, pentest-conventions background context)
+- Created 8 workflow skills (/recon, /scan, /diagnose, /fuzz, /crack, /sniff, /report, /scope) orchestrating multi-tool pentesting workflows
+- Created 3 subagent personas (pentester, defender, analyst) with context-isolated skill shims
+- Established health-check diagnostic and scope management for engagement safety
+
+**Stats:**
+- 86 files created/modified
+- +11,766 / -2,505 lines changed
+- 6 phases, 13 plans, 60 commits
+- 2 days (Feb 17-18, 2026)
+
+**Git range:** `ee8a361` → `bd6ab96`
+
+**What's next:** TBD — next milestone via `/gsd:new-milestone`
+
+---
+
 ## v1.4 JSON Output Mode (Shipped: 2026-02-14)
 
 **Delivered:** Added structured JSON output to all 46 use-case scripts via `-j`/`--json` flag backed by lib/json.sh with fd3 envelope output, enabling piping into jq and downstream automation.
