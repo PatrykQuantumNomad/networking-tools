@@ -160,10 +160,11 @@ Plans:
   1. User can invoke pentester subagent that orchestrates multi-tool attack workflows with verbose output isolated from main conversation
   2. User can invoke defender subagent that analyzes scan findings from a defensive/mitigation perspective
   3. User can invoke analyst subagent that synthesizes results across multiple scans into a structured analysis report
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 33-01: TBD
+- [ ] 33-01-PLAN.md — Pentester agent + /pentester skill shim + gitignore for agent-memory
+- [ ] 33-02-PLAN.md — Defender + analyst agents with /defender and /analyst skill shims
 
 ## Progress
 
@@ -182,6 +183,6 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 30. Utility Skills & Lab | v1.5 | 1/1 | Complete | 2026-02-18 |
 | 31. Remaining Tool Skills | v1.5 | 3/3 | Complete | 2026-02-18 |
 | 32. Workflow Skills | v1.5 | 3/3 | Complete | 2026-02-18 |
-| 33. Subagent Personas | v1.5 | 0/TBD | Not started | - |
+| 33. Subagent Personas | v1.5 | 0/2 | Not started | - |
 
 **Total: 5 milestones shipped (27 phases, 60 plans) + v1.5 in progress (6 phases)**
