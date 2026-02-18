@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 31 - Remaining Tool Skills (v1.5 Claude Skill Pack)
+**Current focus:** Phase 32 - Workflow Skills (v1.5 Claude Skill Pack)
 
 ## Current Position
 
@@ -14,7 +14,7 @@ Plan: 3 of 3 in current phase
 Status: Phase complete, ready for Phase 32
 Last activity: 2026-02-18 — Completed 31-03 Web/DNS Recon Tool Skills (dig, curl, gobuster, ffuf)
 
-Progress: [████░░░░░░] 50% (v1.5)
+Progress: [██████░░░░] 67% (v1.5)
 
 ## Performance Metrics
 
@@ -33,8 +33,6 @@ Progress: [████░░░░░░] 50% (v1.5)
 | v1.3 | 5 | 9 | ~42min |
 | v1.4 | 5 | 10 | ~78min |
 | v1.5 | 6 | TBD | — |
-| Phase 31 P01 | 3min | 2 tasks | 4 files |
-| Phase 31 P03 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -94,7 +92,7 @@ None.
 ### Blockers/Concerns
 
 - ~~PostToolUse hook access to `tool_response.stdout` needs validation during Phase 28~~ RESOLVED: field accessible as `.tool_response.stdout`
-- Skill description budget (2% context window, ~16KB) -- monitor during Phase 31
+- ~~Skill description budget (2% context window, ~16KB) -- monitor during Phase 31~~ RESOLVED: 17 tool skills with disable-model-invocation add 0 bytes to context. 4 utility skills use ~8KB (50% of budget)
 - Agent `memory: project` feature needs practical testing during Phase 33
 
 ### Quick Tasks Completed
