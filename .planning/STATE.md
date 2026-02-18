@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 
 ## Current Position
 
-Phase: 32 of 33 (Workflow Skills) — COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase complete, ready for Phase 33
-Last activity: 2026-02-18 — Completed 32-03 Management Workflow Skills (/report, /scope)
+Phase: 33 of 33 (Subagent Personas) — IN PROGRESS
+Plan: 1 of 2 in current phase
+Status: Completed 33-01, continuing to 33-02
+Last activity: 2026-02-18 — Completed 33-01 Pentester Agent + /pentester skill shim
 
-Progress: [████████░░] 83% (v1.5)
+Progress: [█████████░] 92% (v1.5)
 
 ## Performance Metrics
 
@@ -33,6 +33,7 @@ Progress: [████████░░] 83% (v1.5)
 | v1.3 | 5 | 9 | ~42min |
 | v1.4 | 5 | 10 | ~78min |
 | v1.5 | 6 | TBD | — |
+| Phase 33 P01 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,11 @@ Phase 32-03 execution decisions:
 - jq deduplication via .targets |= unique prevents duplicate scope entries on add
 - /scope requires user confirmation before add, remove, and clear operations
 
+Phase 33-01 execution decisions:
+- Agent file kept at 54 lines (under 60 line target) for context budget efficiency
+- Anti-pattern warning included: preloaded skills are reference instructions, not slash commands
+- Agent-memory gitignored after .pentest/ section for logical grouping
+
 ### Pending Todos
 
 None.
@@ -124,5 +130,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 32-03-PLAN.md (Management Workflow Skills). Phase 32 complete (3/3 plans).
+Stopped at: Completed 33-01-PLAN.md (Pentester Agent). Phase 33 in progress (1/2 plans).
 Resume file: None
