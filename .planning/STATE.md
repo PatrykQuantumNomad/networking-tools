@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Phase 29 - Core Tool Skills (v1.5 Claude Skill Pack)
+**Current focus:** Phase 30 - Utility Skills & Lab Integration (v1.5 Claude Skill Pack)
 
 ## Current Position
 
-Phase: 29 of 33 (Core Tool Skills) — COMPLETE
-Plan: 2 of 2 in current phase
+Phase: 30 of 33 (Utility Skills & Lab Integration) — COMPLETE
+Plan: 1 of 1 in current phase
 Status: Phase complete, ready for verification
-Last activity: 2026-02-17 — Completed 29-02 SQLMap & Nikto Skills + End-to-End Verification
+Last activity: 2026-02-18 — Completed 30-01 Utility Skills (check-tools, lab, pentest-conventions)
 
-Progress: [███░░░░░░░] 33% (v1.5)
+Progress: [████░░░░░░] 50% (v1.5)
 
 ## Performance Metrics
 
@@ -65,6 +65,11 @@ Phase 29-01 execution decisions:
 - Included tool-specific default behavior section in each skill
 - Used double-dash (--) for markdown list descriptions to match project style
 
+Phase 30-01 execution decisions:
+- No disable-model-invocation on utility skills -- Claude should auto-invoke check-tools and lab when relevant
+- pentest-conventions uses user-invocable: false to stay out of / menu but load into Claude context
+- Kept pentest-conventions under 80 lines for context budget (well under 200 line limit)
+
 ### Pending Todos
 
 None.
@@ -84,6 +89,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-17
-Stopped at: Completed Phase 29 (Core Tool Skills). All 2 plans done, human verified.
+Last session: 2026-02-18
+Stopped at: Completed 30-01-PLAN.md (Utility Skills & Lab Integration). Phase 30 has 1 plan, now complete.
 Resume file: None

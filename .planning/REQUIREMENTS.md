@@ -48,9 +48,9 @@ Requirements for Claude Code skill pack. Each maps to roadmap phases.
 
 ### Utility Skills
 
-- [ ] **UTIL-01**: User can invoke check-tools skill to verify tool availability
-- [ ] **UTIL-02**: User can invoke lab skill to manage Docker vulnerable targets (start, stop, status)
-- [ ] **UTIL-03**: Background `pentest-conventions` skill provides Claude with pentesting context automatically
+- [x] **UTIL-01**: User can invoke check-tools skill to verify tool availability
+- [x] **UTIL-02**: User can invoke lab skill to manage Docker vulnerable targets (start, stop, status)
+- [x] **UTIL-03**: Background `pentest-conventions` skill provides Claude with pentesting context automatically
 
 ### Subagent Personas
 
@@ -121,9 +121,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TOOL-15 | Phase 31 | Pending |
 | TOOL-16 | Phase 31 | Pending |
 | TOOL-17 | Phase 31 | Pending |
-| UTIL-01 | Phase 30 | Pending |
-| UTIL-02 | Phase 30 | Pending |
-| UTIL-03 | Phase 30 | Pending |
+| UTIL-01 | Phase 30 | Complete |
+| UTIL-02 | Phase 30 | Complete |
+| UTIL-03 | Phase 30 | Complete |
 | AGNT-01 | Phase 33 | Pending |
 | AGNT-02 | Phase 33 | Pending |
 | AGNT-03 | Phase 33 | Pending |
