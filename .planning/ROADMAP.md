@@ -145,11 +145,12 @@ Plans:
   3. User can invoke `/report` and Claude generates a structured findings report from the session
   4. User can invoke `/scope` to define target scope that the safety hooks enforce
   5. Each workflow skill references the correct tool skills and scripts for its domain
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 32-01: TBD
-- [ ] 32-02: TBD
+- [ ] 32-01-PLAN.md — Network workflow skills (/recon, /scan, /diagnose)
+- [ ] 32-02-PLAN.md — Offensive workflow skills (/fuzz, /crack, /sniff)
+- [ ] 32-03-PLAN.md — Management workflow skills (/report, /scope)
 
 ### Phase 33: Subagent Personas
 **Goal**: Specialized subagents provide context-isolated, role-specific analysis for multi-tool pentesting workflows
@@ -180,7 +181,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 29. Core Tool Skills | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 30. Utility Skills & Lab | v1.5 | 1/1 | Complete | 2026-02-18 |
 | 31. Remaining Tool Skills | v1.5 | 3/3 | Complete | 2026-02-18 |
-| 32. Workflow Skills | v1.5 | 0/TBD | Not started | - |
+| 32. Workflow Skills | v1.5 | 0/3 | Not started | - |
 | 33. Subagent Personas | v1.5 | 0/TBD | Not started | - |
 
 **Total: 5 milestones shipped (27 phases, 60 plans) + v1.5 in progress (6 phases)**
