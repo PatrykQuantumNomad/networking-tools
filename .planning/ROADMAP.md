@@ -131,9 +131,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 31-01-PLAN.md — Offline/file-based tool skills (hashcat, john, aircrack-ng, foremost)
-- [ ] 31-02-PLAN.md — Network tools with unique defaults (hping3, skipfish, netcat, traceroute)
-- [ ] 31-03-PLAN.md — Web/DNS recon tool skills (dig, curl, gobuster, ffuf)
+- [x] 31-01-PLAN.md — Offline/file-based tool skills (hashcat, john, aircrack-ng, foremost)
+- [x] 31-02-PLAN.md — Network tools with unique defaults (hping3, skipfish, netcat, traceroute)
+- [x] 31-03-PLAN.md — Web/DNS recon tool skills (dig, curl, gobuster, ffuf)
 
 ### Phase 32: Workflow Skills
 **Goal**: Users can invoke task-oriented slash commands that orchestrate multiple tool skills into coherent pentesting workflows
@@ -179,7 +179,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 28. Safety Architecture | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 29. Core Tool Skills | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 30. Utility Skills & Lab | v1.5 | 1/1 | Complete | 2026-02-18 |
-| 31. Remaining Tool Skills | 3/3 | Complete   | 2026-02-18 | - |
+| 31. Remaining Tool Skills | v1.5 | 3/3 | Complete | 2026-02-18 |
 | 32. Workflow Skills | v1.5 | 0/TBD | Not started | - |
 | 33. Subagent Personas | v1.5 | 0/TBD | Not started | - |
 
