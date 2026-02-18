@@ -128,11 +128,12 @@ Plans:
   2. All 12 skills follow the same pattern validated in Phase 29 (frontmatter, instructions, script references)
   3. All 12 skills have `disable-model-invocation: true`
   4. Total skill description budget stays within Claude's 2% context window limit
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 31-01: TBD
-- [ ] 31-02: TBD
+- [ ] 31-01-PLAN.md — Offline/file-based tool skills (hashcat, john, aircrack-ng, foremost)
+- [ ] 31-02-PLAN.md — Network tools with unique defaults (hping3, skipfish, netcat, traceroute)
+- [ ] 31-03-PLAN.md — Web/DNS recon tool skills (dig, curl, gobuster, ffuf)
 
 ### Phase 32: Workflow Skills
 **Goal**: Users can invoke task-oriented slash commands that orchestrate multiple tool skills into coherent pentesting workflows
@@ -178,7 +179,7 @@ Phases execute in numeric order: 28 → 29 → 30 → 31 → 32 → 33
 | 28. Safety Architecture | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 29. Core Tool Skills | v1.5 | 2/2 | Complete | 2026-02-17 |
 | 30. Utility Skills & Lab | v1.5 | 1/1 | Complete | 2026-02-18 |
-| 31. Remaining Tool Skills | v1.5 | 0/TBD | Not started | - |
+| 31. Remaining Tool Skills | v1.5 | 0/3 | Not started | - |
 | 32. Workflow Skills | v1.5 | 0/TBD | Not started | - |
 | 33. Subagent Personas | v1.5 | 0/TBD | Not started | - |
 
