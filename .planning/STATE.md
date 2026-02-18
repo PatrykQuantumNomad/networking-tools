@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 
 ## Current Position
 
-Phase: 32 of 33 (Workflow Skills) — In Progress
-Plan: 2 of 3 in current phase
-Status: Executing Phase 32
-Last activity: 2026-02-18 — Completed 32-02 Offensive Workflow Skills (/fuzz, /crack, /sniff)
+Phase: 32 of 33 (Workflow Skills) — COMPLETE
+Plan: 3 of 3 in current phase
+Status: Phase complete, ready for Phase 33
+Last activity: 2026-02-18 — Completed 32-03 Management Workflow Skills (/report, /scope)
 
-Progress: [███████░░░] 70% (v1.5)
+Progress: [████████░░] 73% (v1.5)
 
 ## Performance Metrics
 
@@ -97,6 +97,13 @@ Phase 32-02 execution decisions:
 - /crack offline variant: no network scope validation needed for local hash files and archives
 - /sniff dual-mode: $ARGUMENTS accepts network interface (live) or .pcap file (offline analysis)
 
+Phase 32-03 execution decisions:
+- Used disable-model-invocation: true for both /report and /scope per plan must_haves
+- /report synthesizes from conversation context only -- explicitly prohibits reading audit log files
+- /scope default operation is show when no subcommand provided
+- jq deduplication via .targets |= unique prevents duplicate scope entries on add
+- /scope requires user confirmation before add, remove, and clear operations
+
 ### Pending Todos
 
 None.
@@ -117,5 +124,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 32-02-PLAN.md (Offensive Workflow Skills). Phase 32 at 2/3 plans.
+Stopped at: Completed 32-03-PLAN.md (Management Workflow Skills). Phase 32 complete (3/3 plans).
 Resume file: None
