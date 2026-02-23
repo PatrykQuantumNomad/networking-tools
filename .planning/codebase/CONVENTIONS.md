@@ -1,196 +1,250 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-02-17
+**Analysis Date:** 2026-02-23
+
+## Script Header Pattern
+
+Every `.sh` file under `scripts/` MUST have these three metadata fields within the first 10 lines (enforced by `tests/intg-script-headers.bats`):
+
+```bash
+#!/usr/bin/env bash
+# ============================================================================
+# @description  One-line summary of what the script does
+# @usage        script-name.sh [target] [-h|--help] [-x|--execute] [-j|--json]
+# @dependencies tool-name, common.sh
+# ============================================================================
+```
 
 ## Naming Patterns
 
 **Files:**
-- Scripts use kebab-case: `discover-live-hosts.sh`, `scan-web-vulnerabilities.sh`
-- Library modules use kebab-case: `strict.sh`, `logging.sh`, `validation.sh`
-- Test files use kebab-case with `.bats` extension: `smoke.bats`, `lib-json.bats`, `intg-cli-contracts.bats`
-- Test files prefixed by type: `lib-` (unit), `intg-` (integration), `smoke.bats`
+- Use lowercase kebab-case: `identify-ports.sh`, `capture-http-credentials.sh`, `crack-wpa-handshake.sh`
+- Tool directory names match the tool binary: `nmap/`, `tshark/`, `aircrack-ng/`
+- Library modules are lowercase single-word: `args.sh`, `logging.sh`, `cleanup.sh`
 
 **Functions:**
-- snake_case for public functions: `require_cmd`, `safety_banner`, `parse_common_args`, `run_or_show`
-- Leading underscore for private/internal functions: `_log_timestamp`, `_should_log`, `_json_require_jq`, `_common_setup`
-- Function names are descriptive verbs: `check_cmd`, `require_target`, `make_temp`, `json_is_active`
+- Public functions: lowercase with underscores: `require_cmd`, `parse_common_args`, `safety_banner`, `run_or_show`
+- Private/internal functions: prefixed with underscore: `_log_level_num`, `_should_log`, `_strict_error_handler`, `_cleanup_handler`
+- Predicate functions follow `is_` or `check_` pattern: `is_interactive`, `check_cmd`, `json_is_active`
 
 **Variables:**
-- SCREAMING_SNAKE_CASE for global configuration: `EXECUTE_MODE`, `JSON_MODE`, `VERBOSE`, `LOG_LEVEL`
-- SCREAMING_SNAKE_CASE for environment/color variables: `NO_COLOR`, `PROJECT_ROOT`, `RED`, `GREEN`, `NC`
-- Leading underscore for internal state: `_COMMON_LOADED`, `_JSON_TOOL`, `_JSON_RESULTS`
-- lowercase snake_case for local variables: `local cmd="$1"`, `local install_hint="${2:-}"`
+- Global state: SCREAMING_SNAKE_CASE: `EXECUTE_MODE`, `LOG_LEVEL`, `VERBOSE`, `JSON_MODE`
+- Private library state: prefixed with underscore + module: `_JSON_TOOL`, `_CLEANUP_BASE_DIR`, `_STRICT_LOADED`
+- Source guards: `_COMMON_LOADED`, `_LOGGING_LOADED`, `_ARGS_LOADED` etc.
+- Local variables: lowercase with underscores: `local exit_code`, `local install_hint`, `local tmpfile`
 
-**Script Header Format:**
-- Structured header comment block with `@description`, `@usage`, `@dependencies`
-- Example: `# @description  Find all active hosts on a subnet`
-- Header location: immediately after shebang
+**Constants/Colors:**
+- Color escape codes: uppercase one-word: `RED`, `GREEN`, `YELLOW`, `BLUE`, `CYAN`, `NC`
 
-## Code Style
+## Script Structure (Educational Pattern A — examples and use-cases)
 
-**Formatting:**
-- Indentation: 4 spaces (no tabs)
-- Line continuation: backslash (`\`) at end of line for multi-line commands
-- Heredocs for multi-line help text using `cat <<EOF` or `cat <<'EOF'` (unquoted)
-- Command substitution uses `$(...)` not backticks
+Every use-case script follows this exact structure:
 
-**Linting:**
-- ShellCheck enforced via `make lint` (severity=warning)
-- `.shellcheckrc` configuration file at project root
-- ShellCheck directives placed inline: `# shellcheck disable=SC2034  # Comment explaining why`
-- Source path resolution configured: `source-path=SCRIPTDIR`, `source-path=SCRIPTDIR/..`
+1. Shebang + header metadata block
+2. `source "$(dirname "$0")/../common.sh"`
+3. `show_help()` function with Usage/Description/Flags/Examples sections
+4. `parse_common_args "$@"` then `set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"`
+5. `require_cmd <tool> "<install-hint>"` (use-case scripts only; examples.sh may require_target too)
+6. `require_target "${1:-}"` (only scripts that require a target)
+7. `TARGET="${1:-<default>}"` assignment
+8. `json_set_meta "<tool>" "$TARGET"` (use-case scripts)
+9. `confirm_execute "${1:-}"` (use-case scripts)
+10. `safety_banner` (examples.sh scripts)
+11. Educational display: `info "=== Title ==="`, numbered examples with `run_or_show` or direct `info`/`echo` pairs
+12. `json_finalize` (use-case scripts)
+13. Interactive demo block gated by `[[ "${EXECUTE_MODE:-show}" == "show" ]] && [[ -t 0 ]]`
 
-**Shebang:**
-- All scripts: `#!/usr/bin/env bash`
-- Test files: `#!/usr/bin/env bats`
-
-**Strict Mode:**
-- Enabled in `scripts/lib/strict.sh`: `set -eEuo pipefail`
-- ERR trap handler with stack traces: `_strict_error_handler`
-- Bash 4.4+ gets `inherit_errexit` option
-- Tests disable strict mode: `set +eEuo pipefail` and `trap - ERR` for BATS compatibility
-
-## Import Organization
-
-**Order:**
-1. Source `common.sh` (which loads all libraries in dependency order)
-2. Define `show_help()` function (required before `parse_common_args`)
-3. Call `parse_common_args "$@"` and reset positional parameters
-4. Validate dependencies with `require_cmd`
-5. Set target variable with default fallback
-6. Call `confirm_execute` if script supports `-x` mode
-7. Call `safety_banner` if script performs scanning
-
-**Pattern:**
+Example from `scripts/nmap/identify-ports.sh`:
 ```bash
-#!/usr/bin/env bash
-# Header comment block
 source "$(dirname "$0")/../common.sh"
 
 show_help() {
-    # Help text
+    echo "Usage: $(basename "$0") [target] [-h|--help] [-j|--json]"
+    # ...
 }
 
 parse_common_args "$@"
 set -- "${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"
 
-require_cmd nmap "brew install nmap"
 TARGET="${1:-localhost}"
+json_set_meta "nmap" "$TARGET" "network-scanner"
 confirm_execute "${1:-}"
-safety_banner
+
+info "=== Port Identification ==="
+# ...
+run_or_show "6) Nmap service probing" nmap -sV "$TARGET"
+# ...
+json_finalize
 ```
 
-**Path Aliases:**
-- No path aliases used
-- Relative sourcing: `source "$(dirname "$0")/../common.sh"`
-- Library sourcing: `source "${_LIB_DIR}/strict.sh"` (from common.sh)
+## Code Style
 
-**Source Guards:**
-- All library modules use source guards: `[[ -n "${_COLORS_LOADED:-}" ]] && return 0`
-- Common.sh has master guard: `[[ -n "${_COMMON_LOADED:-}" ]] && return 0`
+**Strict Mode:**
+- All scripts inherit `set -eEuo pipefail` via `scripts/lib/strict.sh`
+- Bash 4.0+ required — enforced at source time in `scripts/common.sh`
+- `shopt -s inherit_errexit` enabled for Bash 4.4+
+- ERR trap provides stack traces via `_strict_error_handler()`
+
+**Variable Quoting:**
+- Always quote variable expansions: `"$TARGET"`, `"${1:-}"`, `"${variable:-default}"`
+- Use `${VAR:-default}` pattern for optional parameters
+- Array expansion: `"${REMAINING_ARGS[@]+${REMAINING_ARGS[@]}}"` (safe empty-array expansion)
+
+**Conditionals:**
+- Use `[[ ... ]]` not `[ ... ]` for all conditionals
+- Arithmetic: `(( expr ))` not `[ expr -eq 0 ]`
+- Command existence: `command -v cmd &>/dev/null` (via `check_cmd`)
+
+**Local Variables:**
+- Always declare local variables with `local` inside functions
+- Declare separately from assignment when using command substitution:
+  ```bash
+  local exit_code
+  exit_code=$?
+  # NOT: local exit_code=$? (masks exit code)
+  ```
+
+**Formatting:**
+- 4-space indentation throughout
+- No trailing whitespace
+- Comment blocks use `# --- Section Name ---` separators
+- Inline comments explain the "why", not the "what"
+
+**ShellCheck:**
+- `shellcheck --severity=warning` enforced on all scripts
+- Config: `.shellcheckrc` at project root
+- `# shellcheck disable=SC2034` used for intentionally-unused color variables
+
+## Logging Conventions
+
+Use functions from `scripts/lib/logging.sh` — never raw `echo` for user-facing messages:
+
+```bash
+info "Normal operational message"       # Blue [INFO] to stdout
+success "Operation completed"           # Green [OK] to stdout
+warn "Non-fatal concern"                # Yellow [WARN] to stdout
+error "Failure message"                 # Red [ERROR] to stderr (always shown)
+debug "Verbose diagnostic detail"       # Cyan [DEBUG] to stdout (LOG_LEVEL=debug only)
+```
+
+Diagnostic scripts use `scripts/lib/diagnostic.sh` functions:
+```bash
+report_pass "Check passed"     # Green [PASS]
+report_fail "Check failed"     # Red [FAIL]
+report_warn "Ambiguous result" # Yellow [WARN]
+report_section "Section Name"  # Cyan section header
+```
+
+**LOG_LEVEL filtering:** `debug` < `info` < `warn` < `error`. Errors always display regardless of level.
 
 ## Error Handling
 
-**Patterns:**
-- Strict mode catches errors automatically (`set -e`)
-- ERR trap prints stack trace to stderr via `_strict_error_handler`
-- Functions use `|| return 0` for non-fatal conditions: `_should_log debug || return 0`
-- Early exit with error message: `error "message" >&2; exit 1`
-- Validation functions exit with code 1: `require_cmd`, `require_target`, `require_root`
-
-**Error Output:**
-- Always write to stderr: `>&2`
-- Use `error()` function from `scripts/lib/logging.sh` for consistent formatting
-- Error function adds timestamp in verbose mode: `[$(date '+%H:%M:%S')] [ERROR]`
-
 **Exit Codes:**
-- Success: `exit 0` or implicit (no exit statement)
-- Validation failure: `exit 1`
-- Help display: `exit 0`
-- User cancellation: `exit 0`
+- `exit 1` for all error conditions
+- `exit 0` for user-cancelled operations (e.g., declined confirmation prompt)
+- Functions return 0/1 naturally via `[[ ... ]]` or command exit status
 
-## Logging
+**Validation Guard Pattern:**
+```bash
+require_cmd nmap "brew install nmap"    # exits 1 if not installed
+require_target "${1:-}"                 # exits 1 if no argument
+require_root                            # exits 1 if not root (rare)
+```
 
-**Framework:** Custom logging in `scripts/lib/logging.sh`
+**Source Guards (all lib modules):**
+```bash
+[[ -n "${_MODULE_LOADED:-}" ]] && return 0
+_MODULE_LOADED=1
+```
 
-**Patterns:**
-- Use log level functions: `debug`, `info`, `success`, `warn`, `error`
-- All log output uses color variables from `scripts/lib/colors.sh`
-- Timestamps added when `VERBOSE >= 1`: `[$(date '+%H:%M:%S')]`
-- JSON mode suppresses logs (redirected to stderr): `exec 1>&2` in `parse_common_args`
+## Function Documentation
 
-**Log Levels:**
-- `debug`: Only visible when `VERBOSE >= 1` or `LOG_LEVEL="debug"`
-- `info`: Default visibility (`LOG_LEVEL="info"`)
-- `warn`: Always visible unless `LOG_LEVEL="error"`
-- `error`: Always visible, writes to stderr
+Document function purpose with inline comments before the function:
+```bash
+# Check if a command exists
+check_cmd() {
+    command -v "$1" &>/dev/null
+}
 
-**Filtering:**
-- Controlled by `LOG_LEVEL` variable: `debug`, `info`, `warn`, `error`
-- Numeric comparison via `_log_level_num()`: debug=0, info=1, warn=2, error=3
-- Check before logging: `_should_log info || return 0`
+# Require a command or exit with install hint
+require_cmd() {
+    local cmd="$1"
+    local install_hint="${2:-}"
+    ...
+}
+```
 
-## Comments
+Multi-line docstrings use `#` comment blocks above complex functions.
 
-**When to Comment:**
-- Structured header block at file start (description, usage, dependencies)
-- Source guards: `# Source guard — prevent double-sourcing`
-- Complex logic or non-obvious behavior
-- ShellCheck directives with explanation: `# shellcheck disable=SC2034  # Used by logging.sh`
-- Inline explanations for educational scripts: numbered examples with context
+## show_help() Convention
 
-**Documentation Format:**
-- File headers use `@description`, `@usage`, `@dependencies` tags
-- Inline comments use single `#` with space after
-- Section separators: `# --- Section Name ---` or `# ============ ... ============`
+Every script's `show_help()` must output `Usage:` (enforced by `tests/intg-cli-contracts.bats` INTG-01). Standard sections:
 
-**JSDoc/TSDoc:**
-- Not applicable (bash project)
+```bash
+show_help() {
+    echo "Usage: $(basename "$0") [target] [flags]"
+    echo ""
+    echo "Description:"
+    echo "  One or two sentences."
+    echo ""
+    echo "Examples:"
+    echo "  $(basename "$0") 192.168.1.1"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help     Show this help message"
+    echo "  -j, --json     Output as JSON (requires jq)"
+    echo "  -x, --execute  Execute commands instead of displaying them"
+}
+```
 
-## Function Design
+Use-case scripts MUST document `--json` flag (enforced by `tests/intg-doc-json-flag.bats` DOC-01 and DOC-02).
 
-**Size:**
-- Small, focused functions (typically 5-20 lines)
-- Longer functions only for complex operations with clear sections (e.g., `parse_common_args`)
+## Output Display Pattern
 
-**Parameters:**
-- Prefer named positional parameters: `local cmd="$1"; local install_hint="${2:-}"`
-- Use parameter expansion for defaults: `"${1:-}"`
-- Document required vs optional in function comments
-- Global state modified via exported variables: `EXECUTE_MODE`, `JSON_MODE`, `VERBOSE`
+Use `run_or_show` for numbered examples that may optionally execute:
+```bash
+run_or_show "N) Human-readable description" command [args...]
+```
 
-**Return Values:**
-- Exit codes: `return 0` for success, `return 1` for failure (boolean checks)
-- Output via stdout (captured with `$()`)
-- Error messages always to stderr: `>&2`
-- Modified global variables for state changes
+For show-only examples (complex pipelines or ones that can't run safely):
+```bash
+info "N) Description"
+echo "   command | pipe | etc"
+echo ""
+```
 
-## Module Design
+For JSON-tracked show-only examples:
+```bash
+info "N) Description"
+echo "   command | pipe"
+echo ""
+json_add_example "Description" "command | pipe"
+```
 
-**Exports:**
-- Functions are implicitly exported (bash sourcing model)
-- Explicit export for variables: `export PROJECT_ROOT`
-- NO_COLOR exported in JSON mode: `export NO_COLOR=1`
+## Temp File Management
 
-**Barrel Files:**
-- `scripts/common.sh` acts as a barrel file, sources all modules in dependency order:
-  1. `strict.sh`
-  2. `colors.sh`
-  3. `logging.sh`
-  4. `validation.sh`
-  5. `cleanup.sh`
-  6. `json.sh`
-  7. `output.sh`
-  8. `args.sh`
-  9. `diagnostic.sh`
-  10. `nc_detect.sh`
+Use `make_temp` from `scripts/lib/cleanup.sh` — never raw `mktemp`:
+```bash
+local tmpfile
+tmpfile=$(make_temp file "prefix")      # auto-cleaned on EXIT
+local tmpdir
+tmpdir=$(make_temp dir)
+```
 
-**Module Pattern:**
-- Each library file in `scripts/lib/` is self-contained
-- Source guard at top: `[[ -n "${_MODULE_LOADED:-}" ]] && return 0`
-- Header comment block with `@description`, `@usage`, `@dependencies`
-- No side effects on load (only function/variable definitions)
+## Module Loading Order
+
+`scripts/common.sh` sources lib modules in strict dependency order:
+1. `strict.sh` — bash strict mode (no deps)
+2. `colors.sh` — color vars (no deps)
+3. `logging.sh` — depends on colors.sh
+4. `validation.sh` — depends on colors.sh, logging.sh
+5. `cleanup.sh` — no deps
+6. `json.sh` — depends on cleanup.sh
+7. `output.sh` — depends on colors.sh, json.sh, cleanup.sh
+8. `args.sh` — no deps (but calls json.sh functions)
+9. `diagnostic.sh` — depends on colors.sh, logging.sh
+10. `nc_detect.sh` — no deps
 
 ---
 
-*Convention analysis: 2026-02-17*
+*Convention analysis: 2026-02-23*
