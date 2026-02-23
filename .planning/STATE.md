@@ -62,9 +62,10 @@ None — all v1.5 blockers resolved.
 |---|-------------|------|--------|-----------|
 | 001 | Remove light theme and theme selector, enforce dark-mode only | 2026-02-11 | 1d9f9f0 | [001-remove-light-theme-and-theme-selector-en](./quick/001-remove-light-theme-and-theme-selector-en/) |
 | 002 | Review markdown files for LLM writing patterns | 2026-02-11 | 16bf6ee | [002-review-md-files-for-llm-writing-patterns](./quick/002-review-md-files-for-llm-writing-patterns/) |
+| 003 | Create v1.5 feature testing guide (docs/TESTING-V15.md) | 2026-02-23 | bfe5e48 | [003-create-v15-feature-testing-guide](./quick/003-create-v15-feature-testing-guide/) |
 
 ## Session Continuity
 
-Last session: 2026-02-18
-Stopped at: v1.5 milestone complete. All 6 phases (28-33) shipped.
+Last session: 2026-02-23
+Stopped at: Completed quick task 003 (v1.5 testing guide). docs/TESTING-V15.md created.
 Resume file: None
