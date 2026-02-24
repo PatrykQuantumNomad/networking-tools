@@ -90,6 +90,96 @@ const breadcrumbSchema =
 				itemListElement: breadcrumbItems,
 			}
 		: null;
+
+// FAQPage schema for rich results and GEO discoverability
+const faqSchema = isFaqPage
+	? {
+			'@context': 'https://schema.org',
+			'@type': 'FAQPage',
+			mainEntity: [
+				{
+					'@type': 'Question',
+					name: 'What tools are included in the pentesting learning lab?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'The lab includes 17 open-source tools: nmap, tshark, metasploit, hashcat, john, sqlmap, nikto, hping3, aircrack-ng, skipfish, foremost, ffuf, gobuster, curl, dig, netcat, and traceroute. Each tool has an examples.sh script with 10 annotated commands plus task-focused use-case scripts.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'Is it legal to use these pentesting tools?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'These tools are legal to possess and use for authorized testing only. The included Docker lab provides intentionally vulnerable targets (DVWA, Juice Shop, WebGoat, VulnerableApp) for safe, legal practice. Never scan or attack systems without explicit written permission.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'What are the system requirements?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'You need a Unix-like system (Linux or macOS), Docker and Docker Compose for the practice lab, and bash. Individual tools can be installed via your system package manager. Run "make check" to see which tools are available.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'Do I need root access to run the scripts?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Most scripts do not require root. However, nmap (SYN scans), tshark (packet capture), hping3 (raw packets), and aircrack-ng (monitor mode) need elevated privileges. Scripts will tell you when root is required.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'How do I start the Docker practice lab?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Run "make lab-up" to start all four vulnerable targets: DVWA on port 8080 (admin/password), Juice Shop on port 3000, WebGoat on port 8888, and VulnerableApp on port 8180. Use "make lab-status" to check health and "make lab-down" to stop.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'What is JSON output mode?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Every script supports a -j flag for structured JSON output, letting you pipe results into jq or other tools for automation. Combine -x with -j to capture live command output in JSON format.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'Can I use these tools for CTF competitions?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Yes. The tools and use-case scripts are commonly used in Capture The Flag challenges. They provide ready-made workflows for reconnaissance, web app testing, password cracking, and network analysis.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'How do I add a new tool to the lab?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Create a directory scripts/<tool-name>/ with an examples.sh file following the existing pattern: source common.sh, call require_cmd, display safety_banner, and list 10 annotated examples. Then add the tool to check-tools.sh.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'What learning paths are available?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'Three curated paths: Reconnaissance (dig, nmap, tshark, metasploit), Web App Testing (nmap, nikto, skipfish, sqlmap), and Network Debugging (dig, traceroute, hping3, curl, tshark). Each progresses from basics to advanced techniques with hands-on lab exercises.',
+					},
+				},
+				{
+					'@type': 'Question',
+					name: 'How do the diagnostics work?',
+					acceptedAnswer: {
+						'@type': 'Answer',
+						text: 'The three diagnostic scripts (DNS, Connectivity, Performance) run automated multi-tool checks and generate structured reports. They combine several tools into a single workflow for comprehensive network troubleshooting. All support JSON output with -j.',
+					},
+				},
+			],
+		}
+	: null;
 ---
 
 {processedHead.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}
@@ -101,3 +191,5 @@ const breadcrumbSchema =
 		<script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
 	)
 }
+
+{faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}

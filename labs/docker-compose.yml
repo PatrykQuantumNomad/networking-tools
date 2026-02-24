@@ -1,41 +1,159 @@
-# docker-compose.yml — Vulnerable practice targets
+# docker-compose.yml — Vulnerable practice targets (hardened)
 # Start: make lab-up   Stop: make lab-down
 #
 # IMPORTANT: These containers are intentionally vulnerable.
 # Only run them on isolated networks. Never expose to the internet.
+
+name: vuln-lab
 
 services:
   # DVWA — Damn Vulnerable Web Application
   # Login: admin / password
   # URL: http://localhost:8080
   dvwa:
-    image: vulnerables/web-dvwa
+    image: kaakaww/dvwa-docker:7fd960fa2a0b234414ccc31261d9f54a1f639146
     ports:
-      - "8080:80"
+      - "127.0.0.1:8080:80"
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+    security_opt:
+      - "no-new-privileges:true"
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - vuln-net
 
   # Juice Shop — OWASP modern vulnerable app
   # URL: http://localhost:3030
   juice-shop:
-    image: bkimminich/juice-shop
+    image: bkimminich/juice-shop:v19.1.1
     ports:
-      - "3030:3000"
+      - "127.0.0.1:3030:3000"
     restart: unless-stopped
-
-  # WebGoat — OWASP teaching platform
-  # URL: http://localhost:8888/WebGoat
-  webgoat:
-    image: webgoat/webgoat
-    ports:
-      - "8888:8080"
-      - "9090:9090"
-    restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - "no-new-privileges:true"
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - vuln-net
 
   # OWASP VulnerableApp — deliberately vulnerable Java web app
   # Covers: command injection, SQLi, XSS, XXE, SSRF, path traversal, JWT flaws
   # URL: http://localhost:8180/VulnerableApp
   vulnerable-app:
-    image: sasanlabs/owasp-vulnerableapp:latest
+    # pin: sasanlabs/owasp-vulnerableapp only publishes "latest"; pin by digest when available
+    image: sasanlabs/owasp-vulnerableapp:1.13.1
     ports:
-      - "8180:9090"
+      - "127.0.0.1:8180:9090"
     restart: unless-stopped
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - "no-new-privileges:true"
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/VulnerableApp"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - vuln-net
+
+  # WebGoat — OWASP teaching platform
+  # URL: http://localhost:8888/WebGoat
+  webgoat:
+    image: webgoat/webgoat:v2025.3
+    ports:
+      - "127.0.0.1:8888:8080"
+      - "127.0.0.1:9090:9090"
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - "no-new-privileges:true"
+    environment:
+      - TZ=America/Toronto      
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/WebGoat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - vuln-net
+
+networks:
+  vuln-net:
+    driver: bridge

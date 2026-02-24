@@ -70,7 +70,7 @@ Each task was committed atomically:
 1. **Task 1: Create hashcat and john skills** - `d9284ed` (feat)
 2. **Task 2: Create aircrack-ng and foremost skills** - `262eae1` (feat)
 
-**Plan metadata:** (pending) (docs: complete plan)
+**Plan metadata:** `b87dd53` (docs: complete plan)
 
 ## Files Created/Modified
 - `.claude/skills/hashcat/SKILL.md` - GPU-accelerated password hash cracking skill (52 lines)

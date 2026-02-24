@@ -43,3 +43,5 @@ site/.astro/
 
 # Claude agent memory (may contain sensitive engagement data)
 .claude/agent-memory/
+
+docs/

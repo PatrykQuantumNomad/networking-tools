@@ -38,7 +38,8 @@ SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
 write_audit() {
   local event="$1" tool="$2" command="$3" target="${4:-}" reason="${5:-}" script="${6:-}"
   mkdir -p "$AUDIT_DIR"
-  local audit_file="$AUDIT_DIR/audit-$(date +%Y-%m-%d).jsonl"
+  local audit_file
+  audit_file="$AUDIT_DIR/audit-$(date +%Y-%m-%d).jsonl"
   jq -n -c \
     --arg ts "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
     --arg event "$event" \
