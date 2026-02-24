@@ -38,6 +38,9 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
   <Card icon="seti:json" title="JSON Output">
     Pipe any script through `-j` for structured JSON. Add `-x` to capture live results.
   </Card>
+  <Card icon="rocket" title="Claude Code">
+    28 slash commands, 3 subagent personas, and safety hooks for AI-assisted pentesting.
+  </Card>
 </CardGrid>
 
 ## Security Tools
@@ -85,4 +88,13 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
   <LinkCard title="Reconnaissance" description="Learning path: dig, nmap, tshark, metasploit" href="/guides/learning-recon/" />
   <LinkCard title="Web App Testing" description="Learning path: nmap, nikto, skipfish, sqlmap" href="/guides/learning-webapp/" />
   <LinkCard title="Network Debugging" description="Learning path: dig, traceroute, hping3, curl, tshark" href="/guides/learning-network-debug/" />
+</CardGrid>
+
+## Claude Code Integration
+
+<CardGrid>
+  <LinkCard title="Getting Started" description="Set up Claude Code for AI-assisted pentesting" href="/claude-code/getting-started/" />
+  <LinkCard title="Tool & Utility Skills" description="17 tool skills and 3 utility commands" href="/claude-code/skills/" />
+  <LinkCard title="Workflows & Agents" description="Multi-step workflows and subagent personas" href="/claude-code/workflows/" />
+  <LinkCard title="Safety & Scope" description="Target allowlists, audit logging, and the health check" href="/claude-code/safety/" />
 </CardGrid>

@@ -123,6 +123,10 @@ export default defineConfig({
 					autogenerate: { directory: 'diagnostics' },
 				},
 				{
+					label: 'Claude Code',
+					autogenerate: { directory: 'claude-code' },
+				},
+				{
 					label: 'About the Author',
 					link: 'https://patrykgolabek.dev/about/',
 					attrs: { target: '_blank', rel: 'noopener' },

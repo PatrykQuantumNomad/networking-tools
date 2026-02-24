@@ -1,0 +1,286 @@
+---
+title: "Workflows & Agents"
+description: "Multi-step security workflows (/recon, /scan, /fuzz, /crack, /sniff, /diagnose, /report, /scope) and subagent personas (/pentester, /defender, /analyst) for Claude Code."
+sidebar:
+  order: 3
+---
+
+import { Tabs, TabItem, Card, CardGrid } from '@astrojs/starlight/components';
+
+Workflow skills chain multiple tools into multi-step engagements. Subagent personas provide specialized roles for different phases of a security assessment.
+
+## Workflow Skills
+
+Each workflow verifies scope, runs numbered steps with `-j -x` flags, and delivers a structured summary at the end.
+
+<Tabs>
+  <TabItem label="Reconnaissance">
+
+### /recon
+
+Comprehensive reconnaissance against a target -- host discovery, DNS enumeration, SSL inspection, and subdomain enumeration.
+
+```
+/recon localhost
+```
+
+**Steps:**
+
+1. Host discovery (nmap ping sweeps)
+2. Port scanning (nmap service detection)
+3. DNS records (dig A, MX, NS, TXT, CNAME)
+4. Zone transfer attempt (dig AXFR)
+5. SSL/TLS inspection (curl certificate check)
+6. Subdomain enumeration (gobuster DNS, if installed)
+
+**Output:** Structured summary of hosts, ports/services, DNS records, TLS details, and subdomains.
+
+  </TabItem>
+  <TabItem label="Vulnerability">
+
+### /scan
+
+Vulnerability scanning -- port identification, web vulnerability detection, SQL injection testing, and HTTP endpoint analysis.
+
+```
+/scan http://localhost:8080
+```
+
+**Steps:**
+
+1. Port and service scan (nmap)
+2. Web vulnerability scan (nmap NSE scripts)
+3. Web server analysis (nikto)
+4. SQL injection testing (sqlmap, if target has URL parameters)
+5. HTTP endpoint testing (curl)
+
+**Output:** Findings organized by severity -- Critical, High, Medium, Low/Informational.
+
+---
+
+### /fuzz
+
+Web fuzzing and enumeration -- directory brute-force, parameter fuzzing, and web scanning.
+
+```
+/fuzz http://localhost:8080
+```
+
+**Steps:**
+
+1. Directory discovery (gobuster)
+2. Parameter fuzzing (ffuf)
+3. Web vulnerability scan (nikto)
+
+**Output:** Discovered paths, hidden parameters, and identified vulnerabilities with next steps.
+
+  </TabItem>
+  <TabItem label="Exploitation">
+
+### /crack
+
+Password cracking -- hash identification followed by targeted cracking based on hash type.
+
+```
+/crack /tmp/hashes.txt
+```
+
+**Steps:**
+
+1. Hash identification (john)
+2. NTLM cracking (hashcat, if applicable)
+3. Web hash cracking (hashcat, if MD5/SHA/bcrypt)
+4. Linux password cracking (john, if shadow format)
+5. Archive cracking (john, if ZIP/RAR/PDF)
+
+Only the relevant steps run based on the identified hash type.
+
+**Output:** Hash types identified, passwords recovered, and recommendations for further cracking.
+
+**Note:** Operates on local files -- no network scope validation needed.
+
+---
+
+### /sniff
+
+Traffic capture and analysis -- HTTP credential capture, DNS query analysis, and file extraction.
+
+```
+/sniff eth0        # Live capture on interface
+/sniff capture.pcap  # Offline analysis
+```
+
+**Steps:**
+
+1. HTTP credential capture (tshark)
+2. DNS query analysis (tshark)
+3. File extraction (tshark)
+
+**Output:** Captured credentials, DNS activity patterns, and extracted files.
+
+**Note:** Live capture may require root privileges.
+
+  </TabItem>
+  <TabItem label="Reporting">
+
+### /diagnose
+
+Network diagnostics -- DNS, connectivity, and performance checks.
+
+```
+/diagnose example.com
+```
+
+**Steps:**
+
+1. DNS diagnostics (auto-report script)
+2. Connectivity diagnostics (auto-report script)
+3. Performance diagnostics (auto-report script)
+4. Network path tracing (traceroute with `-j -x`)
+5. DNS propagation check (dig with `-j -x`)
+
+**Note:** Steps 1-3 use diagnostic auto-report scripts that output pass/fail/warn results directly (no `-j` flag). Steps 4-5 use standard wrapper scripts with JSON output.
+
+**Output:** DNS health, connectivity status, performance metrics, network path, and propagation status.
+
+---
+
+### /report
+
+Generate a structured findings report from the current Claude Code session.
+
+```
+/report                    # Default title with today's date
+/report "DVWA Assessment"  # Custom title
+```
+
+Synthesizes all tool outputs and findings from the current conversation into a markdown report organized by severity. Saves to `report-YYYY-MM-DD.md` in the project root.
+
+**Report sections:** Executive summary, scope and methodology, findings by severity (Critical/High/Medium/Low/Informational), recommendations, and appendix.
+
+**Note:** Pulls findings from conversation context only -- does not read audit log files.
+
+  </TabItem>
+</Tabs>
+
+## Scope Management
+
+### /scope
+
+Manage the target scope file that controls which targets security tools can scan.
+
+```
+/scope              # Show current scope (default)
+/scope show         # Show current scope
+/scope init         # Create scope with localhost defaults
+/scope add <target> # Add a target (requires confirmation)
+/scope remove <target>  # Remove a target (requires confirmation)
+/scope clear        # Remove all targets (requires confirmation)
+```
+
+The scope file lives at `.pentest/scope.json` and is checked by the PreToolUse hook before every tool invocation. See [Safety & Scope](/claude-code/safety/) for details on how scope validation works.
+
+## Subagent Personas
+
+Three specialized personas for different phases of a security assessment. Each runs in an isolated context with its own set of tools and preloaded skills.
+
+<CardGrid>
+  <Card icon="warning" title="/pentester">
+    Offensive testing specialist with full Bash access and 6 preloaded workflow skills. Orchestrates multi-tool attack workflows.
+  </Card>
+  <Card icon="approve-check" title="/defender">
+    Defensive analyst with read-only access. Categorizes findings, assesses risk, and provides remediation guidance.
+  </Card>
+  <Card icon="document" title="/analyst">
+    Report synthesis specialist with write access. Correlates findings across scans and produces structured deliverables.
+  </Card>
+</CardGrid>
+
+### /pentester
+
+Offensive pentesting specialist. Invoke with a target to run a full engagement:
+
+```
+/pentester localhost
+```
+
+**Tools available:** Read, Grep, Glob, Bash
+
+**Preloaded skills:** pentest-conventions, recon, scan, fuzz, crack, sniff
+
+The pentester selects the appropriate workflow(s) based on the target type:
+
+| Target Type | Starting Workflow |
+|-------------|------------------|
+| IP address or domain | recon, then scan |
+| Web application URL | scan, then fuzz |
+| Hash file | crack |
+| Network interface or pcap | sniff |
+
+Delivers findings organized by severity with specific evidence and recommended next steps.
+
+### /defender
+
+Defensive security analyst. Invoke after scanning completes to get remediation guidance:
+
+```
+/defender
+```
+
+**Tools available:** Read, Grep, Glob (read-only -- cannot execute commands or modify files)
+
+**Preloaded skills:** pentest-conventions
+
+For each finding, the defender provides:
+
+- **Attack vector** -- how the vulnerability is exploited
+- **Impact** -- what an attacker gains
+- **Exploitability** -- difficulty level
+- **Remediation** -- specific fix with priority
+- **Detection** -- how to detect exploitation attempts
+
+Concludes with an overall security posture rating, systemic issues, and quick wins.
+
+### /analyst
+
+Report synthesis specialist. Invoke after multiple scans to generate a comprehensive report:
+
+```
+/analyst "DVWA Assessment"
+```
+
+**Tools available:** Read, Grep, Glob, Write (can write report files but cannot execute commands)
+
+**Preloaded skills:** pentest-conventions, report
+
+The analyst correlates findings across all scan results:
+
+- Merges overlapping findings from different tools
+- Identifies attack chains (where multiple findings combine for greater impact)
+- Produces a structured report with finding IDs, CVSS scores, and remediation roadmap
+- Writes the report to `report-YYYY-MM-DD.md`
+
+### Persona Comparison
+
+| Persona | Tools | Preloaded Skills | Use Case |
+|---------|-------|-----------------|----------|
+| `/pentester` | Read, Grep, Glob, **Bash** | pentest-conventions, recon, scan, fuzz, crack, sniff | Active scanning and testing |
+| `/defender` | Read, Grep, Glob | pentest-conventions | Post-scan remediation guidance |
+| `/analyst` | Read, Grep, Glob, **Write** | pentest-conventions, report | Report generation and correlation |
+
+## Typical Engagement Flow
+
+A complete engagement using Claude Code, from scope to report:
+
+```
+/scope init                        # 1. Define allowed targets
+/scope add 192.168.1.100           # 2. Add engagement target
+/recon 192.168.1.100               # 3. Discover hosts and services
+/scan http://192.168.1.100:8080    # 4. Scan for vulnerabilities
+/fuzz http://192.168.1.100:8080    # 5. Discover hidden content
+/crack /tmp/hashes.txt             # 6. Crack extracted hashes
+/defender                          # 7. Get defensive recommendations
+/analyst "Engagement Report"       # 8. Generate final report
+```
+
+Each step builds on the previous -- recon discovers services, scan finds vulnerabilities, fuzz reveals hidden paths, and the analyst synthesizes everything into a deliverable.
