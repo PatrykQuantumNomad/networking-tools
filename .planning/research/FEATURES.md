@@ -1,405 +1,254 @@
-# Feature Landscape: Claude Code Skill Pack
+# Feature Research
 
-**Domain:** Claude Code skill pack for ethical hacking / pentesting CLI toolkit
-**Researched:** 2026-02-17
-**Overall confidence:** HIGH
+**Domain:** Claude Code skill publication for pentesting toolkit (skills.sh + plugin marketplace)
+**Researched:** 2026-03-06
+**Confidence:** MEDIUM-HIGH
 
-## Context: Why a Claude Code Skill Pack
+## Context: What Changed Since v1 Research (2026-02-17)
 
-The project has 81 bash scripts across 17 tools with structured JSON output (`-j` flag) on all 46 use-case scripts, dual-mode execution (show vs execute via `-x`), safety banners, and `confirm_execute` gates. This is a complete educational pentesting toolkit, but users must know which scripts exist, what arguments they take, and how to interpret results. A Claude Code skill pack bridges this gap: Claude becomes an intelligent front-end that knows the toolkit, suggests appropriate tools, runs them safely, and explains results.
+The previous research (v1, Feb 17) designed skills that wrap wrapper scripts inside the repo. This research addresses a different problem: **standalone publication** where skills work WITHOUT the repository's `scripts/` directory. The 32 skills, 3 hooks, and 3 agents are already built. The question now is: what features do they need to be publishable on skills.sh and as a Claude Code plugin?
 
-Existing comparable projects: [secskills](https://github.com/trilwu/secskills) (16 skills + 6 agents, generic prompts), [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) (SecLists payloads/wordlists), [claude-code-owasp](https://github.com/agamm/claude-code-owasp) (OWASP Top 10 reference). None wrap a self-contained bash toolkit with structured JSON output. They provide general security guidance or reference material, not tool execution with result analysis.
+Key shifts:
+- skills.sh launched Jan 2026 with 69K+ skills and 2M+ CLI installs -- it is THE discovery platform
+- Claude Code plugin marketplace is now mature (v1.0.33+) with `/plugin install` flow
+- Two competing distribution channels exist: `npx skills add` (cross-agent) and `/plugin marketplace add` (Claude Code native)
+- No competitor ships executable safety hooks alongside security skills -- this is the differentiator
 
-**Key differentiator:** This is the only skill pack that executes real CLI tools with `-j` structured JSON output and has Claude analyze the structured results.
+## Feature Landscape
 
----
+### Table Stakes (Users Expect These)
 
-## Table Stakes
+Features users assume exist. Missing these = product feels incomplete.
 
-Features users expect from a pentesting skill pack. Missing these makes the plugin feel incomplete.
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Self-contained SKILL.md with inline tool knowledge | Every skill on skills.sh works as a standalone folder. Users run `npx skills add` and expect skills to work immediately. Current skills say `bash scripts/nmap/discover-live-hosts.sh -j -x` -- those scripts do not exist outside the repo. | HIGH | This is the single largest transformation: 17 tool skills and 6 workflow skills must contain inline command knowledge so they work without wrapper scripts. Each tool skill needs the actual nmap/sqlmap/nikto commands, flags, and interpretation guidance inline. |
+| YAML frontmatter (name, description) | The skills CLI and Claude Code both require frontmatter for discovery and invocation. Without it, skills are invisible on skills.sh. | DONE | Already present on all 32 skills. Verify `name` uses lowercase-hyphen format (max 64 chars) -- currently compliant. |
+| `disable-model-invocation: true` on action skills | Standard practice for skills with side effects. All security skill competitors use this. Users do not want Claude autonomously launching nmap scans against targets. | DONE | Already set on 28 of 32 skills. The 4 without it (check-tools, lab, netsec-health, pentest-conventions) are correct -- those are reference/utility skills. |
+| Tool installation detection per skill | Users install the skill pack but may not have nmap, sqlmap, or hashcat installed. Skills must detect and provide install guidance. | MEDIUM | Currently handled by wrapper scripts (`require_cmd`). For standalone skills, each SKILL.md needs inline detection: "Run `which nmap` -- if not found, install with `brew install nmap` / `apt install nmap`." Alternatively, use `!` dynamic context injection to detect at skill load time. |
+| Clear descriptions with trigger keywords | Claude uses descriptions to decide when to auto-load skills. Top skills on skills.sh (100K+ installs) write descriptions optimized for relevance matching. | LOW | Current descriptions are functional but miss natural language triggers. Example: nmap description says "Network scanning and host discovery using nmap wrapper scripts" -- should say "Network scanning and host discovery with nmap. Use for port scans, service detection, OS fingerprinting, and vulnerability checks." Drop "wrapper scripts" (meaningless to standalone users). |
+| Plugin manifest (.claude-plugin/plugin.json) | Required for Claude Code plugin marketplace distribution. Without it, `/plugin install` does not work. | LOW | New file. Name, description, version, author, homepage, repository, license, keywords. |
+| marketplace.json | Required for plugin marketplace catalog. Lists all skills, agents, and hooks in the package. | LOW | New file at `.claude-plugin/marketplace.json`. Maps the 32 skills + hooks to their source directories. |
+| Scope management that works standalone | The PreToolUse hook validates targets against `.pentest/scope.json`. This file must be creatable without the repo's Makefile or scripts. | LOW | `/scope init` skill already creates scope.json directly. Verify it works without any repo-specific paths. |
 
-| Feature | Why Expected | Complexity | Depends On | Notes |
-|---------|--------------|------------|------------|-------|
-| **Task-oriented slash commands** (`/scan`, `/recon`, `/crack`, `/fuzz`) | Users think in tasks, not tools. Every security skill pack surfaces actions by methodology phase. PTES defines the standard phases. | MEDIUM | Existing scripts | 6 SKILL.md files mapping to PTES phases. Each invokes underlying bash scripts via `Bash()`. Uses `$ARGUMENTS` for target. |
-| **Tool-level slash commands** (`/nmap`, `/sqlmap`, `/nikto`, etc.) | Users who know which tool they want need direct access without remembering script paths. | LOW | Existing scripts | One SKILL.md per tool (17 total). Thin wrappers: list available scripts, run with `-j` for JSON, let Claude interpret results. |
-| **`/lab` command** (start/stop/status) | Lab targets are the safe practice environment. Friction-free setup is baseline for any security learning tool. | LOW | Docker, docker-compose | Single SKILL.md wrapping `make lab-up`, `lab-down`, `lab-status`. Shows ports and credentials. `disable-model-invocation: true` because it has side effects. |
-| **`/check-tools` command** (verify installation) | Users need to know what is available before scanning. First thing anyone runs. | LOW | `check-tools.sh` | Runs `check-tools.sh`, Claude parses output and advises on missing tools. Can inject via `!` dynamic context. |
-| **JSON output consumption** | All 46 use-case scripts support `-j`. Claude should consume structured JSON, not raw terminal text. | LOW | Existing `-j` flag | Skills instruct Claude to always use `-j` flag and parse the JSON envelope (meta, results, summary) for analysis. |
-| **Safety guardrails** | Ethical hacking demands authorization. Users expect a security-focused skill to enforce safe practices. | LOW | Existing `safety_banner`, `confirm_execute` | Active scanning skills use `disable-model-invocation: true`. Instructions include authorization reminders. `confirm_execute` gates `-x` mode in scripts. |
-| **Target parameter handling** | Users specify targets naturally ("scan 192.168.1.0/24") and expect skills to route correctly. | MEDIUM | `$ARGUMENTS` substitution | Skills parse `$ARGUMENTS` into TARGET. Claude validates format (IP, URL, subnet, domain) before invoking. `argument-hint` frontmatter shows expected format. |
-| **Result interpretation** | Users want Claude to explain what scan results mean, not just dump output. This is the core value of having an AI run pentesting tools. | MEDIUM | JSON output, Claude reasoning | After running a script with `-j -x`, Claude reads JSON and provides: what was found, severity, next steps. Instructions in each skill guide interpretation. |
+### Differentiators (Competitive Advantage)
 
-## Differentiators
+Features that set the product apart. Not required, but valuable.
 
-Features that set this skill pack apart from generic security skills and competing skill packs.
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Safety hooks shipped with package | **No competitor ships executable safety hooks.** awesome-claude-skills-security (Eyadkelleh) has no enforcement. transilienceai/communitytools says "always get permission" with no technical controls. Trail of Bits focuses on code analysis, not runtime scanning guardrails. Shipping PreToolUse scope validation + PostToolUse audit logging is genuinely novel in the ecosystem. | MEDIUM | Plugin format supports `hooks/hooks.json` for auto-registration. Hook scripts must be portable: use `${CLAUDE_PLUGIN_ROOT}` for path resolution instead of `$CLAUDE_PROJECT_DIR`. Current hooks depend on `jq` -- document this dependency. |
+| Dual-mode execution (wrapper-aware + standalone) | Skills detect if wrapper scripts exist (inside the repo) and use them for the full experience (JSON bridge, structured output). Otherwise, fall back to direct tool commands with inline knowledge. No competitor does this. | HIGH | Core architectural pattern. Each tool skill needs: "If `${CLAUDE_SKILL_DIR}/../../../scripts/nmap/discover-live-hosts.sh` exists, run it with `-j -x`. Otherwise, run `nmap -sn <target>` directly and interpret the output." The wrapper path provides the JSON bridge advantage; the standalone path provides universal portability. |
+| Structured JSON output bridge | PostToolUse hook parses JSON from wrapper scripts and injects structured summaries via `additionalContext`. Tool output is automatically parsed and summarized for the agent. No competitor has this automated feedback loop. | DONE | Already built. Only works when wrapper scripts are available (dual-mode wrapper path). In standalone mode, Claude interprets raw tool output directly (still works, just less structured). |
+| Three persona agents (pentester, defender, analyst) | Competitors have generic security agents. Having offensive/defensive/analytical role-based perspectives on the same scan data is pedagogically unique and practically valuable. | LOW | Already built. For plugin distribution, agents go in `agents/` directory at plugin root. Verify they reference skills correctly in the plugin namespace (may need `networking-tools:nmap` instead of just `nmap`). |
+| Multi-tool workflow orchestration | 6 workflow skills (`/recon`, `/scan`, `/crack`, `/fuzz`, `/sniff`, `/diagnose`) compose 3-6 tool operations with decision logic and conditional execution. Transilience has similar scope but with less structured step-by-step methodology. | DONE | Already built. For standalone mode, workflow skills need to reference standalone tool skills (not wrapper scripts). Each step needs the dual-mode pattern. |
+| Audit logging | PostToolUse hook writes to `.pentest/audit.log` with timestamps and commands. Useful for reporting and compliance documentation. No competitor tracks what was executed. | DONE | Already built in netsec-posttool.sh. Ships automatically with the hook package. |
+| Health check (`/netsec-health`) | Self-diagnostic verifying hooks are registered, scope file exists, dependencies present. No competitor has "is my safety infrastructure working?" as a first-run verification. | DONE | Already built. Critical for onboarding: user runs `/netsec-health` immediately after plugin install to verify setup. Must be updated to check plugin-context paths. |
+| Educational inline content | Each skill explains WHY commands work, not just WHAT to run. For standalone mode, this teaching content must be inline in SKILL.md or in supporting `references/` files. | MEDIUM | Current wrapper scripts have this knowledge. For standalone skills, the educational content moves inline. This transforms skills from "run this command" to "here is what this command does, why it matters, and how to interpret results." Competitors list commands; this teaches. |
+| Two-channel distribution | Plugin marketplace for full experience (skills + hooks + agents). skills.sh for broad reach (skills only, works across 37+ agents). No competitor explicitly targets both channels. | LOW | Structural decision. Plugin lives in repo root. skills.sh installation uses `npx skills add patrykquantumnomad/networking-tools`. Both read from the same `skills/` directory. |
 
-| Feature | Value Proposition | Complexity | Depends On | Notes |
-|---------|-------------------|------------|------------|-------|
-| **Workflow chains** (multi-tool orchestration) | Competitors provide individual tools. Chaining recon > enumeration > vuln-analysis > reporting in one conversation is rare and high-value. | HIGH | Task commands, JSON output | A `/pentest` skill follows PTES: runs recon, analyzes results, suggests next-phase scripts. Uses `context: fork` with pentesting agent. |
-| **Pentesting subagent** (`.claude/agents/pentester.md`) | Specialized system prompt with security expertise and PTES methodology. Generic Claude lacks domain-specific judgment for tool chaining. | MEDIUM | Skills, agents system | Custom agent with `allowed-tools: Bash, Read, Grep, Glob`. Preloaded with conventions skill. Used via `context: fork, agent: pentester`. |
-| **Report generation** (`/report`) | Pentesters write reports after every engagement. Auto-generating structured markdown saves hours. | MEDIUM | Result interpretation | Skill reviews conversation, extracts findings from JSON results, generates report: executive summary, methodology, findings with severity, remediation. |
-| **Learning mode** (educational context) | Existing scripts print WHY context. Claude amplifies this by explaining attack theory, defenses, OWASP references. Competitors provide tool guidance but not education. | LOW | Existing script explanations | Background knowledge skill (`user-invocable: false`) instructs Claude to explain security concepts behind each command. |
-| **Lab scenario guides** (`/practice`) | Having targets running is step one. Guided walkthroughs for specific vulnerabilities (SQLi on DVWA, XSS on Juice Shop) are step two. | MEDIUM | Lab running, tool skills | Skills with supporting files. Detects running targets via `!docker compose -f labs/docker-compose.yml ps`. |
-| **Dynamic context injection** | Skills use `!`command`` syntax to inject tool availability and lab status before Claude sees the prompt. Claude adapts to the actual environment. | LOW | `!` command syntax | Prepend workflow skills with `!bash scripts/check-tools.sh 2>/dev/null` so Claude knows what is installed. |
-| **Scope management** (`/scope`) | Real pentests have defined scope. Records authorized targets and enforces checks before active scanning. | MEDIUM | Safety guardrails | Stores scope in `.pentest-scope.json`. Active scanning skills check scope. Claude warns if target out of scope. |
-| **Safety hooks** (PreToolUse validation) | Hook that validates bash commands before execution: warns about scanning external targets, blocks dangerous patterns. Belt-and-suspenders with `disable-model-invocation`. | MEDIUM | hooks system | `hooks/hooks.json` with PreToolUse matcher on Bash tool. Script checks command against safety patterns. |
-| **SessionStart tool check** | Hook that runs `check-tools.sh` at session start to inject tool availability into Claude's context automatically. | LOW | hooks system | SessionStart hook outputs available/missing tools. Claude knows what it can use from the start. |
-| **Use-case discovery** | Skill that helps users find the right script. "I want to find open ports" -> suggests `nmap/discover-live-hosts.sh`. | LOW | All tool skills | Single skill listing all 46 use-case scripts with descriptions, organized by task category. |
+### Anti-Features (Commonly Requested, Often Problematic)
 
-## Anti-Features
+Features that seem good but create problems.
 
-Features to explicitly NOT build.
-
-| Anti-Feature | Why Avoid | What to Do Instead |
-|--------------|-----------|-------------------|
-| **Auto-execute scans without user invocation** | Active scanning without explicit consent violates ethical hacking principles. Could scan unauthorized targets. Claude's Bash tool already requires permission, but skill design must reinforce safety culture. | `disable-model-invocation: true` on all active scanning skills. Require explicit `/scan target` invocation. Keep `confirm_execute` gate in scripts. |
-| **Automatic exploitation** (run exploits without user action) | Exploitation is destructive and context-dependent. Wrong exploit = crashed service, data loss, legal liability. | Show exploit commands with explanation. Let user confirm each step. Never auto-chain exploitation. |
-| **One skill per script** (81 individual skills) | Exceeds Claude's skill description budget (2% of context window, ~16K chars fallback). 81 descriptions flood context, slow every interaction, overwhelm the `/` menu. | Group by task (6 workflow skills) + by tool (17 tool skills, most `disable-model-invocation: true` to stay out of context) = 23-25 skills total. |
-| **MCP server wrapping bash scripts** | Marginal benefit over `-j` flag. Significant implementation complexity (Node.js/Python MCP server). Scripts already produce structured JSON. | Use Bash tool to run scripts with `-j`. Same structured result, zero infrastructure. |
-| **Parsing native tool output formats** | Nmap XML, tshark JSON, sqlmap output have complex schemas. Parsing each is a separate project (see `jc`). | Use `-j` flag for structured envelope output. For native formats, point users to tools directly. |
-| **Interactive terminal passthrough** | Claude Code cannot handle interactive sessions. Tools like msfconsole, john --stdin require sustained interactive I/O. | Show commands. User runs interactive tools in separate terminal. Claude helps interpret results. |
-| **Credential storage** in context or files | Storing secrets in plaintext is a security anti-pattern. Violates responsible disclosure. | Display credentials in output. User manages their own secure notes. Never write credentials to files via skills. |
-| **Persistent background scanning** | Claude Code is conversational, not daemon-like. Background processes outlive context. Could trigger IDS/IPS. | Single-shot scans. Suggest cron/systemd for production monitoring. |
-| **`bypassPermissions`** on any agent | Pentesting tools can be destructive. Bypassing permission checks removes the safety net. | Use `default` or `acceptEdits` permission modes. Let users approve each action. |
-| **Agent teams** (multi-session parallel) | Experimental feature requiring env var flag. Overkill for a skill pack. | Standard subagents handle all needed workflows. |
-
----
-
-## Command Taxonomy
-
-### Recommended Skill Organization
-
-Skills are organized into three tiers matching how pentesters naturally work:
-
-**Tier 1: Workflow Skills (PTES phases)** -- User-invocable AND Claude-invocable
-
-These map to penetration testing methodology phases. Users type `/recon target` and Claude orchestrates the right tools.
-
-| Skill Name | PTES Phase | Scripts Used | Argument |
-|------------|------------|--------------|----------|
-| `/recon` | Intelligence Gathering | nmap/discover-live-hosts, dig/query-dns, gobuster/enumerate-subdomains, curl/check-ssl | `$ARGUMENTS` = target (IP/domain/subnet) |
-| `/scan` | Vulnerability Analysis | nmap/scan-web-vulnerabilities, nikto/scan-specific-vulnerabilities, sqlmap/test-all-parameters | `$ARGUMENTS` = target URL or IP |
-| `/fuzz` | Vulnerability Analysis | gobuster/discover-directories, ffuf/fuzz-parameters | `$ARGUMENTS` = target URL |
-| `/crack` | Exploitation (credentials) | hashcat/crack-*, john/crack-*, john/identify-hash-type | `$ARGUMENTS` = hash or hashfile |
-| `/sniff` | Intelligence Gathering | tshark/capture-http-credentials, tshark/analyze-dns-queries | `$ARGUMENTS` = interface or pcap |
-| `/diagnose` | Pre-engagement | diagnostics/connectivity, diagnostics/dns, diagnostics/performance | `$ARGUMENTS` = target domain |
-
-**Tier 2: Tool Skills** -- User-invocable only (`disable-model-invocation: true`)
-
-Direct tool access for users who know what they want. These stay out of Claude's context to preserve the skill description budget.
-
-| Skill Name | Tool | Scripts Available |
-|------------|------|-------------------|
-| `/nmap` | nmap | examples, identify-ports, discover-live-hosts, scan-web-vulnerabilities |
-| `/sqlmap` | sqlmap | examples, dump-database, test-all-parameters, bypass-waf |
-| `/nikto` | nikto | examples, scan-specific-vulnerabilities, scan-multiple-hosts, scan-with-auth |
-| `/tshark` | tshark | examples, capture-http-credentials, analyze-dns-queries, extract-files-from-capture |
-| `/hashcat` | hashcat | examples, crack-ntlm-hashes, benchmark-gpu, crack-web-hashes |
-| `/john` | john | examples, crack-linux-passwords, crack-archive-passwords, identify-hash-type |
-| `/gobuster` | gobuster | examples, discover-directories, enumerate-subdomains |
-| `/ffuf` | ffuf | examples, fuzz-parameters |
-| `/hping3` | hping3 | examples, test-firewall-rules, detect-firewall |
-| `/netcat` | netcat | examples, scan-ports, setup-listener, transfer-files |
-| `/dig-tool` | dig | examples, query-dns-records, check-dns-propagation, attempt-zone-transfer |
-| `/curl-tool` | curl | examples, test-http-endpoints, check-ssl-certificate, debug-http-response |
-| `/traceroute-tool` | traceroute/mtr | examples, trace-network-path, diagnose-latency, compare-routes |
-| `/aircrack` | aircrack-ng | examples, capture-handshake, crack-wpa-handshake, analyze-wireless-networks |
-| `/foremost` | foremost | examples, recover-deleted-files, carve-specific-filetypes, analyze-forensic-image |
-| `/metasploit` | metasploit | examples, generate-reverse-shell, scan-network-services, setup-listener |
-| `/skipfish` | skipfish | examples, quick-scan-web-app, scan-authenticated-app |
-
-**Tier 3: Utility Skills** -- Mixed invocation
-
-| Skill Name | Purpose | Model-Invocable? | Why |
-|------------|---------|------------------|-----|
-| `/lab` | Start/stop/status Docker lab targets | No | Side effects (starts containers) |
-| `/check-tools` | Verify tool installation | Yes | Useful context for Claude to adapt |
-| `/report` | Generate pentest report from session | No | User-triggered, summarizes conversation |
-| `/scope` | Set/view authorized testing scope | No | User-triggered, defines boundaries |
-| `/practice` | Guided lab walkthrough | Yes | Claude can suggest when user is learning |
-| `pentest-conventions` | Background: PTES methodology, output preferences, safety | No (background, `user-invocable: false`) | Invisible to user, auto-loaded for security context |
-
-### Naming Conventions
-
-- **Workflow skills**: Verb-based, short, memorable (`/recon`, `/scan`, `/fuzz`, `/crack`, `/sniff`, `/diagnose`)
-- **Tool skills**: Tool name directly (`/nmap`, `/sqlmap`, `/nikto`)
-- **Conflict resolution**: Append `-tool` when tool name conflicts with shell builtins or is ambiguous (`/dig-tool`, `/curl-tool`, `/traceroute-tool`)
-- **Utility skills**: Action-based (`/lab`, `/report`, `/scope`)
-- **Background skills**: Descriptive compound name (`pentest-conventions`)
-
-### Skill Description Budget Analysis
-
-Claude Code loads skill descriptions into context at 2% of context window (~16K chars fallback). Budget breakdown:
-
-- **Workflow skills (6)**: Claude-invocable, descriptions in context. ~200 chars each = ~1200 chars.
-- **Tool skills (17)**: `disable-model-invocation: true` -- descriptions NOT in context. Zero budget impact.
-- **Utility skills (6)**: Mixed. Only `check-tools`, `practice`, and `pentest-conventions` are Claude-invocable = 3 descriptions ~600 chars.
-- **Total budget used**: ~1800 chars of ~16K budget. Well within limits.
-
-If skills exceed the budget, run `/context` to check for excluded skills. Override with `SLASH_COMMAND_TOOL_CHAR_BUDGET` env var.
-
----
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Auto-execution of security tools without confirmation | Users want `/recon target` to just run everything | Security tools should never auto-execute without explicit consent. Could scan unauthorized targets, trigger IDS alerts, violate laws. Claude autonomously running nmap is a liability. | Keep `disable-model-invocation: true` on all action skills. Require user invocation via `/skill-name`. Scope validation as hard gate before any scanning. |
+| Bundled wordlists and payloads | awesome-claude-skills-security bundles SecLists. Seems comprehensive. | Massively inflates package size. Wordlists change frequently. Bundling attack payloads creates distribution risk -- GitHub may flag repo. skills.sh security audits (partnered with Snyk, Socket, Gen) may reject packages with payloads. | Reference external wordlist paths. Skills should expect standard install locations (`/usr/share/wordlists/`, SecLists) and detect them. |
+| Raw tool passthrough (bypass skills) | "Let me just run `nmap -sV -p- target`" | Bypasses scope validation, audit logging, and structured output. Defeats the safety architecture. | PreToolUse hook intercepts raw tool invocations. In standalone mode, skills provide inline knowledge so users have no reason to bypass. |
+| Cross-agent hook compatibility | skills.sh supports 37+ agents. Ship hooks for all. | Only Claude Code and Cline support hooks (per npx skills compatibility table). Other agents have no hook system. | Plugin format for Claude Code (full hooks). skills.sh for cross-agent (skills only, no hooks). Two channels, not one compromised channel. |
+| Automatic target discovery | Skills that auto-scan the local network for targets | Scanning without explicit targeting is legally problematic. "It found your neighbor's router" is dangerous. | Always require explicit target. Default to localhost. Require scope.json entry before scanning. |
+| One monolithic skill file | Single SKILL.md containing all 17 tools | Exceeds Claude's skill description budget. Violates the SKILL.md < 500 lines recommendation. Impossible to maintain. | One skill per tool directory. Keep SKILL.md focused, move details to supporting files (references/, examples/). |
+| Interactive terminal passthrough | Users want msfconsole, john --stdin interactive sessions via Claude | Claude Code cannot handle sustained interactive I/O. These tools require terminal control. | Show commands and flags. User runs interactive tools in separate terminal. Claude helps interpret results afterward. |
+| Custom agent for every tool | 17 separate subagents (nmap-agent, sqlmap-agent, etc.) | Agent overhead per invocation. Exceeds useful granularity. Users do not think "I need the nikto agent." | Three role-based agents (pentester, defender, analyst) that load tool skills as context. Role abstraction, not tool abstraction. |
 
 ## Feature Dependencies
 
 ```
-[pentest-conventions] (background knowledge -- foundation for all interactions)
+[SKILL.md standalone transformation]
     |
-    v
-[check-tools] (environment awareness -- everything depends on knowing tools)
+    +--requires--> [Dual-mode execution pattern]
+    |                   |
+    |                   +--requires--> [Inline tool command knowledge per skill]
+    |                   +--requires--> [Tool installation detection (inline)]
+    |                   +--requires--> [Wrapper script detection logic]
     |
-    v
-[lab] (optional but recommended -- provides safe targets)
+    +--enhances--> [Educational inline content]
+
+[Plugin packaging]
     |
-    v
-[Tool skills: /nmap, /sqlmap, etc.] (direct tool access, each wraps scripts)
+    +--requires--> [.claude-plugin/plugin.json manifest]
+    +--requires--> [marketplace.json catalog]
+    +--requires--> [hooks/hooks.json with portable hook scripts]
+    |                   |
+    |                   +--requires--> [Portable PreToolUse (scope validation)]
+    |                   |                   +--requires--> [$CLAUDE_PLUGIN_ROOT path resolution]
+    |                   |
+    |                   +--requires--> [Portable PostToolUse (JSON bridge + audit)]
+    |                                       +--requires--> [$CLAUDE_PLUGIN_ROOT path resolution]
     |
-    v
-[Workflow skills: /recon, /scan, /fuzz, /crack] (orchestrate tool scripts)
+    +--enhances--> [Health check skill (plugin-aware)]
+
+[Scope management (standalone)]
     |
-    v
-[scope] (enhances workflow skills with scope checking)
+    +--requires--> [.pentest/scope.json initialization via /scope init]
+    +--required-by--> [PreToolUse hook]
+    +--required-by--> [All 17 tool skills + 6 workflow skills]
+
+[Workflow skills (standalone)]
     |
-    v
-[report] (requires prior scan results in conversation)
+    +--requires--> [Standalone tool skills (all 17)]
+    +--requires--> [Scope management]
+
+[Persona agents (portable)]
     |
-    v
-[practice] (requires lab + tool skills + conventions)
+    +--requires--> [agents/ directory at plugin root]
+    +--requires--> [Skill namespace resolution (plugin: prefix)]
+    +--requires--> [Standalone workflow skills]
+
+[Description optimization]
     |
-    v
-[safety hooks] (PreToolUse, SessionStart -- enhances all skills)
-    |
-    v
-[pentesting subagent] (requires stable skills to preload)
-    |
-    v
-[/pentest multi-phase] (requires subagent + all workflows + report)
+    +--independent (can be done anytime)
+    +--enhances--> [skills.sh discovery and ranking]
 ```
 
 ### Dependency Notes
 
-- **pentest-conventions must come first:** Sets Claude's behavior for all security interactions -- PTES methodology, `-j` flag usage, safety practices.
-- **Tool skills require check-tools pattern:** Scripts handle this via `require_cmd`, but SKILL.md should instruct Claude to check availability first.
-- **Workflow skills orchestrate tool scripts:** `/recon` runs nmap, dig, gobuster scripts. The scripts must exist and tools must be installed.
-- **Report requires session context:** Runs inline (not forked) so it has access to conversation history and all prior JSON results.
-- **Practice requires lab:** Lab walkthroughs only make sense if Docker targets are running. Check via `!docker compose ps`.
-- **Safety hooks enhance everything:** PreToolUse hooks are additive safety. Can be implemented at any point but should come before agents which have broader permissions.
-- **Subagent requires stable skills:** Agent preloads skills. Skills must be stable before agent design.
-
----
+- **Standalone transformation is the critical path**: Nothing else matters if skills do not work outside the repo. This blocks all other features.
+- **Plugin packaging depends on portable hooks**: Hooks must use `${CLAUDE_PLUGIN_ROOT}` instead of `$CLAUDE_PROJECT_DIR`. Current hooks hardcode project paths.
+- **Workflow skills depend on tool skills being standalone**: `/recon` calls nmap, dig, curl, gobuster. Each must work standalone before the workflow can.
+- **Persona agents need namespace awareness**: In plugin context, skills are namespaced (`networking-tools:nmap`). Agent definitions that reference `/nmap` may need updating to `/networking-tools:nmap`.
+- **Description optimization is independent**: Can be done at any point. High impact for skills.sh ranking with zero dependency on other work.
+- **Scope management is a foundation**: Everything depends on scope.json. The `/scope init` skill must work standalone first.
 
 ## MVP Definition
 
 ### Launch With (v1)
 
-Minimum viable skill pack -- validates that Claude Code + existing bash scripts = useful pentesting assistant.
+Minimum viable product for skills.sh listing and Claude Code plugin marketplace.
 
-- [ ] **pentest-conventions** (background knowledge skill) -- Sets Claude's behavior for all security interactions. PTES methodology, `-j` flag usage, safety practices, result interpretation format. Zero scripts to write, just SKILL.md.
-- [ ] **check-tools** -- First thing any user runs. Wraps `check-tools.sh`. Immediate value, proves the pattern.
-- [ ] **lab** -- Wraps `make lab-up/down/status`. Users need targets before scanning.
-- [ ] **recon** workflow -- First active workflow. Orchestrates nmap, dig, gobuster for reconnaissance. Demonstrates the value: natural language to multi-tool orchestration with result interpretation.
-- [ ] **scan** workflow -- Core pentesting activity. nmap, nikto, sqlmap vulnerability scanning.
-- [ ] **5 tool skills** (/nmap, /sqlmap, /nikto, /gobuster, /ffuf) -- Direct access for power users. Validates tool-level pattern before scaling to all 17.
+- [ ] **17 tool skills rewritten for standalone** -- Each contains inline command knowledge with dual-mode detection (wrapper if available, direct commands otherwise). This is the blocking work.
+- [ ] **6 workflow skills updated for standalone** -- `/recon`, `/scan`, `/crack`, `/fuzz`, `/sniff`, `/diagnose` reference standalone tool skills, not wrapper scripts.
+- [ ] **Plugin manifest** (`.claude-plugin/plugin.json`) -- Name: networking-tools, version: 1.0.0, author, homepage, license (Apache-2.0 or MIT), keywords.
+- [ ] **marketplace.json** -- Lists all 32 skills + hooks for Claude Code plugin marketplace.
+- [ ] **Portable hooks** (`hooks/hooks.json`) -- PreToolUse scope validation and PostToolUse audit logging using `${CLAUDE_PLUGIN_ROOT}` for path resolution.
+- [ ] **Scope init standalone** -- `/scope init` creates `.pentest/scope.json` without any repo-specific dependencies.
+- [ ] **Health check updated** -- `/netsec-health` works in plugin context, checks plugin-relative paths.
+- [ ] **Description keyword optimization** -- All 32 skill descriptions rewritten with natural language trigger keywords. Drop "wrapper scripts" language.
+- [ ] **4 utility skills verified** -- check-tools, lab, pentest-conventions, netsec-health work standalone or degrade gracefully.
 
 ### Add After Validation (v1.x)
 
-- [ ] **Remaining 12 tool skills** -- Scale proven pattern to all 17 tools.
-- [ ] **crack, fuzz, sniff, diagnose** workflows -- Complete the PTES phase coverage.
-- [ ] **report** -- Pentest report generation from session findings.
-- [ ] **scope** -- Authorized scope management.
-- [ ] **Safety hooks** -- PreToolUse validation, SessionStart tool check.
-- [ ] **Use-case discovery** -- Help users find the right script for their task.
+Features to add once core plugin is working and listed.
+
+- [ ] **Supporting reference files** -- `references/cheatsheet.md` per tool skill with flag reference, common scenarios, output interpretation. Triggered by user feedback requesting more depth.
+- [ ] **Persona agent portability** -- Verify pentester, defender, analyst agents work in plugin namespace. Fix any `/nmap` -> `/networking-tools:nmap` references.
+- [ ] **Report skill enhancement** -- `/report` generates structured findings as markdown artifact, not just conversation text.
+- [ ] **Inline version detection** -- Skills detect tool version and adjust command flags accordingly.
+- [ ] **Educational mode toggle** -- A variant that explains every command before suggesting it (learner mode vs. practitioner mode).
 
 ### Future Consideration (v2+)
 
-- [ ] **practice** (lab walkthroughs) -- High content effort for each target/vulnerability. Supporting files needed.
-- [ ] **Pentesting subagent** -- Custom agent with preloaded skills. Defer until skills are stable.
-- [ ] **Plugin packaging** -- `.claude-plugin/plugin.json` for distribution. Defer until mature.
-- [ ] **Multi-phase pentest orchestration** (`/pentest`) -- Full PTES workflow. Requires all tier-1/tier-2 skills stable.
+Features to defer until initial traction is established.
 
----
+- [ ] **MCP server for tool management** -- Instead of bash hooks, an MCP server managing scope, audit, and invocation. Defer: hooks work now, MCP adds complexity.
+- [ ] **Lab environment portability** -- Docker lab management portable outside repo. Defer: lab targets are repo-specific docker-compose.
+- [ ] **Custom wordlist management** -- Skills that detect and manage SecLists, custom dictionaries. Defer: paths are environment-specific.
+- [ ] **Multi-agent coordination** -- Pentester + defender simultaneously. Defer: agent teams are experimental.
+- [ ] **skills.sh category submission** -- Submit to skills.sh curated security category once it exists.
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| pentest-conventions (background) | HIGH | LOW | P1 |
-| check-tools | HIGH | LOW | P1 |
-| lab | HIGH | LOW | P1 |
-| recon workflow | HIGH | MEDIUM | P1 |
-| scan workflow | HIGH | MEDIUM | P1 |
-| 5 initial tool skills | HIGH | LOW | P1 |
-| Remaining 12 tool skills | MEDIUM | LOW | P2 |
-| crack workflow | MEDIUM | MEDIUM | P2 |
-| fuzz workflow | MEDIUM | LOW | P2 |
-| sniff workflow | MEDIUM | MEDIUM | P2 |
-| diagnose workflow | MEDIUM | LOW | P2 |
-| report generation | HIGH | MEDIUM | P2 |
-| scope management | MEDIUM | MEDIUM | P2 |
-| Safety hooks | MEDIUM | MEDIUM | P2 |
-| Use-case discovery | MEDIUM | LOW | P2 |
-| practice (lab walkthroughs) | MEDIUM | HIGH | P3 |
-| Pentesting subagent | MEDIUM | MEDIUM | P3 |
-| Plugin packaging | LOW | MEDIUM | P3 |
-| Multi-phase orchestration | HIGH | HIGH | P3 |
+| 17 tool skills standalone rewrite | HIGH | HIGH | P1 |
+| 6 workflow skills standalone update | HIGH | MEDIUM | P1 |
+| Plugin manifest + marketplace.json | HIGH | LOW | P1 |
+| Portable safety hooks | HIGH | MEDIUM | P1 |
+| Scope init standalone | HIGH | LOW | P1 |
+| Health check update | MEDIUM | LOW | P1 |
+| Description keyword optimization | MEDIUM | LOW | P1 |
+| 4 utility skills verification | MEDIUM | LOW | P1 |
+| Supporting reference files | MEDIUM | MEDIUM | P2 |
+| Persona agent portability | MEDIUM | MEDIUM | P2 |
+| Report skill enhancement | MEDIUM | MEDIUM | P2 |
+| Inline version detection | LOW | MEDIUM | P3 |
+| Educational mode toggle | LOW | MEDIUM | P3 |
+| MCP server replacement | LOW | HIGH | P3 |
 
 **Priority key:**
-- P1: Must have for launch -- validates the skill pack concept
-- P2: Should have, add after core skills are proven
-- P3: Nice to have, defer until foundation is solid
-
----
-
-## User Workflow Patterns
-
-### Pattern 1: "I have a target, what should I do?"
-```
-User: I need to test 192.168.1.0/24
-Claude: (pentest-conventions loads, checks installed tools, checks scope)
-        Suggests starting with reconnaissance.
-User: /recon 192.168.1.0/24
-Claude: Runs discover-live-hosts.sh -j -x, parses JSON, shows live hosts.
-        Runs query-dns on found hosts, identifies web servers.
-        Suggests: "Found 3 live hosts with web servers. Run /scan on port 80/443?"
-User: /scan 192.168.1.50
-Claude: Runs nmap scan-web-vulnerabilities -j -x, nikto -j -x.
-        Parses JSON results, explains findings with severity.
-User: /report
-Claude: Generates structured report from conversation findings.
-```
-
-### Pattern 2: "I know my tool, give me direct access"
-```
-User: /nmap
-Claude: Shows available nmap scripts:
-        - examples.sh (10 generic examples)
-        - identify-ports.sh (port identification workflow)
-        - discover-live-hosts.sh (subnet host discovery)
-        - scan-web-vulnerabilities.sh (web vuln scanning)
-User: /nmap identify-ports 10.0.0.1
-Claude: Runs identify-ports.sh 10.0.0.1 -j -x
-        Parses JSON envelope, explains each discovered service.
-```
-
-### Pattern 3: "I am learning, walk me through it"
-```
-User: /lab
-Claude: Starts lab, shows targets and credentials.
-User: /practice sql-injection
-Claude: Walks through SQLi testing on DVWA step by step.
-User: Why did that work?
-Claude: (pentest-conventions activates) Explains SQL injection,
-        parameterized queries, OWASP reference.
-```
-
-### Pattern 4: "Diagnose a network problem"
-```
-User: My connection to example.com seems slow
-Claude: (suggests /diagnose based on context)
-User: /diagnose example.com
-Claude: Runs diagnostics/connectivity.sh, diagnostics/performance.sh
-        Parses results, identifies the bottleneck hop.
-```
-
----
-
-## Implementation Patterns
-
-### SKILL.md Pattern for Tool Skills
-
-```yaml
----
-name: nmap
-description: Network scanning with nmap. Discover hosts, scan ports, detect services.
-disable-model-invocation: true
-argument-hint: [script-name] [target]
-allowed-tools: Bash(bash scripts/nmap/*), Read
----
-
-# nmap - Network Scanner
-
-Available scripts:
-- **examples** -- 10 common nmap examples
-- **identify-ports** -- Identify services behind open ports
-- **discover-live-hosts** -- Find live hosts on a subnet
-- **scan-web-vulnerabilities** -- Scan web servers for vulnerabilities
-
-## Usage
-
-Run the requested script with `-j` for structured JSON output:
-
-bash scripts/nmap/$ARGUMENTS[0].sh $ARGUMENTS[1] -j -x
-
-## Rules
-- Always use `-j` flag for structured JSON output you can analyze
-- Parse the JSON envelope: look at `results` array and `summary`
-- Explain findings to the user with severity and next steps
-- If tool not installed, show install hint from check-tools.sh
-```
-
-### SKILL.md Pattern for Workflow Skills
-
-```yaml
----
-name: recon
-description: Reconnaissance and intelligence gathering on a target. Use when user wants to discover hosts, enumerate DNS, find subdomains.
-argument-hint: [target IP, domain, or subnet]
-allowed-tools: Bash(bash scripts/*), Read, Grep
----
-
-# Reconnaissance Workflow
-
-Perform intelligence gathering on $ARGUMENTS following PTES Phase 2.
-
-## Environment
-- Installed tools: !`bash scripts/check-tools.sh 2>/dev/null | grep -E '(nmap|dig|gobuster|curl)' | head -10`
-- Lab status: !`docker compose -f labs/docker-compose.yml ps 2>/dev/null | tail -5`
-
-## Steps
-1. **Host Discovery**: `bash scripts/nmap/discover-live-hosts.sh $ARGUMENTS -j -x`
-2. **DNS Enumeration**: `bash scripts/dig/query-dns-records.sh $ARGUMENTS -j -x`
-3. **Subdomain Discovery** (if domain): `bash scripts/gobuster/enumerate-subdomains.sh $ARGUMENTS -j -x`
-4. **SSL/TLS Check** (if HTTPS): `bash scripts/curl/check-ssl-certificate.sh $ARGUMENTS -j -x`
-
-## After each step
-- Parse JSON output
-- Summarize findings
-- Suggest next steps based on results
-
-## Safety
-- Verify target is authorized before scanning
-- Only scan targets the user explicitly provides
-```
-
----
+- P1: Must have for launch on skills.sh and plugin marketplace
+- P2: Should have, add after initial listing and user feedback
+- P3: Nice to have, defer until established traction
 
 ## Competitor Feature Analysis
 
-| Feature | secskills (trilwu) | awesome-claude-skills-security | claude-code-owasp | Our Approach |
-|---------|-------------------|-------------------------------|-------------------|--------------|
-| Skills count | 16 skills + 6 agents | Curated wordlists/payloads | Single OWASP skill | 6 workflow + 17 tool + 6 utility = 29 |
-| Underlying tools | Generic prompt guidance | SecLists data files | No tool integration | 81 real bash scripts with JSON output |
-| Structured output | None | None | None | All scripts: `-j` JSON envelope |
-| Educational content | Minimal | None | OWASP Top 10 reference | WHY explanations in every script |
-| Lab environment | None | None | None | Docker targets (DVWA, Juice Shop, WebGoat, VulnerableApp) |
-| Dual execution | N/A | N/A | N/A | Show mode + Execute mode |
-| Methodology | Ad-hoc categories | Payload categories | OWASP framework | PTES 7-phase methodology |
-| Distribution | Plugin | Plugin | Plugin/skill | Project skills, future plugin |
+| Feature | Trail of Bits | Transilience | awesome-claude-skills-security | alirezarezvani/claude-skills | Our Approach |
+|---------|---------------|--------------|-------------------------------|------------------------------|--------------|
+| **Distribution** | Plugin marketplace | Manual .claude/ copy | Plugin format | Marketplace + manual | Dual: plugin marketplace + npx skills add |
+| **Skill count** | ~20 security skills | 7 skills + 35 agents | 7 categories + 5 commands | 169 skills (all domains) | 32 skills + 3 agents + 3 hooks |
+| **Safety enforcement** | None (trust user) | Docs only ("get permission") | Docs only ("authorized use") | Skill security auditor (static) | Technical: PreToolUse scope validation, PostToolUse audit logging |
+| **Hook shipping** | None | None | None | None | 3 hooks: PreToolUse, PostToolUse, health check |
+| **Tool dependencies** | Assumes installed | Assumes installed | Bundles wordlists | Zero-dep Python tools | Detect + guide: check tool, show install if missing |
+| **Workflow orchestration** | Single-tool skills | Agent-based workflows | Slash commands only | Skill-by-skill | Multi-step workflows composing tool skills with decision logic |
+| **Educational content** | Minimal | PortSwigger walkthroughs | Wordlist descriptions | Domain-specific guides | Inline explanations of why each command works |
+| **Cross-agent support** | Claude Code only | Claude Code only | Claude Code only | Claude Code + Codex | Claude Code plugin (full) + skills.sh 37+ agents (skills only) |
+| **Audit trail** | None | None | None | None | Timestamped .pentest/audit.log |
+| **Standalone operation** | Yes (no tool deps) | Yes (uses curl/httpx) | Yes (bundles data) | Yes (stdlib Python) | Dual-mode: uses wrappers if available, direct commands otherwise |
 
----
+### Key Competitive Insight
+
+**No competitor ships executable safety hooks alongside pentesting skills.** The combination of scope validation + audit logging + health checks is genuinely differentiated. This should be the headline feature: "The only pentesting skill pack with built-in safety controls."
+
+Secondary differentiator: dual-mode execution. Skills that work better inside the repo (JSON bridge, structured output) but still work everywhere else (direct commands, Claude interprets output). No competitor does this.
+
+## Distribution Strategy
+
+### Channel 1: Claude Code Plugin (Full Experience)
+
+```
+Install: /plugin marketplace add patrykquantumnomad/networking-tools
+         /plugin install networking-tools@patrykquantumnomad-networking-tools
+```
+
+- All 32 skills (namespaced as `/networking-tools:nmap`, `/networking-tools:recon`)
+- 3 persona agents (pentester, defender, analyst)
+- Safety hooks auto-registered via `hooks/hooks.json`
+- Scope management operational
+- JSON bridge active when wrapper scripts present
+- Full audit logging
+
+### Channel 2: skills.sh / npx skills (Broad Reach)
+
+```
+Install: npx skills add patrykquantumnomad/networking-tools
+```
+
+- All 32 skills (no namespace prefix)
+- Works across Claude Code, Cursor, Codex, Goose, and 37+ agents
+- No hooks (most agents do not support them)
+- Skills operate in standalone mode with inline knowledge
+- Safety relies on skill instructions rather than hook enforcement
+
+### Why Two Channels
+
+The plugin format is the superior experience (hooks, agents, structured output). But skills.sh has 2M+ CLI installs and 69K+ skills -- it is the discovery platform. Publishing both maximizes reach (skills.sh for discovery) while the plugin provides depth (full safety architecture). The same skill files serve both channels -- no duplication needed.
 
 ## Sources
 
-- [Claude Code Skills Documentation](https://code.claude.com/docs/en/skills) -- Official reference: SKILL.md format, frontmatter fields, `$ARGUMENTS`, `!` dynamic context injection, `context: fork`, `disable-model-invocation`, skill description budget (2% context window, 16K fallback), supporting files, `allowed-tools` (HIGH confidence)
-- [Claude Code Plugins Reference](https://code.claude.com/docs/en/plugins-reference) -- Plugin manifest schema, directory structure (`skills/`, `agents/`, `hooks/`, `.mcp.json`), distribution scopes, `${CLAUDE_PLUGIN_ROOT}`, CLI commands (HIGH confidence)
-- [secskills (trilwu/secskills)](https://github.com/trilwu/secskills) -- Existing security plugin: 16 skills (web, AD, cloud, mobile, wireless, post-exploitation) + 6 subagents (pentester, cloud-pentester, mobile-pentester, web3-auditor, red-team-operator, recon-specialist) (MEDIUM confidence)
-- [awesome-claude-skills-security (Eyadkelleh)](https://github.com/Eyadkelleh/awesome-claude-skills-security) -- SecLists-based security testing resources as Claude Code skills (MEDIUM confidence)
-- [claude-code-owasp (agamm)](https://github.com/agamm/claude-code-owasp) -- OWASP Top 10:2025 + ASVS 5.0 reference skill with code review checklists (MEDIUM confidence)
-- [VoltAgent penetration-tester subagent](https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/categories/04-quality-security/penetration-tester.md) -- Agent definition: allowed tools (Read, Grep, Glob, Bash), Opus model, PTES-aligned workflow (MEDIUM confidence)
-- [PTES - Penetration Testing Execution Standard](http://www.pentest-standard.org/index.php/Main_Page) -- 7-phase methodology: pre-engagement, intelligence gathering, threat modeling, vulnerability analysis, exploitation, post-exploitation, reporting (HIGH confidence)
-- [OWASP Web Security Testing Guide](https://owasp.org/www-project-web-security-testing-guide/latest/3-The_OWASP_Testing_Framework/1-Penetration_Testing_Methodologies) -- Web security testing methodology (HIGH confidence)
-- Codebase analysis: direct reading of 81 scripts, lib/ modules (args.sh, json.sh, output.sh), Makefile, check-tools.sh, CLAUDE.md, existing GSD commands (HIGH confidence)
+- [Claude Code Skills Documentation](https://code.claude.com/docs/en/skills) -- SKILL.md format, frontmatter reference, invocation control, `$ARGUMENTS`, `${CLAUDE_SKILL_DIR}`, supporting files, skill description budget (HIGH confidence)
+- [Claude Code Plugins Documentation](https://code.claude.com/docs/en/plugins) -- Plugin structure, hooks.json, manifest, marketplace distribution, `${CLAUDE_PLUGIN_ROOT}` (HIGH confidence)
+- [Claude Code Plugin Marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) -- marketplace.json schema, hosting, distribution, plugin sources, strict mode (HIGH confidence)
+- [Claude Code Discover Plugins](https://code.claude.com/docs/en/discover-plugins) -- Official marketplace, install commands, plugin management (HIGH confidence)
+- [skills.sh](https://skills.sh/) -- Skills directory and leaderboard, 69K+ skills, 2M+ installs (HIGH confidence)
+- [npx skills CLI (vercel-labs/skills)](https://github.com/vercel-labs/skills) -- Installation tool, symlink vs copy, agent compatibility matrix, hooks support only Claude Code + Cline (HIGH confidence)
+- [Vercel Skills Night](https://vercel.com/blog/skills-night-69000-ways-agents-are-getting-smarter) -- Ecosystem scale and security partnerships (MEDIUM confidence)
+- [Trail of Bits Skills](https://github.com/trailofbits/skills) -- Competitor: security research skills, plugin marketplace, ~91 commits (MEDIUM confidence)
+- [Transilience Community Tools](https://github.com/transilienceai/communitytools) -- Competitor: 7 pentesting skills, 35+ agents, no hooks (MEDIUM confidence)
+- [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) -- Competitor: SecLists-based security skills, no enforcement (MEDIUM confidence)
+- [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) -- Competitor: 169 skills, 2,300+ stars, zero-dep Python tools (MEDIUM confidence)
+- [Claude Code FAQ on Skills vs Plugins](https://x.com/claude_code/status/2009479585172242739) -- "Plugins are containers for distributing skills" (MEDIUM confidence)
 
 ---
-*Feature research for: Claude Code ethical hacking skill pack*
-*Researched: 2026-02-17*
+*Feature research for: Claude Code pentesting skill publication to skills.sh*
+*Researched: 2026-03-06*

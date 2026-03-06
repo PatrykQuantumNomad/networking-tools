@@ -1,249 +1,352 @@
-# Stack Research: Claude Code Skill Pack
+# Stack Research: skills.sh Publishing
 
-**Domain:** Claude Code plugin/skill pack for pentesting toolkit
-**Researched:** 2026-02-17
+**Domain:** Publishing standalone Claude Code skills to skills.sh from an existing pentesting toolkit
+**Researched:** 2026-03-06
 **Confidence:** HIGH
+
+## Executive Summary
+
+Publishing to skills.sh requires **zero new dependencies**. The platform uses git-based discovery -- skills live in a public GitHub repo, users install them via `npx skills add owner/repo`, and skills.sh indexes repos automatically through anonymous CLI telemetry. There is no submission process, no API, no registry. The existing 32 SKILL.md files already follow the Agent Skills open standard (agentskills.io) and need only format adjustments to work as standalone installable skills.
+
+The critical insight: skills.sh discovers skills in `.claude/skills/` directories automatically. The networking-tools repo already has this structure. The work is not about adding technology -- it is about refining existing SKILL.md content so skills function independently of the repo's wrapper scripts, and structuring the repo so `npx skills add PatrykQuantumNomad/networking-tools` discovers all 32 skills correctly.
 
 ## Recommended Stack
 
-### Core Technologies
+### Core Technologies (No Changes Needed)
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| Claude Code Plugin System | 1.0.33+ | Primary distribution format | Official packaging mechanism for skills, agents, hooks, and MCP servers. Supports marketplace distribution, versioning, and team sharing. The plugin system supersedes standalone `.claude/commands/` files for distributable packages. |
-| SKILL.md (Agent Skills format) | Current | Skill definitions | The modern replacement for `.claude/commands/*.md` files. Skills support directories with supporting files, model-invocation control, subagent context forking, and dynamic context injection via `!`command`` syntax. Commands still work but skills are the recommended path forward. |
-| Markdown + YAML frontmatter | N/A | Skill/agent/command authoring | All Claude Code extensibility uses Markdown body with YAML frontmatter for configuration. No build step, no compilation, pure text files. |
-| JSON | N/A | Hook/MCP/settings configuration | `hooks.json`, `plugin.json`, `marketplace.json`, `.mcp.json` all use JSON. No YAML, no TOML -- JSON only for configuration files. |
-| Bash | 4.0+ | Script runtime and hook commands | The project is bash-first. Hook commands execute bash scripts. The existing 81 scripts with `-j/--json` structured output are directly usable by Claude via hooks and skills. |
-| Node.js | 18+ | Hook scripts (when complex JSON parsing needed) | Claude Code hooks receive JSON via stdin. For complex JSON processing, Node.js scripts are more robust than bash+jq. The existing GSD hooks (`gsd-check-update.js`, `gsd-statusline.js`) already demonstrate this pattern in this repo. |
-| jq | 1.6+ | JSON parsing in hook commands | Lightweight alternative to Node.js for simple hook commands. Official Claude Code docs recommend jq for extracting fields from hook JSON input. Already a validated dependency in this project from the JSON output milestone. |
+| SKILL.md (YAML + Markdown) | Agent Skills spec v1 | Skill definition format | The open standard adopted by Anthropic, Microsoft, OpenAI, Cursor, and 15+ agent platforms. Already in use in this repo. |
+| Git / GitHub | Current | Distribution mechanism | skills.sh uses GitHub as the source of truth. Repos are fetched directly. No package registry needed. |
+| Bash + jq | System-installed | Hook scripts | Already in use for netsec-pretool.sh, netsec-posttool.sh, netsec-health.sh. No changes needed. |
+| `npx skills` (Vercel CLI) | Latest on npm | Installation CLI | The CLI that powers skills.sh. Users run `npx skills add` to install. Publishers do NOT need to install it themselves. |
 
-### Plugin Directory Structure
+### Supporting Tools (Optional, for Testing)
 
-| Component | Location | Purpose | When to Use |
-|-----------|----------|---------|-------------|
-| `.claude-plugin/plugin.json` | Plugin root | Manifest: name, version, description, author | Always required. Defines the plugin identity and namespace. |
-| `skills/<skill-name>/SKILL.md` | Plugin root | Skill directories with main instructions + supporting files | Primary way to expose tool commands and workflows. Each pentesting tool gets a skill directory. |
-| `agents/` | Plugin root | Custom subagent definitions as .md files | Specialized personas: `pentester.md`, `defender.md`, `recon-analyst.md` |
-| `hooks/hooks.json` | Plugin root | Event handlers: PreToolUse, PostToolUse, SessionStart, etc. | Safety guardrails (warn before destructive commands), environment setup, output formatting |
-| `commands/` | Plugin root | Simple slash commands (legacy, still supported) | Quick single-file commands that don't need supporting files |
-| `scripts/` | Plugin root | Bash/Node scripts invoked by hooks or referenced by skills | Hook command targets, helper scripts bundled with the plugin |
+| Tool | Version | Purpose | When to Use |
+|------|---------|---------|-------------|
+| `npx skills` CLI | npm `skills` package | Test installation locally | Run `npx skills add ./` to test self-install during development |
+| `skills-ref` validator | github.com/agentskills/agentskills | Validate SKILL.md frontmatter | Run `skills-ref validate ./my-skill` to catch naming/format errors before publishing |
 
-### Skill Frontmatter Reference (Complete)
-
-| Field | Required | Purpose | Relevant Values for This Project |
-|-------|----------|---------|----------------------------------|
-| `name` | No (defaults to directory name) | Slash command name. Lowercase, hyphens, max 64 chars | `nmap-scan`, `recon-workflow`, `lab-setup` |
-| `description` | Recommended | When Claude should use this skill. Claude reads this to auto-invoke | "Scan a target network with nmap for open ports and services" |
-| `argument-hint` | No | Autocomplete hint for user arguments | `[target-ip]`, `[url]`, `[interface]` |
-| `disable-model-invocation` | No | `true` = only user can invoke via `/name`. Prevents Claude auto-triggering | `true` for destructive operations (exploitation, active scanning) |
-| `user-invocable` | No | `false` = hidden from `/` menu, only Claude can invoke | `false` for background knowledge skills (conventions, safety rules) |
-| `allowed-tools` | No | Tools Claude can use without permission when skill is active | `Bash, Read, Grep, Glob` for read-only; add `Write` for report generation |
-| `model` | No | Override model for this skill | Generally omit (inherit from session) |
-| `context` | No | `fork` = run in isolated subagent context | `fork` for long-running scans that shouldn't consume main context |
-| `agent` | No | Which subagent type when `context: fork` | `Explore` for read-only research, custom agent names for specialized work |
-| `hooks` | No | Lifecycle hooks scoped to this skill's active period | Per-skill safety validation hooks |
-
-### Agent Frontmatter Reference (Complete)
-
-| Field | Required | Purpose | Relevant Values |
-|-------|----------|---------|-----------------|
-| `name` | Yes | Agent identifier, lowercase + hyphens | `pentester`, `defender`, `recon-analyst` |
-| `description` | Yes | When Claude should delegate to this agent | Detailed description of specialization |
-| `tools` | No | Allowlist of tools. Inherits all if omitted | `Read, Grep, Glob, Bash` (restrict per role) |
-| `disallowedTools` | No | Denylist: removed from inherited tools | `Write, Edit` for read-only agents |
-| `model` | No | `sonnet`, `opus`, `haiku`, or `inherit` | `haiku` for fast recon, `inherit` for complex analysis |
-| `permissionMode` | No | `default`, `acceptEdits`, `dontAsk`, `plan`, `bypassPermissions` | `default` for safety. Never `bypassPermissions` for pentesting. |
-| `maxTurns` | No | Maximum agentic turns before agent stops | Set to prevent runaway scanning loops |
-| `skills` | No | Skills to preload into agent context at startup | Preload safety guidelines, tool conventions |
-| `memory` | No | Persistent memory scope: `user`, `project`, `local` | `project` for learning target-specific patterns |
-| `hooks` | No | Agent-scoped lifecycle hooks | PreToolUse validation for command safety |
-| `mcpServers` | No | MCP servers available to this agent | Generally not needed -- direct bash execution suffices |
-
-### Hook Event Types (Complete Reference)
-
-| Event | When | Can Block? | Matcher Field | Key Use for This Project |
-|-------|------|-----------|---------------|--------------------------|
-| `SessionStart` | Session begins/resumes | No (can add context) | Source: startup/resume/clear/compact | Inject safety reminders, check tool availability |
-| `UserPromptSubmit` | User submits prompt | Yes | None (always fires) | Validate prompts don't request unauthorized targets |
-| `PreToolUse` | Before tool executes | Yes (allow/deny/ask) | Tool name | Block dangerous bash commands, validate targets |
-| `PermissionRequest` | Permission dialog shown | Yes (allow/deny) | Tool name | Auto-allow safe read-only commands |
-| `PostToolUse` | After tool succeeds | No (can provide feedback) | Tool name | Log executed commands, format output |
-| `PostToolUseFailure` | After tool fails | No | Tool name | Suggest troubleshooting steps |
-| `Notification` | Claude sends notification | No | Notification type | Desktop notification for long scans |
-| `SubagentStart` | Subagent spawned | No (can add context) | Agent type | Inject target-specific context |
-| `SubagentStop` | Subagent finishes | Yes | Agent type | Validate scan results before reporting |
-| `Stop` | Claude finishes responding | Yes | None (always fires) | Ensure safety summary included |
-| `PreCompact` | Before context compaction | No | manual/auto | Preserve critical scan findings |
-| `SessionEnd` | Session terminates | No | Exit reason | Cleanup temp files, save session log |
-
-### Hook I/O Protocol
-
-| Aspect | Detail |
-|--------|--------|
-| **Input** | JSON via stdin: `session_id`, `cwd`, `hook_event_name`, `tool_name`, `tool_input`, `permission_mode` |
-| **Exit 0** | Allow action. Stdout parsed as JSON for structured control. For SessionStart/UserPromptSubmit, stdout added to Claude's context. |
-| **Exit 2** | Block action. Stderr fed back to Claude as error message. |
-| **Other exits** | Non-blocking error. Stderr shown in verbose mode only (`Ctrl+O`). |
-| **PreToolUse decisions** | JSON via stdout: `hookSpecificOutput.permissionDecision` = `"allow"` / `"deny"` / `"ask"` |
-| **PostToolUse/Stop decisions** | Top-level `decision: "block"` with `reason` field |
-| **Context injection** | `hookSpecificOutput.additionalContext` string added to Claude's context |
-| **Modified input** | `hookSpecificOutput.updatedInput` modifies tool parameters before execution |
-| **Environment** | `$CLAUDE_PROJECT_DIR` = project root, `${CLAUDE_PLUGIN_ROOT}` = plugin install dir, `$CLAUDE_ENV_FILE` = env persistence (SessionStart only) |
-
-### Dynamic Context Injection in Skills
-
-| Syntax | Purpose | Example |
-|--------|---------|---------|
-| `$ARGUMENTS` | All user arguments | `/nmap-scan 192.168.1.0/24` -> `$ARGUMENTS` = `192.168.1.0/24` |
-| `$ARGUMENTS[N]` or `$N` | Positional argument (0-based) | `$0` = first arg, `$1` = second |
-| `${CLAUDE_SESSION_ID}` | Current session ID | Logging, session-specific files |
-| `` !`command` `` | Shell command output injected before Claude sees the skill | `` !`make check 2>/dev/null` `` to show installed tools |
-
-### Distribution: Marketplace Configuration
-
-| Field | Type | Required | Purpose |
-|-------|------|----------|---------|
-| `name` | string | Yes | Marketplace identifier (kebab-case). Users see this: `/plugin install tool@name` |
-| `owner.name` | string | Yes | Marketplace maintainer name |
-| `owner.email` | string | No | Contact email |
-| `metadata.description` | string | No | Brief marketplace description |
-| `metadata.version` | string | No | Marketplace format version |
-| `plugins[].name` | string | Yes | Plugin identifier |
-| `plugins[].source` | string or object | Yes | Where to fetch: `"./path"`, `{source: "github", repo: "owner/repo"}` |
-| `plugins[].description` | string | No | Plugin description |
-| `plugins[].version` | string | No | Plugin version (semver). If also in plugin.json, plugin.json wins. |
-
-### Plugin Source Types
-
-| Source | Format | Best For |
-|--------|--------|----------|
-| Relative path | `"./plugins/my-plugin"` | Monorepo marketplace with all plugins in one repo |
-| GitHub | `{source: "github", repo: "owner/repo", ref: "v1.0", sha: "abc123"}` | Independent plugin repos. Recommended for this project. |
-| Git URL | `{source: "url", url: "https://gitlab.com/team/plugin.git"}` | Non-GitHub git hosts |
-| npm | `{source: "npm", package: "name", version: "^1.0"}` | **Not yet fully implemented per official docs. Avoid.** |
-| pip | `{source: "pip", package: "name"}` | Python-based plugins (not relevant here) |
-
-## Development Tools
+### Development Tools
 
 | Tool | Purpose | Notes |
 |------|---------|-------|
-| `claude --plugin-dir ./path` | Local plugin testing without installation | Supports multiple `--plugin-dir` flags for loading multiple plugins simultaneously |
-| `claude plugin validate .` | Validate marketplace/plugin JSON syntax | Also available as `/plugin validate .` within Claude Code |
-| `claude --debug` | Debug hook execution | Shows matched hooks, exit codes, stdout/stderr output |
-| `/hooks` menu | Interactive hook management | View, add, delete hooks. Changes take effect immediately. |
-| `/plugin` menu | Interactive plugin management | Install, enable, disable, update plugins |
-| `/context` | Check skill loading status | Shows if skills are excluded due to character budget limits |
-| `Ctrl+O` | Toggle verbose mode | See hook output in transcript |
-| BATS | Test bash scripts bundled with plugin | Existing 435-test suite. Test scripts independently before packaging. |
+| `npx skills init` | Scaffold new SKILL.md files | Creates properly formatted frontmatter template. Useful if adding new skills. |
+| `npx skills list` | Verify installed skills | Test that installation puts skills in correct locations |
+
+## How skills.sh Publishing Works
+
+### The Publishing Pipeline (There Is None)
+
+skills.sh has NO explicit publish step. The flow is:
+
+1. Put SKILL.md files in a **public GitHub repo** following the standard directory structure
+2. Share the install command: `npx skills add PatrykQuantumNomad/networking-tools`
+3. When users run that command, anonymous telemetry registers installs on skills.sh
+4. The skill appears on the skills.sh leaderboard, ranked by install count
+5. There is no approval process, no review queue, no API key
+
+### How the CLI Discovers Skills
+
+The `npx skills add` CLI searches these locations in order:
+
+1. Root directory (if it contains `SKILL.md`)
+2. `skills/` directory and subdirectories
+3. `skills/.curated/`, `skills/.experimental/`, `skills/.system/`
+4. `.agents/skills/` directory
+5. **`.claude/skills/` directory** (this is where networking-tools stores its skills)
+6. `.cursor/skills/`, `.codex/skills/`, and other agent-specific paths
+7. Recursive fallback search if nothing found in standard paths
+8. `.claude-plugin/marketplace.json` or `.claude-plugin/plugin.json` manifest files
+
+Since networking-tools already uses `.claude/skills/<name>/SKILL.md`, the CLI will discover all 32 skills automatically.
+
+### Installing Specific Skills
+
+Users can install individual skills:
+```bash
+npx skills add PatrykQuantumNomad/networking-tools --skill nmap
+npx skills add PatrykQuantumNomad/networking-tools --skill recon --skill scan
+```
+
+Or install all skills at once:
+```bash
+npx skills add PatrykQuantumNomad/networking-tools
+```
+
+Target specific agents:
+```bash
+npx skills add PatrykQuantumNomad/networking-tools -a claude-code
+npx skills add PatrykQuantumNomad/networking-tools -a cursor
+```
+
+### Where Skills Get Installed
+
+The CLI installs to `.agents/skills/` and creates symlinks to each detected agent's directory (`.claude/skills/`, `.cursor/skills/`, `.codex/skills/`, etc.). Users can choose symlinks (recommended) or independent copies.
+
+## SKILL.md Format Specification
+
+### Required Frontmatter Fields (Agent Skills Standard)
+
+| Field | Required | Constraints | Example |
+|-------|----------|-------------|---------|
+| `name` | **Yes** | 1-64 chars, lowercase alphanumeric + hyphens, no leading/trailing/consecutive hyphens, must match parent directory name | `nmap` |
+| `description` | **Yes** | 1-1024 chars, describe what it does AND when to use it | `Network scanning and host discovery. Use when you need port scans, service detection, or host enumeration.` |
+
+### Optional Frontmatter Fields (Agent Skills Standard)
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `license` | License identifier or reference | `MIT` |
+| `compatibility` | Environment requirements (max 500 chars) | `Requires nmap and bash. Designed for Claude Code.` |
+| `metadata` | Arbitrary key-value pairs (string-to-string map) | `author: PatrykQuantumNomad`, `version: "2.0"` |
+| `allowed-tools` | Space-delimited pre-approved tools (experimental) | `Bash Read Grep` |
+
+### Claude Code Extension Fields (Beyond Standard)
+
+These fields work in Claude Code but may be ignored by other agents:
+
+| Field | Purpose | Current Usage in Repo |
+|-------|---------|----------------------|
+| `disable-model-invocation` | Prevent Claude from auto-invoking (manual `/name` only) | Used by all 17 tool skills and most workflow skills |
+| `user-invocable` | Set `false` to hide from `/` menu (background knowledge only) | Used by `pentest-conventions` |
+| `argument-hint` | Autocomplete hint for expected arguments | Used by workflow skills (`<target>`, `<hashfile-or-hash>`) |
+| `context` | Set to `fork` to run in subagent | Not currently used |
+| `agent` | Which subagent to use with `context: fork` | Not currently used |
+| `model` | Override model for this skill | Not currently used |
+| `hooks` | Skill-scoped lifecycle hooks | Not currently used |
+
+### String Substitution Variables
+
+| Variable | Description |
+|----------|-------------|
+| `$ARGUMENTS` | All arguments passed when invoking the skill |
+| `$ARGUMENTS[N]` / `$N` | Access specific argument by 0-based index |
+| `${CLAUDE_SESSION_ID}` | Current session ID |
+| `${CLAUDE_SKILL_DIR}` | Directory containing the skill's SKILL.md |
+
+### Body Content Guidelines (from Agent Skills Spec)
+
+- Keep SKILL.md under 500 lines / 5000 tokens
+- Move detailed reference material to separate files (REFERENCE.md, examples/, scripts/)
+- Reference supporting files from SKILL.md so Claude knows they exist
+- Include step-by-step instructions, examples, edge cases
+- Recommended sections: instructions, examples of inputs/outputs, common edge cases
+
+### Skill Directory Structure
+
+```
+skill-name/
+  SKILL.md           # Required -- main instructions
+  REFERENCE.md       # Optional -- detailed docs loaded on demand
+  examples/          # Optional -- example outputs
+  scripts/           # Optional -- executable scripts
+  assets/            # Optional -- templates, images, data files
+```
+
+### Example: Complete Standalone Skill
+
+```yaml
+---
+name: nmap
+description: Network scanning and host discovery using nmap. Use when you need port scans, service detection, host enumeration, or web vulnerability detection with NSE scripts.
+license: MIT
+compatibility: Requires nmap and bash. Designed for Claude Code.
+metadata:
+  author: PatrykQuantumNomad
+  version: "2.0"
+allowed-tools: Bash
+disable-model-invocation: true
+---
+
+# Nmap Network Scanner
+
+[Standalone instructions for running nmap scans...]
+```
+
+## Hooks Distribution
+
+### Current State
+
+Hooks in `.claude/hooks/` are configured via `.claude/settings.json`:
+- `netsec-pretool.sh` -- PreToolUse: validates targets against scope, blocks raw tool invocations
+- `netsec-posttool.sh` -- PostToolUse: parses JSON output, provides structured summaries
+- `netsec-health.sh` -- Health check: verifies safety architecture
+
+### How Hooks Are Distributed
+
+Hooks are **NOT part of the Agent Skills standard**. The agentskills.io spec defines only SKILL.md files with optional scripts/, references/, and assets/ directories. Hooks are a Claude Code-specific feature configured in `.claude/settings.json`.
+
+**Distribution options:**
+
+| Method | How It Works | Pros | Cons |
+|--------|-------------|------|------|
+| Git clone / fork | Users clone the repo, get hooks via `.claude/settings.json` automatically | Complete experience, zero extra setup | Requires full repo clone, not selective |
+| Skills with bundled scripts | A skill includes hook scripts in its `scripts/` directory and documents manual configuration | Portable via skills.sh | User must manually edit settings.json |
+| Plugin distribution | `.claude-plugin/` format bundles hooks with skills | Automatic hook installation | Requires plugin format packaging |
+| Documentation skill | A `setup` skill that tells users how to install hooks | Simple, transparent | Manual user effort |
+
+**Recommendation:** Distribute hooks through the git repo (clone/fork), not through skills.sh. Skills.sh is for SKILL.md files. Hooks require `.claude/settings.json` configuration that `npx skills add` does not handle. Create a `netsec-setup` skill that documents hook installation for users who install skills standalone.
+
+## Agents Distribution
+
+### Current State
+
+Agents in `.claude/agents/`:
+- `pentester.md` -- Offensive specialist with preloaded skills
+- `defender.md` -- Defensive analysis subagent
+- `analyst.md` -- Report synthesis subagent
+
+### How Agents Are Distributed
+
+Agents (subagent definitions in `.claude/agents/`) are also **NOT part of the Agent Skills standard**. They are a Claude Code-specific feature.
+
+**Distribution options:**
+
+| Method | How It Works | Pros | Cons |
+|--------|-------------|------|------|
+| Git clone / fork | Users clone the repo, get agents automatically | Complete experience | Requires full repo clone |
+| Skill-as-agent | Convert agent personas into skills with `context: fork` | Installable via skills.sh | Loses agent-specific fields (memory, maxTurns) |
+| Skills referencing agents | A skill with `context: fork` and `agent: pentester` | Clean separation | Agent file must already exist on user's system |
+
+**Recommendation:** Convert the 3 agent personas into skills that use `context: fork`. This makes them installable via `npx skills add` without requiring users to manually set up `.claude/agents/` files. The existing `pentester`, `defender`, and `analyst` skills already exist in `.claude/skills/` and invoke the agents -- they just need to be made self-contained.
+
+## What Needs to Change in Existing Skills
+
+### Problem: Wrapper Script Dependencies
+
+All 32 existing skills reference wrapper scripts like `bash scripts/nmap/identify-ports.sh $ARGUMENTS -j -x`. When installed to another project via `npx skills add`, those scripts do not exist.
+
+### Solution: Dual-Mode Skills
+
+Each skill should detect whether wrapper scripts exist and adapt:
+- When installed standalone: provide direct tool instructions (e.g., `nmap -sV target`)
+- When in the networking-tools repo: use wrapper scripts with `-j -x` flags
+
+| Approach | Pros | Cons | Recommended |
+|----------|------|------|-------------|
+| **Standalone instructions only** | Works anywhere, no dependencies | Loses wrapper script benefits (JSON output, safety hooks) | No |
+| **Reference source repo only** | Preserves all functionality | Requires cloning networking-tools, not truly standalone | No |
+| **Bundle scripts in skill dirs** | Self-contained, portable | Duplicates code, maintenance burden, large skill dirs | No |
+| **Dual-mode (detect and adapt)** | Works both standalone and with repo | More complex SKILL.md content | **Yes** |
+
+Example dual-mode pattern in SKILL.md:
+```markdown
+## Running Scans
+
+### With networking-tools wrapper scripts (recommended)
+If you have the full networking-tools repo, use wrapper scripts for JSON output and safety hooks:
+- `bash scripts/nmap/identify-ports.sh $ARGUMENTS -j -x`
+
+### Standalone (no wrapper scripts)
+- `nmap -sV -sC $ARGUMENTS` -- Service version detection with default scripts
+- `nmap -p- --min-rate 1000 $ARGUMENTS` -- Full port scan
+```
 
 ## Installation
 
+### For Publishers (This Repo)
+
+No installation needed. The repo structure already works. After SKILL.md refinements:
+
 ```bash
-# The plugin itself is pure markdown/json/bash -- no build step, no npm install
+# Test that skills are discoverable
+cd /tmp && mkdir test-project && cd test-project
+npx skills add PatrykQuantumNomad/networking-tools --skill nmap
+ls -la .agents/skills/nmap/ .claude/skills/nmap/ 2>/dev/null
+```
 
-# Development: Test plugin locally
-claude --plugin-dir ./networking-tools-plugin
+### For Users (Installing Skills)
 
-# Distribution Option 1: Direct from GitHub marketplace
-# User adds the marketplace once:
-#   /plugin marketplace add owner/networking-tools-marketplace
-# Then installs:
-#   /plugin install networking-tools@marketplace-name
+```bash
+# Install all skills
+npx skills add PatrykQuantumNomad/networking-tools
 
-# Distribution Option 2: Project-level auto-discovery
-# Add to .claude/settings.json in any project:
-# {
-#   "extraKnownMarketplaces": {
-#     "networking-tools": {
-#       "source": { "source": "github", "repo": "owner/networking-tools-plugin" }
-#     }
-#   },
-#   "enabledPlugins": { "networking-tools@networking-tools": true }
-# }
+# Install specific skills
+npx skills add PatrykQuantumNomad/networking-tools --skill nmap --skill recon
 
-# User dependencies (pentesting tools the plugin wraps):
-brew install nmap nikto sqlmap john hashcat jq  # macOS
-# or: apt install nmap nikto sqlmap john hashcat jq  # Linux
+# Install for specific agent only
+npx skills add PatrykQuantumNomad/networking-tools -a claude-code
 ```
 
 ## Alternatives Considered
 
 | Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| Plugin system (skills + agents + hooks) | Standalone `.claude/commands/` only | If distribution is not a goal and skills are only for personal/project use. Commands work without plugin infrastructure. |
-| SKILL.md format (skills/) | commands/*.md format | Commands still work and are simpler (single file, no directory). Use for very simple slash commands that need no supporting files. |
-| Bash hook scripts with jq | Node.js hook scripts | Use Node.js when JSON parsing is complex (deeply nested objects, array manipulation). For simple field extraction, bash+jq is lighter. |
-| GitHub marketplace distribution | npm source | npm source is "not yet fully implemented" per official docs (warning shown in validation). GitHub repo source is the mature, recommended path. |
-| Plugin with marketplace.json | Raw git repo with `.claude/` files | Raw `.claude/` approach requires users to manually copy files. Plugin system handles installation, updates, versioning, and namespacing automatically. |
-| Separate marketplace repo | Marketplace in same repo as plugin | Keeps distribution config separate from plugin code. Allows one marketplace to host multiple plugins. |
+|-------------|-------------|------------------------|
+| skills.sh via `npx skills add` | Claude Plugin Marketplace (`/plugin install`) | When you need to bundle hooks + settings.json + skills as a complete package. Plugin marketplace uses `.claude-plugin/` format and handles hook installation automatically. |
+| skills.sh via `npx skills add` | Manual sharing (README + git clone) | When targeting users who prefer full repo clone with hooks, agents, and wrapper scripts intact. |
+| skills.sh via `npx skills add` | LobeHub / PlayBooks.com | When targeting non-Claude agents primarily. These are alternative skill directories with different audiences. |
+| Git-based hooks distribution | Plugin-bundled hooks | When hooks are critical and must be installed automatically alongside skills. |
 
 ## What NOT to Use
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| npm source in marketplace.json | Documented as "not yet fully implemented" in official docs. Validation emits warning. | GitHub repo source or relative path source |
-| `type: "prompt"` hooks for safety checks | Adds LLM call latency and non-determinism to safety guardrails that should be deterministic | `type: "command"` hooks with bash scripts for deterministic validation |
-| Complex MCP servers for wrapping bash scripts | Overkill. Adds Node.js server runtime requirement, complex setup. | Skills that invoke bash scripts directly via `!`command`` injection or allowed Bash tool |
-| `bypassPermissions` on subagents | Pentesting tools can be destructive. Bypassing permissions removes the safety net. | `default` or `acceptEdits` permission mode with explicit tool allowlists |
-| Inline hook configs in plugin.json | Harder to maintain than a separate file; mixes metadata with behavior | Separate `hooks/hooks.json` file referenced from plugin.json |
-| `.claude/commands/` for distribution | Not portable. Requires manual file copying. No versioning, no namespacing. | Plugin system with skills/ directory |
-| Agent teams for this use case | Experimental feature requiring env var flag. Overkill for skill pack. | Standard subagents (well-supported, stable API) |
+| Custom npm package for publishing | Unnecessary. skills.sh already indexes GitHub repos directly via CLI telemetry. | `npx skills add owner/repo` |
+| API-based submission to skills.sh | Does not exist. Indexing is automatic via install telemetry. | Push to GitHub, share install command |
+| `add-skill` npm package | Alternative CLI by a different author. Less widely adopted than Vercel's `skills` package. | `npx skills` (Vercel's CLI, powers skills.sh) |
+| `.claude-plugin/` format for skills-only publishing | Adds unnecessary complexity. Plugin format is for bundling hooks + settings + skills together. For skills-only distribution, plain `.claude/skills/` is simpler. | Plain `.claude/skills/` directory structure |
+| Custom metadata fields outside `metadata:` | Non-standard top-level fields are ignored by the CLI and other agents. | Use the `metadata:` map for any custom key-values |
+| `skillsmp.com` / other marketplaces | Fragment discovery across platforms. skills.sh has the most installs and broadest agent support. | skills.sh as primary distribution |
 
 ## Stack Patterns by Variant
 
-**If building a minimal skill pack (Phase 1):**
-- Use `skills/` directory with SKILL.md files only
-- Each tool gets its own skill directory (e.g., `skills/nmap-scan/SKILL.md`)
-- No hooks, no agents, no MCP servers
-- Users invoke via `/networking-tools:nmap-scan <target>`
-- Because: Simplest to build, test, and maintain. Validates the approach before adding complexity.
+**If publishing skills only (recommended first step):**
+- Keep existing `.claude/skills/` structure
+- Refine SKILL.md files for standalone use (dual-mode: wrapper + raw tool instructions)
+- Add `license`, `compatibility`, and `metadata` fields to frontmatter
+- Push to GitHub and share `npx skills add PatrykQuantumNomad/networking-tools`
+- Zero new dependencies, zero build steps
 
-**If building a full plugin with safety (Phase 2):**
-- Add `hooks/hooks.json` with PreToolUse safety checks
-- Add `agents/` with specialized pentesting personas
-- Skills reference agents for complex workflows
-- Because: Provides guided workflows, safety guardrails, and specialized AI behavior.
+**If publishing skills + hooks + agents as a complete toolkit (later):**
+- Use `.claude-plugin/` format to bundle everything
+- Create a `plugin.json` manifest pointing to skills, hooks, and agent definitions
+- Users install via `/plugin install` in Claude Code
+- More complex but provides the complete safety-guarded experience
 
-**If distributing via marketplace (Phase 3):**
-- Create a separate marketplace repo with `.claude-plugin/marketplace.json`
-- Plugin source points to the networking-tools repo via GitHub source
-- Version tracked in plugin.json (single source of truth)
-- Because: Clean separation between the tool and its distribution mechanism. Users get automatic updates.
+**If targeting cross-agent compatibility (Cursor, Codex, Windsurf):**
+- Stick to agentskills.io standard fields only (`name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools`)
+- Remove Claude Code-specific fields from frontmatter (or accept they'll be ignored)
+- Avoid `$ARGUMENTS` substitution and `!`command`` syntax (Claude Code only)
+- Write instructions as plain Markdown that any agent can follow
 
 ## Version Compatibility
 
 | Component | Compatible With | Notes |
 |-----------|-----------------|-------|
-| Plugin system | Claude Code >= 1.0.33 | Minimum version for `/plugin` command and plugin infrastructure |
-| Skills (SKILL.md) | Claude Code >= 1.0 | Skills merged with commands; both formats work |
-| Hooks API (all events) | Claude Code >= 1.0 | All 14 hook events documented above are stable |
-| `context: fork` | Claude Code >= 1.0 | Runs skill in isolated subagent context |
-| `` !`command` `` injection | Claude Code >= 1.0 | Preprocesses shell commands before skill content sent to Claude |
-| `$ARGUMENTS` / `$N` | Claude Code >= 1.0 | String substitution in skill content |
-| `${CLAUDE_PLUGIN_ROOT}` | Claude Code >= 1.0.33 | Environment variable for plugin-relative paths in hooks/MCP |
-| Agent teams | Claude Code (experimental) | Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`. Not recommended for this project. |
-| LSP servers in plugins | Claude Code >= 1.0.33 | Not relevant for this project (no code intelligence needed) |
+| Agent Skills spec v1 | Claude Code, Cursor, Codex CLI, GitHub Copilot, Windsurf, VSCode, 15+ agents | Open standard maintained at agentskills.io |
+| `npx skills` CLI | Node.js 18+ | Runs via npx, no global install needed |
+| Claude Code extension fields | Claude Code only | `disable-model-invocation`, `user-invocable`, `context`, `agent`, `hooks` ignored by other agents |
+| `$ARGUMENTS` substitution | Claude Code only | Other agents may not support this |
+| `!`command`` (dynamic context) | Claude Code only | Shell preprocessing before skill execution |
+| Hooks (`.claude/hooks/`) | Claude Code and Cline only | Per skills.sh compatibility table |
+
+## Existing User Publications
+
+The user has already published 4 skills from `PatrykQuantumNomad/claude-in-a-box`:
+- `k8s-analyzer`
+- `compose-validator`
+- `dockerfile-analyzer`
+- Plus one additional skill
+
+These live in `.claude/skills/` in that repo and appear on `skills.sh/patrykquantumnomad`. The same pattern applies to networking-tools -- push refined SKILL.md files to GitHub, share the install command, skills appear on skills.sh automatically.
 
 ## Sources
 
 ### HIGH Confidence (Official documentation, verified via WebFetch)
-- [Claude Code Skills Documentation](https://code.claude.com/docs/en/slash-commands) -- Complete skills/commands reference, frontmatter fields, invocation control, dynamic context injection
-- [Claude Code Hooks Guide](https://code.claude.com/docs/en/hooks-guide) -- Hook automation walkthrough, common patterns
-- [Claude Code Hooks Reference](https://code.claude.com/docs/en/hooks) -- Complete hook event schemas, JSON I/O format, all 14 events, matcher patterns
-- [Claude Code Plugins Documentation](https://code.claude.com/docs/en/plugins) -- Plugin creation, structure, quickstart, migration from .claude/
-- [Claude Code Plugins Reference](https://code.claude.com/docs/en/plugins-reference) -- Complete plugin manifest schema, CLI commands, debugging tools
-- [Claude Code Plugin Marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) -- marketplace.json schema, source types, distribution, hosting
-- [Claude Code Subagents](https://code.claude.com/docs/en/sub-agents) -- Agent definition format, frontmatter, built-in agents, persistent memory
-- [Anthropic Official Plugin Marketplace](https://github.com/anthropics/claude-code/blob/main/.claude-plugin/marketplace.json) -- Real-world marketplace.json structure
+- [Claude Code Skills Documentation](https://code.claude.com/docs/en/skills) -- Complete skills reference, all frontmatter fields, invocation control, dynamic context injection, supporting files, cross-agent compatibility
+- [Agent Skills Specification](https://agentskills.io/specification) -- Open standard defining SKILL.md format, required/optional fields, directory structure, naming constraints, validation
+- [skills.sh Docs](https://skills.sh/docs) -- Platform overview, installation mechanics
+- [skills.sh FAQ](https://skills.sh/docs/faq) -- How telemetry-based indexing works, no explicit publish step
+- [Vercel Labs skills CLI](https://github.com/vercel-labs/skills) -- CLI source, discovery paths, installation behavior, multi-skill repo support, `--skill` flag, `-a` agent targeting
+- [Anthropic skills repository](https://github.com/anthropics/skills) -- Reference implementation, plugin marketplace integration
+- [Vercel Agent Skills Guide](https://vercel.com/kb/guide/agent-skills-creating-installing-and-sharing-reusable-agent-context) -- Publishing workflow, format, distribution
 
-### MEDIUM Confidence (Community examples, cross-referenced with official docs)
-- [awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) -- Existing security skill pack with pentesting agents
-- [Trail of Bits Claude Code Skills](https://github.com/trailofbits/skills) -- Security research skills by established security firm
-- [Claude Code OWASP Skills](https://github.com/agamm/claude-code-owasp) -- Security best practices skill example
-- [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code) -- Curated list of skills, hooks, commands, plugins
-- [Anthropic Claude Plugins Official](https://github.com/anthropics/claude-plugins-official) -- Anthropic-managed plugin directory
+### MEDIUM Confidence (Verified via multiple consistent sources)
+- [skills.sh/patrykquantumnomad](https://skills.sh/patrykquantumnomad) -- User's existing published skills from claude-in-a-box repo
+- [PatrykQuantumNomad/claude-in-a-box](https://github.com/PatrykQuantumNomad/claude-in-a-box) -- Reference for how skills are already structured in user's other repo
 
 ---
-*Stack research for: Claude Code Skill Pack for Networking/Pentesting Tools*
-*Researched: 2026-02-17*
+*Stack research for: skills.sh publishing of pentesting skills*
+*Researched: 2026-03-06*
