@@ -1,0 +1,23 @@
+{
+  "name": "netsec-tools",
+  "owner": {
+    "name": "PatrykQuantumNomad",
+    "url": "https://github.com/PatrykQuantumNomad"
+  },
+  "metadata": {
+    "description": "Pentesting skills pack for Claude Code -- 17 tool skills, 6 workflows, 3 agent personas for network security testing"
+  },
+  "plugins": [
+    {
+      "name": "netsec-skills",
+      "source": "./netsec-skills",
+      "description": "17 tool skills, 6 workflows, 3 agent personas for network security testing",
+      "version": "1.0.0",
+      "homepage": "https://github.com/PatrykQuantumNomad/networking-tools",
+      "repository": "https://github.com/PatrykQuantumNomad/networking-tools",
+      "license": "MIT",
+      "keywords": ["pentesting", "security", "nmap", "sqlmap", "hashcat", "metasploit", "red-team", "CTF"],
+      "category": "security"
+    }
+  ]
+}
