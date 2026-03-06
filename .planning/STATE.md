@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v1.6
+milestone_name: Skills.sh Publication
+status: executing
+stopped_at: Completed 34-01-PLAN.md
+last_updated: "2026-03-06T14:25:56.555Z"
+last_activity: 2026-03-06 — Completed 34-01 plugin directory scaffold
+progress:
+  total_phases: 6
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 1
+  percent: 8
+---
+
 # Project State
 
 ## Project Reference
@@ -10,16 +26,16 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 ## Current Position
 
 Phase: 34 of 39 (Plugin Scaffold and GSD Separation)
-Plan: 0 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-03-06 — Roadmap created for v1.6 (6 phases, 19 requirements)
+Plan: 1 of 2 in current phase
+Status: Executing
+Last activity: 2026-03-06 — Completed 34-01 plugin directory scaffold
 
-Progress: [░░░░░░░░░░] 0% (v1.6)
+Progress: [█░░░░░░░░░] 8% (v1.6)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 73 (across v1.0-v1.5)
+- Total plans completed: 74 (across v1.0-v1.6)
 - Average duration: ~4min per plan
 - Total execution time: ~5.3 hours
 
@@ -34,6 +50,7 @@ Progress: [░░░░░░░░░░] 0% (v1.6)
 | v1.4 | 5 | 10 | ~78min |
 | v1.5 | 6 | 13 | ~30min |
 | v1.6 | 6 | ~13 est | - |
+| Phase 34 P01 | 3min | 2 tasks | 40 files |
 
 ## Accumulated Context
 
@@ -45,6 +62,9 @@ Full decision table in PROJECT.md. Recent decisions affecting v1.6:
 - Deterministic safety hooks via bash+jq (fast, free, predictable)
 - disable-model-invocation: true on tool skills (zero context overhead)
 - Validate pattern on small set before scaling (5-tool pilot proven in v1.5)
+- Hook scripts copied (not symlinked) to netsec-skills/ for Phase 35 portability edits
+- marketplace.json has 27 skill entries (agent invoker skills represented by agents section, not duplicated)
+- Excluded lab, pentest-conventions skills and all gsd-* agents from plugin (GSD boundary)
 
 ### Pending Todos
 
@@ -67,6 +87,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06
-Stopped at: v1.6 roadmap created (6 phases, 34-39). Ready to plan Phase 34.
+Last session: 2026-03-06T14:25:56.553Z
+Stopped at: Completed 34-01-PLAN.md
 Resume file: None

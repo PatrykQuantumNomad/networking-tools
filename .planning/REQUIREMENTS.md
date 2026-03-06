@@ -9,9 +9,9 @@ Requirements for skills.sh publication. Each maps to roadmap phases.
 
 ### Plugin Infrastructure
 
-- [ ] **PLUG-01**: User can install the netsec skills pack via a `.claude-plugin/plugin.json` manifest
-- [ ] **PLUG-02**: User can discover all skills, agents, and hooks listed in `marketplace.json`
-- [ ] **PLUG-03**: Published plugin package contains zero GSD framework files (agents, hooks, commands, templates)
+- [x] **PLUG-01**: User can install the netsec skills pack via a `.claude-plugin/plugin.json` manifest
+- [x] **PLUG-02**: User can discover all skills, agents, and hooks listed in `marketplace.json`
+- [x] **PLUG-03**: Published plugin package contains zero GSD framework files (agents, hooks, commands, templates)
 - [ ] **PLUG-04**: User can install skills via both `npx skills add` (skills.sh) and plugin marketplace
 
 ### Standalone Tool Skills
@@ -73,9 +73,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLUG-01 | Phase 34 | Pending |
-| PLUG-02 | Phase 34 | Pending |
-| PLUG-03 | Phase 34 | Pending |
+| PLUG-01 | Phase 34 | Complete |
+| PLUG-02 | Phase 34 | Complete |
+| PLUG-03 | Phase 34 | Complete |
 | PLUG-04 | Phase 39 | Pending |
 | TOOL-01 | Phase 36 | Pending |
 | TOOL-02 | Phase 36 | Pending |
