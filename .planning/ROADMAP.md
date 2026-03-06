@@ -156,11 +156,11 @@ Plans:
   1. All 3 agent persona files (pentester, defender, analyst) exist in the plugin `agents/` directory with correct role definitions and skill preloads
   2. `/pentester`, `/defender`, and `/analyst` invoker skills launch their respective agents with `context: fork` and correct plugin-namespaced skill references
   3. Agent skill references resolve correctly in plugin context (empirically tested with at least one agent + one skill before porting all three)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 38-01: TBD
-- [ ] 38-02: TBD
+- [ ] 38-01-PLAN.md — BATS scaffold and pentester pilot with pentest-conventions dual-mode transformation
+- [ ] 38-02-PLAN.md — Scale to defender, analyst, and remaining utility skills with full validation
 
 ### Phase 39: End-to-End Testing and Publication
 **Goal**: Users can install the complete netsec skills pack from skills.sh or plugin marketplace and have all skills, hooks, and agents working on first use
