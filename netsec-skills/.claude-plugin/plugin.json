@@ -1,0 +1,24 @@
+{
+  "name": "netsec-skills",
+  "version": "1.0.0",
+  "description": "Pentesting skills pack -- 17 tool skills, 6 workflows, 3 agent personas for network security testing with Claude Code",
+  "keywords": [
+    "pentesting",
+    "security",
+    "red-team",
+    "CTF",
+    "network-security",
+    "nmap",
+    "sqlmap",
+    "hashcat",
+    "metasploit",
+    "nikto",
+    "gobuster"
+  ],
+  "author": {
+    "name": "PatrykQuantumNomad",
+    "url": "https://github.com/PatrykQuantumNomad"
+  },
+  "repository": "https://github.com/PatrykQuantumNomad/networking-tools",
+  "license": "MIT"
+}
