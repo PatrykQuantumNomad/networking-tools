@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Skills.sh Publication
 status: executing
-stopped_at: Completed 36-03-PLAN.md
-last_updated: "2026-03-06T17:34:38.273Z"
-last_activity: 2026-03-06 — Completed 36-03 plugin portability and marketplace sync
+stopped_at: Completed 37-01-PLAN.md
+last_updated: "2026-03-06T18:27:58Z"
+last_activity: 2026-03-06 — Completed 37-01 workflow dual-mode pilot (recon + crack)
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 8
+  completed_plans: 8
   percent: 100
 ---
 
@@ -21,21 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** v1.6 Skills.sh Publication -- Phase 36 (Dual-Mode Tool Skills)
+**Current focus:** v1.6 Skills.sh Publication -- Phase 37 (Standalone Workflow Skills)
 
 ## Current Position
 
-Phase: 36 of 39 (Dual-Mode Tool Skills) -- COMPLETE
-Plan: 3 of 3 in current phase (all complete)
-Status: Phase 36 complete
-Last activity: 2026-03-06 — Completed 36-03 plugin portability and marketplace sync
+Phase: 37 of 39 (Standalone Workflow Skills) -- IN PROGRESS
+Plan: 1 of 2 in current phase
+Status: Executing Phase 37
+Last activity: 2026-03-06 — Completed 37-01 workflow dual-mode pilot (recon + crack)
 
 Progress: [██████████] 100% (v1.6)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 77 (across v1.0-v1.6)
+- Total plans completed: 78 (across v1.0-v1.6)
 - Average duration: ~4min per plan
 - Total execution time: ~5.4 hours
 
@@ -57,6 +57,7 @@ Progress: [██████████] 100% (v1.6)
 | Phase 36 P01 | 6min | 2 tasks | 4 files |
 | Phase 36 P02 | 5min | 2 tasks | 14 files |
 | Phase 36 P03 | 19min | 2 tasks | 35 files |
+| Phase 37 P01 | 4min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,10 @@ Full decision table in PROJECT.md. Recent decisions affecting v1.6:
 - [Phase 36]: Gobuster and ffuf include SecLists wordlist recommendations since both tools require external wordlists
 - [Phase 36]: Plugin tool skills use cp (real copies) not symlinks/hardlinks for portability outside repo
 - [Phase 36]: Marketplace descriptions match SKILL.md frontmatter exactly -- SKILL.md is single source of truth
+- [Phase 37]: Workflow dual-mode uses per-step branching (not per-section Mode headers like tool skills)
+- [Phase 37]: Single Environment Detection per workflow with test -f on one representative script
+- [Phase 37]: After Each Step section mode-aware: PostToolUse for wrapper, direct review for standalone
+- [Phase 37]: Plugin symlinks replaced with real copies for recon and crack
 
 ### Pending Todos
 
@@ -108,6 +113,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T17:56:00Z
-Stopped at: Completed 36-03-PLAN.md (Phase 36 complete)
+Last session: 2026-03-06T18:27:58Z
+Stopped at: Completed 37-01-PLAN.md
 Resume file: None

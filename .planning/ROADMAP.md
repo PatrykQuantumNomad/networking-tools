@@ -145,7 +145,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 37-01-PLAN.md — BATS test scaffold and pilot dual-mode transformation (recon + crack)
+- [x] 37-01-PLAN.md — BATS test scaffold and pilot dual-mode transformation (recon + crack)
 - [ ] 37-02-PLAN.md — Scale dual-mode to remaining 4 workflows and full validation
 
 ### Phase 38: Agent Personas
@@ -194,7 +194,7 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 34. Plugin Scaffold | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 35. Portable Safety | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 36. Tool Skills | v1.6 | 3/3 | Complete | 2026-03-06 |
-| 37. Workflow Skills | v1.6 | 0/2 | Not started | - |
+| 37. Workflow Skills | v1.6 | 1/2 | In progress | - |
 | 38. Agent Personas | v1.6 | 0/2 | Not started | - |
 | 39. Publication | v1.6 | 0/2 | Not started | - |
 
