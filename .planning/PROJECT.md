@@ -61,7 +61,16 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 
 ### Active
 
-(None — next milestone requirements to be defined via `/gsd:new-milestone`)
+## Current Milestone: v1.6 Skills.sh Publication
+
+**Goal:** Publish standalone pentesting skills pack (skills + hooks + agents) to skills.sh/patrykquantumnomad/networking-tools
+
+**Target features:**
+- Standalone skills with flexible wrapper detection (use wrappers if in-repo, direct tool commands if standalone)
+- Portable safety hooks (scope validation, audit logging, health check)
+- Agent personas (pentester, defender, analyst)
+- Exclude GSD commands/agents — netsec-specific only
+- Published and discoverable on skills.sh
 
 ### Out of Scope
 
@@ -151,4 +160,4 @@ Claude Code integration: 17 tool skills, 8 workflow skills, 3 utility skills, 3 
 | Defender read-only, analyst write-capable | Least privilege per persona; pentester gets full Bash | ✓ Good — defense-in-depth for subagents |
 
 ---
-*Last updated: 2026-02-18 after v1.5 milestone*
+*Last updated: 2026-03-06 after v1.6 milestone start*
