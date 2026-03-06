@@ -98,8 +98,8 @@ Archived to `.planning/milestones/v1.5-ROADMAP.md`
 **Plans**: 2 plans
 
 Plans:
-- [ ] 34-01-PLAN.md — Plugin directory scaffold with manifest, hooks, symlinks, marketplace catalog, and README
-- [ ] 34-02-PLAN.md — Boundary validation script and comprehensive scaffold verification
+- [x] 34-01-PLAN.md — Plugin directory scaffold with manifest, hooks, symlinks, marketplace catalog, and README
+- [x] 34-02-PLAN.md — Boundary validation script and comprehensive scaffold verification
 
 ### Phase 35: Portable Safety Infrastructure
 **Goal**: Users can validate scope, audit tool invocations, and check netsec health from a plugin install outside the networking-tools repo
@@ -191,11 +191,11 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 18-22 | v1.3 | 9/9 | Complete | 2026-02-12 |
 | 23-27 | v1.4 | 10/10 | Complete | 2026-02-14 |
 | 28-33 | v1.5 | 13/13 | Complete | 2026-02-18 |
-| 34. Plugin Scaffold | 2/2 | Complete   | 2026-03-06 | - |
+| 34. Plugin Scaffold | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 35. Portable Safety | v1.6 | 0/2 | Not started | - |
 | 36. Tool Skills | v1.6 | 0/3 | Not started | - |
 | 37. Workflow Skills | v1.6 | 0/2 | Not started | - |
 | 38. Agent Personas | v1.6 | 0/2 | Not started | - |
 | 39. Publication | v1.6 | 0/2 | Not started | - |
 
-**Total: 6 milestones (33 phases shipped, 6 phases planned, 73 plans completed)**
+**Total: 6 milestones (34 phases shipped, 5 phases planned, 75 plans completed)**
