@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# @description Verify netsec-skills plugin directory contains only allowed files
+# @usage bash scripts/validate-plugin-boundary.sh [plugin-dir]
+# @dependencies find jq
 # validate-plugin-boundary.sh
 #
 # Verify that the netsec-skills/ plugin directory contains only allowed files.
