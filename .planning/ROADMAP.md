@@ -95,11 +95,11 @@ Archived to `.planning/milestones/v1.5-ROADMAP.md`
   2. `marketplace.json` in the plugin root lists all skills, hooks, and agents that will be published
   3. The `netsec-skills/` directory contains zero files with `gsd-` prefix, zero GSD agents, zero GSD hooks, zero GSD commands or templates
   4. Plugin directory structure has `skills/`, `agents/`, `hooks/`, and `scripts/` subdirectories matching the Claude Code plugin format
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 34-01: TBD
-- [ ] 34-02: TBD
+- [ ] 34-01-PLAN.md — Plugin directory scaffold with manifest, hooks, symlinks, marketplace catalog, and README
+- [ ] 34-02-PLAN.md — Boundary validation script and comprehensive scaffold verification
 
 ### Phase 35: Portable Safety Infrastructure
 **Goal**: Users can validate scope, audit tool invocations, and check netsec health from a plugin install outside the networking-tools repo
