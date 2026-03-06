@@ -2,17 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-18)
+See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** Planning next milestone
+**Current focus:** v1.6 Skills.sh Publication -- Phase 34 (Plugin Scaffold and GSD Separation)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-06 — Milestone v1.6 started
+Phase: 34 of 39 (Plugin Scaffold and GSD Separation)
+Plan: 0 of 2 in current phase
+Status: Ready to plan
+Last activity: 2026-03-06 — Roadmap created for v1.6 (6 phases, 19 requirements)
+
+Progress: [░░░░░░░░░░] 0% (v1.6)
 
 ## Performance Metrics
 
@@ -31,20 +33,18 @@ Last activity: 2026-03-06 — Milestone v1.6 started
 | v1.3 | 5 | 9 | ~42min |
 | v1.4 | 5 | 10 | ~78min |
 | v1.5 | 6 | 13 | ~30min |
+| v1.6 | 6 | ~13 est | - |
 
 ## Accumulated Context
 
 ### Decisions
 
-All decisions archived in milestone ROADMAP archives:
-- v1.0: .planning/milestones/v1.0-ROADMAP.md
-- v1.1: .planning/milestones/v1.1-ROADMAP.md
-- v1.2: .planning/milestones/v1.2-ROADMAP.md
-- v1.3: .planning/milestones/v1.3-ROADMAP.md
-- v1.4: .planning/milestones/v1.4-ROADMAP.md
-- v1.5: .planning/milestones/v1.5-ROADMAP.md
+Full decision table in PROJECT.md. Recent decisions affecting v1.6:
 
-Full cumulative decision table in PROJECT.md.
+- Plugin wraps, never modifies existing scripts (zero regressions, clean separation)
+- Deterministic safety hooks via bash+jq (fast, free, predictable)
+- disable-model-invocation: true on tool skills (zero context overhead)
+- Validate pattern on small set before scaling (5-tool pilot proven in v1.5)
 
 ### Pending Todos
 
@@ -52,7 +52,10 @@ None.
 
 ### Blockers/Concerns
 
-None — all v1.5 blockers resolved.
+- Bash 4.0+ requirement in hooks needs macOS compatibility check (`declare -A` in pretool hook)
+- `${CLAUDE_PLUGIN_ROOT}` has known bugs on Windows (#18527) and during SessionStart (#27145)
+- Agent-to-skill namespace resolution in plugins is undocumented (needs empirical testing in Phase 38)
+- skills.sh plugin auto-discovery mechanism unclear (test during Phase 39)
 
 ### Quick Tasks Completed
 
@@ -64,6 +67,6 @@ None — all v1.5 blockers resolved.
 
 ## Session Continuity
 
-Last session: 2026-02-23
-Stopped at: Completed quick task 003 (v1.5 testing guide). docs/TESTING-V15.md created.
+Last session: 2026-03-06
+Stopped at: v1.6 roadmap created (6 phases, 34-39). Ready to plan Phase 34.
 Resume file: None

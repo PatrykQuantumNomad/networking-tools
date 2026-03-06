@@ -73,31 +73,31 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLUG-01 | — | Pending |
-| PLUG-02 | — | Pending |
-| PLUG-03 | — | Pending |
-| PLUG-04 | — | Pending |
-| TOOL-01 | — | Pending |
-| TOOL-02 | — | Pending |
-| TOOL-03 | — | Pending |
-| TOOL-04 | — | Pending |
-| WORK-01 | — | Pending |
-| WORK-02 | — | Pending |
-| SAFE-01 | — | Pending |
-| SAFE-02 | — | Pending |
-| SAFE-03 | — | Pending |
-| SAFE-04 | — | Pending |
-| AGEN-01 | — | Pending |
-| AGEN-02 | — | Pending |
-| PUBL-01 | — | Pending |
-| PUBL-02 | — | Pending |
-| PUBL-03 | — | Pending |
+| PLUG-01 | Phase 34 | Pending |
+| PLUG-02 | Phase 34 | Pending |
+| PLUG-03 | Phase 34 | Pending |
+| PLUG-04 | Phase 39 | Pending |
+| TOOL-01 | Phase 36 | Pending |
+| TOOL-02 | Phase 36 | Pending |
+| TOOL-03 | Phase 36 | Pending |
+| TOOL-04 | Phase 36 | Pending |
+| WORK-01 | Phase 37 | Pending |
+| WORK-02 | Phase 37 | Pending |
+| SAFE-01 | Phase 35 | Pending |
+| SAFE-02 | Phase 35 | Pending |
+| SAFE-03 | Phase 35 | Pending |
+| SAFE-04 | Phase 35 | Pending |
+| AGEN-01 | Phase 38 | Pending |
+| AGEN-02 | Phase 38 | Pending |
+| PUBL-01 | Phase 39 | Pending |
+| PUBL-02 | Phase 39 | Pending |
+| PUBL-03 | Phase 39 | Pending |
 
 **Coverage:**
 - v1.6 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19
+- Mapped to phases: 19
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-06*
-*Last updated: 2026-03-06 after initial definition*
+*Last updated: 2026-03-06 after roadmap creation*

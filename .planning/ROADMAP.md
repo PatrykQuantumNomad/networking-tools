@@ -8,6 +8,7 @@
 - ✅ **v1.3 Testing & Script Headers** — Phases 18-22 (shipped 2026-02-12)
 - ✅ **v1.4 JSON Output Mode** — Phases 23-27 (shipped 2026-02-14)
 - ✅ **v1.5 Claude Skill Pack** — Phases 28-33 (shipped 2026-02-18)
+- 🚧 **v1.6 Skills.sh Publication** — Phases 34-39 (in progress)
 
 ## Phases
 
@@ -72,7 +73,115 @@ Archived to `.planning/milestones/v1.5-ROADMAP.md`
 
 </details>
 
+### 🚧 v1.6 Skills.sh Publication (In Progress)
+
+**Milestone Goal:** Publish standalone pentesting skills pack (skills + hooks + agents) to skills.sh, installable via `npx skills add` and Claude plugin marketplace, with zero GSD framework leakage and full safety infrastructure portability.
+
+- [ ] **Phase 34: Plugin Scaffold and GSD Separation** - Establish netsec-skills/ plugin directory with manifest, marketplace catalog, and clean GSD boundary
+- [ ] **Phase 35: Portable Safety Infrastructure** - Make hooks, scope management, and health check work outside the repo via portable path resolution
+- [ ] **Phase 36: Dual-Mode Tool Skills** - Transform 17 tool skills to work standalone (direct commands) and in-repo (wrapper scripts) with install detection
+- [ ] **Phase 37: Standalone Workflow Skills** - Port 6 workflow skills with dual-mode branching at every step
+- [ ] **Phase 38: Agent Personas** - Port 3 agent definitions and invoker skills with verified plugin namespace resolution
+- [ ] **Phase 39: End-to-End Testing and Publication** - Verify full plugin installation, publish to skills.sh, confirm two-channel distribution
+
+## Phase Details
+
+### Phase 34: Plugin Scaffold and GSD Separation
+**Goal**: Users can load a clean netsec-only plugin directory that contains zero GSD framework artifacts
+**Depends on**: Nothing (first phase of v1.6)
+**Requirements**: PLUG-01, PLUG-02, PLUG-03
+**Success Criteria** (what must be TRUE):
+  1. `netsec-skills/` directory exists with a valid `.claude-plugin/plugin.json` manifest and `claude --plugin-dir ./netsec-skills` loads without errors
+  2. `marketplace.json` in the plugin root lists all skills, hooks, and agents that will be published
+  3. The `netsec-skills/` directory contains zero files with `gsd-` prefix, zero GSD agents, zero GSD hooks, zero GSD commands or templates
+  4. Plugin directory structure has `skills/`, `agents/`, `hooks/`, and `scripts/` subdirectories matching the Claude Code plugin format
+**Plans**: TBD
+
+Plans:
+- [ ] 34-01: TBD
+- [ ] 34-02: TBD
+
+### Phase 35: Portable Safety Infrastructure
+**Goal**: Users can validate scope, audit tool invocations, and check netsec health from a plugin install outside the networking-tools repo
+**Depends on**: Phase 34
+**Requirements**: SAFE-01, SAFE-02, SAFE-03, SAFE-04
+**Success Criteria** (what must be TRUE):
+  1. PreToolUse hook resolves paths via `${CLAUDE_PLUGIN_ROOT}` and correctly blocks out-of-scope targets when loaded as a plugin (not from `.claude/hooks/`)
+  2. PostToolUse hook logs audit entries and injects JSON bridge context when running outside the repo, with graceful degradation when wrapper scripts are absent
+  3. `/netsec-health` skill verifies tool availability, hook registration, and scope file status in both in-repo and plugin contexts
+  4. User can run `/netsec-scope init`, `/netsec-scope add`, `/netsec-scope remove`, and `/netsec-scope show` without Makefile or repo-specific paths
+  5. Hooks auto-create default scope or skip scope validation gracefully on fresh installs (no hard-fail when `.pentest/scope.json` is missing)
+**Plans**: TBD
+
+Plans:
+- [ ] 35-01: TBD
+- [ ] 35-02: TBD
+
+### Phase 36: Dual-Mode Tool Skills
+**Goal**: Users can invoke any of 17 tool skills and get working commands whether or not the networking-tools wrapper scripts are present
+**Depends on**: Phase 35
+**Requirements**: TOOL-01, TOOL-02, TOOL-03, TOOL-04
+**Success Criteria** (what must be TRUE):
+  1. Each of the 17 tool skills contains inline command knowledge sufficient to guide the user without any wrapper scripts (standalone mode produces usable tool commands)
+  2. When wrapper scripts are detected via `!`command -v``, skills reference them with `-j -x` flags for structured JSON output (in-repo mode)
+  3. Each tool skill checks tool installation status and provides platform-specific install guidance (brew, apt, pip) when the tool is missing
+  4. Skill descriptions use natural trigger keywords that match how users ask for pentesting tasks (optimized for Claude auto-matching and skills.sh search ranking)
+  5. Dual-mode pattern validated on 3 simple tools (dig, curl, netcat) before scaling to all 17
+**Plans**: TBD
+
+Plans:
+- [ ] 36-01: TBD
+- [ ] 36-02: TBD
+- [ ] 36-03: TBD
+
+### Phase 37: Standalone Workflow Skills
+**Goal**: Users can run multi-tool workflows (/recon, /scan, /fuzz, /crack, /sniff, /diagnose) that produce complete results whether installed standalone or in-repo
+**Depends on**: Phase 36
+**Requirements**: WORK-01, WORK-02
+**Success Criteria** (what must be TRUE):
+  1. Each of the 6 workflow skills executes a complete multi-step sequence without requiring wrapper scripts (standalone mode uses direct tool commands at every step)
+  2. Each workflow step includes dual-mode branching that detects and uses wrapper scripts when available, falling back to direct commands when not
+  3. Workflows produce coherent end-to-end results (not just individual tool outputs) with clear step numbering and decision points
+**Plans**: TBD
+
+Plans:
+- [ ] 37-01: TBD
+- [ ] 37-02: TBD
+
+### Phase 38: Agent Personas
+**Goal**: Users can invoke pentester, defender, and analyst subagents that correctly load their associated skills in plugin namespace
+**Depends on**: Phase 37
+**Requirements**: AGEN-01, AGEN-02
+**Success Criteria** (what must be TRUE):
+  1. All 3 agent persona files (pentester, defender, analyst) exist in the plugin `agents/` directory with correct role definitions and skill preloads
+  2. `/pentester`, `/defender`, and `/analyst` invoker skills launch their respective agents with `context: fork` and correct plugin-namespaced skill references
+  3. Agent skill references resolve correctly in plugin context (empirically tested with at least one agent + one skill before porting all three)
+**Plans**: TBD
+
+Plans:
+- [ ] 38-01: TBD
+- [ ] 38-02: TBD
+
+### Phase 39: End-to-End Testing and Publication
+**Goal**: Users can install the complete netsec skills pack from skills.sh or plugin marketplace and have all skills, hooks, and agents working on first use
+**Depends on**: Phase 38
+**Requirements**: PLUG-04, PUBL-01, PUBL-02, PUBL-03
+**Success Criteria** (what must be TRUE):
+  1. `npx skills add PatrykQuantumNomad/networking-tools` installs all skills and they appear in Claude Code's skill list
+  2. Plugin installation via `claude plugin install` registers hooks, loads agents, and makes all skills available
+  3. Skills pack appears on skills.sh/patrykquantumnomad/networking-tools with correct metadata
+  4. Fresh install end-to-end test passes: install -> `/netsec-health` -> scope init -> tool skill -> workflow skill -> agent invoke all succeed without errors
+  5. Published package contains zero GSD framework files (validated by build check before publish)
+**Plans**: TBD
+
+Plans:
+- [ ] 39-01: TBD
+- [ ] 39-02: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -82,5 +191,11 @@ Archived to `.planning/milestones/v1.5-ROADMAP.md`
 | 18-22 | v1.3 | 9/9 | Complete | 2026-02-12 |
 | 23-27 | v1.4 | 10/10 | Complete | 2026-02-14 |
 | 28-33 | v1.5 | 13/13 | Complete | 2026-02-18 |
+| 34. Plugin Scaffold | v1.6 | 0/2 | Not started | - |
+| 35. Portable Safety | v1.6 | 0/2 | Not started | - |
+| 36. Tool Skills | v1.6 | 0/3 | Not started | - |
+| 37. Workflow Skills | v1.6 | 0/2 | Not started | - |
+| 38. Agent Personas | v1.6 | 0/2 | Not started | - |
+| 39. Publication | v1.6 | 0/2 | Not started | - |
 
-**Total: 6 milestones shipped (33 phases, 73 plans)**
+**Total: 6 milestones (33 phases shipped, 6 phases planned, 73 plans completed)**
