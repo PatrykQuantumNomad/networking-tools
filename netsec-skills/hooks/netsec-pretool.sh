@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# PreToolUse safety hook for networking-tools
+# PreToolUse safety hook for networking-tools (portable plugin version)
 # Implements: SAFE-01 (target allowlist), SAFE-02 (raw tool interception), SAFE-04 (audit logging)
+#
+# Portable version: works both in-repo and as a Claude Code plugin via ${CLAUDE_PLUGIN_ROOT}.
+# Requires bash 3.2+ (no associative arrays, no bash 4.0+ features).
 #
 # Reads hook JSON from stdin. Only processes Bash tool invocations containing
 # security tool commands. Non-security commands (git, ls, npm, etc.) fast-exit
@@ -29,8 +32,18 @@ if [[ "$COMMAND" != *"scripts/"* ]] && ! echo "$COMMAND" | grep -qEw "$SECURITY_
   exit 0
 fi
 
-# ---------- Project directory ----------
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+# ---------- Project directory (portable resolution) ----------
+resolve_project_dir() {
+  if [[ -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "$CLAUDE_PROJECT_DIR"
+  elif git rev-parse --show-toplevel 2>/dev/null; then
+    :
+  else
+    pwd
+  fi
+}
+PROJECT_DIR="$(resolve_project_dir)"
+
 AUDIT_DIR="$PROJECT_DIR/.pentest"
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
 
@@ -63,38 +76,36 @@ deny() {
 }
 
 # ---------- 4. SAFE-02: Raw tool interception (before target validation) ----------
-# Associative array: tool binary -> wrapper script directory
-declare -A TOOL_SCRIPT_DIR=(
-  [nmap]="scripts/nmap/"
-  [tshark]="scripts/tshark/"
-  [msfconsole]="scripts/metasploit/"
-  [msfvenom]="scripts/metasploit/"
-  [msfdb]="scripts/metasploit/"
-  [sqlmap]="scripts/sqlmap/"
-  [nikto]="scripts/nikto/"
-  [hashcat]="scripts/hashcat/"
-  [john]="scripts/john/"
-  [hping3]="scripts/hping3/"
-  [skipfish]="scripts/skipfish/"
-  [aircrack-ng]="scripts/aircrack-ng/"
-  [airodump-ng]="scripts/aircrack-ng/"
-  [aireplay-ng]="scripts/aircrack-ng/"
-  [airmon-ng]="scripts/aircrack-ng/"
-  [gobuster]="scripts/gobuster/"
-  [ffuf]="scripts/ffuf/"
-  [foremost]="scripts/foremost/"
-  [dig]="scripts/dig/"
-  [curl]="scripts/curl/"
-  [nc]="scripts/netcat/"
-  [netcat]="scripts/netcat/"
-  [ncat]="scripts/netcat/"
-  [traceroute]="scripts/traceroute/"
-  [mtr]="scripts/traceroute/"
-)
+# Case-statement lookup: tool binary -> wrapper script directory (bash 3.2 compatible)
+get_tool_script_dir() {
+  case "$1" in
+    nmap)          echo "scripts/nmap/" ;;
+    tshark)        echo "scripts/tshark/" ;;
+    msfconsole|msfvenom|msfdb) echo "scripts/metasploit/" ;;
+    sqlmap)        echo "scripts/sqlmap/" ;;
+    nikto)         echo "scripts/nikto/" ;;
+    hashcat)       echo "scripts/hashcat/" ;;
+    john)          echo "scripts/john/" ;;
+    hping3)        echo "scripts/hping3/" ;;
+    skipfish)      echo "scripts/skipfish/" ;;
+    aircrack-ng|airodump-ng|aireplay-ng|airmon-ng) echo "scripts/aircrack-ng/" ;;
+    gobuster)      echo "scripts/gobuster/" ;;
+    ffuf)          echo "scripts/ffuf/" ;;
+    foremost)      echo "scripts/foremost/" ;;
+    dig)           echo "scripts/dig/" ;;
+    curl)          echo "scripts/curl/" ;;
+    nc|netcat|ncat) echo "scripts/netcat/" ;;
+    traceroute|mtr) echo "scripts/traceroute/" ;;
+    *)             echo "" ;;
+  esac
+}
+
+# Plain string of tool binaries (word-splitting intentional for iteration)
+TOOL_BINS="nmap tshark msfconsole msfvenom msfdb sqlmap nikto hashcat john hping3 skipfish aircrack-ng airodump-ng aireplay-ng airmon-ng gobuster ffuf foremost dig curl nc netcat ncat traceroute mtr"
 
 # Only check for raw tool usage if the command does NOT go through a wrapper script
 if [[ "$COMMAND" != *"scripts/"* ]]; then
-  for tool_bin in "${!TOOL_SCRIPT_DIR[@]}"; do
+  for tool_bin in $TOOL_BINS; do
     # Match: command starts with optional sudo then the tool name as a word boundary
     # The tool must be the primary command, not an argument to grep/which/cat/etc.
     if echo "$COMMAND" | grep -qE "^(sudo[[:space:]]+)?${tool_bin}(\\b|\$)"; then
@@ -106,9 +117,24 @@ if [[ "$COMMAND" != *"scripts/"* ]]; then
         fi
       fi
 
-      local_dir="${TOOL_SCRIPT_DIR[$tool_bin]}"
-      reason="Blocked: direct '${tool_bin}' call. Use wrapper scripts in ${local_dir} instead (e.g., bash ${local_dir}examples.sh TARGET)"
-      context="BLOCKED: raw tool '${tool_bin}' used directly. Command: ${COMMAND}. Redirect to wrapper scripts in ${local_dir}."
+      # Dual-context redirect: plugin vs in-repo
+      if [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]]; then
+        # Plugin context: redirect to skill trigger, not wrapper scripts
+        skill_name="$tool_bin"
+        case "$tool_bin" in
+          msfconsole|msfvenom|msfdb) skill_name="metasploit" ;;
+          airodump-ng|aireplay-ng|airmon-ng) skill_name="aircrack-ng" ;;
+          nc|ncat) skill_name="netcat" ;;
+          mtr) skill_name="traceroute" ;;
+        esac
+        reason="Blocked: direct '${tool_bin}' call. Use the /${skill_name} skill instead."
+        context="BLOCKED: raw tool '${tool_bin}' used directly. Command: ${COMMAND}. Use /${skill_name} skill for guided usage."
+      else
+        # In-repo context: redirect to wrapper scripts (original behavior)
+        local_dir="$(get_tool_script_dir "$tool_bin")"
+        reason="Blocked: direct '${tool_bin}' call. Use wrapper scripts in ${local_dir} instead (e.g., bash ${local_dir}examples.sh TARGET)"
+        context="BLOCKED: raw tool '${tool_bin}' used directly. Command: ${COMMAND}. Redirect to wrapper scripts in ${local_dir}."
+      fi
       write_audit "blocked" "$tool_bin" "$COMMAND" "" "raw tool bypass" ""
       deny "$reason" "$context"
       exit 0
@@ -124,15 +150,12 @@ fi
 
 SCOPE_FILE="$PROJECT_DIR/.pentest/scope.json"
 
-# Check scope file existence
+# Check scope file existence -- auto-create default if missing
 if [[ ! -f "$SCOPE_FILE" ]]; then
-  # Extract tool name from script path for audit
+  mkdir -p "$(dirname "$SCOPE_FILE")"
+  echo '{"targets":["localhost","127.0.0.1"],"notes":"Auto-created by netsec safety hook. Add targets with /netsec-scope add <target>"}' > "$SCOPE_FILE"
   SCRIPT_TOOL=$(echo "$COMMAND" | grep -oE 'scripts/[^/]+' | head -1 | sed 's|scripts/||')
-  write_audit "blocked" "${SCRIPT_TOOL:-unknown}" "$COMMAND" "" "no scope file" ""
-  reason="No scope file found at .pentest/scope.json. Create one with {\"targets\":[\"localhost\"]} or run the health-check."
-  context="BLOCKED: no scope file. Expected at ${SCOPE_FILE}. Help the user create one with allowed targets."
-  deny "$reason" "$context"
-  exit 0
+  write_audit "scope_created" "${SCRIPT_TOOL:-system}" "$COMMAND" "" "auto-created default scope" ""
 fi
 
 # Extract target from wrapper script command
