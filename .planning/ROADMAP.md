@@ -111,11 +111,11 @@ Plans:
   3. `/netsec-health` skill verifies tool availability, hook registration, and scope file status in both in-repo and plugin contexts
   4. User can run `/netsec-scope init`, `/netsec-scope add`, `/netsec-scope remove`, and `/netsec-scope show` without Makefile or repo-specific paths
   5. Hooks auto-create default scope or skip scope validation gracefully on fresh installs (no hard-fail when `.pentest/scope.json` is missing)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 35-01: TBD
-- [ ] 35-02: TBD
+- [ ] 35-01-PLAN.md — Portable PreToolUse and PostToolUse hooks with bash 3.2 compat and dual-context resolution
+- [ ] 35-02-PLAN.md — Portable scope management script and dual-context health check
 
 ### Phase 36: Dual-Mode Tool Skills
 **Goal**: Users can invoke any of 17 tool skills and get working commands whether or not the networking-tools wrapper scripts are present
