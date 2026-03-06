@@ -159,7 +159,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 38-01-PLAN.md — BATS scaffold and pentester pilot with pentest-conventions dual-mode transformation
+- [x] 38-01-PLAN.md — BATS scaffold and pentester pilot with pentest-conventions dual-mode transformation
 - [ ] 38-02-PLAN.md — Scale to defender, analyst, and remaining utility skills with full validation
 
 ### Phase 39: End-to-End Testing and Publication
@@ -195,7 +195,7 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 35. Portable Safety | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 36. Tool Skills | v1.6 | 3/3 | Complete | 2026-03-06 |
 | 37. Workflow Skills | v1.6 | 2/2 | Complete | 2026-03-06 |
-| 38. Agent Personas | v1.6 | 0/2 | Not started | - |
+| 38. Agent Personas | v1.6 | 1/2 | In progress | - |
 | 39. Publication | v1.6 | 0/2 | Not started | - |
 
 **Total: 6 milestones (36 phases shipped, 3 phases planned, 81 plans completed)**

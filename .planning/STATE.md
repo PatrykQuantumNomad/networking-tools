@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Skills.sh Publication
 status: executing
-stopped_at: Completed 37-02-PLAN.md (Phase 37 complete)
-last_updated: "2026-03-06T18:40:25Z"
-last_activity: 2026-03-06 — Completed Phase 37 (all 6 workflow skills dual-mode)
+stopped_at: Completed 38-01-PLAN.md
+last_updated: "2026-03-06T20:16:28Z"
+last_activity: 2026-03-06 — Completed 38-01 (BATS scaffold + pentester pilot)
 progress:
   total_phases: 6
   completed_phases: 4
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 
 ## Current Position
 
-Phase: 38 of 39 (Agent Personas) -- NOT STARTED
-Plan: 0 of 2 in current phase
-Status: Phase 37 complete, ready for Phase 38
-Last activity: 2026-03-06 — Completed Phase 37 (all 6 workflow skills dual-mode)
+Phase: 38 of 39 (Agent Personas) -- IN PROGRESS
+Plan: 1 of 2 in current phase
+Status: Plan 01 complete, ready for Plan 02
+Last activity: 2026-03-06 — Completed 38-01 (BATS scaffold + pentester pilot)
 
 Progress: [██████████] 100% (v1.6)
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100% (v1.6)
 | Phase 36 P03 | 19min | 2 tasks | 35 files |
 | Phase 37 P01 | 4min | 2 tasks | 6 files |
 | Phase 37 P02 | 8min | 2 tasks | 8 files |
+| Phase 38 P01 | 3min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,10 @@ Full decision table in PROJECT.md. Recent decisions affecting v1.6:
 - [Phase 37]: Diagnose workflow uses test -f scripts/diagnostics/dns.sh for detection (diagnostic scripts, not tool wrappers)
 - [Phase 37]: Diagnose steps 1-3 wrapper commands have no -j -x flags (diagnostic auto-report scripts)
 - [Phase 37]: All 6 workflow plugin files are real copies (not symlinks)
+- [Phase 38]: Pentester agent dual-mode uses test -f scripts/nmap/identify-ports.sh for environment detection
+- [Phase 38]: pentest-conventions uses conditional language with [in-repo only] markers for portability
+- [Phase 38]: Agent frontmatter unchanged -- skills: field resolves by name: field matching in plugin
+- [Phase 38]: pentest-conventions is user-invocable: false, not added to marketplace.json
 
 ### Pending Todos
 
@@ -117,6 +122,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T18:40:25Z
-Stopped at: Completed 37-02-PLAN.md (Phase 37 complete)
+Last session: 2026-03-06T20:16:28Z
+Stopped at: Completed 38-01-PLAN.md
 Resume file: None
