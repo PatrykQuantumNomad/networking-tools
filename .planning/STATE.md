@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Skills.sh Publication
 status: executing
-stopped_at: Completed 38-02-PLAN.md
-last_updated: "2026-03-06T20:24:42Z"
-last_activity: 2026-03-06 — Completed 38-02 (dual-mode scaling and full validation)
+stopped_at: Completed 39-01-PLAN.md
+last_updated: "2026-03-06T22:34:01Z"
+last_activity: 2026-03-06 — Completed 39-01 (E2E publication validation and two-channel README)
 progress:
   total_phases: 6
   completed_phases: 5
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** v1.6 Skills.sh Publication -- Phase 38 (Agent Personas)
+**Current focus:** v1.6 Skills.sh Publication -- Phase 39 (End-to-End Testing and Publication)
 
 ## Current Position
 
-Phase: 38 of 39 (Agent Personas) -- COMPLETE
-Plan: 2 of 2 in current phase (all complete)
-Status: Phase 38 complete, ready for Phase 39
-Last activity: 2026-03-06 — Completed 38-02 (dual-mode scaling and full validation)
+Phase: 39 of 39 (End-to-End Testing and Publication)
+Plan: 1 of 2 in current phase
+Status: Completed 39-01, ready for 39-02
+Last activity: 2026-03-06 — Completed 39-01 (E2E publication validation and two-channel README)
 
 Progress: [██████████] 100% (v1.6)
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100% (v1.6)
 | Phase 37 P02 | 8min | 2 tasks | 8 files |
 | Phase 38 P01 | 3min | 2 tasks | 7 files |
 | Phase 38 P02 | 4min | 2 tasks | 11 files |
+| Phase 39 P01 | 32min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,8 @@ Full decision table in PROJECT.md. Recent decisions affecting v1.6:
 - [Phase 38]: check-tools dual-mode uses inline command -v loop for standalone, bash scripts/check-tools.sh for in-repo
 - [Phase 38]: Report skill portable as-is -- .pentest/scope.json reference works in both contexts
 - [Phase 38]: Zero remaining symlinks in netsec-skills/ after replacing all 6 remaining (defender, analyst, report, check-tools)
+- [Phase 39]: Repo-root .claude-plugin/marketplace.json uses source: ./netsec-skills to point to plugin subdirectory
+- [Phase 39]: Validation utility scripts excluded from BATS tool-contract test discovery (not pentesting tool scripts)
 
 ### Pending Todos
 
@@ -127,6 +130,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T20:24:42Z
-Stopped at: Completed 38-02-PLAN.md
+Last session: 2026-03-06T22:34:01Z
+Stopped at: Completed 39-01-PLAN.md
 Resume file: None

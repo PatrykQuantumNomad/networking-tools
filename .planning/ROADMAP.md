@@ -196,6 +196,6 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 36. Tool Skills | v1.6 | 3/3 | Complete | 2026-03-06 |
 | 37. Workflow Skills | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 38. Agent Personas | v1.6 | 2/2 | Complete | 2026-03-06 |
-| 39. Publication | v1.6 | 0/2 | Not started | - |
+| 39. Publication | 1/2 | In Progress|  | - |
 
 **Total: 6 milestones (37 phases shipped, 2 phases planned, 84 plans completed)**

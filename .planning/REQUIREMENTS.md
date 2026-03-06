@@ -12,7 +12,7 @@ Requirements for skills.sh publication. Each maps to roadmap phases.
 - [x] **PLUG-01**: User can install the netsec skills pack via a `.claude-plugin/plugin.json` manifest
 - [x] **PLUG-02**: User can discover all skills, agents, and hooks listed in `marketplace.json`
 - [x] **PLUG-03**: Published plugin package contains zero GSD framework files (agents, hooks, commands, templates)
-- [ ] **PLUG-04**: User can install skills via both `npx skills add` (skills.sh) and plugin marketplace
+- [x] **PLUG-04**: User can install skills via both `npx skills add` (skills.sh) and plugin marketplace
 
 ### Standalone Tool Skills
 
@@ -40,9 +40,9 @@ Requirements for skills.sh publication. Each maps to roadmap phases.
 
 ### Publication
 
-- [ ] **PUBL-01**: End-to-end standalone installation works: `npx skills add PatrykQuantumNomad/networking-tools` installs all skills
-- [ ] **PUBL-02**: Plugin installation works: skills, hooks, and agents function correctly after plugin install
-- [ ] **PUBL-03**: Skills appear on skills.sh/patrykquantumnomad/networking-tools
+- [x] **PUBL-01**: End-to-end standalone installation works: `npx skills add PatrykQuantumNomad/networking-tools` installs all skills
+- [x] **PUBL-02**: Plugin installation works: skills, hooks, and agents function correctly after plugin install
+- [x] **PUBL-03**: Skills appear on skills.sh/patrykquantumnomad/networking-tools
 
 ## Future Requirements
 
@@ -76,7 +76,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLUG-01 | Phase 34 | Complete |
 | PLUG-02 | Phase 34 | Complete |
 | PLUG-03 | Phase 34 | Complete |
-| PLUG-04 | Phase 39 | Pending |
+| PLUG-04 | Phase 39 | Complete |
 | TOOL-01 | Phase 36 | Complete |
 | TOOL-02 | Phase 36 | Complete |
 | TOOL-03 | Phase 36 | Complete |
@@ -89,9 +89,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-04 | Phase 35 | Complete |
 | AGEN-01 | Phase 38 | Complete |
 | AGEN-02 | Phase 38 | Complete |
-| PUBL-01 | Phase 39 | Pending |
-| PUBL-02 | Phase 39 | Pending |
-| PUBL-03 | Phase 39 | Pending |
+| PUBL-01 | Phase 39 | Complete |
+| PUBL-02 | Phase 39 | Complete |
+| PUBL-03 | Phase 39 | Complete |
 
 **Coverage:**
 - v1.6 requirements: 19 total
