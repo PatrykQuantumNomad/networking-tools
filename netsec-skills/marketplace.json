@@ -1,0 +1,244 @@
+{
+  "name": "netsec-skills",
+  "version": "1.0.0",
+  "description": "Pentesting skills pack -- 17 tool skills, 6 workflows, 3 agent personas for network security testing with Claude Code",
+  "skills": [
+    {
+      "name": "nmap",
+      "type": "tool",
+      "trigger": "/nmap",
+      "description": "Network scanning and host discovery using nmap wrapper scripts",
+      "tags": ["network", "scanning", "discovery", "ports"],
+      "requires": "nmap"
+    },
+    {
+      "name": "tshark",
+      "type": "tool",
+      "trigger": "/tshark",
+      "description": "Packet capture and network traffic analysis using tshark wrapper scripts",
+      "tags": ["traffic", "capture", "packets", "wireshark"],
+      "requires": "tshark"
+    },
+    {
+      "name": "metasploit",
+      "type": "tool",
+      "trigger": "/metasploit",
+      "description": "Exploitation framework wrapper scripts for payloads, scanning, and listeners",
+      "tags": ["exploitation", "payloads", "shells", "msfconsole"],
+      "requires": "msfconsole"
+    },
+    {
+      "name": "aircrack-ng",
+      "type": "tool",
+      "trigger": "/aircrack-ng",
+      "description": "WiFi security auditing and WPA cracking using aircrack-ng wrapper scripts",
+      "tags": ["wifi", "wireless", "WPA", "handshake"],
+      "requires": "aircrack-ng"
+    },
+    {
+      "name": "hashcat",
+      "type": "tool",
+      "trigger": "/hashcat",
+      "description": "GPU-accelerated password hash cracking using hashcat wrapper scripts",
+      "tags": ["password", "hash", "cracking", "GPU", "NTLM"],
+      "requires": "hashcat"
+    },
+    {
+      "name": "skipfish",
+      "type": "tool",
+      "trigger": "/skipfish",
+      "description": "Active web application security scanner using skipfish wrapper scripts",
+      "tags": ["web", "scanner", "crawler", "application"],
+      "requires": "skipfish"
+    },
+    {
+      "name": "sqlmap",
+      "type": "tool",
+      "trigger": "/sqlmap",
+      "description": "SQL injection detection and database extraction using sqlmap wrapper scripts",
+      "tags": ["SQL", "injection", "database", "exploitation"],
+      "requires": "sqlmap"
+    },
+    {
+      "name": "hping3",
+      "type": "tool",
+      "trigger": "/hping3",
+      "description": "TCP/IP packet crafting and firewall testing using hping3 wrapper scripts",
+      "tags": ["packets", "firewall", "TCP", "crafting"],
+      "requires": "hping3"
+    },
+    {
+      "name": "john",
+      "type": "tool",
+      "trigger": "/john",
+      "description": "Password hash cracking and identification using John the Ripper wrapper scripts",
+      "tags": ["password", "hash", "cracking", "john"],
+      "requires": "john"
+    },
+    {
+      "name": "nikto",
+      "type": "tool",
+      "trigger": "/nikto",
+      "description": "Web server vulnerability scanning using nikto wrapper scripts",
+      "tags": ["web", "server", "vulnerabilities", "scanning"],
+      "requires": "nikto"
+    },
+    {
+      "name": "foremost",
+      "type": "tool",
+      "trigger": "/foremost",
+      "description": "File carving and forensic data recovery using foremost wrapper scripts",
+      "tags": ["forensics", "carving", "recovery", "files"],
+      "requires": "foremost"
+    },
+    {
+      "name": "dig",
+      "type": "tool",
+      "trigger": "/dig",
+      "description": "DNS record querying and zone transfer testing using dig wrapper scripts",
+      "tags": ["DNS", "records", "zone-transfer", "nameserver"],
+      "requires": "dig"
+    },
+    {
+      "name": "curl",
+      "type": "tool",
+      "trigger": "/curl",
+      "description": "HTTP request debugging and SSL inspection using curl wrapper scripts",
+      "tags": ["HTTP", "SSL", "TLS", "requests", "headers"],
+      "requires": "curl"
+    },
+    {
+      "name": "netcat",
+      "type": "tool",
+      "trigger": "/netcat",
+      "description": "TCP/UDP networking swiss-army knife using netcat wrapper scripts",
+      "tags": ["TCP", "UDP", "networking", "connections", "listener"],
+      "requires": "nc"
+    },
+    {
+      "name": "traceroute",
+      "type": "tool",
+      "trigger": "/traceroute",
+      "description": "Network path tracing and latency diagnosis using traceroute and mtr wrapper scripts",
+      "tags": ["network", "path", "latency", "hops", "routing"],
+      "requires": "traceroute"
+    },
+    {
+      "name": "gobuster",
+      "type": "tool",
+      "trigger": "/gobuster",
+      "description": "Directory and subdomain brute-forcing using gobuster wrapper scripts",
+      "tags": ["directory", "subdomain", "brute-force", "enumeration"],
+      "requires": "gobuster"
+    },
+    {
+      "name": "ffuf",
+      "type": "tool",
+      "trigger": "/ffuf",
+      "description": "Web fuzzing for parameters, directories, and endpoints using ffuf wrapper scripts",
+      "tags": ["fuzzing", "web", "parameters", "brute-force"],
+      "requires": "ffuf"
+    },
+    {
+      "name": "recon",
+      "type": "workflow",
+      "trigger": "/recon",
+      "description": "Run reconnaissance workflow -- host discovery, DNS enumeration, and OSINT gathering",
+      "tags": ["reconnaissance", "discovery", "enumeration", "OSINT"]
+    },
+    {
+      "name": "scan",
+      "type": "workflow",
+      "trigger": "/scan",
+      "description": "Run vulnerability scanning workflow -- port scans, web vulnerability scans, and SQL injection testing",
+      "tags": ["vulnerability", "scanning", "assessment", "CVE"]
+    },
+    {
+      "name": "fuzz",
+      "type": "workflow",
+      "trigger": "/fuzz",
+      "description": "Run fuzzing workflow -- directory brute-force, parameter fuzzing, and web scanning",
+      "tags": ["fuzzing", "brute-force", "parameters", "discovery"]
+    },
+    {
+      "name": "crack",
+      "type": "workflow",
+      "trigger": "/crack",
+      "description": "Run password cracking workflow -- hash identification, dictionary attacks, and brute force",
+      "tags": ["password", "cracking", "hashes", "dictionary"]
+    },
+    {
+      "name": "sniff",
+      "type": "workflow",
+      "trigger": "/sniff",
+      "description": "Run traffic capture and analysis workflow -- HTTP credentials, DNS queries, and file extraction",
+      "tags": ["traffic", "capture", "credentials", "analysis"]
+    },
+    {
+      "name": "diagnose",
+      "type": "workflow",
+      "trigger": "/diagnose",
+      "description": "Run network diagnostic workflow -- DNS, connectivity, and latency checks",
+      "tags": ["diagnostics", "DNS", "connectivity", "latency"]
+    },
+    {
+      "name": "scope",
+      "type": "utility",
+      "trigger": "/scope",
+      "description": "Define and manage target scope for pentesting engagements",
+      "tags": ["scope", "targets", "management", "safety"]
+    },
+    {
+      "name": "netsec-health",
+      "type": "utility",
+      "trigger": "/netsec-health",
+      "description": "Check that all pentesting safety hooks are installed and working",
+      "tags": ["health", "safety", "hooks", "diagnostics"]
+    },
+    {
+      "name": "check-tools",
+      "type": "utility",
+      "trigger": "/check-tools",
+      "description": "Check which pentesting tools are installed on this system",
+      "tags": ["tools", "installation", "detection", "setup"]
+    },
+    {
+      "name": "report",
+      "type": "utility",
+      "trigger": "/report",
+      "description": "Generate a structured pentesting findings report from the current session",
+      "tags": ["report", "findings", "summary", "deliverable"]
+    }
+  ],
+  "hooks": [
+    {
+      "name": "netsec-pretool",
+      "event": "PreToolUse",
+      "description": "Target allowlist validation and raw tool interception -- blocks out-of-scope targets and direct tool calls",
+      "file": "hooks/netsec-pretool.sh"
+    },
+    {
+      "name": "netsec-posttool",
+      "event": "PostToolUse",
+      "description": "Audit logging and JSON bridge -- logs tool executions and injects structured context from JSON output",
+      "file": "hooks/netsec-posttool.sh"
+    }
+  ],
+  "agents": [
+    {
+      "name": "pentester",
+      "description": "Offensive pentesting specialist for multi-tool attack workflow orchestration",
+      "file": "agents/pentester.md"
+    },
+    {
+      "name": "defender",
+      "description": "Defensive security analyst for remediation guidance and risk assessment",
+      "file": "agents/defender.md"
+    },
+    {
+      "name": "analyst",
+      "description": "Security analysis specialist for structured report synthesis across multiple scans",
+      "file": "agents/analyst.md"
+    }
+  ]
+}
