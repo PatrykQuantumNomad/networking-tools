@@ -193,9 +193,9 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 28-33 | v1.5 | 13/13 | Complete | 2026-02-18 |
 | 34. Plugin Scaffold | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 35. Portable Safety | v1.6 | 2/2 | Complete | 2026-03-06 |
-| 36. Tool Skills | 3/3 | Complete   | 2026-03-06 | - |
+| 36. Tool Skills | v1.6 | 3/3 | Complete | 2026-03-06 |
 | 37. Workflow Skills | v1.6 | 0/2 | Not started | - |
 | 38. Agent Personas | v1.6 | 0/2 | Not started | - |
 | 39. Publication | v1.6 | 0/2 | Not started | - |
 
-**Total: 6 milestones (35 phases shipped, 4 phases planned, 78 plans completed)**
+**Total: 6 milestones (36 phases shipped, 3 phases planned, 80 plans completed)**
