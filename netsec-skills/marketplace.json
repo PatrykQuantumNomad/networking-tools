@@ -7,7 +7,7 @@
       "name": "nmap",
       "type": "tool",
       "trigger": "/nmap",
-      "description": "Network scanning and host discovery using nmap wrapper scripts",
+      "description": "Scan networks, discover hosts, detect open ports and services with nmap. Port scanning, host discovery, OS detection, service enumeration, NSE scripts.",
       "tags": ["network", "scanning", "discovery", "ports"],
       "requires": "nmap"
     },
@@ -15,7 +15,7 @@
       "name": "tshark",
       "type": "tool",
       "trigger": "/tshark",
-      "description": "Packet capture and network traffic analysis using tshark wrapper scripts",
+      "description": "Capture and analyze network traffic with tshark. Packet capture, protocol analysis, display filters, credential extraction, file carving from pcaps.",
       "tags": ["traffic", "capture", "packets", "wireshark"],
       "requires": "tshark"
     },
@@ -23,7 +23,7 @@
       "name": "metasploit",
       "type": "tool",
       "trigger": "/metasploit",
-      "description": "Exploitation framework wrapper scripts for payloads, scanning, and listeners",
+      "description": "Generate payloads, scan services, and set up listeners with Metasploit. Reverse shells, msfvenom, auxiliary scanners, multi/handler.",
       "tags": ["exploitation", "payloads", "shells", "msfconsole"],
       "requires": "msfconsole"
     },
@@ -31,7 +31,7 @@
       "name": "aircrack-ng",
       "type": "tool",
       "trigger": "/aircrack-ng",
-      "description": "WiFi security auditing and WPA cracking using aircrack-ng wrapper scripts",
+      "description": "Audit WiFi security and crack WPA handshakes with aircrack-ng. Wireless scanning, monitor mode, handshake capture, dictionary attacks.",
       "tags": ["wifi", "wireless", "WPA", "handshake"],
       "requires": "aircrack-ng"
     },
@@ -39,7 +39,7 @@
       "name": "hashcat",
       "type": "tool",
       "trigger": "/hashcat",
-      "description": "GPU-accelerated password hash cracking using hashcat wrapper scripts",
+      "description": "Crack password hashes with GPU acceleration using hashcat. NTLM, MD5, SHA-256, bcrypt, rule-based attacks, benchmarking.",
       "tags": ["password", "hash", "cracking", "GPU", "NTLM"],
       "requires": "hashcat"
     },
@@ -47,7 +47,7 @@
       "name": "skipfish",
       "type": "tool",
       "trigger": "/skipfish",
-      "description": "Active web application security scanner using skipfish wrapper scripts",
+      "description": "Scan web applications for vulnerabilities with skipfish. Web crawler, authenticated scanning, security assessment.",
       "tags": ["web", "scanner", "crawler", "application"],
       "requires": "skipfish"
     },
@@ -55,7 +55,7 @@
       "name": "sqlmap",
       "type": "tool",
       "trigger": "/sqlmap",
-      "description": "SQL injection detection and database extraction using sqlmap wrapper scripts",
+      "description": "Detect SQL injection and extract databases with sqlmap. Parameter testing, WAF bypass, database enumeration, tamper scripts.",
       "tags": ["SQL", "injection", "database", "exploitation"],
       "requires": "sqlmap"
     },
@@ -63,7 +63,7 @@
       "name": "hping3",
       "type": "tool",
       "trigger": "/hping3",
-      "description": "TCP/IP packet crafting and firewall testing using hping3 wrapper scripts",
+      "description": "Craft packets and test firewalls with hping3. TCP flag probes, firewall detection, custom ICMP/UDP/TCP packets.",
       "tags": ["packets", "firewall", "TCP", "crafting"],
       "requires": "hping3"
     },
@@ -71,7 +71,7 @@
       "name": "john",
       "type": "tool",
       "trigger": "/john",
-      "description": "Password hash cracking and identification using John the Ripper wrapper scripts",
+      "description": "Crack passwords and identify hash types with John the Ripper. Linux shadows, archive passwords, wordlists, incremental mode.",
       "tags": ["password", "hash", "cracking", "john"],
       "requires": "john"
     },
@@ -79,7 +79,7 @@
       "name": "nikto",
       "type": "tool",
       "trigger": "/nikto",
-      "description": "Web server vulnerability scanning using nikto wrapper scripts",
+      "description": "Scan web servers for vulnerabilities with nikto. CGI checks, outdated software, misconfigurations, authenticated scanning.",
       "tags": ["web", "server", "vulnerabilities", "scanning"],
       "requires": "nikto"
     },
@@ -87,7 +87,7 @@
       "name": "foremost",
       "type": "tool",
       "trigger": "/foremost",
-      "description": "File carving and forensic data recovery using foremost wrapper scripts",
+      "description": "Recover deleted files and carve data from disk images with foremost. File carving, forensic analysis, header/footer recovery.",
       "tags": ["forensics", "carving", "recovery", "files"],
       "requires": "foremost"
     },
@@ -95,7 +95,7 @@
       "name": "dig",
       "type": "tool",
       "trigger": "/dig",
-      "description": "DNS record querying and zone transfer testing using dig wrapper scripts",
+      "description": "Query DNS records and test zone transfers with dig. A, MX, NS, TXT records, AXFR, propagation checks, nameserver queries.",
       "tags": ["DNS", "records", "zone-transfer", "nameserver"],
       "requires": "dig"
     },
@@ -103,7 +103,7 @@
       "name": "curl",
       "type": "tool",
       "trigger": "/curl",
-      "description": "HTTP request debugging and SSL inspection using curl wrapper scripts",
+      "description": "Debug HTTP requests and inspect SSL certificates with curl. TLS versions, certificate chains, headers, response timing.",
       "tags": ["HTTP", "SSL", "TLS", "requests", "headers"],
       "requires": "curl"
     },
@@ -111,7 +111,7 @@
       "name": "netcat",
       "type": "tool",
       "trigger": "/netcat",
-      "description": "TCP/UDP networking swiss-army knife using netcat wrapper scripts",
+      "description": "Scan ports, set up listeners, and transfer files with netcat. TCP/UDP connections, port scanning, reverse shells, file transfer.",
       "tags": ["TCP", "UDP", "networking", "connections", "listener"],
       "requires": "nc"
     },
@@ -119,7 +119,7 @@
       "name": "traceroute",
       "type": "tool",
       "trigger": "/traceroute",
-      "description": "Network path tracing and latency diagnosis using traceroute and mtr wrapper scripts",
+      "description": "Trace network paths and diagnose latency with traceroute and mtr. Hop analysis, route comparison, real-time latency monitoring.",
       "tags": ["network", "path", "latency", "hops", "routing"],
       "requires": "traceroute"
     },
@@ -127,7 +127,7 @@
       "name": "gobuster",
       "type": "tool",
       "trigger": "/gobuster",
-      "description": "Directory and subdomain brute-forcing using gobuster wrapper scripts",
+      "description": "Discover hidden directories and enumerate subdomains with gobuster. Directory brute-force, DNS enumeration, wordlist scanning.",
       "tags": ["directory", "subdomain", "brute-force", "enumeration"],
       "requires": "gobuster"
     },
@@ -135,7 +135,7 @@
       "name": "ffuf",
       "type": "tool",
       "trigger": "/ffuf",
-      "description": "Web fuzzing for parameters, directories, and endpoints using ffuf wrapper scripts",
+      "description": "Fuzz web parameters, directories, and endpoints with ffuf. Parameter discovery, content filtering, custom wordlists.",
       "tags": ["fuzzing", "web", "parameters", "brute-force"],
       "requires": "ffuf"
     },
