@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Skills.sh Publication
-status: completed
-stopped_at: Completed 35-02-PLAN.md
-last_updated: "2026-03-06T15:50:52.601Z"
-last_activity: 2026-03-06 — Completed 35-02 portable scope and health check
+status: in-progress
+stopped_at: Completed 36-01-PLAN.md
+last_updated: "2026-03-06T17:22:36Z"
+last_activity: 2026-03-06 — Completed 36-01 BATS test scaffold and 3-tool pilot
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
-  percent: 25
+  total_plans: 13
+  completed_plans: 5
+  percent: 38
 ---
 
 # Project State
@@ -25,17 +25,17 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 
 ## Current Position
 
-Phase: 35 of 39 (Portable Safety Infrastructure)
-Plan: 2 of 2 in current phase (PHASE COMPLETE)
-Status: Phase 35 complete
-Last activity: 2026-03-06 — Completed 35-02 portable scope and health check
+Phase: 36 of 39 (Dual-Mode Tool Skills)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-03-06 — Completed 36-01 BATS test scaffold and 3-tool pilot
 
-Progress: [██░░░░░░░░] 25% (v1.6)
+Progress: [███░░░░░░░] 38% (v1.6)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 76 (across v1.0-v1.6)
+- Total plans completed: 77 (across v1.0-v1.6)
 - Average duration: ~4min per plan
 - Total execution time: ~5.4 hours
 
@@ -54,6 +54,7 @@ Progress: [██░░░░░░░░] 25% (v1.6)
 | Phase 34 P02 | 4min | 2 tasks | 1 files |
 | Phase 35 P01 | 3min | 2 tasks | 2 files |
 | Phase 35 P02 | 5min | 2 tasks | 4 files |
+| Phase 36 P01 | 6min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Full decision table in PROJECT.md. Recent decisions affecting v1.6:
 - [Phase 35]: resolve_project_dir pattern shared across scope script and health check for consistent project directory resolution
 - [Phase 35]: Bash 3.2 safe arithmetic replaces bash 4.0 ((var++)) for macOS compatibility
 - [Phase 35]: Health check reports bash version informationally rather than requiring 4.0+
+- [Phase 36]: Awk-based section extraction in BATS tests for macOS BSD sed compatibility
+- [Phase 36]: Function-based binary resolution replaces declare -A in BATS (parser limitation)
+- [Phase 36]: Plugin skill files are hardlinks to in-repo (same inode); Plan 03 will create independent copies
 
 ### Pending Todos
 
@@ -97,6 +101,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T15:50:52.599Z
-Stopped at: Completed 35-02-PLAN.md
+Last session: 2026-03-06T17:22:36Z
+Stopped at: Completed 36-01-PLAN.md
 Resume file: None

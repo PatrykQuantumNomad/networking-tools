@@ -130,7 +130,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 36-01-PLAN.md — BATS test scaffold and 3-tool pilot (dig, curl, netcat) dual-mode transformation
+- [x] 36-01-PLAN.md — BATS test scaffold and 3-tool pilot (dig, curl, netcat) dual-mode transformation
 - [ ] 36-02-PLAN.md — Scale dual-mode pattern to remaining 14 tool skills
 - [ ] 36-03-PLAN.md — Replace plugin symlinks with real files, sync marketplace.json, full validation
 
@@ -193,9 +193,9 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 28-33 | v1.5 | 13/13 | Complete | 2026-02-18 |
 | 34. Plugin Scaffold | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 35. Portable Safety | v1.6 | 2/2 | Complete | 2026-03-06 |
-| 36. Tool Skills | v1.6 | 0/3 | Not started | - |
+| 36. Tool Skills | v1.6 | 1/3 | In progress | - |
 | 37. Workflow Skills | v1.6 | 0/2 | Not started | - |
 | 38. Agent Personas | v1.6 | 0/2 | Not started | - |
 | 39. Publication | v1.6 | 0/2 | Not started | - |
 
-**Total: 6 milestones (35 phases shipped, 4 phases planned, 77 plans completed)**
+**Total: 6 milestones (35 phases shipped, 4 phases planned, 78 plans completed)**
