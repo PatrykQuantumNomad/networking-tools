@@ -115,7 +115,7 @@ Plans:
 
 Plans:
 - [x] 35-01-PLAN.md — Portable PreToolUse and PostToolUse hooks with bash 3.2 compat and dual-context resolution
-- [ ] 35-02-PLAN.md — Portable scope management script and dual-context health check
+- [x] 35-02-PLAN.md — Portable scope management script and dual-context health check
 
 ### Phase 36: Dual-Mode Tool Skills
 **Goal**: Users can invoke any of 17 tool skills and get working commands whether or not the networking-tools wrapper scripts are present
@@ -192,10 +192,10 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 23-27 | v1.4 | 10/10 | Complete | 2026-02-14 |
 | 28-33 | v1.5 | 13/13 | Complete | 2026-02-18 |
 | 34. Plugin Scaffold | v1.6 | 2/2 | Complete | 2026-03-06 |
-| 35. Portable Safety | 2/2 | Complete   | 2026-03-06 | - |
+| 35. Portable Safety | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 36. Tool Skills | v1.6 | 0/3 | Not started | - |
 | 37. Workflow Skills | v1.6 | 0/2 | Not started | - |
 | 38. Agent Personas | v1.6 | 0/2 | Not started | - |
 | 39. Publication | v1.6 | 0/2 | Not started | - |
 
-**Total: 6 milestones (34 phases shipped, 5 phases planned, 75 plans completed)**
+**Total: 6 milestones (35 phases shipped, 4 phases planned, 77 plans completed)**

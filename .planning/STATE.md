@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** v1.6 Skills.sh Publication -- Phase 35 (Portable Safety Infrastructure)
+**Current focus:** v1.6 Skills.sh Publication -- Phase 36 (Dual-Mode Tool Skills)
 
 ## Current Position
 
