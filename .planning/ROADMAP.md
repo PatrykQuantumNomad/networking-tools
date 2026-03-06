@@ -131,8 +131,8 @@ Plans:
 
 Plans:
 - [x] 36-01-PLAN.md — BATS test scaffold and 3-tool pilot (dig, curl, netcat) dual-mode transformation
-- [ ] 36-02-PLAN.md — Scale dual-mode pattern to remaining 14 tool skills
-- [ ] 36-03-PLAN.md — Replace plugin symlinks with real files, sync marketplace.json, full validation
+- [x] 36-02-PLAN.md — Scale dual-mode pattern to remaining 14 tool skills
+- [x] 36-03-PLAN.md — Replace plugin symlinks with real files, sync marketplace.json, full validation
 
 ### Phase 37: Standalone Workflow Skills
 **Goal**: Users can run multi-tool workflows (/recon, /scan, /fuzz, /crack, /sniff, /diagnose) that produce complete results whether installed standalone or in-repo
@@ -142,11 +142,11 @@ Plans:
   1. Each of the 6 workflow skills executes a complete multi-step sequence without requiring wrapper scripts (standalone mode uses direct tool commands at every step)
   2. Each workflow step includes dual-mode branching that detects and uses wrapper scripts when available, falling back to direct commands when not
   3. Workflows produce coherent end-to-end results (not just individual tool outputs) with clear step numbering and decision points
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 37-01: TBD
-- [ ] 37-02: TBD
+- [ ] 37-01-PLAN.md — BATS test scaffold and pilot dual-mode transformation (recon + crack)
+- [ ] 37-02-PLAN.md — Scale dual-mode to remaining 4 workflows and full validation
 
 ### Phase 38: Agent Personas
 **Goal**: Users can invoke pentester, defender, and analyst subagents that correctly load their associated skills in plugin namespace
