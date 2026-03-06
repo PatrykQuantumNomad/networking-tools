@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Skills.sh Publication
 status: executing
-stopped_at: Completed 37-01-PLAN.md
-last_updated: "2026-03-06T18:27:58Z"
-last_activity: 2026-03-06 — Completed 37-01 workflow dual-mode pilot (recon + crack)
+stopped_at: Completed 37-02-PLAN.md (Phase 37 complete)
+last_updated: "2026-03-06T18:40:25Z"
+last_activity: 2026-03-06 — Completed Phase 37 (all 6 workflow skills dual-mode)
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 8
+  completed_plans: 9
   percent: 100
 ---
 
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Ready-to-run scripts and accessible documentation that eliminate the need to remember tool flags and configurations -- run one command, get what you need.
-**Current focus:** v1.6 Skills.sh Publication -- Phase 37 (Standalone Workflow Skills)
+**Current focus:** v1.6 Skills.sh Publication -- Phase 38 (Agent Personas)
 
 ## Current Position
 
-Phase: 37 of 39 (Standalone Workflow Skills) -- IN PROGRESS
-Plan: 1 of 2 in current phase
-Status: Executing Phase 37
-Last activity: 2026-03-06 — Completed 37-01 workflow dual-mode pilot (recon + crack)
+Phase: 38 of 39 (Agent Personas) -- NOT STARTED
+Plan: 0 of 2 in current phase
+Status: Phase 37 complete, ready for Phase 38
+Last activity: 2026-03-06 — Completed Phase 37 (all 6 workflow skills dual-mode)
 
 Progress: [██████████] 100% (v1.6)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 78 (across v1.0-v1.6)
+- Total plans completed: 79 (across v1.0-v1.6)
 - Average duration: ~4min per plan
-- Total execution time: ~5.4 hours
+- Total execution time: ~5.5 hours
 
 **By Milestone:**
 
@@ -58,6 +58,7 @@ Progress: [██████████] 100% (v1.6)
 | Phase 36 P02 | 5min | 2 tasks | 14 files |
 | Phase 36 P03 | 19min | 2 tasks | 35 files |
 | Phase 37 P01 | 4min | 2 tasks | 6 files |
+| Phase 37 P02 | 8min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,9 @@ Full decision table in PROJECT.md. Recent decisions affecting v1.6:
 - [Phase 37]: Single Environment Detection per workflow with test -f on one representative script
 - [Phase 37]: After Each Step section mode-aware: PostToolUse for wrapper, direct review for standalone
 - [Phase 37]: Plugin symlinks replaced with real copies for recon and crack
+- [Phase 37]: Diagnose workflow uses test -f scripts/diagnostics/dns.sh for detection (diagnostic scripts, not tool wrappers)
+- [Phase 37]: Diagnose steps 1-3 wrapper commands have no -j -x flags (diagnostic auto-report scripts)
+- [Phase 37]: All 6 workflow plugin files are real copies (not symlinks)
 
 ### Pending Todos
 
@@ -113,6 +117,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T18:27:58Z
-Stopped at: Completed 37-01-PLAN.md
+Last session: 2026-03-06T18:40:25Z
+Stopped at: Completed 37-02-PLAN.md (Phase 37 complete)
 Resume file: None

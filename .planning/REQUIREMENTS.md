@@ -23,8 +23,8 @@ Requirements for skills.sh publication. Each maps to roadmap phases.
 
 ### Standalone Workflow Skills
 
-- [ ] **WORK-01**: User can use any of 6 workflow skills (/recon, /scan, /fuzz, /crack, /sniff, /diagnose) without wrapper scripts
-- [ ] **WORK-02**: Workflow skills reference standalone tool skills with dual-mode branching at each step
+- [x] **WORK-01**: User can use any of 6 workflow skills (/recon, /scan, /fuzz, /crack, /sniff, /diagnose) without wrapper scripts
+- [x] **WORK-02**: Workflow skills reference standalone tool skills with dual-mode branching at each step
 
 ### Safety Infrastructure
 
@@ -81,8 +81,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TOOL-02 | Phase 36 | Complete |
 | TOOL-03 | Phase 36 | Complete |
 | TOOL-04 | Phase 36 | Complete |
-| WORK-01 | Phase 37 | Pending |
-| WORK-02 | Phase 37 | Pending |
+| WORK-01 | Phase 37 | Complete |
+| WORK-02 | Phase 37 | Complete |
 | SAFE-01 | Phase 35 | Complete |
 | SAFE-02 | Phase 35 | Complete |
 | SAFE-03 | Phase 35 | Complete |

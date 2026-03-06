@@ -80,7 +80,7 @@ Archived to `.planning/milestones/v1.5-ROADMAP.md`
 - [x] **Phase 34: Plugin Scaffold and GSD Separation** - Establish netsec-skills/ plugin directory with manifest, marketplace catalog, and clean GSD boundary (completed 2026-03-06)
 - [x] **Phase 35: Portable Safety Infrastructure** - Make hooks, scope management, and health check work outside the repo via portable path resolution (completed 2026-03-06)
 - [x] **Phase 36: Dual-Mode Tool Skills** - Transform 17 tool skills to work standalone (direct commands) and in-repo (wrapper scripts) with install detection (completed 2026-03-06)
-- [ ] **Phase 37: Standalone Workflow Skills** - Port 6 workflow skills with dual-mode branching at every step
+- [x] **Phase 37: Standalone Workflow Skills** - Port 6 workflow skills with dual-mode branching at every step (completed 2026-03-06)
 - [ ] **Phase 38: Agent Personas** - Port 3 agent definitions and invoker skills with verified plugin namespace resolution
 - [ ] **Phase 39: End-to-End Testing and Publication** - Verify full plugin installation, publish to skills.sh, confirm two-channel distribution
 
@@ -146,7 +146,7 @@ Plans:
 
 Plans:
 - [x] 37-01-PLAN.md — BATS test scaffold and pilot dual-mode transformation (recon + crack)
-- [ ] 37-02-PLAN.md — Scale dual-mode to remaining 4 workflows and full validation
+- [x] 37-02-PLAN.md — Scale dual-mode to remaining 4 workflows and full validation
 
 ### Phase 38: Agent Personas
 **Goal**: Users can invoke pentester, defender, and analyst subagents that correctly load their associated skills in plugin namespace
@@ -194,8 +194,8 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 34. Plugin Scaffold | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 35. Portable Safety | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 36. Tool Skills | v1.6 | 3/3 | Complete | 2026-03-06 |
-| 37. Workflow Skills | v1.6 | 1/2 | In progress | - |
+| 37. Workflow Skills | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 38. Agent Personas | v1.6 | 0/2 | Not started | - |
 | 39. Publication | v1.6 | 0/2 | Not started | - |
 
-**Total: 6 milestones (36 phases shipped, 3 phases planned, 80 plans completed)**
+**Total: 6 milestones (36 phases shipped, 3 phases planned, 81 plans completed)**
