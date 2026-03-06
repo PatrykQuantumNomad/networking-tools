@@ -4,24 +4,56 @@ Pentesting skills pack for Claude Code -- 17 tool skills, 6 workflows, 3 agent p
 
 ## Installation
 
-**Local development (from repo clone):**
+### Plugin Marketplace (recommended)
+
+Full functionality: all skills, safety hooks, and agent personas.
+
+```bash
+/plugin marketplace add PatrykQuantumNomad/networking-tools
+/plugin install netsec-skills@netsec-tools
+```
+
+Skills are namespaced: `/netsec-skills:nmap`, `/netsec-skills:recon`, etc.
+
+### skills.sh (lightweight)
+
+Individual SKILL.md files only -- no hooks, no agents.
+
+```bash
+npx skills add PatrykQuantumNomad/networking-tools
+```
+
+Skills are accessed directly: `/nmap`, `/recon`, etc.
+
+Note: Safety hooks and agent personas are NOT included via skills.sh. Users who want the full safety infrastructure (scope enforcement, audit logging, tool interception) should use the plugin marketplace channel.
+
+### Local Development
+
+For contributors and local testing from a repo clone:
 
 ```bash
 claude --plugin-dir ./netsec-skills
 ```
 
-**Via skills.sh:**
+### Channel Comparison
 
-```bash
-npx skills add PatrykQuantumNomad/networking-tools
-```
+| Feature | Plugin Marketplace | skills.sh |
+|---------|-------------------|-----------|
+| Tool skills (17) | Yes | Yes |
+| Workflow skills (6) | Yes | Yes |
+| Utility skills (4) | Yes | Yes |
+| Safety hooks | Yes | No |
+| Agent personas | Yes | No |
+| Scope management | Yes | Partial (skill only, no hooks) |
+| Namespace | /netsec-skills:name | /name |
 
 ## Quick Start
 
 After installation, verify everything is working:
 
 ```
-/netsec-health
+/netsec-health              (plugin marketplace)
+/netsec-skills:netsec-health (plugin marketplace, namespaced)
 ```
 
 Then define your target scope before running any scans:
@@ -34,13 +66,15 @@ Then define your target scope before running any scans:
 Run a tool skill:
 
 ```
-/nmap scan 192.168.1.1
+/nmap scan 192.168.1.1       (skills.sh)
+/netsec-skills:nmap scan ... (plugin marketplace)
 ```
 
 Run a multi-step workflow:
 
 ```
-/recon 192.168.1.0/24
+/recon 192.168.1.0/24        (skills.sh)
+/netsec-skills:recon ...     (plugin marketplace)
 ```
 
 ## Skills
@@ -97,6 +131,8 @@ Three specialized agent personas for different security tasks:
 
 - **analyst** -- Security analysis specialist. Synthesizes structured reports across multiple scans, correlates findings, and produces deliverable summaries.
 
+Agent personas are available via the plugin marketplace channel only. With skills.sh, invoke agent-specific skills directly (e.g., `/invoke-pentester`).
+
 ## Safety
 
 All tool invocations pass through two safety hooks:
@@ -106,6 +142,8 @@ All tool invocations pass through two safety hooks:
 **PostToolUse hook (netsec-posttool.sh):** Logs every tool execution to an audit trail (.pentest/audit-YYYY-MM-DD.jsonl). When wrapper scripts produce JSON output (-j flag), the hook parses the structured envelope and injects result summaries back into the conversation context.
 
 Scope is managed via `/scope` and stored in `.pentest/scope.json`. No scan will execute against a target not explicitly added to scope.
+
+Note: Safety hooks are only active when installed via the plugin marketplace channel. The skills.sh channel provides the `/scope` skill for manual scope management but does not enforce scope via hooks.
 
 ## Requirements
 
