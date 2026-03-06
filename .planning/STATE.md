@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Skills.sh Publication
-status: in-progress
-stopped_at: Completed 35-01-PLAN.md
-last_updated: "2026-03-06T15:46:20Z"
-last_activity: 2026-03-06 — Completed 35-01 portable PreToolUse and PostToolUse hooks
+status: completed
+stopped_at: Completed 35-02-PLAN.md
+last_updated: "2026-03-06T15:50:52.601Z"
+last_activity: 2026-03-06 — Completed 35-02 portable scope and health check
 progress:
   total_phases: 6
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 2
+  total_plans: 4
+  completed_plans: 4
   percent: 25
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 ## Current Position
 
 Phase: 35 of 39 (Portable Safety Infrastructure)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-06 — Completed 35-01 portable PreToolUse and PostToolUse hooks
+Plan: 2 of 2 in current phase (PHASE COMPLETE)
+Status: Phase 35 complete
+Last activity: 2026-03-06 — Completed 35-02 portable scope and health check
 
 Progress: [██░░░░░░░░] 25% (v1.6)
 
@@ -53,6 +53,7 @@ Progress: [██░░░░░░░░] 25% (v1.6)
 | Phase 34 P01 | 3min | 2 tasks | 40 files |
 | Phase 34 P02 | 4min | 2 tasks | 1 files |
 | Phase 35 P01 | 3min | 2 tasks | 2 files |
+| Phase 35 P02 | 5min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,9 @@ Full decision table in PROJECT.md. Recent decisions affecting v1.6:
 - [Phase 35]: Case-statement replaces declare -A for bash 3.2 macOS compatibility
 - [Phase 35]: Scope auto-creation with localhost defaults instead of hard-deny
 - [Phase 35]: Plugin context redirects to /skill triggers instead of wrapper scripts
+- [Phase 35]: resolve_project_dir pattern shared across scope script and health check for consistent project directory resolution
+- [Phase 35]: Bash 3.2 safe arithmetic replaces bash 4.0 ((var++)) for macOS compatibility
+- [Phase 35]: Health check reports bash version informationally rather than requiring 4.0+
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T15:46:20Z
-Stopped at: Completed 35-01-PLAN.md
+Last session: 2026-03-06T15:50:52.599Z
+Stopped at: Completed 35-02-PLAN.md
 Resume file: None

@@ -78,7 +78,7 @@ Archived to `.planning/milestones/v1.5-ROADMAP.md`
 **Milestone Goal:** Publish standalone pentesting skills pack (skills + hooks + agents) to skills.sh, installable via `npx skills add` and Claude plugin marketplace, with zero GSD framework leakage and full safety infrastructure portability.
 
 - [x] **Phase 34: Plugin Scaffold and GSD Separation** - Establish netsec-skills/ plugin directory with manifest, marketplace catalog, and clean GSD boundary (completed 2026-03-06)
-- [ ] **Phase 35: Portable Safety Infrastructure** - Make hooks, scope management, and health check work outside the repo via portable path resolution
+- [x] **Phase 35: Portable Safety Infrastructure** - Make hooks, scope management, and health check work outside the repo via portable path resolution (completed 2026-03-06)
 - [ ] **Phase 36: Dual-Mode Tool Skills** - Transform 17 tool skills to work standalone (direct commands) and in-repo (wrapper scripts) with install detection
 - [ ] **Phase 37: Standalone Workflow Skills** - Port 6 workflow skills with dual-mode branching at every step
 - [ ] **Phase 38: Agent Personas** - Port 3 agent definitions and invoker skills with verified plugin namespace resolution
@@ -192,7 +192,7 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 23-27 | v1.4 | 10/10 | Complete | 2026-02-14 |
 | 28-33 | v1.5 | 13/13 | Complete | 2026-02-18 |
 | 34. Plugin Scaffold | v1.6 | 2/2 | Complete | 2026-03-06 |
-| 35. Portable Safety | v1.6 | 1/2 | In progress | - |
+| 35. Portable Safety | 2/2 | Complete   | 2026-03-06 | - |
 | 36. Tool Skills | v1.6 | 0/3 | Not started | - |
 | 37. Workflow Skills | v1.6 | 0/2 | Not started | - |
 | 38. Agent Personas | v1.6 | 0/2 | Not started | - |

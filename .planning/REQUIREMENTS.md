@@ -30,8 +30,8 @@ Requirements for skills.sh publication. Each maps to roadmap phases.
 
 - [x] **SAFE-01**: PreToolUse hook works outside the networking-tools repo via `${CLAUDE_PLUGIN_ROOT}` portable path resolution
 - [x] **SAFE-02**: PostToolUse hook works outside the networking-tools repo with graceful degradation
-- [ ] **SAFE-03**: Health check diagnostic verifies infrastructure in both in-repo and plugin contexts
-- [ ] **SAFE-04**: User can init/add/remove/show scope targets without any repo-specific paths or Makefile
+- [x] **SAFE-03**: Health check diagnostic verifies infrastructure in both in-repo and plugin contexts
+- [x] **SAFE-04**: User can init/add/remove/show scope targets without any repo-specific paths or Makefile
 
 ### Agent Personas
 
@@ -85,8 +85,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WORK-02 | Phase 37 | Pending |
 | SAFE-01 | Phase 35 | Complete |
 | SAFE-02 | Phase 35 | Complete |
-| SAFE-03 | Phase 35 | Pending |
-| SAFE-04 | Phase 35 | Pending |
+| SAFE-03 | Phase 35 | Complete |
+| SAFE-04 | Phase 35 | Complete |
 | AGEN-01 | Phase 38 | Pending |
 | AGEN-02 | Phase 38 | Pending |
 | PUBL-01 | Phase 39 | Pending |
