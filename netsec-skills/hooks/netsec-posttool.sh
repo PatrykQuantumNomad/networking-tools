@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
-# PostToolUse safety hook for networking-tools
+# PostToolUse safety hook for networking-tools (portable plugin version)
 # Implements: SAFE-03 (JSON bridge / additionalContext injection), SAFE-04 (audit logging)
 #
-# Reads hook JSON from stdin. Only processes Bash tool invocations that ran
-# wrapper scripts (commands containing scripts/). Everything else fast-exits.
+# Portable version: works both in-repo and as a Claude Code plugin via ${CLAUDE_PLUGIN_ROOT}.
+# Logs audit entries for both wrapper script and direct tool invocations.
+# Requires bash 3.2+ (no bash 4.0+ features).
+#
+# Reads hook JSON from stdin. Processes Bash tool invocations that ran
+# wrapper scripts (commands containing scripts/) and direct security tool calls.
 
 set -euo pipefail
 
@@ -21,17 +25,51 @@ if [[ -z "$COMMAND" ]]; then
   exit 0
 fi
 
-# ---------- 3. Fast exit if not a wrapper script invocation ----------
+# ---------- Project directory (portable resolution) ----------
+resolve_project_dir() {
+  if [[ -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "$CLAUDE_PROJECT_DIR"
+  elif git rev-parse --show-toplevel 2>/dev/null; then
+    :
+  else
+    pwd
+  fi
+}
+PROJECT_DIR="$(resolve_project_dir)"
+
+AUDIT_DIR="$PROJECT_DIR/.pentest"
+
+# ---------- 3. Extract response fields early (needed for direct tool audit) ----------
+EXIT_CODE=$(echo "$INPUT" | jq -r '.tool_response.exit_code // "unknown"')
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
+
+# ---------- 4. Handle non-wrapper-script invocations ----------
+SECURITY_TOOLS_RE='nmap|tshark|nikto|sqlmap|msfconsole|msfvenom|msfdb|hashcat|john|hping3|skipfish|aircrack-ng|airodump-ng|aireplay-ng|airmon-ng|gobuster|ffuf|foremost|dig|curl|nc|netcat|ncat|traceroute|mtr'
+
 if [[ "$COMMAND" != *"scripts/"* ]]; then
+  # Not a wrapper script invocation -- check if it's a direct security tool call
+  if echo "$COMMAND" | grep -qEw "$SECURITY_TOOLS_RE"; then
+    # Extract the tool name from the command
+    DIRECT_TOOL=$(echo "$COMMAND" | grep -oEw "$SECURITY_TOOLS_RE" | head -1)
+    # Still log the direct tool usage for audit trail
+    mkdir -p "$AUDIT_DIR"
+    AUDIT_FILE="$AUDIT_DIR/audit-$(date +%Y-%m-%d).jsonl"
+    jq -n -c \
+      --arg ts "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+      --arg event "direct_tool" \
+      --arg tool "$DIRECT_TOOL" \
+      --arg command "$COMMAND" \
+      --arg exit_code "$EXIT_CODE" \
+      --arg session "$SESSION_ID" \
+      '{timestamp:$ts, event:$event, tool:$tool, command:$command, exit_code:$exit_code, session:$session}' \
+      >> "$AUDIT_FILE"
+  fi
   exit 0
 fi
 
-# ---------- Project directory ----------
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
-AUDIT_DIR="$PROJECT_DIR/.pentest"
+# ---------- 5. Wrapper script path: extract metadata from command ----------
 mkdir -p "$AUDIT_DIR"
 
-# ---------- 4. Extract metadata from command ----------
 # Tool name from script path: scripts/<tool>/... -> <tool>
 SCRIPT_TOOL=$(echo "$COMMAND" | grep -oE 'scripts/[^/]+' | head -1 | sed 's|scripts/||')
 SCRIPT_TOOL="${SCRIPT_TOOL:-unknown}"
@@ -44,13 +82,10 @@ SCRIPT_NAME="${SCRIPT_NAME:-unknown}"
 TARGET=$(echo "$COMMAND" | grep -oE 'scripts/[^[:space:]]+\.sh[[:space:]]+([^[:space:]]+)' | head -1 | sed 's|scripts/[^[:space:]]*\.sh[[:space:]]*||')
 TARGET="${TARGET:-}"
 
-SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
-
-# ---------- 5. Extract tool_response fields (graceful degradation) ----------
-EXIT_CODE=$(echo "$INPUT" | jq -r '.tool_response.exit_code // "unknown"')
+# ---------- 6. Extract stdout for JSON envelope parsing ----------
 STDOUT=$(echo "$INPUT" | jq -r '.tool_response.stdout // empty')
 
-# ---------- 6. SAFE-03: Detect and parse JSON envelope ----------
+# ---------- 7. SAFE-03: Detect and parse JSON envelope ----------
 ADDITIONAL_CONTEXT=""
 RESULTS_TOTAL=""
 RESULTS_OK=""
@@ -72,7 +107,7 @@ if [[ "$COMMAND" == *" -j"* || "$COMMAND" == *" -j "* ]] && [[ -n "$STDOUT" ]]; 
   fi
 fi
 
-# ---------- 7. SAFE-04: Build and append audit log entry ----------
+# ---------- 8. SAFE-04: Build and append audit log entry ----------
 AUDIT_FILE="$AUDIT_DIR/audit-$(date +%Y-%m-%d).jsonl"
 
 if [[ -n "$RESULTS_TOTAL" ]]; then
@@ -104,7 +139,7 @@ else
     >> "$AUDIT_FILE"
 fi
 
-# ---------- 8. Output additionalContext JSON if envelope was parsed ----------
+# ---------- 9. Output additionalContext JSON if envelope was parsed ----------
 if [[ -n "$ADDITIONAL_CONTEXT" ]]; then
   jq -n -c \
     --arg ctx "$ADDITIONAL_CONTEXT" \
