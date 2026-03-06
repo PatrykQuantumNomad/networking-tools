@@ -6,12 +6,14 @@
 # --- File-Level Setup (runs at parse time, before setup/setup_file) ---
 PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 
-# Discover use-case scripts (exclude lib/, diagnostics/, examples, common, check-*)
+# Discover use-case scripts (exclude lib/, diagnostics/, examples, common, check-*, validation utilities)
 _discover_use_case_scripts() {
     find "${PROJECT_ROOT}/scripts" -name '*.sh' \
         -not -path '*/lib/*' \
         -not -name 'common.sh' \
         -not -name 'check-docs-completeness.sh' \
+        -not -name 'test-e2e-publication.sh' \
+        -not -name 'validate-plugin-boundary.sh' \
         -not -path '*/diagnostics/*' \
         -not -name 'check-tools.sh' \
         -not -name 'examples.sh' \

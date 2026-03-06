@@ -8,12 +8,14 @@
 # --- File-Level Setup (runs at parse time, before setup/setup_file) ---
 PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 
-# Discover all testable scripts (excludes lib/, common.sh, check-docs-completeness.sh)
+# Discover all testable scripts (excludes lib/, common.sh, check-docs-completeness.sh, validation utilities)
 _discover_all_scripts() {
     find "${PROJECT_ROOT}/scripts" -name '*.sh' \
         -not -path '*/lib/*' \
         -not -name 'common.sh' \
         -not -name 'check-docs-completeness.sh' \
+        -not -name 'test-e2e-publication.sh' \
+        -not -name 'validate-plugin-boundary.sh' \
         | sort
 }
 
@@ -29,6 +31,8 @@ _discover_execute_mode_scripts() {
         -not -path '*/lib/*' \
         -not -name 'common.sh' \
         -not -name 'check-docs-completeness.sh' \
+        -not -name 'test-e2e-publication.sh' \
+        -not -name 'validate-plugin-boundary.sh' \
         -not -path '*/diagnostics/*' \
         -not -name 'check-tools.sh' \
         ${exclude_latency} \

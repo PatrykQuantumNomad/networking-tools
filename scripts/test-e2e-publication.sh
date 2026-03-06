@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# @description End-to-end plugin publication validation
+# @usage bash scripts/test-e2e-publication.sh [plugin-dir]
+# @dependencies jq
 # scripts/test-e2e-publication.sh -- End-to-end plugin publication validation
 # Validates the netsec-skills plugin directory is ready for publication
 # via both skills.sh and plugin marketplace channels.

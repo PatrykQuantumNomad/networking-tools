@@ -18,6 +18,8 @@ _discover_json_scripts() {
         -not -path '*/lib/*' \
         -not -name 'common.sh' \
         -not -name 'check-docs-completeness.sh' \
+        -not -name 'test-e2e-publication.sh' \
+        -not -name 'validate-plugin-boundary.sh' \
         -not -path '*/diagnostics/*' \
         -not -name 'check-tools.sh' \
         -not -name 'examples.sh' \
