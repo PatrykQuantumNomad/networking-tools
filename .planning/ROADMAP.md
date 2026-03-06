@@ -193,7 +193,7 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 28-33 | v1.5 | 13/13 | Complete | 2026-02-18 |
 | 34. Plugin Scaffold | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 35. Portable Safety | v1.6 | 2/2 | Complete | 2026-03-06 |
-| 36. Tool Skills | v1.6 | 1/3 | In progress | - |
+| 36. Tool Skills | 2/3 | In Progress|  | - |
 | 37. Workflow Skills | v1.6 | 0/2 | Not started | - |
 | 38. Agent Personas | v1.6 | 0/2 | Not started | - |
 | 39. Publication | v1.6 | 0/2 | Not started | - |

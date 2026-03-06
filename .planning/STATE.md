@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Skills.sh Publication
-status: in-progress
-stopped_at: Completed 36-01-PLAN.md
-last_updated: "2026-03-06T17:22:36Z"
-last_activity: 2026-03-06 — Completed 36-01 BATS test scaffold and 3-tool pilot
+status: executing
+stopped_at: Completed 36-02-PLAN.md
+last_updated: "2026-03-06T17:34:38.273Z"
+last_activity: 2026-03-06 — Completed 36-02 scale dual-mode to all 17 tools
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 13
-  completed_plans: 5
-  percent: 38
+  total_plans: 7
+  completed_plans: 6
+  percent: 99
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 ## Current Position
 
 Phase: 36 of 39 (Dual-Mode Tool Skills)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-03-06 — Completed 36-01 BATS test scaffold and 3-tool pilot
+Last activity: 2026-03-06 — Completed 36-02 scale dual-mode to all 17 tools
 
-Progress: [███░░░░░░░] 38% (v1.6)
+Progress: [██████████] 99% (v1.6)
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [███░░░░░░░] 38% (v1.6)
 | Phase 35 P01 | 3min | 2 tasks | 2 files |
 | Phase 35 P02 | 5min | 2 tasks | 4 files |
 | Phase 36 P01 | 6min | 2 tasks | 4 files |
+| Phase 36 P02 | 5min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,9 @@ Full decision table in PROJECT.md. Recent decisions affecting v1.6:
 - [Phase 36]: Awk-based section extraction in BATS tests for macOS BSD sed compatibility
 - [Phase 36]: Function-based binary resolution replaces declare -A in BATS (parser limitation)
 - [Phase 36]: Plugin skill files are hardlinks to in-repo (same inode); Plan 03 will create independent copies
+- [Phase 36]: Offline tools (hashcat, john, foremost) note file-based operation in Target Validation instead of network scope
+- [Phase 36]: Traceroute skill covers both traceroute and mtr with separate install detection
+- [Phase 36]: Gobuster and ffuf include SecLists wordlist recommendations since both tools require external wordlists
 
 ### Pending Todos
 
@@ -101,6 +105,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T17:22:36Z
-Stopped at: Completed 36-01-PLAN.md
+Last session: 2026-03-06T17:34:38.271Z
+Stopped at: Completed 36-02-PLAN.md
 Resume file: None

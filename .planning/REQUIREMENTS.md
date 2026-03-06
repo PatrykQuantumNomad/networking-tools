@@ -16,10 +16,10 @@ Requirements for skills.sh publication. Each maps to roadmap phases.
 
 ### Standalone Tool Skills
 
-- [ ] **TOOL-01**: User can use any of 17 tool skills without wrapper scripts present (standalone mode with inline tool knowledge)
-- [ ] **TOOL-02**: Tool skills detect and use wrapper scripts when available for structured JSON output (in-repo mode)
-- [ ] **TOOL-03**: Each tool skill detects whether the tool is installed and provides platform-specific install guidance
-- [ ] **TOOL-04**: Each skill description uses natural trigger keywords optimized for Claude auto-matching and skills.sh search
+- [x] **TOOL-01**: User can use any of 17 tool skills without wrapper scripts present (standalone mode with inline tool knowledge)
+- [x] **TOOL-02**: Tool skills detect and use wrapper scripts when available for structured JSON output (in-repo mode)
+- [x] **TOOL-03**: Each tool skill detects whether the tool is installed and provides platform-specific install guidance
+- [x] **TOOL-04**: Each skill description uses natural trigger keywords optimized for Claude auto-matching and skills.sh search
 
 ### Standalone Workflow Skills
 
@@ -77,10 +77,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLUG-02 | Phase 34 | Complete |
 | PLUG-03 | Phase 34 | Complete |
 | PLUG-04 | Phase 39 | Pending |
-| TOOL-01 | Phase 36 | Pending |
-| TOOL-02 | Phase 36 | Pending |
-| TOOL-03 | Phase 36 | Pending |
-| TOOL-04 | Phase 36 | Pending |
+| TOOL-01 | Phase 36 | Complete |
+| TOOL-02 | Phase 36 | Complete |
+| TOOL-03 | Phase 36 | Complete |
+| TOOL-04 | Phase 36 | Complete |
 | WORK-01 | Phase 37 | Pending |
 | WORK-02 | Phase 37 | Pending |
 | SAFE-01 | Phase 35 | Complete |
