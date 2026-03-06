@@ -172,11 +172,11 @@ Plans:
   3. Skills pack appears on skills.sh/patrykquantumnomad/networking-tools with correct metadata
   4. Fresh install end-to-end test passes: install -> `/netsec-health` -> scope init -> tool skill -> workflow skill -> agent invoke all succeed without errors
   5. Published package contains zero GSD framework files (validated by build check before publish)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 39-01: TBD
-- [ ] 39-02: TBD
+- [ ] 39-01-PLAN.md — Repo-root marketplace catalog, E2E validation script, and two-channel README
+- [ ] 39-02-PLAN.md — Full validation suite and publication readiness smoke test
 
 ## Progress
 
@@ -198,4 +198,4 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 38. Agent Personas | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 39. Publication | v1.6 | 0/2 | Not started | - |
 
-**Total: 6 milestones (37 phases shipped, 2 phases planned, 82 plans completed)**
+**Total: 6 milestones (37 phases shipped, 2 phases planned, 84 plans completed)**
