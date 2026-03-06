@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# netsec-health.sh — Health check for the networking-tools safety architecture
-# Verifies that all safety hooks are installed, registered, and functioning.
+# netsec-health.sh -- Health check for the networking-tools safety architecture
+# Detects plugin vs in-repo context and adapts checks accordingly.
 # Supports optional -j flag for JSON output.
+#
+# Plugin context: CLAUDE_PLUGIN_ROOT set, hooks at $CLAUDE_PLUGIN_ROOT/hooks/
+# In-repo context: hooks at .claude/hooks/, registration in .claude/settings.json
 #
 # Exit 0 = all checks pass, Exit 1 = one or more failures
 
@@ -24,19 +27,48 @@ check() {
         if [[ "$JSON_OUTPUT" == "false" ]]; then
             echo "  [pass] $label"
         fi
-        ((PASS++))
+        PASS=$((PASS + 1))
         CHECKS+=("{\"label\":\"$label\",\"status\":\"pass\"}")
     else
         if [[ "$JSON_OUTPUT" == "false" ]]; then
             echo "  [FAIL] $label"
         fi
-        ((FAIL++))
+        FAIL=$((FAIL + 1))
         CHECKS+=("{\"label\":\"$label\",\"status\":\"fail\"}")
     fi
 }
 
-# ---------- Determine project root ----------
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+# ---------- Resolve project directory ----------
+resolve_project_dir() {
+  if [[ -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "$CLAUDE_PROJECT_DIR"
+  elif git rev-parse --show-toplevel 2>/dev/null; then
+    :
+  else
+    pwd
+  fi
+}
+
+PROJECT_DIR="$(resolve_project_dir)"
+
+# ---------- Context detection ----------
+if [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]]; then
+  CONTEXT="plugin"
+  HOOK_DIR="$CLAUDE_PLUGIN_ROOT/hooks"
+  HOOK_CONFIG="$CLAUDE_PLUGIN_ROOT/hooks/hooks.json"
+  HOOK_LABEL="plugin: hooks/"
+  CONFIG_LABEL="hooks.json"
+else
+  CONTEXT="in-repo"
+  HOOK_DIR="$PROJECT_DIR/.claude/hooks"
+  HOOK_CONFIG="$PROJECT_DIR/.claude/settings.json"
+  HOOK_LABEL=".claude/hooks/"
+  CONFIG_LABEL="settings.json"
+fi
+
+if [[ "$JSON_OUTPUT" == "false" ]]; then
+  echo "Context: $CONTEXT"
+fi
 
 # ---------- 1. Hook Files ----------
 if [[ "$JSON_OUTPUT" == "false" ]]; then
@@ -45,13 +77,13 @@ if [[ "$JSON_OUTPUT" == "false" ]]; then
     echo "----------"
 fi
 
-PRETOOL="$PROJECT_DIR/.claude/hooks/netsec-pretool.sh"
-POSTTOOL="$PROJECT_DIR/.claude/hooks/netsec-posttool.sh"
+PRETOOL="$HOOK_DIR/netsec-pretool.sh"
+POSTTOOL="$HOOK_DIR/netsec-posttool.sh"
 
-check "PreToolUse hook file exists (.claude/hooks/netsec-pretool.sh)" \
+check "PreToolUse hook file exists ($HOOK_LABEL)" \
     "$( [[ -f "$PRETOOL" ]] && echo true || echo false )"
 
-check "PostToolUse hook file exists (.claude/hooks/netsec-posttool.sh)" \
+check "PostToolUse hook file exists ($HOOK_LABEL)" \
     "$( [[ -f "$POSTTOOL" ]] && echo true || echo false )"
 
 check "PreToolUse hook is executable" \
@@ -67,13 +99,11 @@ if [[ "$JSON_OUTPUT" == "false" ]]; then
     echo "-----------------"
 fi
 
-SETTINGS="$PROJECT_DIR/.claude/settings.json"
+check "PreToolUse hook registered in $CONFIG_LABEL" \
+    "$( jq -e '.hooks.PreToolUse' "$HOOK_CONFIG" &>/dev/null && echo true || echo false )"
 
-check "PreToolUse hook registered in settings.json" \
-    "$( jq -e '.hooks.PreToolUse' "$SETTINGS" &>/dev/null && echo true || echo false )"
-
-check "PostToolUse hook registered in settings.json" \
-    "$( jq -e '.hooks.PostToolUse' "$SETTINGS" &>/dev/null && echo true || echo false )"
+check "PostToolUse hook registered in $CONFIG_LABEL" \
+    "$( jq -e '.hooks.PostToolUse' "$HOOK_CONFIG" &>/dev/null && echo true || echo false )"
 
 # ---------- 3. Scope Configuration ----------
 if [[ "$JSON_OUTPUT" == "false" ]]; then
@@ -130,8 +160,10 @@ fi
 check "jq is installed" \
     "$( command -v jq &>/dev/null && echo true || echo false )"
 
-check "bash version >= 4.0 (associative arrays)" \
-    "$( [[ "${BASH_VERSINFO[0]}" -ge 4 ]] && echo true || echo false )"
+# Informational: report bash version (no longer a hard requirement)
+if [[ "$JSON_OUTPUT" == "false" ]]; then
+    echo "  bash version: ${BASH_VERSION}"
+fi
 
 # ---------- Summary ----------
 if [[ "$JSON_OUTPUT" == "false" ]]; then
@@ -146,7 +178,8 @@ if [[ "$JSON_OUTPUT" == "true" ]]; then
         --argjson checks "$CHECKS_JSON" \
         --arg pass "$PASS" \
         --arg fail "$FAIL" \
-        '{checks:$checks, passed:($pass|tonumber), failed:($fail|tonumber)}'
+        --arg context "$CONTEXT" \
+        '{context:$context, checks:$checks, passed:($pass|tonumber), failed:($fail|tonumber)}'
 fi
 
 # ---------- Guided repair (interactive terminal only) ----------
@@ -155,11 +188,13 @@ if [[ "$FAIL" -gt 0 ]] && [[ -t 0 ]] && [[ "$JSON_OUTPUT" == "false" ]]; then
     echo "Some checks failed. Would you like to attempt guided repair?"
     echo ""
 
-    # Hook files not executable
-    if [[ -f "$PRETOOL" && ! -x "$PRETOOL" ]] || [[ -f "$POSTTOOL" && ! -x "$POSTTOOL" ]]; then
-        read -rp "Fix: Make hook files executable? [y/N] " answer
-        if [[ "$answer" =~ ^[Yy]$ ]]; then
-            chmod +x "$PRETOOL" "$POSTTOOL" 2>/dev/null && echo "  Fixed." || echo "  Failed."
+    # Hook files not executable (in-repo context only -- plugin hooks are managed by the plugin system)
+    if [[ "$CONTEXT" == "in-repo" ]]; then
+        if [[ -f "$PRETOOL" && ! -x "$PRETOOL" ]] || [[ -f "$POSTTOOL" && ! -x "$POSTTOOL" ]]; then
+            read -rp "Fix: Make hook files executable? [y/N] " answer
+            if [[ "$answer" =~ ^[Yy]$ ]]; then
+                chmod +x "$PRETOOL" "$POSTTOOL" 2>/dev/null && echo "  Fixed." || echo "  Failed."
+            fi
         fi
     fi
 
@@ -176,7 +211,7 @@ if [[ "$FAIL" -gt 0 ]] && [[ -t 0 ]] && [[ "$JSON_OUTPUT" == "false" ]]; then
         read -rp "Fix: Create .pentest/scope.json with default lab targets? [y/N] " answer
         if [[ "$answer" =~ ^[Yy]$ ]]; then
             mkdir -p "$AUDIT_DIR"
-            echo '{"targets":["localhost","127.0.0.1"],"ports":[],"notes":"Default scope - add your targets here"}' > "$SCOPE_FILE"
+            echo '{"targets":["localhost","127.0.0.1"]}' > "$SCOPE_FILE"
             echo "  Fixed."
         fi
     fi
