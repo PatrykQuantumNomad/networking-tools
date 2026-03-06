@@ -127,12 +127,12 @@ Plans:
   3. Each tool skill checks tool installation status and provides platform-specific install guidance (brew, apt, pip) when the tool is missing
   4. Skill descriptions use natural trigger keywords that match how users ask for pentesting tasks (optimized for Claude auto-matching and skills.sh search ranking)
   5. Dual-mode pattern validated on 3 simple tools (dig, curl, netcat) before scaling to all 17
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 36-01: TBD
-- [ ] 36-02: TBD
-- [ ] 36-03: TBD
+- [ ] 36-01-PLAN.md — BATS test scaffold and 3-tool pilot (dig, curl, netcat) dual-mode transformation
+- [ ] 36-02-PLAN.md — Scale dual-mode pattern to remaining 14 tool skills
+- [ ] 36-03-PLAN.md — Replace plugin symlinks with real files, sync marketplace.json, full validation
 
 ### Phase 37: Standalone Workflow Skills
 **Goal**: Users can run multi-tool workflows (/recon, /scan, /fuzz, /crack, /sniff, /diagnose) that produce complete results whether installed standalone or in-repo
