@@ -35,8 +35,8 @@ Requirements for skills.sh publication. Each maps to roadmap phases.
 
 ### Agent Personas
 
-- [ ] **AGEN-01**: Pentester, defender, and analyst agents are distributed via plugin `agents/` directory
-- [ ] **AGEN-02**: Agent invoker skills (/pentester, /defender, /analyst) work correctly in plugin namespace
+- [x] **AGEN-01**: Pentester, defender, and analyst agents are distributed via plugin `agents/` directory
+- [x] **AGEN-02**: Agent invoker skills (/pentester, /defender, /analyst) work correctly in plugin namespace
 
 ### Publication
 
@@ -87,8 +87,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SAFE-02 | Phase 35 | Complete |
 | SAFE-03 | Phase 35 | Complete |
 | SAFE-04 | Phase 35 | Complete |
-| AGEN-01 | Phase 38 | Pending |
-| AGEN-02 | Phase 38 | Pending |
+| AGEN-01 | Phase 38 | Complete |
+| AGEN-02 | Phase 38 | Complete |
 | PUBL-01 | Phase 39 | Pending |
 | PUBL-02 | Phase 39 | Pending |
 | PUBL-03 | Phase 39 | Pending |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Skills.sh Publication
 status: executing
-stopped_at: Completed 38-01-PLAN.md
-last_updated: "2026-03-06T20:16:28Z"
-last_activity: 2026-03-06 — Completed 38-01 (BATS scaffold + pentester pilot)
+stopped_at: Completed 38-02-PLAN.md
+last_updated: "2026-03-06T20:24:42Z"
+last_activity: 2026-03-06 — Completed 38-02 (dual-mode scaling and full validation)
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 8
-  completed_plans: 9
+  completed_plans: 10
   percent: 100
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 
 ## Current Position
 
-Phase: 38 of 39 (Agent Personas) -- IN PROGRESS
-Plan: 1 of 2 in current phase
-Status: Plan 01 complete, ready for Plan 02
-Last activity: 2026-03-06 — Completed 38-01 (BATS scaffold + pentester pilot)
+Phase: 38 of 39 (Agent Personas) -- COMPLETE
+Plan: 2 of 2 in current phase (all complete)
+Status: Phase 38 complete, ready for Phase 39
+Last activity: 2026-03-06 — Completed 38-02 (dual-mode scaling and full validation)
 
 Progress: [██████████] 100% (v1.6)
 
@@ -60,6 +60,7 @@ Progress: [██████████] 100% (v1.6)
 | Phase 37 P01 | 4min | 2 tasks | 6 files |
 | Phase 37 P02 | 8min | 2 tasks | 8 files |
 | Phase 38 P01 | 3min | 2 tasks | 7 files |
+| Phase 38 P02 | 4min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,10 @@ Full decision table in PROJECT.md. Recent decisions affecting v1.6:
 - [Phase 38]: pentest-conventions uses conditional language with [in-repo only] markers for portability
 - [Phase 38]: Agent frontmatter unchanged -- skills: field resolves by name: field matching in plugin
 - [Phase 38]: pentest-conventions is user-invocable: false, not added to marketplace.json
+- [Phase 38]: Defender and analyst agents need no body changes -- analysis-only with no wrapper references
+- [Phase 38]: check-tools dual-mode uses inline command -v loop for standalone, bash scripts/check-tools.sh for in-repo
+- [Phase 38]: Report skill portable as-is -- .pentest/scope.json reference works in both contexts
+- [Phase 38]: Zero remaining symlinks in netsec-skills/ after replacing all 6 remaining (defender, analyst, report, check-tools)
 
 ### Pending Todos
 
@@ -122,6 +127,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T20:16:28Z
-Stopped at: Completed 38-01-PLAN.md
+Last session: 2026-03-06T20:24:42Z
+Stopped at: Completed 38-02-PLAN.md
 Resume file: None
