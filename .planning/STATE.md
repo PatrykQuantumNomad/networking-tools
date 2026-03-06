@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Skills.sh Publication
 status: executing
-stopped_at: Completed 36-02-PLAN.md
+stopped_at: Completed 36-03-PLAN.md
 last_updated: "2026-03-06T17:34:38.273Z"
-last_activity: 2026-03-06 — Completed 36-02 scale dual-mode to all 17 tools
+last_activity: 2026-03-06 — Completed 36-03 plugin portability and marketplace sync
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 7
-  completed_plans: 6
-  percent: 99
+  completed_plans: 7
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 
 ## Current Position
 
-Phase: 36 of 39 (Dual-Mode Tool Skills)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-03-06 — Completed 36-02 scale dual-mode to all 17 tools
+Phase: 36 of 39 (Dual-Mode Tool Skills) -- COMPLETE
+Plan: 3 of 3 in current phase (all complete)
+Status: Phase 36 complete
+Last activity: 2026-03-06 — Completed 36-03 plugin portability and marketplace sync
 
-Progress: [██████████] 99% (v1.6)
+Progress: [██████████] 100% (v1.6)
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [██████████] 99% (v1.6)
 | Phase 35 P02 | 5min | 2 tasks | 4 files |
 | Phase 36 P01 | 6min | 2 tasks | 4 files |
 | Phase 36 P02 | 5min | 2 tasks | 14 files |
+| Phase 36 P03 | 19min | 2 tasks | 35 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,8 @@ Full decision table in PROJECT.md. Recent decisions affecting v1.6:
 - [Phase 36]: Offline tools (hashcat, john, foremost) note file-based operation in Target Validation instead of network scope
 - [Phase 36]: Traceroute skill covers both traceroute and mtr with separate install detection
 - [Phase 36]: Gobuster and ffuf include SecLists wordlist recommendations since both tools require external wordlists
+- [Phase 36]: Plugin tool skills use cp (real copies) not symlinks/hardlinks for portability outside repo
+- [Phase 36]: Marketplace descriptions match SKILL.md frontmatter exactly -- SKILL.md is single source of truth
 
 ### Pending Todos
 
@@ -105,6 +108,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T17:34:38.271Z
-Stopped at: Completed 36-02-PLAN.md
+Last session: 2026-03-06T17:56:00Z
+Stopped at: Completed 36-03-PLAN.md (Phase 36 complete)
 Resume file: None

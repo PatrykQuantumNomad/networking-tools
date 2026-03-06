@@ -79,7 +79,7 @@ Archived to `.planning/milestones/v1.5-ROADMAP.md`
 
 - [x] **Phase 34: Plugin Scaffold and GSD Separation** - Establish netsec-skills/ plugin directory with manifest, marketplace catalog, and clean GSD boundary (completed 2026-03-06)
 - [x] **Phase 35: Portable Safety Infrastructure** - Make hooks, scope management, and health check work outside the repo via portable path resolution (completed 2026-03-06)
-- [ ] **Phase 36: Dual-Mode Tool Skills** - Transform 17 tool skills to work standalone (direct commands) and in-repo (wrapper scripts) with install detection
+- [x] **Phase 36: Dual-Mode Tool Skills** - Transform 17 tool skills to work standalone (direct commands) and in-repo (wrapper scripts) with install detection (completed 2026-03-06)
 - [ ] **Phase 37: Standalone Workflow Skills** - Port 6 workflow skills with dual-mode branching at every step
 - [ ] **Phase 38: Agent Personas** - Port 3 agent definitions and invoker skills with verified plugin namespace resolution
 - [ ] **Phase 39: End-to-End Testing and Publication** - Verify full plugin installation, publish to skills.sh, confirm two-channel distribution
@@ -193,7 +193,7 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 28-33 | v1.5 | 13/13 | Complete | 2026-02-18 |
 | 34. Plugin Scaffold | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 35. Portable Safety | v1.6 | 2/2 | Complete | 2026-03-06 |
-| 36. Tool Skills | 2/3 | In Progress|  | - |
+| 36. Tool Skills | 3/3 | Complete   | 2026-03-06 | - |
 | 37. Workflow Skills | v1.6 | 0/2 | Not started | - |
 | 38. Agent Personas | v1.6 | 0/2 | Not started | - |
 | 39. Publication | v1.6 | 0/2 | Not started | - |
