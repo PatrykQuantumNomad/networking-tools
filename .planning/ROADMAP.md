@@ -8,7 +8,7 @@
 - ✅ **v1.3 Testing & Script Headers** — Phases 18-22 (shipped 2026-02-12)
 - ✅ **v1.4 JSON Output Mode** — Phases 23-27 (shipped 2026-02-14)
 - ✅ **v1.5 Claude Skill Pack** — Phases 28-33 (shipped 2026-02-18)
-- 🚧 **v1.6 Skills.sh Publication** — Phases 34-39 (in progress)
+- ✅ **v1.6 Skills.sh Publication** — Phases 34-39 (shipped 2026-03-07)
 
 ## Phases
 
@@ -73,7 +73,7 @@ Archived to `.planning/milestones/v1.5-ROADMAP.md`
 
 </details>
 
-### 🚧 v1.6 Skills.sh Publication (In Progress)
+### ✅ v1.6 Skills.sh Publication (SHIPPED 2026-03-07)
 
 **Milestone Goal:** Publish standalone pentesting skills pack (skills + hooks + agents) to skills.sh, installable via `npx skills add` and Claude plugin marketplace, with zero GSD framework leakage and full safety infrastructure portability.
 
@@ -82,7 +82,7 @@ Archived to `.planning/milestones/v1.5-ROADMAP.md`
 - [x] **Phase 36: Dual-Mode Tool Skills** - Transform 17 tool skills to work standalone (direct commands) and in-repo (wrapper scripts) with install detection (completed 2026-03-06)
 - [x] **Phase 37: Standalone Workflow Skills** - Port 6 workflow skills with dual-mode branching at every step (completed 2026-03-06)
 - [x] **Phase 38: Agent Personas** - Port 3 agent definitions and invoker skills with verified plugin namespace resolution (completed 2026-03-06)
-- [ ] **Phase 39: End-to-End Testing and Publication** - Verify full plugin installation, publish to skills.sh, confirm two-channel distribution
+- [x] **Phase 39: End-to-End Testing and Publication** - Verify full plugin installation, publish to skills.sh, confirm two-channel distribution (completed 2026-03-07)
 
 ## Phase Details
 
@@ -175,8 +175,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 39-01-PLAN.md — Repo-root marketplace catalog, E2E validation script, and two-channel README
-- [ ] 39-02-PLAN.md — Full validation suite and publication readiness smoke test
+- [x] 39-01-PLAN.md — Repo-root marketplace catalog, E2E validation script, and two-channel README
+- [x] 39-02-PLAN.md — Full validation suite and publication readiness smoke test
 
 ## Progress
 
@@ -196,6 +196,6 @@ Phases execute in numeric order: 34 -> 35 -> 36 -> 37 -> 38 -> 39
 | 36. Tool Skills | v1.6 | 3/3 | Complete | 2026-03-06 |
 | 37. Workflow Skills | v1.6 | 2/2 | Complete | 2026-03-06 |
 | 38. Agent Personas | v1.6 | 2/2 | Complete | 2026-03-06 |
-| 39. Publication | 1/2 | In Progress|  | - |
+| 39. Publication | v1.6 | 2/2 | Complete | 2026-03-07 |
 
-**Total: 6 milestones (37 phases shipped, 2 phases planned, 84 plans completed)**
+**Total: 7 milestones shipped (39 phases, 86 plans completed)**
