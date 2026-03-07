@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 81 dual-mode scripts, an 8-module library infrastructure with structured JSON output via `-j`/`--json` flag, 435-test BATS regression suite with CI enforcement, structured metadata headers on all 78 scripts, 3 diagnostic auto-reports, a branded Astro/Starlight documentation site with dark orange/amber theme, custom homepage, learning paths, Docker-based vulnerable targets for safe practice, and a Claude Code skill pack with 17 tool skills, 8 workflow skills, 3 utility skills, 3 subagent personas, and safety hooks with target validation and audit logging.
+A pentesting and network debugging learning lab built on bash scripts, covering 17 security and networking tools with 81 dual-mode scripts, an 8-module library infrastructure with structured JSON output via `-j`/`--json` flag, 469-test BATS regression suite with CI enforcement, structured metadata headers on all 78 scripts, 3 diagnostic auto-reports, a branded Astro/Starlight documentation site with dark orange/amber theme, custom homepage, learning paths, Docker-based vulnerable targets for safe practice, and a standalone Claude Code plugin (netsec-skills/) with 17 dual-mode tool skills, 6 dual-mode workflow skills, 4 utility skills, 3 subagent personas, portable safety hooks with target validation and audit logging, publishable via skills.sh and plugin marketplace.
 
 ## Core Value
 
@@ -58,19 +58,18 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 - ✓ 8 workflow skills: /recon, /scan, /diagnose, /fuzz, /crack, /sniff, /report, /scope — v1.5
 - ✓ 3 subagent personas: pentester (Bash access), defender (read-only), analyst (write-capable) — v1.5
 - ✓ Scope management with .pentest/scope.json and confirmation gates — v1.5
+- ✓ Plugin scaffold with manifest, marketplace catalog, and allowlist-based GSD boundary enforcement — v1.6
+- ✓ Portable PreToolUse/PostToolUse hooks with bash 3.2 compatibility and dual-context CLAUDE_PLUGIN_ROOT resolution — v1.6
+- ✓ Portable scope management and health check working in both in-repo and plugin contexts — v1.6
+- ✓ 17 dual-mode tool skills with inline command knowledge for standalone and wrapper detection for in-repo — v1.6
+- ✓ 6 dual-mode workflow skills (recon, scan, fuzz, crack, sniff, diagnose) with per-step branching — v1.6
+- ✓ 3 agent personas (pentester, defender, analyst) distributed via plugin with dual-mode awareness — v1.6
+- ✓ Plugin publication via skills.sh and plugin marketplace with 25-check E2E validation — v1.6
+- ✓ 469-test BATS regression suite (smoke + unit + integration + JSON + doc + dual-mode + workflow + agent) — v1.6
 
 ### Active
 
-## Current Milestone: v1.6 Skills.sh Publication
-
-**Goal:** Publish standalone pentesting skills pack (skills + hooks + agents) to skills.sh/patrykquantumnomad/networking-tools
-
-**Target features:**
-- Standalone skills with flexible wrapper detection (use wrappers if in-repo, direct tool commands if standalone)
-- Portable safety hooks (scope validation, audit logging, health check)
-- Agent personas (pentester, defender, analyst)
-- Exclude GSD commands/agents — netsec-specific only
-- Published and discoverable on skills.sh
+(No active milestone -- run `/gsd:new-milestone` to start next)
 
 ### Out of Scope
 
@@ -89,18 +88,18 @@ Ready-to-run scripts and accessible documentation that eliminate the need to rem
 
 ## Context
 
-Shipped v1.5 with Claude Code skill pack. Total codebase: 9,963 LOC bash across 81 scripts, plus Astro docs site and 28 Claude Code skill/agent files.
+Shipped v1.6 with standalone plugin publication. Total codebase: 12,706 LOC bash across 81 scripts, plus Astro docs site, netsec-skills/ plugin directory (42 files), and Claude Code skill/agent files.
 All 63 scripts (17 examples.sh + 46 use-case) support dual-mode execution with -h/-v/-q/-x/-j flags.
 9-module library (scripts/lib/) provides strict mode, stack traces, log-level filtering, trap handlers, temp cleanup, retry logic, argument parsing, and JSON output.
-435-test BATS regression suite: 5 smoke + 69 unit + 131 integration + 137 JSON + 93 doc verification — all enforced in CI.
+469-test BATS regression suite: 5 smoke + 69 unit + 131 integration + 137 JSON + 93 doc + 10 dual-mode + 8 workflow + 14 agent — all enforced in CI.
 BATS v1.13.0 with git submodules (bats-support, bats-assert, bats-file) at pinned versions.
 Two GitHub Actions CI pipelines: ShellCheck linting + BATS tests with JUnit PR annotations (independent jobs).
 All 78 scripts have structured @description/@usage/@dependencies metadata headers enforced by BATS validation test.
-Tech stack: Bash scripts + Astro 5.x/Starlight 0.37.x + GitHub Actions + Docker Compose + Claude Code skills/agents.
+Tech stack: Bash scripts + Astro 5.x/Starlight 0.37.x + GitHub Actions + Docker Compose + Claude Code skills/agents/plugin.
 17 tools integrated into check-tools.sh with Makefile targets for each.
 3 diagnostic scripts following Pattern B (structured auto-reports with pass/fail/warn).
 Documentation site deployed to GitHub Pages with CI validation, dark orange/amber theme, terminal-prompt logo, and redesigned homepage.
-Claude Code integration: 17 tool skills, 8 workflow skills, 3 utility skills, 3 subagent personas, 2 safety hooks, health-check diagnostic, scope management.
+Claude Code plugin (netsec-skills/): 17 dual-mode tool skills, 6 dual-mode workflow skills, 4 utility skills, 3 subagent personas, 2 portable safety hooks, health-check diagnostic, scope management. Publishable via skills.sh and plugin marketplace.
 
 ## Constraints
 
@@ -158,6 +157,14 @@ Claude Code integration: 17 tool skills, 8 workflow skills, 3 utility skills, 3 
 | Workflow skills use numbered steps with -j -x | Consistent invocation pattern Claude can follow mechanically | ✓ Good — all 8 workflows use same structure |
 | /report from conversation context only | Prevents reading sensitive audit logs; synthesizes from session | ✓ Good — clean data boundary |
 | Defender read-only, analyst write-capable | Least privilege per persona; pentester gets full Bash | ✓ Good — defense-in-depth for subagents |
+| Case-statement replaces declare -A for bash 3.2 | macOS ships bash 3.2; associative arrays require 4.0+ | ✓ Good — portable to all macOS versions |
+| Scope auto-creation with localhost defaults | Better UX for fresh plugin installs vs hard-deny | ✓ Good — no first-run failures |
+| Plugin skills are real file copies (not symlinks) | Symlinks break when plugin installed outside repo | ✓ Good — fully portable distribution |
+| Marketplace descriptions match SKILL.md frontmatter | Single source of truth in SKILL.md | ✓ Good — no description drift |
+| Per-step dual-mode branching in workflows | Keeps workflow step flow coherent vs per-section Mode headers | ✓ Good — readable multi-tool sequences |
+| Agent frontmatter unchanged for plugin | skills: field resolves by name: field matching | ✓ Good — no plugin-specific agent variants |
+| Validation utilities excluded from BATS discovery | Not pentesting tool scripts; don't follow --help/-x/-j contract | ✓ Good — clean test semantics |
+| Repo-root marketplace.json with source: ./netsec-skills | Standard marketplace catalog pattern for plugin distribution | ✓ Good — two-channel distribution ready |
 
 ---
-*Last updated: 2026-03-06 after v1.6 milestone start*
+*Last updated: 2026-03-07 after v1.6 milestone*

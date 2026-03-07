@@ -1,5 +1,31 @@
 # Project Milestones: Networking Tools
 
+## v1.6 Skills.sh Publication (Shipped: 2026-03-07)
+
+**Delivered:** Published the Claude Code skill pack as a standalone plugin for skills.sh and plugin marketplace, with 31 dual-mode skills, 3 agent personas, portable safety hooks, and zero GSD framework leakage -- installable via `npx skills add` or plugin marketplace.
+
+**Phases completed:** 34-39 (13 plans total)
+
+**Key accomplishments:**
+- Created netsec-skills/ plugin scaffold with manifest, marketplace catalog, and allowlist-based boundary enforcement ensuring zero GSD framework leakage
+- Rewrote PreToolUse/PostToolUse hooks for bash 3.2 compatibility with dual-context plugin/in-repo resolution via CLAUDE_PLUGIN_ROOT and auto-creating scope
+- Transformed all 17 tool skills with inline command knowledge for standalone operation plus wrapper script detection for structured JSON output
+- Ported 6 multi-step workflows (recon, scan, fuzz, crack, sniff, diagnose) with per-step dual-mode branching
+- Distributed 3 agent personas (pentester, defender, analyst) with dual-mode awareness and zero-symlink real-file plugin distribution
+- Built 25-check E2E validation suite achieving 469/469 BATS tests and confirmed plugin loading
+
+**Stats:**
+- 118 files created/modified
+- +14,022 / -576 lines changed (12,706 LOC bash total)
+- 6 phases, 13 plans, 26 tasks, 52 commits
+- 2 days (Mar 6-7, 2026)
+
+**Git range:** `feat(34-01)` -> `docs(phase-39)`
+
+**What's next:** TBD -- next milestone via `/gsd:new-milestone`
+
+---
+
 ## v1.5 Claude Skill Pack (Shipped: 2026-02-18)
 
 **Delivered:** Packaged the 17-tool, 81-script pentesting toolkit as a self-contained Claude Code skill pack with 17 tool skills, 8 workflow skills, 3 utility skills, 3 subagent personas, safety hooks with target validation and audit logging, and a health-check diagnostic.
