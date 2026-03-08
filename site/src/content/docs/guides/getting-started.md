@@ -110,6 +110,6 @@ This downloads rockyou.txt into the `wordlists/` directory.
 
 Now that your environment is ready, explore the rest of the project:
 
-- **[Tools](../tools/)** -- reference pages for each of the 14 security tools with example commands
-- **[Diagnostics](../diagnostics/)** -- automated health-check scripts for DNS and connectivity
+- **[Tools](/tools/)** -- reference pages for each of the 14 security tools with example commands
+- **[Diagnostics](/diagnostics/)** -- automated health-check scripts for DNS and connectivity
 - Run `make help` to see every available Makefile target
